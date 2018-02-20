@@ -928,7 +928,7 @@ int CGenCP1::FailSus2() {
 					// If second part is 3/4 in species 5
 					if (npm == 8 && s2 - sus[ls] == 5) {
 						// If next note is 1/8
-						if (llen[ls + 1] == 1 && ls < fli_size - 2) FLAG2L(291, fli[ls + 1], sus[ls]);
+						if (llen[ls + 1] == 1 && ls < fli_size - 2 && tivl[s2] < 0) FLAG2L(291, fli[ls + 1], sus[ls]);
 						if (FailSusResolution(fli[ls + 1])) return 1;
 						// Stop processing this sus
 						continue;
