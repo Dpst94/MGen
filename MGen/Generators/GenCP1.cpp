@@ -2033,7 +2033,7 @@ int CGenCP1::FailRhythm5() {
 			// Check only if no croches or less than 4 notes
 			if (rid.size() && (!has_croche || l_len.size() <4)) {
 				// Do not fire for first measure if measure starts with pause
-				if (rid.back() == rid_cur && (ms > 1 || !fn)) FLAG2L(247, fli[bli[mli[ms] - 1]], mli[ms - 1]);
+				if (rid.back() == rid_cur && (ms > 1 || !fn)) FLAG2L(247, s, fli[bli[s + npm - 1]]);
 			}
 			rid.push_back(rid_cur);
 		}
