@@ -2164,10 +2164,13 @@ int CGenCF1::FailLeapFill(vector<int> &c, int late_leap, int leap_prev, int chil
 	int skips = 10;
 	// Calculate allowed skips 
 	int allowed_skips = 1;
+	if (leap_size > 4) ++allowed_skips;
 	if (leap_size > 6) ++allowed_skips;
-	if (late_leap <= c4p_last_notes2 + 1) ++allowed_skips;
+	if (late_leap <= c4p_last_notes2 + 1) allowed_skips += 1;
 	int allowed_pskips = 1;
+	if (leap_size > 4) ++allowed_pskips;
 	if (leap_size > 6) ++allowed_pskips;
+	if (late_leap <= c4p_last_notes2 + 1) allowed_pskips += 1;
 	// Check if leap is filled
 	tail_len = 2 + (leap_size - 1) * fill_steps_mul;
 	// Do not check fill if search window is cut by end of current not-last scan window
@@ -2177,11 +2180,13 @@ int CGenCF1::FailLeapFill(vector<int> &c, int late_leap, int leap_prev, int chil
 			fill_from, deviates, dev_count, leap_prev, fill_end);
 		if (skips > allowed_skips) filled = 0;
 		else if (fill_to >= 3 && fill_to <= fill_pre4_int && (fill_to_pre == fill_to || late_leap > c4p_last_notes2 + 1 || !accept[144 + leap_id])) filled = 0;
-		else if (fill_to > 3) filled = 0;
+		else if (fill_to > 3 && late_leap > c4p_last_notes2 + 1) filled = 0;
+		else if (fill_to > fill_pre4_int && late_leap <= c4p_last_notes2 + 1) filled = 0;
 		else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start) && !accept[100 + leap_id]) filled = 0;
 		else if (fill_to == 2 && fill_to_pre > 1 && fleap_start && !accept[104 + leap_id]) filled = 0;
 		else if (fill_from >= 3 && fill_from <= fill_pre4_int && (!fill_from_pre || late_leap > c4p_last_notes2 + 1 || !accept[144 + leap_id])) filled = 0;
-		else if (fill_from > 3) filled = 0;
+		else if (fill_from > 3 && late_leap > c4p_last_notes2 + 1) filled = 0;
+		else if (fill_from > fill_pre4_int && late_leap <= c4p_last_notes2 + 1) filled = 0;
 		else if (fill_from == 2 && !accept[53 + leap_id]) filled = 0;
 		else if (deviates > 2) filled = 0;
 		else if (deviates == 1 && !accept[42 + leap_id]) filled = 0;
@@ -2213,7 +2218,8 @@ int CGenCF1::FailLeapFill(vector<int> &c, int late_leap, int leap_prev, int chil
 					if (late_leap <= pre_last_leaps + 1) FLAG2(204 + leap_id, fli[fleap_start]);
 					else FLAG2(112 + leap_id, fli[fleap_start]);
 				}
-				else FLAG2(124 + leap_id, fli[fleap_start]);
+				else 
+					FLAG2(124 + leap_id, fli[fleap_start]);
 			}
 		}
 		// Show compensation flags only if successfully compensated
