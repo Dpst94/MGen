@@ -1979,8 +1979,8 @@ void CGenCF1::CountFillSkips(int leap_prev, int &skips, int t1, int t2) {
 
 void CGenCF1::CountFillLimits(vector<int> &c, int pre, int t1, int t2, int &fill_to, int &fill_to_pre, int &fill_from_pre, int &fill_from) {
 	fill_to = leap_size;
-	fill_to_pre = 0;
-	fill_from_pre = 0;
+	fill_to_pre = fill_to;
+	fill_from_pre = fill_to;
 	fill_from = leap_size;
 	// Search for first compensated note
 	for (int i = t2-1; i >= t1; --i) {
@@ -2014,11 +2014,13 @@ void CGenCF1::CountFillLimits(vector<int> &c, int pre, int t1, int t2, int &fill
 				else if (c[fli[x]] == c[leap_start] - 2) nstat4[1] = 1;
 			}
 		}
+		fill_to_pre = fill_to;
 		if (fill_to == 2) {
-			if (nstat4[0]) fill_to_pre = 1;
+			if (nstat4[0]) --fill_to_pre;
 		}
-		else if (fill_to == 3) {
-			if (nstat4[0] && nstat4[1]) fill_to_pre = 1;
+		else if (fill_to >= 3) {
+			if (nstat4[0]) --fill_to_pre;
+			if (nstat4[1]) --fill_to_pre;
 		}
 	}
 	// Check prepared fill from
@@ -2174,10 +2176,10 @@ int CGenCF1::FailLeapFill(vector<int> &c, int late_leap, int leap_prev, int chil
 		CountFill(c, tail_len, nstat2, nstat3, skips, fill_to, 0, fill_to_pre, fill_from_pre,
 			fill_from, deviates, dev_count, leap_prev, fill_end);
 		if (skips > allowed_skips) filled = 0;
-		else if (fill_to >= 3 && fill_to <= fill_pre4_int && (!fill_to_pre || late_leap > c4p_last_notes2 + 1 || !accept[144 + leap_id])) filled = 0;
+		else if (fill_to >= 3 && fill_to <= fill_pre4_int && (fill_to_pre == fill_to || late_leap > c4p_last_notes2 + 1 || !accept[144 + leap_id])) filled = 0;
 		else if (fill_to > 3) filled = 0;
-		else if (fill_to == 2 && (fill_to_pre || !fleap_start) && !accept[100 + leap_id]) filled = 0;
-		else if (fill_to == 2 && !fill_to_pre && fleap_start && !accept[104 + leap_id]) filled = 0;
+		else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start) && !accept[100 + leap_id]) filled = 0;
+		else if (fill_to == 2 && fill_to_pre > 1 && fleap_start && !accept[104 + leap_id]) filled = 0;
 		else if (fill_from >= 3 && fill_from <= fill_pre4_int && (!fill_from_pre || late_leap > c4p_last_notes2 + 1 || !accept[144 + leap_id])) filled = 0;
 		else if (fill_from > 3) filled = 0;
 		else if (fill_from == 2 && !accept[53 + leap_id]) filled = 0;
@@ -2223,9 +2225,9 @@ int CGenCF1::FailLeapFill(vector<int> &c, int late_leap, int leap_prev, int chil
 			else if (fill_from >= 3 && fill_from <= fill_pre4_int && late_leap <= c4p_last_notes2 + 1)
 				FLAG2(144 + leap_id, fli[fleap_start]);
 			// Flag prepared unfinished fill if it is not blocking 
-			else if (fill_to == 2 && (fill_to_pre || !fleap_start)) FLAG2(100 + leap_id, fli[fleap_start]);
+			else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start)) FLAG2(100 + leap_id, fli[fleap_start]);
 			// Flag unfinished fill if it is not blocking
-			else if (fill_to == 2 && !fill_to_pre) FLAG2(104 + leap_id, fli[fleap_start]);
+			else if (fill_to == 2 && fill_to_pre > 1) FLAG2(104 + leap_id, fli[fleap_start]);
 			// Flag after 3rd if it is not blocking
 			if (fill_from == 2) FLAG2(53 + leap_id, fli[fleap_start]);
 			// Flag deviation if it is not blocking
