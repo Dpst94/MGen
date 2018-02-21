@@ -605,7 +605,7 @@ void CGMidi::SetLyShape(int s1, int s2, int f, int fl, int vtype) {
 		// Link to start
 		lyi[s2].shsl[vtype] = s1 - s2;
 		lyi[s1].shse[vtype] = severity[fl];
-		if (vtype == vInterval || vtype == vNoteName) {
+		if (vtype == vInterval || vtype == vNoteName || vtype == vHarm) {
 			if (lyi[s2].shse[vtype] <= severity[fl]) {
 				lyi[s2].shse[vtype] = severity[fl];
 			}
@@ -959,9 +959,14 @@ void CGMidi::SendLyHarm() {
 			st.Replace("6", " \\raise #0.7 6");
 			//if (found) st = ", " + st;
 			found = 1;
-			ly_ly_st += "\\teeny \\on-color #(rgb-color ";
-			ly_ly_st += GetLyMarkColor(mark_color[ly_s][ly_v2]);
-			ly_ly_st += ") \\pad-markup #0.4 " + st + " ";
+			ly_ly_st += "\\teeny ";
+			if (lyi[ly_s2].shs[vHarm] || lyi[ly_s2].shf[vHarm]) {
+				DWORD col = flag_color[lyi[ly_s2].shse[vHarm]];
+				if (col && col != color_noflag) {
+					ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor2(col) + ") ";				
+				}
+			}
+			ly_ly_st += "\\pad-markup #0.4 " + st + " ";
 			ly_ly_st += "}8\n";
 			SendLySkips(ly_mul - 1);
 		}

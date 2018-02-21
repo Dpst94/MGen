@@ -3299,18 +3299,18 @@ int CGenCP1::FailHarm() {
 			if (harm_conflict && s > mli[ms]) {
 				RemoveHarmDuplicate();
 				// More than two harmonies
-				if (hcount) FLAG2(40, s);
+				if (hcount) FLAG2L(40, s, mli[ms]);
 				else {
 					// Two harmonies penultimate
-					if (ms == mli.size() - 2) FLAG2(306, s);
+					if (ms == mli.size() - 2) FLAG2L(306, s, mli[ms]);
 					else {
 						// Stepwize resolution of 5th to 6th or 6th to 5th with two harmonies in measure
 						if (sus[ls1] && (
 							(ivlc[mli[ms]] == 4 && ivlc[mli[ms] + npm / 2] == 5) ||
 							(ivlc[mli[ms]] == 5 && ivlc[mli[ms] + npm / 2] == 4)) &&
 							abs(ac[cpv][mli[ms]] - ac[cpv][mli[ms] + npm / 2]) < 2)
-							FLAG2(329, s);
-						else FLAG2(307, s);
+							FLAG2L(329, s, mli[ms]);
+						else FLAG2L(307, s, mli[ms]);
 					}
 				}
 				harm_conflict = 0;
