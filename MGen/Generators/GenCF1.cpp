@@ -2166,7 +2166,7 @@ int CGenCF1::FailLeapFill(vector<int> &c, int late_leap, int leap_prev, int chil
 	int allowed_skips = 1;
 	if (leap_size > 4) ++allowed_skips;
 	if (leap_size > 6) ++allowed_skips;
-	if (late_leap <= c4p_last_notes2 + 1) allowed_skips += 1;
+	if (late_leap <= c4p_last_notes2 + 1) allowed_skips += 2;
 	int allowed_pskips = 1;
 	if (leap_size > 4) ++allowed_pskips;
 	if (leap_size > 6) ++allowed_pskips;
