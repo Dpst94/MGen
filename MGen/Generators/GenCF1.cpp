@@ -2269,10 +2269,14 @@ int CGenCF1::FailLeapMDC(vector<int> &leap, vector<int> &cc) {
 			++mdc2;
 		}
 	}
+	// Do not flag close+close
+	if (mdc1 == 0 && mdc2 == 0) return 0;
 	// Do not flag last 3rd in SAS, because it can be later converted to 5th
 	if (fleap_end == fli_size - 1 && ep2 < c_len && !leap_id) return 0;
+	// SP5 1skip
+	if (mdc1 <= 1 && mdc2 <= 1 && svoices == 2 && species == 5) FLAG2(414 + leap_id, fli[fleap_start]);
 	// Close + next
-	if (!mdc1 && mdc2 == 1) FLAG2(128 + leap_id, fli[fleap_start]);
+	else if (!mdc1 && mdc2 == 1) FLAG2(128 + leap_id, fli[fleap_start]);
 		// Close + far
 	else if (!mdc1 && mdc2 == 2) FLAG2(140 + leap_id, fli[fleap_start]);
 		// Close + no
