@@ -1891,6 +1891,7 @@ int CGenCP1::FailRhythm5() {
 	int full_measure = 0;
 	// Position inside measure
 	int pos = 0;
+	int uneven_start_fired = 0;
 	// Starting step of measure
 	int mstart = 0;
 	// Length sum
@@ -2025,7 +2026,10 @@ int CGenCP1::FailRhythm5() {
 				//else if (l_len[lp] == 2 && pos == 6 && slur2) FLAG2(235, s2);
 			}
 			// Uneven starting rhythm
-			if (!ms && lp>0 && l_len[lp] != l_len[lp-1]) FLAG2L(254, s2, 0);
+			if (!ms && lp > 0 && l_len[lp] != l_len[lp - 1] && !uneven_start_fired) {
+				uneven_start_fired = 1;
+				FLAG2L(254, s2, 0);
+			}
 			pos += l_len[lp];
 		}
 		// Check rhythm repeat
