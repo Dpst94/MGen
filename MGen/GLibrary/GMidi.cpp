@@ -3002,8 +3002,9 @@ void CGMidi::AddNoteOn(long long timestamp, int data1, int data2)
 	if ((data1 < icf[instr[midi_voice]].nmin) || (data1 > icf[instr[midi_voice]].nmax)) {
 		if (warning_note_wrong[midi_voice] < 4) {
 			CString st;
-			st.Format("Blocked note %d/%d step %d time %lld in voice %d instrument %d out of range %d-%d",
-				data1, data2, midi_current_step, timestamp, midi_voice, instr[midi_voice], 
+			st.Format("Blocked note %d/%d step %d time %lld in voice %d instrument %s/%s out of range %d-%d",
+				data1, data2, midi_current_step, timestamp, midi_voice, icf[instr[midi_voice]].group,
+				icf[instr[midi_voice]].name,
 				icf[instr[midi_voice]].nmin, icf[instr[midi_voice]].nmax);
 			WriteLog(1, st);
 			warning_note_wrong[midi_voice] ++;
@@ -3036,8 +3037,9 @@ void CGMidi::AddNoteOff(long long timestamp, int data1, int data2)
 	if ((data1 < icf[instr[midi_voice]].nmin) || (data1 > icf[instr[midi_voice]].nmax)) {
 		if (warning_note_wrong[midi_voice] < 4) {
 			CString st;
-			st.Format("Blocked note %d/%d time %lld in voice %d instrument %d out of range %d-%d",
-				data1, data2, timestamp, midi_voice, instr[midi_voice], 
+			st.Format("Blocked note %d/%d time %lld in voice %d instrument %s/%s out of range %d-%d",
+				data1, data2, timestamp, midi_voice, icf[instr[midi_voice]].group,
+				icf[instr[midi_voice]].name,
 				icf[instr[midi_voice]].nmin, icf[instr[midi_voice]].nmax);
 			WriteLog(1, st);
 			warning_note_wrong[midi_voice] ++;
