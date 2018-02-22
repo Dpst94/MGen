@@ -616,9 +616,6 @@ int RunRender() {
 	CGLib::CleanFolder(ReaperTempFolder + "*.wav");
 	CGLib::CleanFolder(ReaperTempFolder + "*.reapeaks");
 
-	if (CGLib::fileExists(share + j_folder + j_basefile + ".mp3")) {
-	}
-
 	return 0;
 }
 
