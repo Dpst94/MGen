@@ -32,6 +32,7 @@ public:
 	void LoadCCName(CString * sName, CString * sValue, CString sSearch, int i);
 	void LoadKswGroup(CString * sName, CString * sValue, CString sSearch, int i);
 	PmMessage ParseMidiCommand(CString st, int i);
+	PmMessage ParseMidiCommand2(CString st, int value, int i);
 	void SaveInitCommand(PmMessage msg, int i);
 	void LoadInitCommand(CString * sName, CString * sValue, CString sSearch, int i);
 	void LoadTechnique(CString * sName, CString * sValue, CString sSearch, int i);

@@ -627,7 +627,6 @@ void CGVar::LoadInstrument(int i, CString fname)
 			st3.Trim();
 			st2.MakeLower();
 			// Initialize loading
-			parameter_found = 0;
 			LoadInstrumentLine(st2, st3, i);
 			if (!parameter_found) {
 				WriteLog(5, "Unrecognized parameter '" + st2 + "' = '" + st3 + "' in file " + fname);
@@ -727,6 +726,10 @@ PmMessage CGVar::ParseMidiCommand(CString st, int i) {
 		st = st1;
 		value = atoi(st2);
 	}
+	return ParseMidiCommand2(st, value, i);
+}
+
+PmMessage CGVar::ParseMidiCommand2(CString st, int value, int i) {
 	if (icf[i].NameToCC.find(st) != icf[i].NameToCC.end()) {
 		// Default value if not specified
 		if (value == -1) value = 100;
@@ -741,7 +744,7 @@ PmMessage CGVar::ParseMidiCommand(CString st, int i) {
 		//WriteLog(1, "Accepted InitCommand for KSW: " + *sName + " = " + *sValue);
 		return Pm_Message(MIDI_NOTEON, id, value);
 	}
-return 0;
+	return 0;
 }
 
 void CGVar::SaveInitCommand(PmMessage msg, int i) {
@@ -858,6 +861,7 @@ void CGVar::LoadMapPitch(CString *sName, CString *sValue, CString sSearch, int i
 }
 
 void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
+	parameter_found = 0;
 	LoadVar(&st2, &st3, "library", &icf[i].lib);
 	CheckVar(&st2, &st3, "pan", &icf[i].pan, 0, 100);
 	CheckVar(&st2, &st3, "volume", &icf[i].vol, 0, 100);
@@ -1009,6 +1013,20 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 			icf[i].trem_deactivate = icf[i].NameToTech[st3];
 		}
 		else WriteLog(5, "Unknown technique specified for trem_selected: " + st3);
+	}
+	// Parse command
+	PmMessage msg = ParseMidiCommand2(st2, atoi(st3), i);
+	if (!msg && !parameter_found) {
+		WriteLog(5, "Unknown name. Please first bind CC name or KSW name in instrument config: " + st2 + " = " + st3);
+		return;
+	}
+	if (msg) {
+		if (parameter_found) {
+			WriteLog(5, "Command name conflicts with config parameter name: " + st2 + " = " + st3);
+			return;
+		}
+		++parameter_found;
+		SaveInitCommand(msg, i);
 	}
 }
 
