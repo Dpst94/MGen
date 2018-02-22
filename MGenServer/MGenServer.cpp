@@ -249,7 +249,7 @@ void CheckChildren(int restart) {
 }
 
 // Start process, wait for some time. If process did not finish, this is an error
-int RunTimeout(CString path, CString par, int delay) {
+int RunTimeout(CString path, CString par, int delay, int check_exit_code=1) {
 	CString fname = CGLib::fname_from_path(path);
 	DWORD ecode;
 	SHELLEXECUTEINFO sei = { 0 };
@@ -278,8 +278,10 @@ int RunTimeout(CString path, CString par, int delay) {
 	}
 	if (!GetExitCodeProcess(sei.hProcess, &ecode)) ecode = 102;
 	if (ecode != 0 && ecode != STILL_ACTIVE) { // 259
-		est.Format("Exit code %d: %s %s", ecode, path, par);
-		WriteLog(est);
+		if (check_exit_code) {
+			est.Format("Exit code %d: %s %s", ecode, path, par);
+			WriteLog(est);
+		}
 		return ecode;
 	}
 	return 0;
@@ -600,7 +602,7 @@ int RunRender() {
 		par.Format("-show_format -of flat -i %s > %s.inf 2>&1",
 			share + j_folder + j_basefile + ".mp3",
 			share + j_folder + j_basefile);
-		ret = RunTimeout(fChild["ffmpeg.exe"] + "ffprobe.exe", par, 30000);
+		ret = RunTimeout(fChild["ffmpeg.exe"] + "ffprobe.exe", par, 30000, 0);
 		if (!CGLib::fileExists(share + j_folder + j_basefile + ".inf")) {
 			est.Format("File not found: " + share + j_folder + j_basefile + ".inf");
 		}
