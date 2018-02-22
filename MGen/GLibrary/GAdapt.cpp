@@ -803,11 +803,8 @@ void CGAdapt::CalculateVoiceStages() {
 			v_stage[v] = tcs_instr[trackchan].size();
 		}
 		// Calculate instrument config for voice
-		if (icf[ii].child.find(v_itrack[v]) != icf[ii].child.end()) {
-			ii = icf[ii].child[v_itrack[v]];
-			if (icf[ii].child.find(v_stage[v]) != icf[ii].child.end()) {
-				ii = icf[ii].child[v_stage[v]];
-			}
+		if (icf[ii].child.find(track_id[v]) != icf[ii].child.end()) {
+			ii = icf[ii].child[track_id[v]];
 			instr[v] = ii;
 		}
 		// Set instrument for each exported track
