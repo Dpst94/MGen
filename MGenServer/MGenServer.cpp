@@ -440,6 +440,48 @@ void LoadVoices() {
 	}
 }
 
+void AnalyseWaveform(CString fname2) {
+	// Create waveform graphic
+	SendProgress("Running waveform and information analysis");
+	CString fname3 = fname2;
+	if (fname3.Find(".mp3") == fname3.GetLength() - 4) {
+		fname3 = fname3.Left(fname3.GetLength() - 4);
+	}
+
+	CString par;
+	par.Format("-y -i %s -filter_complex showwavespic=s=1050x120 -frames:v 1 %s_.png",
+		share + j_folder + fname2,
+		share + j_folder + fname3);
+	int ret = RunTimeout(fChild["ffmpeg.exe"] + "ffmpeg.exe",
+		par, 30000);
+	if (ret) {
+		est.Format("Error during running waveformer: %d", ret);
+	}
+	if (!CGLib::fileExists(share + j_folder + fname3 + "_.png")) {
+		est.Format("File not found: " + share + j_folder + fname3 + "_.png");
+	}
+
+	par.Format("-y -i %s -filter_complex showwavespic=s=8000x800 -frames:v 1 %s.png",
+		share + j_folder + fname2,
+		share + j_folder + fname3);
+	ret = RunTimeout(fChild["ffmpeg.exe"] + "ffmpeg.exe",
+		par, 30000);
+	if (ret) {
+		est.Format("Error during running waveformer: %d", ret);
+	}
+	if (!CGLib::fileExists(share + j_folder + fname3 + ".png")) {
+		est.Format("File not found: " + share + j_folder + fname3 + ".png");
+	}
+
+	par.Format("-show_format -of flat -i %s > %s.inf 2>&1",
+		share + j_folder + fname2,
+		share + j_folder + fname3);
+	ret = RunTimeout(fChild["ffmpeg.exe"] + "ffprobe.exe", par, 30000, 0);
+	if (!CGLib::fileExists(share + j_folder + fname3 + ".inf")) {
+		est.Format("File not found: " + share + j_folder + fname3 + ".inf");
+	}
+}
+
 int RunRenderStage(int sta) {
 	vector <CString> sv;
 	CString st;
@@ -515,11 +557,14 @@ int RunRenderStage(int sta) {
 		return FinishJob(1, "Output file output-00-master.mp3 is too small");
 	}
 	if (sta) {
-		if (f_stems) 
+		if (f_stems) {
 			CGLib::copy_file(reaperbuf + "output-00-master.mp3", share + j_folder + j_basefile + "_" + sta_st + ".mp3");
+			AnalyseWaveform(j_basefile + "_" + sta_st + ".mp3");
+		}
 	}
 	else {
 		CGLib::copy_file(reaperbuf + "output-00-master.mp3", share + j_folder + j_basefile + ".mp3");
+		AnalyseWaveform(j_basefile + ".mp3");
 	}
 	// Copy stems
 	if (f_stems) {
@@ -549,6 +594,7 @@ int RunRenderStage(int sta) {
 			//WriteLog(finder.GetFilePath() + ": " + fname + " -> " + fname2);
 			CGLib::copy_file(finder.GetFilePath(),
 				share + j_folder + fname2);
+			AnalyseWaveform(fname2);
 		}
 		finder.Close();
 	}
@@ -570,42 +616,7 @@ int RunRender() {
 	CGLib::CleanFolder(ReaperTempFolder + "*.wav");
 	CGLib::CleanFolder(ReaperTempFolder + "*.reapeaks");
 
-	// Create waveform graphic
 	if (CGLib::fileExists(share + j_folder + j_basefile + ".mp3")) {
-		SendProgress("Running waveform and information analysis");
-
-		CString par;
-		par.Format("-y -i %s -filter_complex showwavespic=s=1050x120 -frames:v 1 %s_2.png",
-			share + j_folder + j_basefile + ".mp3",
-			share + j_folder + j_basefile);
-		int ret = RunTimeout(fChild["ffmpeg.exe"] + "ffmpeg.exe",
-			par, 30000);
-		if (ret) {
-			est.Format("Error during running waveformer: %d", ret);
-		}
-		if (!CGLib::fileExists(share + j_folder + j_basefile + "_2.png")) {
-			est.Format("File not found: " + share + j_folder + j_basefile + "_2.png");
-		}
-
-		par.Format("-y -i %s -filter_complex showwavespic=s=8000x800 -frames:v 1 %s.png",
-			share + j_folder + j_basefile + ".mp3",
-			share + j_folder + j_basefile);
-		ret = RunTimeout(fChild["ffmpeg.exe"] + "ffmpeg.exe",
-			par, 30000);
-		if (ret) {
-			est.Format("Error during running waveformer: %d", ret);
-		}
-		if (!CGLib::fileExists(share + j_folder + j_basefile + ".png")) {
-			est.Format("File not found: " + share + j_folder + j_basefile + ".png");
-		}
-
-		par.Format("-show_format -of flat -i %s > %s.inf 2>&1",
-			share + j_folder + j_basefile + ".mp3",
-			share + j_folder + j_basefile);
-		ret = RunTimeout(fChild["ffmpeg.exe"] + "ffprobe.exe", par, 30000, 0);
-		if (!CGLib::fileExists(share + j_folder + j_basefile + ".inf")) {
-			est.Format("File not found: " + share + j_folder + j_basefile + ".inf");
-		}
 	}
 
 	return 0;
