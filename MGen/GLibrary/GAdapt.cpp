@@ -470,7 +470,7 @@ void CGAdapt::AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int p
 	if (artic[i][v] != aNONLEGATO) return;
 	// Get allowed range
 	float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
-	int vel1 = 0;
+	int vel1 = 1;
 	// Check if slow accent allowed
 	if (ndur < icf[ii].slow_acc_minlen) vel1 = max(vel1, icf[ii].slow_acc_vel + 1);
 	// Check accent range
