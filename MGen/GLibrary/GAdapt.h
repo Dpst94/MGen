@@ -46,7 +46,7 @@ protected:
 	void AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount);
 	void AdaptGetPhrases(int step1, int step2);
-	void AdaptPhraseBell(int step1, int step2);
+	void AdaptPhraseBell(int v, int step1, int step2);
 	void AdaptReverseBell(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptNoteEndStep(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount);
