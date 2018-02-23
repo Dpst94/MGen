@@ -3149,7 +3149,10 @@ int CGenCP1::EvalHarm() {
 			}
 			if (pen1 == 3) {
 				++p3c;
-				if (p3c == 1) FLAG2(99, s);
+				if (p3c == 1) {
+					if (hbc[i] % 7 == hbc[i - 1] % 7) FLAG2(99, s);
+					else FLAG2(418, s);
+				}
 				else if (p3c == 2) FLAG2(321, s);
 			}
 			else {
