@@ -503,9 +503,9 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 	// Create bell if long length, not pause and not last note (because can be just end of adapt window)
 	if ((ndur > (float)icf[ii].bell_mindur2 / 2) && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ
 		&& (x == ncount - 1 || pause[ni][v])) {
-		int pos = round(i + (float)(len[i][v]) * 2.0 * icf[ii].bell_start_len / 100.0);
-		int ok = 1;
 		int end = i + len[i][v];
+		int pos = round(end - (float)(len[i][v])  * icf[ii].bell_end_len / 100.0);
+		int ok = 1;
 		// Check if dynamics does not increase
 		if (end - pos > 1) for (int z = pos; z < end; z++) {
 			if (dyn[z - 1][v] < dyn[end - 1][v]) {
@@ -550,9 +550,6 @@ void CGAdapt::AdaptGetPhrases(int step1, int step2) {
 			}
 		}
 	}
-}
-
-void CGAdapt::AdaptPhraseBell(int step1, int step2) {
 }
 
 void CGAdapt::AdaptReverseBell(int v, int x, int i, int ii, int ei, int pi, int pei)
