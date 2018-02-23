@@ -2119,11 +2119,15 @@ int CGenCP1::FailPcoApartStep2(int iv, int &pco_last, int &mli_last, int &pco_la
 				// Anticipation
 				if (retrigger[s]) {
 					// Last contrary
-					if (ep2 == c_len && ls == fli_size - 1 && 
-						(acc[0][s] - acc[0][pco_last]) * (acc[1][s] - acc[1][pco_last]) < 0) 
+					if (ep2 == c_len && ls == fli_size - 1 &&
+						(acc[0][s] - acc[0][pco_last]) * (acc[1][s] - acc[1][pco_last]) < 0)
 						FLAG2L(376, s, pco_last);
 					// Other anticipation
 					else FLAG2L(315, s, pco_last);
+				}
+				// Suspension
+				else if (sus[ls] == s) {
+					FLAG2L(385, s, pco_last);
 				}
 				// Downbeat
 				else if (fli[ls] == s && acc[cfv][s] != acc[cfv][s - 1]) {
