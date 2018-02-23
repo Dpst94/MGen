@@ -4,8 +4,7 @@
 #include "GAdapt.h"
 #include "SmRnd.h"
 
-CGAdapt::CGAdapt()
-{
+CGAdapt::CGAdapt() {
 	play_transpose.resize(MAX_VOICE);
 	warning_note_range.resize(MAX_VOICE);
 	warning_note_wrong.resize(MAX_VOICE);
@@ -13,9 +12,7 @@ CGAdapt::CGAdapt()
 	warning_note_long.resize(MAX_VOICE);
 }
 
-
-CGAdapt::~CGAdapt()
-{
+CGAdapt::~CGAdapt() {
 }
 
 void CGAdapt::CheckInstrumentRange(int v, int ii) {
@@ -258,7 +255,7 @@ void CGAdapt::AdaptNonlegatoStep(int v, int x, int i, int ii, int ei, int pi, in
 	}
 }
 
-int CGAdapt::GetDrange(int src, int range1, int range2) {
+int CGAdapt::MapDrange(int src, int range1, int range2) {
 	return src * (range2 - range1) / 100.0 + range1 * 127.0 / 100.0;
 }
 
@@ -271,7 +268,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 		if (icf[ii].stac_ahead > -1) dstime[pi][v] = -icf[ii].stac_ahead;
 		else dstime[pi][v] = -icf[ii].all_ahead;
 		artic[pi][v] = aSTAC;
-		vel[pi][v] = GetDrange(dyn[pi][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
+		vel[pi][v] = MapDrange(dyn[pi][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
 		// Next note cannot be legato/slur
 		dstime[i][v] = -icf[ii].all_ahead;
 		artic[i][v] = aNONLEGATO;
@@ -285,7 +282,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 		if (icf[ii].stac_ahead > -1) dstime[i][v] = -icf[ii].stac_ahead;
 		else dstime[i][v] = -icf[ii].all_ahead;
 		artic[i][v] = aSTAC;
-		vel[i][v] = GetDrange(dyn[i][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
+		vel[i][v] = MapDrange(dyn[i][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
 		if (comment_adapt) adapt_comment[i][v] += "Staccato. ";
 	}
 }
@@ -293,7 +290,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 void CGAdapt::AdaptPizzStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
 	// Change pizz dynamics
 	if (artic[i][v] == aPIZZ) {
-		vel[i][v] = GetDrange(dyn[i][v], icf[ii].pizz_dyn_range1, icf[ii].pizz_dyn_range2);
+		vel[i][v] = MapDrange(dyn[i][v], icf[ii].pizz_dyn_range1, icf[ii].pizz_dyn_range2);
 		if (icf[ii].pizz_ahead > -1) {
 			dstime[i][v] = -icf[ii].pizz_ahead;
 		}
@@ -498,13 +495,13 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 			}
 			if (comment_adapt) adapt_comment[i][v] += "Long bell start. ";
 			// Decrease starting velocity
-			if (icf[ii].bell_end_vel) vel[i][v] = max(1, 
+			if (icf[ii].bell_end_vel) vel[i][v] = max(1,
 				randbw(dyn[i][v] * icf[ii].bell_end_vel / 100.0, dyn[i][v] * icf[ii].bell_start_vel / 100.0)); //-V550
 		}
 	}
 	int ni = i + noff[i][v];
 	// Create bell if long length, not pause and not last note (because can be just end of adapt window)
-	if ((ndur > (float)icf[ii].bell_mindur2/2) && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ 
+	if ((ndur > (float)icf[ii].bell_mindur2 / 2) && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ
 		&& (x == ncount - 1 || pause[ni][v])) {
 		int pos = round(i + (float)(len[i][v]) * 2.0 * icf[ii].bell_start_len / 100.0);
 		int ok = 1;
@@ -523,6 +520,39 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 			if (comment_adapt) adapt_comment[i + len[i][v] - 1][v] += "Long bell end. ";
 		}
 	}
+}
+
+void CGAdapt::AdaptGetPhrases(int step1, int step2) {
+	phrase.clear();
+	phrase.resize(v_cnt);
+	for (int v = 0; v < v_cnt; v++) {
+		int first_i = -1;
+		int last_i = -1;
+		int ei = 0;
+		float last_time = -10000;
+		for (int i = step1; i <= step2; ++i) {
+			ei = i + len[i][v] - 1;
+			if (!pause[i][v] && !coff[i][v]) {
+				// Check distance
+				if (sstime[i][v] - last_time > 200) {
+					// Record previous phrase
+					if (first_i > -1 && setime[last_i][v] - sstime[first_i][v] > 800) {
+						phrase[v].resize(phrase[v].size() + 1);
+						phrase[v][phrase[v].size() - 1].s1 = first_i;
+						phrase[v][phrase[v].size() - 1].s2 = last_i;
+					}
+					// Start new phrase
+					first_i = i;
+				}
+				// Record last note
+				last_i = ei;
+				last_time = setime[ei][v];
+			}
+		}
+	}
+}
+
+void CGAdapt::AdaptPhraseBell(int step1, int step2) {
 }
 
 void CGAdapt::AdaptReverseBell(int v, int x, int i, int ii, int ei, int pi, int pei)
@@ -658,7 +688,7 @@ void CGAdapt::ApplyTrem(int &started, int step1, int step2, int v, int ii) {
 		len[i][v] = step2 - step1 + 1;
 		coff[i][v] = i - step1;
 		if (!dyn[i][v]) dyn[i][v] = dyn[i - 1][v];
-		dyn[i][v] = GetDrange(dyn[i][v], icf[ii].trem_dyn_range1, icf[ii].trem_dyn_range2);
+		dyn[i][v] = MapDrange(dyn[i][v], icf[ii].trem_dyn_range1, icf[ii].trem_dyn_range2);
 		midi_ch[i][v] = midi_ch[step1][v];
 	}
 	int step22 = step2;
@@ -881,6 +911,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 	adapt_pspeed = m_pspeed;
 	CalculateVoiceStages();
 	ExportVoiceStages();
+	AdaptGetPhrases(step1, step2);
 	for (int v = 0; v < v_cnt; v++) {
 		int ii = instr[v]; // Instrument id
 		int ncount = 0;
