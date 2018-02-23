@@ -503,7 +503,7 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 	// Create bell if long length, not pause and not last note (because can be just end of adapt window)
 	if ((ndur > (float)icf[ii].bell_mindur2 / 2) && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ
 		&& (x == ncount - 1 || pause[ni][v])) {
-		int pos = round(i + (float)(len[i][v]) * 2.0 * icf[ii].bell_end_len / 100.0);
+		int pos = round(i + (float)(len[i][v]) * 2.0 * icf[ii].bell_start_len / 100.0);
 		int ok = 1;
 		int end = i + len[i][v];
 		// Check if dynamics does not increase
@@ -536,7 +536,7 @@ void CGAdapt::AdaptGetPhrases(int step1, int step2) {
 				// Check distance
 				if (sstime[i][v] - last_time > 200) {
 					// Record previous phrase
-					if (first_i > -1) {
+					if (first_i > -1 && setime[last_i][v] - sstime[first_i][v] > 800) {
 						phrase[v].resize(phrase[v].size() + 1);
 						phrase[v][phrase[v].size() - 1].s1 = first_i;
 						phrase[v][phrase[v].size() - 1].s2 = last_i;
@@ -552,18 +552,7 @@ void CGAdapt::AdaptGetPhrases(int step1, int step2) {
 	}
 }
 
-void CGAdapt::AdaptPhraseBell(int v, int step1, int step2) {
-	for (int p = 0; p < phrase[v].size(); ++p) {
-		int s1 = phrase[v][p].s1;
-		int s2 = phrase[v][p].s2;
-		float time1 = sstime[s1][v];
-		float time2 = setime[s2][v];
-		float pdur = time2 - time1;
-		// Do not process too short phrases
-		if (pdur < 600) continue;
-		// Get finish bell length
-		float fbell = 
-	}
+void CGAdapt::AdaptPhraseBell(int step1, int step2) {
 }
 
 void CGAdapt::AdaptReverseBell(int v, int x, int i, int ii, int ei, int pi, int pei)
