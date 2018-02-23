@@ -259,6 +259,17 @@ int CGAdapt::MapDrange(int src, int range1, int range2) {
 	return src * (range2 - range1) / 100.0 + range1 * 127.0 / 100.0;
 }
 
+int CGAdapt::MapInRange(int src, int range1, int range2) {
+	return src * (range2 - range1) / 127.0 + range1;
+}
+
+int CGAdapt::RandInRange(int src, int range1, int range2, int rand_range) {
+	int res = src + randbw(-rand_range * src / 100, rand_range * src / 100);
+	if (res < range1) res = range1;
+	if (res > range2) res = range2;
+	return res;
+}
+
 void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
 	if (!icf[ii].stac_auto) return;
 	// Make short non-legato notes (on both sides) staccato
@@ -268,7 +279,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 		if (icf[ii].stac_ahead > -1) dstime[pi][v] = -icf[ii].stac_ahead;
 		else dstime[pi][v] = -icf[ii].all_ahead;
 		artic[pi][v] = aSTAC;
-		vel[pi][v] = MapDrange(dyn[pi][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
+		vel[pi][v] = MapInRange(dyn[pi][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
 		// Next note cannot be legato/slur
 		dstime[i][v] = -icf[ii].all_ahead;
 		artic[i][v] = aNONLEGATO;
@@ -282,7 +293,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 		if (icf[ii].stac_ahead > -1) dstime[i][v] = -icf[ii].stac_ahead;
 		else dstime[i][v] = -icf[ii].all_ahead;
 		artic[i][v] = aSTAC;
-		vel[i][v] = MapDrange(dyn[i][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
+		vel[i][v] = MapInRange(dyn[i][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
 		if (comment_adapt) adapt_comment[i][v] += "Staccato. ";
 	}
 }
@@ -290,7 +301,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 void CGAdapt::AdaptPizzStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
 	// Change pizz dynamics
 	if (artic[i][v] == aPIZZ) {
-		vel[i][v] = MapDrange(dyn[i][v], icf[ii].pizz_dyn_range1, icf[ii].pizz_dyn_range2);
+		vel[i][v] = MapInRange(dyn[i][v], icf[ii].pizz_dyn_range1, icf[ii].pizz_dyn_range2);
 		if (icf[ii].pizz_ahead > -1) {
 			dstime[i][v] = -icf[ii].pizz_ahead;
 		}
@@ -317,12 +328,12 @@ void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pe
 			float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
 			if (icf[ii].gliss_freq && ndur > icf[ii].gliss_minlen && 
 				randbw(0, 100) < icf[ii].gliss_freq) {
-					vel[i][v] = icf[ii].vel_gliss;
+					vel[i][v] = icf[ii].gliss_leg_vel;
 					if (comment_adapt) adapt_comment[i][v] += "Gliss. ";
 			}
 			else {
 				if (ndur > icf[ii].legato_long_minlen) {
-					vel[i][v] = randbw(icf[ii].vel_gliss + 1, icf[ii].vel_legato_long);
+					vel[i][v] = randbw(icf[ii].gliss_leg_vel + 1, icf[ii].vel_legato_long);
 				}
 				else {
 					vel[i][v] = randbw(icf[ii].vel_legato_long + 1, 127);
@@ -455,24 +466,33 @@ void CGAdapt::FixOverlap(int v, int x, int i, int ii, int ei, int pi, int pei) {
 	}
 }
 
-void CGAdapt::AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
-	// If nonlegato and short note, avoid slow sustain articulations
-	if (artic[i][v] == aNONLEGATO || icf[ii].type == itSMW) {
-		float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
-		if (ndur < icf[ii].vel_normal_minlen && vel[i][v] < icf[ii].vel_immediate) {
-			vel[i][v] = randbw(icf[ii].vel_immediate, icf[ii].vel_immediate + 2);
-			if (comment_adapt) adapt_comment[i][v] += "Vel immediate. ";
-		}
+void CGAdapt::AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int pei, int pni, int pnei) {
+	if (artic[i][v] != aNONLEGATO) return;
+	// Get allowed range
+	float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
+	int vel1 = 0;
+	// Check if slow accent allowed
+	if (ndur < icf[ii].slow_acc_minlen) vel1 = max(vel1, icf[ii].slow_acc_vel + 1);
+	// Check accent range
+	vel1 = max(vel1, icf[ii].acc_range1 * 127.0 / 100.0);
+	int vel2 = 127;
+	// Check if harsh accent allowed
+	if (randbw(0, 100) >= icf[ii].harsh_acc_freq) vel2 = min(vel2, icf[ii].harsh_acc_vel - 1);
+	// Check accent range
+	vel2 = min(vel2, icf[ii].acc_range2 * 127.0 / 100.0);
+	// Swap limits
+	if (vel1 > vel2) swap(vel1, vel2);
+	// Map to range
+	vel[i][v] = MapInRange(dyn[i][v], vel1, vel2);
+	float rv = icf[ii].rnd_vel;
+	// If note repeats, increase randomization range
+	if (pni > -1 && note[pni][v] == note[i][v] && 
+		(setime[i][v] - sstime[pnei][v]) * 100 / m_pspeed < 500 && icf[ii].rnd_vel_repeat) {
+		rv = icf[ii].rnd_vel_repeat;
+		if (comment_adapt) adapt_comment[i][v] += "Repeat note random vel. ";
 	}
-	if (artic[i][v] == aNONLEGATO) {
-		// Limit harsh sustains
-		if (vel[i][v] >= icf[ii].vel_harsh && icf[ii].harsh_freq < 100) {
-			if (randbw(0, 100) >= icf[ii].harsh_freq) {
-				vel[i][v] = randbw(icf[ii].vel_immediate, icf[ii].vel_harsh - 1);
-				if (comment_adapt) adapt_comment[i][v] += "Vel harsh limited. ";
-			}
-		}
-	}
+	// Random in range
+	vel[i][v] = RandInRange(vel[i][v], vel1, vel2, rv);
 }
 
 void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount) {
@@ -685,7 +705,7 @@ void CGAdapt::ApplyTrem(int &started, int step1, int step2, int v, int ii) {
 		len[i][v] = step2 - step1 + 1;
 		coff[i][v] = i - step1;
 		if (!dyn[i][v]) dyn[i][v] = dyn[i - 1][v];
-		dyn[i][v] = MapDrange(dyn[i][v], icf[ii].trem_dyn_range1, icf[ii].trem_dyn_range2);
+		dyn[i][v] = MapInRange(dyn[i][v], icf[ii].trem_dyn_range1, icf[ii].trem_dyn_range2);
 		midi_ch[i][v] = midi_ch[step1][v];
 	}
 	int step22 = step2;
@@ -750,34 +770,6 @@ void CGAdapt::AdaptTrem(int step1, int step2, int v, int ii) {
 		if (i >= step2) break;
 	}
 	ApplyTrem(started, first_step, pei, v, ii);
-}
-
-// Randomize note velocity
-void CGAdapt::AdaptRndVel(int v, int x, int i, int ii, int ei, int pi, int pei)
-{
-	float rv = icf[ii].rnd_vel;
-	int ok = 1;
-	if (icf[ii].rnd_vel > 0) {
-		if (icf[ii].type == itEIS) {
-			// Prevent velocity randomization of legato transitions, because this can create gliss
-			if (i && !pause[i - 1][v] && note[i-1][v] != note[i][v]) ok = 0;
-			// Prevent velocity randomization of short nonlegato notes, because they sound bad at low velocity with Friedlander
-			if ((setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v] < icf[ii].vel_normal_minlen) ok = 0;
-		}
-		if (icf[ii].type == itSMB || icf[ii].type == itSIVOR || icf[ii].type == itSMW) {
-			// Prevent velocity randomization of flexible legato transitions, because this can shift tempo
-			if (i && !pause[i - 1][v] && note[i - 1][v] != note[i][v]) ok = 0;
-		}
-		if (ok) {
-			// If note repeats, increase randomization range
-			if (i > 0 && note[i - 1][v] == note[i][v] && icf[ii].rnd_vel_repeat) {
-				rv = icf[ii].rnd_vel_repeat;
-				if (comment_adapt) adapt_comment[i][v] += "Repeat note random vel. ";
-			}
-			int max_shift = vel[i][v] * rv / 100.0;
-			vel[i][v] = randbw(max(1, vel[i][v] - max_shift), min(127, vel[i][v] + max_shift));
-		}
-	}
 }
 
 void CGAdapt::CalculateVoiceStages() {
@@ -938,6 +930,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 		if (!adapt_enable) continue;
 		slur_count = 0;
 		int i = step1;
+		int pni = -1;
+		int pnei = -1;
 		for (int x = 0; x < ncount; x++) {
 			if (need_exit) break;
 			ei = max(0, i + len[i][v] - 1);
@@ -964,7 +958,6 @@ void CGAdapt::Adapt(int step1, int step2) {
 					AdaptStaccatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptPizzStep(v, x, i, ii, ei, pi, pei);
 					AdaptAheadStep(v, x, i, ii, ei, pi, pei);
-					AdaptAttackStep(v, x, i, ii, ei, pi, pei);
 				}
 				// Samplemodeling Brass
 				if (icf[ii].type == itSMB) {
@@ -993,10 +986,12 @@ void CGAdapt::Adapt(int step1, int step2) {
 					AdaptRetriggerNonlegatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptNonlegatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptAheadStep(v, x, i, ii, ei, pi, pei);
-					AdaptAttackStep(v, x, i, ii, ei, pi, pei);
 				}
+				AdaptAttackStep(v, x, i, ii, ei, pi, pei, pni, pnei);
 			} // !pause
 			if (noff[i][v] == 0) break;
+			pni = i;
+			pnei = ei;
 			i += noff[i][v];
 		} // for x
 		i = step1;
@@ -1018,7 +1013,6 @@ void CGAdapt::Adapt(int step1, int step2) {
 					if ((icf[ii].rand_end_max > 0) && (max_shift > icf[ii].rand_end_max)) max_shift = icf[ii].rand_end_max;
 					detime[ei][v] += (rand01() - 0.5) * max_shift;
 				}
-				AdaptRndVel(v, x, i, ii, ei, pi, pei);
 				FixOverlap(v, x, i, ii, ei, pi, pei);
 			}
 			CheckNoteBreath(v, x, i, ii, ei, pi, pei);

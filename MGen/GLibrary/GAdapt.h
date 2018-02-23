@@ -18,7 +18,6 @@ public:
 	CGAdapt();
 	~CGAdapt();
 
-	void AdaptRndVel(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void Adapt(int step1, int step2);
 
 	float adapt_pspeed = 100; // Playback speed used during adaptation
@@ -36,14 +35,16 @@ protected:
 	void AdaptRetriggerNonlegatoStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptAutoLegatoStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptNonlegatoStep(int v, int x, int i, int ii, int ei, int pi, int pei);
-	inline int MapDrange(int src, int range1, int range2);
+	int MapDrange(int src, int range1, int range2);
+	inline int MapInRange(int src, int range1, int range2);
+	int RandInRange(int src, int range1, int range2, int rand_range);
 	void AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptPizzStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptAllAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptFlexAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void FixOverlap(int v, int x, int i, int ii, int ei, int pi, int pei);
-	void AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int pei);
+	void AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int pei, int pni, int pnei);
 	void AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount);
 	void AdaptGetPhrases(int step1, int step2);
 	void AdaptReverseBell(int v, int x, int i, int ii, int ei, int pi, int pei);
