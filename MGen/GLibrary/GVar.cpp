@@ -222,7 +222,10 @@ void CGVar::LoadConfigFile(CString fname, int load_includes) {
 		if (pos > -1)	st = st.Left(pos);
 		st.Trim();
 		// Load include
-		if (load_includes && CheckInclude(st, fname, iname)) LoadConfigFile(iname);
+		if (load_includes && CheckInclude(st, fname, iname)) {
+			LoadConfigFile(iname);
+			st = "";
+		}
 		if (error) break;
 		pos = st.Find("=");
 		if (pos != -1) {
@@ -357,6 +360,11 @@ void CGVar::LoadConfigFile(CString fname, int load_includes) {
 				}
 			}
 			if (error) break;
+		}
+		else {
+			if (st != "") {
+				WriteLog(5, "No equal sign in line, which is not a comment: '" + st2 + "' = '" + st3 + "' in file " + fname);
+			}
 		}
 	}
 	fs.close();
@@ -617,7 +625,10 @@ void CGVar::LoadInstrument(int i, CString fname)
 		if (pos > -1)	st = st.Left(pos);
 		st.Trim();
 		// Load include
-		if (CheckInclude(st, fname, iname)) LoadInstrument(i, iname);
+		if (CheckInclude(st, fname, iname)) {
+			LoadInstrument(i, iname);
+			st = "";
+		}
 		// Find equals
 		pos = st.Find("=");
 		if (pos != -1) {
@@ -632,6 +643,11 @@ void CGVar::LoadInstrument(int i, CString fname)
 				WriteLog(5, "Unrecognized parameter '" + st2 + "' = '" + st3 + "' in file " + fname);
 			}
 			//CGVar::LoadVar(&st2, &st3, "save_format_version", &save_format_version);
+		}
+		else {
+			if (st != "") {
+				WriteLog(5, "No equal sign in line, which is not a comment: '" + st2 + "' = '" + st3 + "' in file " + fname);
+			}
 		}
 	} // while (fs.good())
 	fs.close();
@@ -1699,6 +1715,11 @@ void CGVar::LoadResults(CString dir, CString fname)
 			LoadVar(&st2, &st3, "save_format_version", &save_format_version);
 			if (!parameter_found) {
 				WriteLog(5, "Unrecognized parameter '" + st2 + "' = '" + st3 + "' in file " + path);
+			}
+		}
+		else {
+			if (st != "") {
+				WriteLog(5, "No equal sign in line, which is not a comment: '" + st2 + "' = '" + st3 + "' in file " + path);
 			}
 		}
 	}
