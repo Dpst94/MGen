@@ -363,7 +363,7 @@ void CGVar::LoadConfigFile(CString fname, int load_includes) {
 		}
 		else {
 			if (st != "") {
-				WriteLog(5, "No equal sign in line, which is not a comment: '" + st2 + "' = '" + st3 + "' in file " + fname);
+				WriteLog(5, "No equal sign in line, which is not a comment: '" + st + "' in file " + fname);
 			}
 		}
 	}
@@ -646,7 +646,7 @@ void CGVar::LoadInstrument(int i, CString fname)
 		}
 		else {
 			if (st != "") {
-				WriteLog(5, "No equal sign in line, which is not a comment: '" + st2 + "' = '" + st3 + "' in file " + fname);
+				WriteLog(5, "No equal sign in line, which is not a comment: '" + st + "' in file " + fname);
 			}
 		}
 	} // while (fs.good())
@@ -1719,7 +1719,7 @@ void CGVar::LoadResults(CString dir, CString fname)
 		}
 		else {
 			if (st != "") {
-				WriteLog(5, "No equal sign in line, which is not a comment: '" + st2 + "' = '" + st3 + "' in file " + path);
+				WriteLog(5, "No equal sign in line, which is not a comment: '" + st + "' in file " + path);
 			}
 		}
 	}
