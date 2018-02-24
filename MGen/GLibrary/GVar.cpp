@@ -1465,6 +1465,8 @@ void CGVar::ValidateVectors2(int step1, int step2) {
 void CGVar::ValidateVectors(int step1, int step2) {
 	long long time_start = CGLib::time();
 	CString st;
+	// Calculate source time where it was not set
+	CountSTime(step1, step2);
 	// Check first step
 	if (!step1) for (int v = 0; v < v_cnt; v++) {
 		if (coff[0][v] && warning_valid < MAX_WARN_VALID) {
