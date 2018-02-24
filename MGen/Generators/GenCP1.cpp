@@ -561,6 +561,7 @@ int CGenCP1::SendCP() {
 		MergeNotes(step, pos - 1, v);
 		MakeBellDyn(v, step, pos - 1, 40, 100, 20);
 	}
+	if (tempo_bell) MakeBellTempo(step, pos - 1, tempo[step], tempo_bell * tempo[step]);
 	step = pos + pause_len;
 	FixLen(step000, step - 1);
 	// Count additional variables

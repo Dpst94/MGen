@@ -682,6 +682,7 @@ void CGenCF1::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "animate", &animate, 0);
 	CheckVar(sN, sV, "prohibit_min_severity", &prohibit_min_severity, 0, 101);
 	CheckVar(sN, sV, "animate_delay", &animate_delay, 0);
+	CheckVar(sN, sV, "tempo_bell", &tempo_bell, 0, 100);
 	CheckVar(sN, sV, "cantus_high", &cantus_high, 0, 1);
 	CheckVar(sN, sV, "rpenalty_accepted", &rpenalty_accepted, 0);
 	CheckVar(sN, sV, "c_len", &c_len, 1);
@@ -3912,8 +3913,24 @@ void CGenCF1::MakeBellDyn(int v, int step1, int step2, int dyn1, int dyn2, int d
 	int mids = (step1 + step2) / 2;
 	int counts = step2 - step1;
 	for (int s = step1; s <= step2; ++s) {
-		if (s < mids)	dyn[s][v] = dyn1 + min(dyn2 - dyn1, (dyn2-dyn1) * (s - step1) / counts*2) + dyn_rand * rand2() / RAND_MAX;
-		else dyn[s][v] = dyn1 + min(dyn2-dyn1, (dyn2-dyn1) * (step2 - s) / counts*2) + dyn_rand * rand2() / RAND_MAX;
+		if (s < mids)	dyn[s][v] = dyn1 + min(dyn2 - dyn1, (dyn2 - dyn1) * (s - step1) / counts * 2) + dyn_rand * rand2() / RAND_MAX;
+		else dyn[s][v] = dyn1 + min(dyn2 - dyn1, (dyn2 - dyn1) * (step2 - s) / counts * 2) + dyn_rand * rand2() / RAND_MAX;
+	}
+}
+
+// Create bell dynamics curve
+void CGenCF1::MakeBellTempo(int step1, int step2, int tempo1, int tempo2) {
+	// Do not process if steps are equal or wrong
+	if (step2 <= step1) return;
+	// Do not process if tempo is not uniform
+	for (int s = step1; s <= step2; ++s) {
+		if (tempo[s] != tempo[step1]) return;
+	}
+	int mids = (step1 + step2) / 2;
+	int counts = step2 - step1;
+	for (int s = step1; s <= step2; ++s) {
+		if (s <= mids)	tempo[s] = tempo1 + (tempo2 - tempo1) * pow((s - step1) * 2.0 / counts, 0.5);
+		else tempo[s] = tempo1 + (tempo2 - tempo1) * pow((step2 - s) * 2.0 / counts, 0.5);
 	}
 }
 
@@ -4171,6 +4188,7 @@ int CGenCF1::SendCantus() {
 		pos += cc_len[s];
 	}
 	MakeBellDyn(v, step, pos - 1, 40, 100, 20);
+	if (tempo_bell) MakeBellTempo(step, pos - 1, tempo[step], tempo_bell * tempo[step]);
 	step = pos + SendPause(pos, v);
 	InterpolateNgraph(v, step000, step);
 	// Count additional variables

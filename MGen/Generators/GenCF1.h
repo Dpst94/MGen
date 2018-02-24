@@ -324,6 +324,7 @@ protected:
 	void TransposeCantusBack();
 	void SendNotes(int pos, int i, int v, int av, int x, vector<int>& cc);
 	void MakeBellDyn(int v, int step1, int step2, int dyn1, int dyn2, int dyn_rand);
+	void MakeBellTempo(int step1, int step2, int tempo1, int tempo2);
 	int SendPause(int pos, int v);
 	inline void MakeLenExport(vector<int>& cc, int av, int retr_on);
 	inline void SendHarmColor(int pos, int v);
@@ -414,6 +415,7 @@ protected:
 	int fill_pre3_notes = 5; // How many notes to search for fill preparation for compensation to 3rd
 	int fill_pre4_notes = 5; // How many notes to search for fill preparation for compensation to Xth in the end
 	int fill_pre4_int = 4; // Interval to be compensated in the end
+	float tempo_bell = 0; // Increase tempo in the middle of cantus / counterpoint. 0 - preserve source tempo
 
 	int log_pmap = 0; // Set to 1 to enable logging parameter map to log folder. Needs canculate_stat to work correctly
 	int show_allowed_flags = 0; // Show even allowed flags(bold in rules.xlsm)
