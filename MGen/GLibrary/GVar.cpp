@@ -874,7 +874,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	LoadNote(&st2, &st3, "replacepitch", &icf[i].replace_pitch);
 	LoadNote(&st2, &st3, "trem_replace", &icf[i].trem_replace);
 	CheckVar(&st2, &st3, "trem_transpose", &icf[i].trem_transpose, -127, 127);
-	CheckVar(&st2, &st3, "trem_chan", &icf[i].trem_chan, 0, 15);
+	CheckVar(&st2, &st3, "trem_chan", &icf[i].trem_chan, 1, 16);
 	CheckVar(&st2, &st3, "bow_lock", &icf[i].bow_lock, 0, 2);
 	LoadCCName(&st2, &st3, "cc_name", i);
 	LoadKswGroup(&st2, &st3, "kswgroup", i);
@@ -887,7 +887,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "poly", &icf[i].poly);
 	CheckVar(&st2, &st3, "single_stage", &icf[i].single_stage, 0, 1);
 	CheckVar(&st2, &st3, "type", &icf[i].type);
-	CheckVar(&st2, &st3, "channel", &icf[i].channel);
+	CheckVar(&st2, &st3, "channel", &icf[i].channel, 1, 16);
 	CheckVar(&st2, &st3, "legato_long_minlen", &icf[i].legato_long_minlen);
 	CheckVar(&st2, &st3, "vel_legato_long", &icf[i].vel_legato_long);
 	CheckRange(&st2, &st3, "vib_bell_top", &icf[i].vib_bell_top1, &icf[i].vib_bell_top2);

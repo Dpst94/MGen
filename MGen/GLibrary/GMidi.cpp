@@ -945,7 +945,7 @@ void CGMidi::SendLyHarm() {
 			int found = 0;
 			// Replace dominant symbol
 			st.Replace("#", " \"#\" ");
-			st.Replace("b", " \\flat ");
+			st.Replace("b", " \\raise #0.3 \\magnify #0.5 \\flat ");
 			if (ly_dominant_letter) {
 				if (st[0] == 'D') {
 					st = "\\concat { \\char ##x00D0 " + st.Right(st.GetLength() - 1) + " } ";
@@ -1221,7 +1221,7 @@ void CGMidi::SaveMidi(CString dir, CString fname) {
 	for (int v = 0; v < v_cnt; v++) {
 		track = v + 1;
 		if (track_id[v]) track = track_id[v];
-		channel = v;
+		channel = v % 16;
 		string st = icf[instr[v]].group;
 		// Replace piano with other instrument, because otherways it generates two-stave track in Sibelius
 		if (st == "Piano") st = "Vibraphone";
@@ -2555,7 +2555,7 @@ void CGMidi::SendMIDI(int step1, int step2)
 		int ei;
 		int ncount = 0;
 		int ii = instr[v];
-		midi_channel = icf[ii].channel;
+		midi_channel = icf[ii].channel - 1;
 		midi_channel_saved = midi_channel;
 		midi_track = icf[ii].track;
 		midi_stage = v_stage[v];
@@ -2579,7 +2579,7 @@ void CGMidi::SendMIDI(int step1, int step2)
 			AddCC(midi_sent_t - midi_start_time - midi_prepause, 7, 
 				(icf[ii].vol * icf[ii].vol_default * master_vol) / 10000);
 			if (icf[ii].trem_chan > -1) {
-				midi_channel = icf[ii].trem_chan;
+				midi_channel = icf[ii].trem_chan - 1;
 				// Send pan
 				AddCC(midi_sent_t - midi_start_time - midi_prepause, 10, 
 					(icf[ii].pan * 127) / 100);
@@ -2628,7 +2628,7 @@ void CGMidi::SendMIDI(int step1, int step2)
 					}
 				}
 				// Note ON if it is not blocked and was not yet sent
-				if (artic[i][v] == aTREM && icf[ii].trem_chan > -1) midi_channel = icf[ii].trem_chan;
+				if (artic[i][v] == aTREM && icf[ii].trem_chan > -1) midi_channel = icf[ii].trem_chan - 1;
 				stimestamp = sstime[i][v] * 100 / m_pspeed + dstime[i][v];
 				CheckDstime(i, v);
 				if ((stimestamp + midi_start_time + midi_prepause >= midi_sent_t) && (i >= midi_sent)) {
@@ -2778,7 +2778,7 @@ void CGMidi::SendMIDI(int step1, int step2)
 			i += noff[i][v];
 		}
 		// Send CC
-		if (icf[ii].trem_chan > -1) midi_channel = icf[ii].trem_chan;
+		if (icf[ii].trem_chan > -1) midi_channel = icf[ii].trem_chan - 1;
 		InterpolateCC(icf[ii].CC_dyn, icf[ii].rnd_dyn, step1, step22, dyn, ii, v);
 		InterpolateCC(icf[ii].CC_vib, icf[ii].rnd_vib, step1, step22, vib, ii, v);
 		InterpolateCC(icf[ii].CC_vibf, icf[ii].rnd_vibf, step1, step22, vibf, ii, v);
