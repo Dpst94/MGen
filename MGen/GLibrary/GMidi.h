@@ -384,6 +384,7 @@ protected:
 	int midi_track = 0;
 	int midi_stage = 0;
 	int midi_voice = 0;
+	int midi_sending_buf_next = 0;
 
 	// Cantus
 	vector< vector <int> > cantus; // Cantus loaded from midi file

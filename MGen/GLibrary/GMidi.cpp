@@ -2380,7 +2380,8 @@ void CGMidi::AddMidiEvent(long long timestamp, int mm_type, int data1, int data2
 			}
 		}
 		else {
-			if (!v_stage[midi_voice] && icf[instr[midi_voice]].port) midi_buf.push_back(event);
+			if (midi_sending_buf_next || (!v_stage[midi_voice] && icf[instr[midi_voice]].port)) 
+				midi_buf.push_back(event);
 			// Save maximum message and its time
 			if (real_timestamp > midi_sent_t2) {
 				midi_sent_t2 = real_timestamp;
@@ -2528,8 +2529,9 @@ void CGMidi::SendMIDI(int step1, int step2)
 	// Decrease right limit to allow for legato ahead, random start and ks/cc transitions
 	if (!midi_last_run) midi_buf_lim -= MAX_AHEAD;
 	// Sort by timestamp before sending
-	qsort(midi_buf_next.data(), midi_buf_next.size(), sizeof(PmEvent), PmEvent_comparator);
 	if (midi_buf_next.size() > 0) {
+		qsort(midi_buf_next.data(), midi_buf_next.size(), sizeof(PmEvent), PmEvent_comparator);
+		midi_sending_buf_next = 1;
 		vector <PmEvent> mbn = midi_buf_next; 
 		midi_buf_next.clear();
 		// Set step to zero, because we do not know real steps of postponed notes
@@ -2540,6 +2542,7 @@ void CGMidi::SendMIDI(int step1, int step2)
 				Pm_MessageStatus(mbn[i].message),
 				Pm_MessageData1(mbn[i].message), Pm_MessageData2(mbn[i].message));
 		}
+		midi_sending_buf_next = 0;
 		if (debug_level > 1) {
 			CString est;
 			est.Format("Postponed events sent (%d) - now postponed %d",
