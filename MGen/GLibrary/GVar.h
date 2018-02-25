@@ -16,7 +16,6 @@
 #define mftFIN 11
 #define mftMUS 12
 
-
 class CGVar :
 	public CGLib
 {

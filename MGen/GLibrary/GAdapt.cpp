@@ -480,6 +480,8 @@ void CGAdapt::AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int p
 	if (randbw(0, 100) >= icf[ii].harsh_acc_freq) vel2 = min(vel2, icf[ii].harsh_acc_vel - 1);
 	// Check accent range
 	vel2 = min(vel2, icf[ii].acc_range2 * 127.0 / 100.0);
+	// Protect from going below 1
+	vel2 = max(1, vel2);
 	// Swap limits
 	if (vel1 > vel2) swap(vel1, vel2);
 	// Map to range
