@@ -274,7 +274,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 	if (!icf[ii].stac_auto) return;
 	// Make short non-legato notes (on both sides) staccato
 	if (x && artic[pi][v] != aLEGATO && artic[pi][v] != aSLUR && artic[pi][v] != aPIZZ &&
-		artic[i][v] != aLEGATO && artic[i][v] != aSLUR &&
+		artic[i][v] != aLEGATO && artic[i][v] != aSLUR && icf[ii].stac_maxlen > -1 && 
 		(setime[pei][v] - sstime[pi][v]) * 100 / m_pspeed + detime[pei][v] - dstime[pi][v] <= icf[ii].stac_maxlen) {
 		if (icf[ii].stac_ahead > -1) dstime[pi][v] = -icf[ii].stac_ahead;
 		else dstime[pi][v] = -icf[ii].all_ahead;
@@ -288,7 +288,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 	}
 	// Same process for current note
 	if (artic[i][v] != aLEGATO && artic[i][v] != aSLUR && artic[i][v] != aPIZZ &&
-		(ei == t_generated - 1 || pause[ei + 1][v]) &&
+		(ei == t_generated - 1 || pause[ei + 1][v]) && icf[ii].stac_maxlen > -1 &&
 		(setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v] <= icf[ii].stac_maxlen) {
 		if (icf[ii].stac_ahead > -1) dstime[i][v] = -icf[ii].stac_ahead;
 		else dstime[i][v] = -icf[ii].all_ahead;
@@ -326,7 +326,7 @@ void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pe
 			}
 			// Add glissando if note is long
 			float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
-			if (icf[ii].gliss_freq && ndur > icf[ii].gliss_minlen && 
+			if (icf[ii].gliss_freq > 0 && ndur > icf[ii].gliss_minlen && icf[ii].gliss_minlen > 0 &&
 				randbw(0, 100) < icf[ii].gliss_freq) {
 					vel[i][v] = icf[ii].gliss_leg_vel;
 					if (comment_adapt) adapt_comment[i][v] += "Gliss. ";
@@ -398,7 +398,7 @@ void CGAdapt::AdaptFlexAheadStep(int v, int x, int i, int ii, int ei, int pi, in
 			}
 		}
 		else if (max_adur > icf[ii].gliss_mindur && abs(note[pi][v] - note[i][v]) > 1 && abs(note[pi][v] - note[i][v]) < 6 &&
-			randbw(0, 100) < icf[ii].gliss_freq/(100-icf[ii].splitpo_freq+0.001)*100) {
+			icf[ii].gliss_freq > 0 && randbw(0, 100) < icf[ii].gliss_freq/(100-icf[ii].splitpo_freq+0.001)*100) {
 			artic[i][v] = aGLISS2;
 			if (comment_adapt) adapt_comment[i][v] += "Gliss2. ";
 			min_adur = icf[ii].gliss_mindur;
@@ -474,12 +474,12 @@ void CGAdapt::AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int p
 	// Check if slow accent allowed
 	if (ndur < icf[ii].slow_acc_minlen) vel1 = max(vel1, icf[ii].slow_acc_vel + 1);
 	// Check accent range
-	vel1 = max(vel1, icf[ii].acc_range1 * 127.0 / 100.0);
+	vel1 = max(vel1, icf[ii].acc_range1);
 	int vel2 = 127;
 	// Check if harsh accent allowed
 	if (randbw(0, 100) >= icf[ii].harsh_acc_freq) vel2 = min(vel2, icf[ii].harsh_acc_vel - 1);
 	// Check accent range
-	vel2 = min(vel2, icf[ii].acc_range2 * 127.0 / 100.0);
+	vel2 = min(vel2, icf[ii].acc_range2);
 	// Protect from going below 1
 	vel2 = max(1, vel2);
 	// Swap limits
@@ -723,7 +723,7 @@ void CGAdapt::ApplyTrem(int &started, int step1, int step2, int v, int ii) {
 }
 
 void CGAdapt::AdaptTrem(int step1, int step2, int v, int ii) {
-	if (!icf[ii].trem_maxlen) return;
+	if (icf[ii].trem_maxlen <= 0) return;
 	int i = step1;
 	int first_step = -1;
 	int pi = -1;
