@@ -655,6 +655,7 @@ int RunJobMGen() {
 	tChild["MGen.exe"] = CGLib::time();
 	//WriteLog("Starting MGen.exe " + par);
 	int ret = RunTimeout(fChild["MGen.exe"] + "MGen.exe", par, j_timeout2 * 1000);
+	SendProgress("Analysing algorithm run results");
 	// Get autosave
 	CString as_fname, as_dir;
 	if (!CGLib::fileExists("log\\autosave.txt")) {
