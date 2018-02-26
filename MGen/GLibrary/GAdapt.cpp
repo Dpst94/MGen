@@ -273,7 +273,7 @@ int CGAdapt::RandInRange(int src, int range1, int range2, int rand_range) {
 void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
 	// Change imported stac dynamics and ahead
 	if (artic[i][v] == aSTAC) {
-		vel[i][v] = MapInRange(dyn[i][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
+		vel[i][v] = MapDrange(dyn[i][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
 		if (icf[ii].stac_ahead > -1) dstime[i][v] = -icf[ii].stac_ahead;
 		if (comment_adapt) adapt_comment[i][v] += "Staccato. ";
 	}
@@ -284,7 +284,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 		if (icf[ii].stac_ahead > -1) dstime[pi][v] = -icf[ii].stac_ahead;
 		else dstime[pi][v] = -icf[ii].all_ahead;
 		artic[pi][v] = aSTAC;
-		vel[pi][v] = MapInRange(dyn[pi][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
+		vel[pi][v] = MapDrange(dyn[pi][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
 		// Next note cannot be legato/slur
 		dstime[i][v] = -icf[ii].all_ahead;
 		artic[i][v] = aNONLEGATO;
@@ -298,7 +298,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 		if (icf[ii].stac_ahead > -1) dstime[i][v] = -icf[ii].stac_ahead;
 		else dstime[i][v] = -icf[ii].all_ahead;
 		artic[i][v] = aSTAC;
-		vel[i][v] = MapInRange(dyn[i][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
+		vel[i][v] = MapDrange(dyn[i][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
 		if (comment_adapt) adapt_comment[i][v] += "Staccato. ";
 	}
 }
@@ -306,7 +306,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 void CGAdapt::AdaptPizzStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
 	// Change pizz dynamics
 	if (artic[i][v] == aPIZZ) {
-		vel[i][v] = MapInRange(dyn[i][v], icf[ii].pizz_dyn_range1, icf[ii].pizz_dyn_range2);
+		vel[i][v] = MapDrange(dyn[i][v], icf[ii].pizz_dyn_range1, icf[ii].pizz_dyn_range2);
 		if (icf[ii].pizz_ahead > -1) {
 			dstime[i][v] = -icf[ii].pizz_ahead;
 		}

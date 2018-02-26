@@ -117,9 +117,9 @@ struct IConf {
 	int stac_auto = 1;
 	int stac_ahead = -1;
 	int stac_maxlen = 0; // Maximum note length (ms) to be converted to staccato in case of non-legato on both sides
-	int stac_dyn_range1 = 0;
+	int stac_dyn_range1 = 1;
 	int stac_dyn_range2 = 100;
-	int pizz_dyn_range1 = 0;
+	int pizz_dyn_range1 = 1;
 	int pizz_dyn_range2 = 100;
 	int pizz_ahead = -1;  // Time in ms to stretch pizz notes back to cope with slow attack
 	int pizz_import = 1; // Set to 0 to ignore pizzicato in source MIDI file and play as normal notes
