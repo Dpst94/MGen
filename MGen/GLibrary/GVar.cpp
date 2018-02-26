@@ -250,6 +250,7 @@ void CGVar::LoadConfigFile(CString fname, int load_includes) {
 			CheckVar(&st2, &st3, "midifile_export_comments", &midifile_export_comments, 0, 1);
 			CheckVar(&st2, &st3, "adapt_enable", &adapt_enable, 0, 1);
 			CheckVar(&st2, &st3, "autolegato", &auto_legato, 0, 1);
+			CheckVar(&st2, &st3, "reverb_mix", &reverb_mix, 0, 100);
 			CheckVar(&st2, &st3, "autononlegato", &auto_nonlegato, 0, 1);
 			CheckVar(&st2, &st3, "grownotes", &grow_notes);
 			CheckVar(&st2, &st3, "comment_adapt", &comment_adapt, 0, 1);
@@ -945,6 +946,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "nonlegato_mingap", &icf[i].nonlegato_mingap);
 	CheckVar(&st2, &st3, "retrigger_mingap", &icf[i].retrigger_mingap);
 	CheckVar(&st2, &st3, "auto_legato", &icf[i].auto_legato);
+	CheckVar(&st2, &st3, "reverb_mix", &icf[i].reverb_mix);
 	CheckVar(&st2, &st3, "fix_transpose", &icf[i].fix_transpose);
 	CheckVar(&st2, &st3, "pedal_import", &icf[i].pedal_import);
 	CheckVar(&st2, &st3, "trem_maxlen", &icf[i].trem_maxlen);

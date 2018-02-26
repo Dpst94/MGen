@@ -135,6 +135,7 @@ struct IConf {
 	int trem_lock = 0; // 0 - do not lock tremolo, 1 - always tremolo
 	int bow_lock = 0; // 0 - do not lock bow, 1 - always sul tasto, 2 - always sul ponticello
 	int mute_lock = 0; // 0 - do not lock mute, 1 - always selected mute (mute_activate)
+	int reverb_mix = 0;
 	int lengroup2 = 0;
 	int lengroup3 = 0;
 	int lengroup4 = 0;
