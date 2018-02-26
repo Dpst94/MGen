@@ -803,6 +803,8 @@ void CGAdapt::CalculateVoiceStages() {
 		// Calculate parameters
 		int track = track_id[v];
 		int ii = instr[v];
+		// First process voices without reverb set
+		if (icf[ii].reverb_mix > -1) continue;
 		int trackchan = icf[ii].track * 16 + icf[ii].channel;
 		// Calculate stats
 		++voices_in_instr[ii];
@@ -854,7 +856,7 @@ void CGAdapt::ExportVoiceStages() {
 	ofstream fs;
 	CreateDirectory(as_dir, NULL);
 	fs.open(as_dir + "\\" + as_fname + ".csv");
-	fs << "SRC;SRC track;Voice;IGroup;Instr;Stage;Track;Chan;Port;Poly;\n";
+	fs << "SRC;SRC track;Voice;IGroup;Instr;Stage;Track;Chan;Port;Poly;Reverb;\n";
 	for (int v = 0; v < v_cnt; v++) {
 		int ii = instr[v];
 		fs << track_id[v] << ";";
@@ -867,6 +869,8 @@ void CGAdapt::ExportVoiceStages() {
 		fs << icf[ii].channel << ";";
 		fs << icf[ii].port << ";";
 		fs << icf[ii].poly << ";";
+		if (icf[ii].reverb_mix == -1) fs << reverb_mix << ";";
+		else fs << icf[ii].reverb_mix << ";";
 		fs << "\n";
 	}
 	fs.close();
