@@ -271,9 +271,14 @@ int CGAdapt::RandInRange(int src, int range1, int range2, int rand_range) {
 }
 
 void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
-	if (!icf[ii].stac_auto) return;
+	// Change imported stac dynamics and ahead
+	if (artic[i][v] == aSTAC) {
+		vel[i][v] = MapInRange(dyn[i][v], icf[ii].stac_dyn_range1, icf[ii].stac_dyn_range2);
+		if (icf[ii].stac_ahead > -1) dstime[i][v] = -icf[ii].stac_ahead;
+		if (comment_adapt) adapt_comment[i][v] += "Staccato. ";
+	}
 	// Make short non-legato notes (on both sides) staccato
-	if (x && artic[pi][v] != aLEGATO && artic[pi][v] != aSLUR && artic[pi][v] != aPIZZ &&
+	if (icf[ii].stac_auto && x && artic[pi][v] != aLEGATO && artic[pi][v] != aSLUR && artic[pi][v] != aPIZZ &&
 		artic[i][v] != aLEGATO && artic[i][v] != aSLUR && icf[ii].stac_maxlen > -1 && 
 		(setime[pei][v] - sstime[pi][v]) * 100 / m_pspeed + detime[pei][v] - dstime[pi][v] <= icf[ii].stac_maxlen) {
 		if (icf[ii].stac_ahead > -1) dstime[pi][v] = -icf[ii].stac_ahead;
@@ -287,7 +292,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 		if (comment_adapt) adapt_comment[pi][v] += "Staccato. ";
 	}
 	// Same process for current note
-	if (artic[i][v] != aLEGATO && artic[i][v] != aSLUR && artic[i][v] != aPIZZ &&
+	if (icf[ii].stac_auto && artic[i][v] != aLEGATO && artic[i][v] != aSLUR && artic[i][v] != aPIZZ &&
 		(ei == t_generated - 1 || pause[ei + 1][v]) && icf[ii].stac_maxlen > -1 &&
 		(setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v] <= icf[ii].stac_maxlen) {
 		if (icf[ii].stac_ahead > -1) dstime[i][v] = -icf[ii].stac_ahead;
