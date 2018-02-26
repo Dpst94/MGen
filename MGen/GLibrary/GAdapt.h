@@ -40,6 +40,7 @@ protected:
 	int RandInRange(int src, int range1, int range2, int rand_range);
 	void AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptPizzStep(int v, int x, int i, int ii, int ei, int pi, int pei);
+	void AdaptTremStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptAllAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptFlexAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei);
@@ -51,6 +52,7 @@ protected:
 	void AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptNoteEndStep(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount);
 	void ApplyTrem(int & started, int step1, int step2, int v, int ii);
+	void AdaptImportedTrem(int step1, int step2, int v, int ii);
 	void AdaptTrem(int step1, int step2, int v, int ii);
 											 
   // Adapt local variables

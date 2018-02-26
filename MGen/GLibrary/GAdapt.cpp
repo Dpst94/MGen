@@ -314,6 +314,16 @@ void CGAdapt::AdaptPizzStep(int v, int x, int i, int ii, int ei, int pi, int pei
 	}
 }
 
+void CGAdapt::AdaptTremStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
+	// Change pizz dynamics
+	if (artic[i][v] == aTREM) {
+		for (int z = i; z <= ei; ++z) {
+			dyn[z][v] = MapInRange(dyn[z][v], icf[ii].trem_dyn_range1, icf[ii].trem_dyn_range2);
+		}
+		if (comment_adapt) adapt_comment[i][v] += "Trem dyn. ";
+	}
+}
+
 void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
 	float max_shift = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed * icf[ii].rand_start / 100;
 	if ((icf[ii].rand_start_max > 0) && (max_shift > icf[ii].rand_start_max)) max_shift = icf[ii].rand_start_max;
@@ -962,6 +972,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 					AdaptNonlegatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptStaccatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptPizzStep(v, x, i, ii, ei, pi, pei);
+					AdaptTremStep(v, x, i, ii, ei, pi, pei);
 					AdaptAheadStep(v, x, i, ii, ei, pi, pei);
 				}
 				// Samplemodeling Brass
