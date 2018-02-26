@@ -849,6 +849,13 @@ void CGAdapt::CalculateVoiceStages() {
 		t_instr[icf[ii].track] = ii;
 		tcs_instr[trackchan][v_stage[v]] = ii;
 	}
+	for (int v = 0; v < v_cnt; v++) {
+		// Calculate parameters
+		int track = track_id[v];
+		int ii = instr[v];
+		// Now process voices with reverb set
+		if (icf[ii].reverb_mix == -1) continue;
+	}
 	stages_calculated = 1;
 }
 
