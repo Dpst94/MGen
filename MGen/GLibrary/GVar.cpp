@@ -453,6 +453,13 @@ void CGVar::LoadVarInstr(CString * sName, CString * sValue, char* sSearch, vecto
 					st, v, instr_layout, icf[0].group, icf[0].name, 0);
 				WriteLog(5, est);
 			}
+			else {
+				// Calculate instrument config for voice
+				if (icf[ii].child.find(v + 1) != icf[ii].child.end()) {
+					ii = icf[ii].child[v + 1];
+					instr[v] = ii;
+				}
+			}
 		}
 	}
 }
@@ -891,6 +898,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	LoadNote(&st2, &st3, "trem_replace", &icf[i].trem_replace);
 	CheckVar(&st2, &st3, "trem_transpose", &icf[i].trem_transpose, -127, 127);
 	CheckVar(&st2, &st3, "trem_chan", &icf[i].trem_chan, 1, 16);
+	CheckVar(&st2, &st3, "trem_lock", &icf[i].trem_lock, 0, 1);
 	CheckVar(&st2, &st3, "bow_lock", &icf[i].bow_lock, 0, 2);
 	LoadCCName(&st2, &st3, "cc_name", i);
 	LoadKswGroup(&st2, &st3, "kswgroup", i);
@@ -1033,7 +1041,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	// Parse command
 	PmMessage msg = ParseMidiCommand2(st2, atoi(st3), i);
 	if (!msg && !parameter_found) {
-		WriteLog(5, "Unknown name. Please first bind CC name or KSW name in instrument config: " + st2 + " = " + st3);
+		//WriteLog(5, "Unknown name. Please first bind CC name or KSW name in instrument config: " + st2 + " = " + st3);
 		return;
 	}
 	if (msg) {

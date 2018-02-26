@@ -1636,6 +1636,8 @@ void CGMidi::LoadMidi(CString path)
 							}
 							if (dchan == 2 && icf[instr[v]].trem_import) artic[pos + z][v] = aTREM;
 						}
+						// Lock tremolo
+						if (icf[instr[v]].trem_lock) artic[pos + z][v] = aTREM;
 						// Lock mute
 						if (icf[instr[v]].mute_lock) SetBit(filter[pos + z][v], fMUTE);
 						// Lock bow
