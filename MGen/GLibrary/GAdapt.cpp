@@ -794,11 +794,13 @@ void CGAdapt::CalculateVoiceStages() {
 	if (stages_calculated) return;
 	vector<int> voices_in_instr(icf.size()); // How many voices use each instrument
 	vector<int> voices_in_track(icf.size()); // How many voices use each initial track
+	vector<int> stage_reverb(icf.size()); // Reverb for each stage
 	vector<map<int, int>> tracks_in_instr(icf.size()); // How many tracks use each instrument
 	map<int, int> voices_in_trackchan; // How many voices use each resulting track/channel
 	map<int, int> stages_in_trackchan; // How many stages use each resulting track/channel
 	map<int, map<int, int>> tcs_instr; // instrument for each trackchan/stage
 	v_stage.resize(MAX_VOICE);
+	int max_stage = 0;
 	for (int v = 0; v < v_cnt; v++) {
 		// Calculate parameters
 		int track = track_id[v];
@@ -840,21 +842,55 @@ void CGAdapt::CalculateVoiceStages() {
 			// For solo instrument alwas create new stage
 			v_stage[v] = tcs_instr[trackchan].size();
 		}
-		// Calculate instrument config for voice
-		if (icf[ii].child.find(track_id[v]) != icf[ii].child.end()) {
-			ii = icf[ii].child[track_id[v]];
-			instr[v] = ii;
-		}
 		// Set instrument for each exported track
 		t_instr[icf[ii].track] = ii;
 		tcs_instr[trackchan][v_stage[v]] = ii;
+		max_stage = max(max_stage, v_stage[v]);
+		stage_reverb[v_stage[v]] = icf[ii].reverb_mix;
 	}
+	// All voices with reverb set get higher stage numbers
 	for (int v = 0; v < v_cnt; v++) {
 		// Calculate parameters
 		int track = track_id[v];
 		int ii = instr[v];
 		// Now process voices with reverb set
 		if (icf[ii].reverb_mix == -1) continue;
+		int trackchan = icf[ii].track * 16 + icf[ii].channel;
+		// Calculate stats
+		++voices_in_instr[ii];
+		++voices_in_track[track];
+		tracks_in_instr[ii][track] = 1;
+		++voices_in_trackchan[trackchan];
+		// Record stats
+		v_itrack[v] = tracks_in_instr[ii].size();
+		itrack[track] = tracks_in_instr[ii].size();
+		// if instrument is solo or stage 0 is occupied with a different instrument
+		if (icf[ii].poly > 1) {
+			// Scan each stage for this trackchan and reverb
+			int found = -1;
+			for (auto const& it : tcs_instr[trackchan]) {
+				if (it.second == ii && stage_reverb[it.first] == icf[ii].reverb_mix) {
+					found = it.first;
+				}
+			}
+			if (found > -1) {
+				// Use same stage if this poly instrument was already sent
+				v_stage[v] = found;
+			}
+			else {
+				// Create new stage for this trackchan and send voice there
+				v_stage[v] = max_stage + 1;
+			}
+		}
+		else {
+			// For solo instrument alwais create new stage
+			v_stage[v] = max_stage + 1;
+		}
+		// Set instrument for each exported track
+		t_instr[icf[ii].track] = ii;
+		tcs_instr[trackchan][v_stage[v]] = ii;
+		max_stage = max(max_stage, v_stage[v]);
+		stage_reverb[v_stage[v]] = icf[ii].reverb_mix;
 	}
 	stages_calculated = 1;
 }
