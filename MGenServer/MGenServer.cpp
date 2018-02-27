@@ -56,7 +56,8 @@ int can_render = 1;
 int screenshot_id = 0;
 int max_screenshot = 10;
 
-map <int, map<int, int>> st_used;
+map <int, map<int, int>> st_used; // [stage][track]
+map <int, float> st_reverb; // [stage]
 
 // Children
 vector <CString> nChild; // Child process name
@@ -429,6 +430,7 @@ int SendKeyToWindowClass(CString wClass, short vk) {
 void LoadVoices() {
 	vector <CString> sv, sa;
 	st_used.clear();
+	st_reverb.clear();
 	if (!CGLib::fileExists(share + j_folder + j_basefile + ".csv")) return;
 	CGLib::read_file_sv(share + j_folder + j_basefile + ".csv", sv);
 	for (int i = 1; i < sv.size(); ++i) {
@@ -437,7 +439,23 @@ void LoadVoices() {
 		if (sa.size() < 7) continue;
 		//WriteLog(sa[5] + "/" + sa[6]);
 		st_used[atoi(sa[5])][atoi(sa[6])] = 1;
+		st_reverb[atoi(sa[5])] = atoi(sa[10]);
 	}
+}
+
+void MakeRenderLua(int sta) {
+	vector<CString> sv;
+	ofstream fs;
+	CString title;
+	CString st;
+	fs.open("server\\scripts\\render-midi.lua");
+	CGLib::read_file_sv("server\\scripts\\templates\\render-midi.lua", sv);
+	st.Format("%.2f", st_reverb[sta] / 100.0);
+	for (int i = 0; i < sv.size(); ++i) {
+		sv[i].Replace("$REVERB_MIX$", st);
+		fs << sv[i] << "\n";
+	}
+	fs.close();
 }
 
 void AnalyseWaveform(CString fname2) {
@@ -506,6 +524,8 @@ int RunRenderStage(int sta) {
 	rename(reaperbuf + "stage.temp", reaperbuf + "stage.mp3");
 	// Copy files
 	CGLib::copy_file(share + j_folder + j_basefile + "_" + sta_st + ".midi", reaperbuf + "input.mid");
+	// Prepare script
+	MakeRenderLua(sta);
 	// Start render
 	est.Format("Starting render stage #" + sta_st2 + " after %d seconds...",
 		(CGLib::time() - time_job0) / 1000);
