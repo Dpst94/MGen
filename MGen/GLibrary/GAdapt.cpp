@@ -806,7 +806,7 @@ void CGAdapt::CalculateVoiceStages() {
 		int track = track_id[v];
 		int ii = instr[v];
 		// First process voices without reverb set
-		if (icf[ii].reverb_mix > -1) continue;
+		if (icf[ii].reverb_mix > -1 && icf[ii].reverb_mix != reverb_mix) continue;
 		int trackchan = icf[ii].track * 16 + icf[ii].channel;
 		// Calculate stats
 		++voices_in_instr[ii];
@@ -854,7 +854,7 @@ void CGAdapt::CalculateVoiceStages() {
 		int track = track_id[v];
 		int ii = instr[v];
 		// Now process voices with reverb set
-		if (icf[ii].reverb_mix == -1) continue;
+		if (icf[ii].reverb_mix == -1 || icf[ii].reverb_mix == reverb_mix) continue;
 		int trackchan = icf[ii].track * 16 + icf[ii].channel;
 		// Calculate stats
 		++voices_in_instr[ii];
