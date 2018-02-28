@@ -467,7 +467,7 @@ void AnalyseWaveform(CString fname2) {
 	}
 
 	CString par;
-	par.Format("-y -i %s -filter_complex showwavespic=s=1050x120 -frames:v 1 %s_.png",
+	par.Format("-y -i \"%s\" -filter_complex showwavespic=s=1050x120 -frames:v 1 \"%s_.png\"",
 		share + j_folder + fname2,
 		share + j_folder + fname3);
 	int ret = RunTimeout(fChild["ffmpeg.exe"] + "ffmpeg.exe",
@@ -479,7 +479,7 @@ void AnalyseWaveform(CString fname2) {
 		est.Format("File not found: " + share + j_folder + fname3 + "_.png");
 	}
 
-	par.Format("-y -i %s -filter_complex showwavespic=s=8000x800 -frames:v 1 %s.png",
+	par.Format("-y -i \"%s\" -filter_complex showwavespic=s=8000x800 -frames:v 1 \"%s.png\"",
 		share + j_folder + fname2,
 		share + j_folder + fname3);
 	ret = RunTimeout(fChild["ffmpeg.exe"] + "ffmpeg.exe",
@@ -491,7 +491,7 @@ void AnalyseWaveform(CString fname2) {
 		est.Format("File not found: " + share + j_folder + fname3 + ".png");
 	}
 
-	par.Format("-show_format -of flat -i %s > %s.inf 2>&1",
+	par.Format("-show_format -of flat -i \"%s\" > \"%s\".inf 2>&1",
 		share + j_folder + fname2,
 		share + j_folder + fname3);
 	ret = RunTimeout(fChild["ffmpeg.exe"] + "ffprobe.exe", par, 30000, 0);
