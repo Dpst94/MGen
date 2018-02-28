@@ -74,6 +74,7 @@ public:
 	int adapt_enable = 1;
 	int auto_legato = -1;
 	int reverb_mix = 30;
+	int toload_time = 0;
 	int auto_nonlegato = 0; // Setting this to 0 disables nonlegato_freq
 	int midi_file_type; // 0 - not specified, 10 - Sibelius, 11 - Finale, 12 - MuseScore
 	int grow_notes = -1;

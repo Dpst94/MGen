@@ -1160,6 +1160,7 @@ void CGMidi::ExportAdaptedMidi(CString dir, CString fname) {
 			//midifile.addPatchChange(track, 0, channel, 0); // 0=piano, 40=violin, 70=bassoon
 			//smidifile[sta].addPatchChange(strack, 0, channel, 0); // 0=piano, 40=violin, 70=bassoon
 			for (int i = 0; i < midifile_buf[sta][tr].size(); i++) {
+				if (toload_time && midifile_buf[sta][tr][i].timestamp > toload_time * 1000) continue;
 				tick = midifile_buf[sta][tr][i].timestamp / 1000.0 / spq * tpq;
 				type = Pm_MessageStatus(midifile_buf[sta][tr][i].message) & 0xF0;
 				data1 = Pm_MessageData1(midifile_buf[sta][tr][i].message);
@@ -1318,12 +1319,12 @@ void CGMidi::LoadMidi(CString path)
 	for (int track = 0; track < midifile.getTrackCount(); track++) {
 		for (int i = 0; i < midifile[track].size(); i++) {
 			MidiEvent* mev = &midifile[track][i];
+			int pos = round(mev->tick / (float)tpc);
 			if (mev->isNoteOn() || mev->isController()) {
 				if (track_firstchan[track] == -1)
 					track_firstchan[track] = mev->getChannel();
 			}
 			if (mev->isTempo()) {
-				int pos = round(mev->tick / (float)tpc);
 				if (pos >= t_allocated) ResizeVectors(max(t_allocated * 2, pos + 1));
 				tempo[pos] = mev->getTempoBPM() * midifile_in_mul;
 				if (pos > last_step) last_step = pos;

@@ -251,6 +251,7 @@ void CGVar::LoadConfigFile(CString fname, int load_includes) {
 			CheckVar(&st2, &st3, "adapt_enable", &adapt_enable, 0, 1);
 			CheckVar(&st2, &st3, "autolegato", &auto_legato, 0, 1);
 			CheckVar(&st2, &st3, "reverb_mix", &reverb_mix, 0, 100);
+			CheckVar(&st2, &st3, "toload_time", &toload_time);
 			CheckVar(&st2, &st3, "autononlegato", &auto_nonlegato, 0, 1);
 			CheckVar(&st2, &st3, "grownotes", &grow_notes);
 			CheckVar(&st2, &st3, "comment_adapt", &comment_adapt, 0, 1);
