@@ -404,6 +404,18 @@ void CGVar::LoadConfig(CString fname, int load_includes) {
 	st2 = "instruments";
 	LoadVarInstr(&st2, &m_algo_insts, "instruments", instr);
 	LoadVarInstr(&st2, &m_config_insts, "instruments", instr);
+	// Process configs
+	ProcessConfig();
+}
+
+void CGVar::ProcessConfig() {
+	int max_vol = 100;
+	for (int ii = 0; ii < icf.size(); ++ii) {
+		if (icf[ii].vol > max_vol) max_vol = icf[ii].vol;
+	}
+	for (int ii = 0; ii < icf.size(); ++ii) {
+		icf[ii].vol = icf[ii].vol * 100.0 / max_vol;
+	}
 }
 
 void CGVar::LoadConfigFiles(CString fname, int load_includes) {
@@ -889,7 +901,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	parameter_found = 0;
 	LoadVar(&st2, &st3, "library", &icf[i].lib);
 	CheckVar(&st2, &st3, "pan", &icf[i].pan, 0, 100);
-	CheckVar(&st2, &st3, "volume", &icf[i].vol, 0, 100);
+	CheckVar(&st2, &st3, "volume", &icf[i].vol, 0, 200);
 	CheckVar(&st2, &st3, "volume_default", &icf[i].vol_default, 0, 127);
 	CheckVar(&st2, &st3, "ks1", &icf[i].ks1);
 	LoadNote(&st2, &st3, "n_min", &icf[i].nmin);
