@@ -791,34 +791,6 @@ int CGenCP1::FailVMotion() {
 	return 0;
 }
 
-int CGenCP1::FailSusResolution(int s3) {
-	// Mark resolution as obligatory harmonic in basic msh
-	if (tivl[s3] > 0) mshb[bli[s3]] = pSusRes;
-	// Resolution by leap
-	else if (abs(ac[cpv][s3] - ac[cpv][s2]) > 1) FLAG2(221, sus[ls]);
-	else {
-		// Resolution up
-		if (acc[cpv][s3] > acc[cpv][s2]) {
-			// Allowed only for resolution of leading tone
-			if (apcc[cpv][s2] == 11) FLAG2(222, sus[ls]);
-			else FLAG2L(219, s3, sus[ls]);
-		}
-		// 9th to 8va
-		if (ivlc[s2] == 1 && ivlc[s3] == 0) {
-			if (ivl[s2] > 7) {
-				if (cantus_high) 
-					FLAG2(216, sus[ls]);
-			}
-			// 2nd to unison
-			else FLAG2(218, sus[ls]);
-		}
-		// 7th to 8va
-		else if (cantus_high && ivlc[s2] == 6 && ivlc[s3] == 0) 
-			FLAG2(217, sus[ls]);
-	}
-	return 0;
-}
-
 int CGenCP1::FailSus1() {
 	CHECK_READY_PERSIST(DP_mli);
 	CHECK_READY(DR_fli, DR_ivl, DR_sus);
@@ -972,6 +944,13 @@ int CGenCP1::FailSus2() {
 						if (s5 && abs(ac[cpv][s5] - ac[cpv][s2]) > 1) s5 = 0;
 						FLAG2C(221);
 					}
+					// Resolution up not LT
+					if (!accept[219]) {
+						if (s3 && acc[cpv][s3] > acc[cpv][s2] && apcc[cpv][s2] != 11) s3 = 0;
+						if (s4 && acc[cpv][s4] > acc[cpv][s2] && apcc[cpv][s2] != 11) s4 = 0;
+						if (s5 && acc[cpv][s5] > acc[cpv][s2] && apcc[cpv][s2] != 11) s5 = 0;
+						FLAG2C(219);
+					}
 					// Notes have too many insertions?
 					if (!accept[292]) {
 						if (s3 && ls3 - ls > 3) s3 = 0;
@@ -979,17 +958,52 @@ int CGenCP1::FailSus2() {
 						if (s5 && ls5 - ls > 3) s5 = 0;
 						FLAG2C(292);
 					}
+					// 9th to 8va
+					if (!accept[216]) {
+						if (s3 && ivlc[s2] == 1 && ivlc[s3] == 0 && ivl[s2] > 7 && cantus_high) s3 = 0;
+						if (s4 && ivlc[s2] == 1 && ivlc[s4] == 0 && ivl[s2] > 7 && cantus_high) s4 = 0;
+						if (s5 && ivlc[s2] == 1 && ivlc[s5] == 0 && ivl[s2] > 7 && cantus_high) s5 = 0;
+						FLAG2C(216);
+					}
+					// 2nd to unison
+					if (!accept[218]) {
+						if (s3 && ivlc[s2] == 1 && ivlc[s3] == 0 && ivl[s2] <= 7) s3 = 0;
+						if (s4 && ivlc[s2] == 1 && ivlc[s4] == 0 && ivl[s2] <= 7) s4 = 0;
+						if (s5 && ivlc[s2] == 1 && ivlc[s5] == 0 && ivl[s2] <= 7) s5 = 0;
+						FLAG2C(218);
+					}
+					// 7th to 8va
+					if (!accept[217]) {
+						if (s3 && cantus_high && ivlc[s2] == 6 && ivlc[s3] == 0) s3 = 0;
+						if (s4 && cantus_high && ivlc[s2] == 6 && ivlc[s4] == 0) s4 = 0;
+						if (s5 && cantus_high && ivlc[s2] == 6 && ivlc[s5] == 0) s5 = 0;
+						FLAG2C(217);
+					}
 					// First leap is too long?
 					if (abs(acc[cpv][fli[ls + 1]] - acc[cpv][s2]) > sus_insert_max_leap)
 						FLAG2L(295, fli[ls + 1], sus[ls]);
-					// Single insertion
+					// Single insertion, second movement is leap
 					if (!accept[136]) {
 						if (s3 && ls3 == ls + 2 && aleap[cpv][fli2[ls + 1]] > 0) s3 = 0;
 						if (s4 && ls4 == ls + 2 && aleap[cpv][fli2[ls + 1]] > 0) s4 = 0;
 						if (s5 && ls5 == ls + 2 && aleap[cpv][fli2[ls + 1]] > 0) s5 = 0;
-						FLAG2LC(136);
+						FLAG2C(136);
 					}
-					if (FailSusResolution(s3)) return 1;
+					// Single insertion, second movement is leap
+					if (!accept[296]) {
+						if (s3 && ls3 == ls + 2 && aleap[cpv][fli2[ls + 1]] < 0) s3 = 0;
+						if (s4 && ls4 == ls + 2 && aleap[cpv][fli2[ls + 1]] < 0) s4 = 0;
+						if (s5 && ls5 == ls + 2 && aleap[cpv][fli2[ls + 1]] < 0) s5 = 0;
+						FLAG2C(296);
+					}
+					// Mark insertion as non-harmonic in basic msh if resolution is harmonic and sus ends with dissonance
+					if (s3 && ls3 == ls + 2 && tivl[fli[ls + 2]] > 0) mshb[ls + 1] = pAux;
+					if (s4 && ls4 == ls + 2 && tivl[fli[ls + 2]] > 0) mshb[ls + 1] = pAux;
+					if (s5 && ls5 == ls + 2 && tivl[fli[ls + 2]] > 0) mshb[ls + 1] = pAux;
+					// Mark resolution as obligatory harmonic in basic msh
+					if (s3) mshb[ls3] = pSusRes;
+					if (s4) mshb[ls4] = pSusRes;
+					if (s5) mshb[ls5] = pSusRes;
 				}
 			}
 			else if (ep2 == c_len) {
@@ -997,20 +1011,8 @@ int CGenCP1::FailSus2() {
 				FLAG2(220, s);
 			}
 		}
-	}
-	return 0;
-}
-
-int CGenCP1::FailSusIns1() {
-	// If second movement is leap
-	if (aleap[cpv][fli2[ls + 1]] > 0) FLAG2L(136, fli[ls + 1], sus[ls]);
-	else if (aleap[cpv][fli2[ls + 1]] < 0) FLAG2L(296, fli[ls + 1], sus[ls]);
-	else {
-		// Mark insertion as non-harmonic in basic msh if resolution is harmonic and sus ends with dissonance
-		if (tivl[s2] < 0 && tivl[fli[ls + 2]] > 0) mshb[ls + 1] = pAux;
-		// Normal smooth insertions
-		if (asmooth[cpv][fli2[ls + 1]] > 0) FLAG2L(137, fli[ls + 1], sus[ls]);
-		else if (asmooth[cpv][fli2[ls + 1]] < 0) FLAG2L(138, fli[ls + 1], sus[ls]);
+	skipsus:
+		continue;
 	}
 	return 0;
 }

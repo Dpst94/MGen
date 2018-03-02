@@ -106,10 +106,10 @@
 
 // Flag and go to next cycle
 #define FLAG2C(id) do { \
-	if (!s3 && !s4 && !s5) {
-		FLAG2(id, sus[ls]);
-		continue;
-	}
+	if (!s3 && !s4 && !s5) { \
+		FLAG2(id, sus[ls]); \
+		goto skipsus; \
+	} \
 } while (0)
 
 
