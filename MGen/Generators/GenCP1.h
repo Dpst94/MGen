@@ -49,6 +49,7 @@ protected:
 	inline int FailSusResolution(int s3);
 	inline int FailSus1();
 	inline int FailSus2();
+	inline int FailSusIns1();
 	inline int FailSusCount();
 	inline int FailSus();
 	inline int FailDisSus();

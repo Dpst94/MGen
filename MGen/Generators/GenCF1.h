@@ -104,6 +104,15 @@
 	anfl[cpv][i].push_back(i);  \
 } while (0)
 
+// Flag and go to next cycle
+#define FLAG2C(id) do { \
+	if (!s3 && !s4 && !s5) {
+		FLAG2(id, sus[ls]);
+		continue;
+	}
+} while (0)
+
+
 // Report violation and save link
 #define FLAG2L(id, i, i2) do { \
   ASSERT_RULE(id);  \

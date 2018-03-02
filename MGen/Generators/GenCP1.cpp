@@ -792,34 +792,29 @@ int CGenCP1::FailVMotion() {
 }
 
 int CGenCP1::FailSusResolution(int s3) {
-	// Check if suspension second part is discord
-	if (tivl[s2] < 0) {
-		// Mark resolution as obligatory harmonic in basic msh
-		if (tivl[s3] > 0) mshb[bli[s3]] = pSusRes;
-		// Resolution to discord
-		if (tivl[s3] < 0) FLAG2(220, sus[ls]);
-			// Resolution by leap
-		else if (abs(ac[cpv][s3] - ac[cpv][s2]) > 1) FLAG2(221, sus[ls]);
-		else {
-			// Resolution up
-			if (acc[cpv][s3] > acc[cpv][s2]) {
-				// Allowed only for resolution of leading tone
-				if (apcc[cpv][s2] == 11) FLAG2(222, sus[ls]);
-				else FLAG2L(219, s3, sus[ls]);
-			}
-			// 9th to 8va
-			if (ivlc[s2] == 1 && ivlc[s3] == 0) {
-				if (ivl[s2] > 7) {
-					if (cantus_high) 
-						FLAG2(216, sus[ls]);
-				}
-				// 2nd to unison
-				else FLAG2(218, sus[ls]);
-			}
-			// 7th to 8va
-			else if (cantus_high && ivlc[s2] == 6 && ivlc[s3] == 0) 
-				FLAG2(217, sus[ls]);
+	// Mark resolution as obligatory harmonic in basic msh
+	if (tivl[s3] > 0) mshb[bli[s3]] = pSusRes;
+	// Resolution by leap
+	else if (abs(ac[cpv][s3] - ac[cpv][s2]) > 1) FLAG2(221, sus[ls]);
+	else {
+		// Resolution up
+		if (acc[cpv][s3] > acc[cpv][s2]) {
+			// Allowed only for resolution of leading tone
+			if (apcc[cpv][s2] == 11) FLAG2(222, sus[ls]);
+			else FLAG2L(219, s3, sus[ls]);
 		}
+		// 9th to 8va
+		if (ivlc[s2] == 1 && ivlc[s3] == 0) {
+			if (ivl[s2] > 7) {
+				if (cantus_high) 
+					FLAG2(216, sus[ls]);
+			}
+			// 2nd to unison
+			else FLAG2(218, sus[ls]);
+		}
+		// 7th to 8va
+		else if (cantus_high && ivlc[s2] == 6 && ivlc[s3] == 0) 
+			FLAG2(217, sus[ls]);
 	}
 	return 0;
 }
@@ -853,7 +848,7 @@ int CGenCP1::FailSus1() {
 int CGenCP1::FailSus2() {
 	CHECK_READY(DR_fli, DR_ivl, DR_sus);
 	CHECK_READY(DR_leap);
-	int ls3, s3, antici;
+	int ls3, ls4, ls5, s3, s4, s5, antici;
 	for (ls = 0; ls < fli_size; ++ls) if (sus[ls]) {
 		// Run sus checks
 		s = fli[ls];
@@ -902,11 +897,14 @@ int CGenCP1::FailSus2() {
 		else {
 			// Species 2
 			if (species == 2) {
-				if (bmli[sus[ls]] == mli.size() - 2 && ls < fli_size - 1 && 
+				// I -> LT penultimate
+				if (bmli[sus[ls]] == mli.size() - 2 && ls < fli_size - 1 &&
 					apcc[cpv][sus[ls]] == 0 && apcc[cpv][fli[ls + 1]] == 11) FLAG2(387, s);
-					else FLAG2(388, s);
+				// Other
+				else FLAG2(388, s);
 			}
 			else {
+				// Not sp2
 				FLAG2(225, s);
 			}
 			// Suspension not in last measures
@@ -921,49 +919,77 @@ int CGenCP1::FailSus2() {
 			if (sus[ls] - fli[ls] > npm / 2) FLAG2(274, s);
 			// Long finish
 			if (fli2[ls] - sus[ls] + 1 > 3 * npm / 4) FLAG2(332, s);
+			// Allow if not discord
+			if (tivl[s2] > 0) continue;
 			// If sus is not last note
 			if (ls < fli_size - 1) {
-				// If mid-bar already generated (sus cannot be in first measure, thus npm usage is correct)
-				s3 = sus[ls] + npm / 2;
-				if (s3 < ep2) {
-					// If second part is 3/4 in species 5
-					if (npm == 8 && s2 - sus[ls] == 5) {
-						// If next note is 1/8
-						if (llen[ls + 1] == 1 && ls < fli_size - 2 && tivl[s2] < 0) FLAG2L(291, fli[ls + 1], sus[ls]);
-						if (FailSusResolution(fli[ls + 1])) return 1;
-						// Stop processing this sus
-						continue;
+				// Full measure should be generated
+				if (sus[ls] + npm < ep2) {
+					// Available beats
+					s3 = sus[ls] + npm / 4;
+					s4 = sus[ls] + npm / 2;
+					s5 = sus[ls] + npm * 3 / 4;
+					ls3 = bli[s3];
+					ls4 = bli[s4];
+					ls5 = bli[s5];
+					// For species 2 and 4 check only 3rd beat
+					if (species == 2 || species == 4) {
+						s3 = 0;
+						s5 = 0;
 					}
-					// If this step does not start new note
-					if (acc[cpv][s3] == acc[cpv][s3 - 1]) FLAG2L(286, s2 + 1, sus[ls]);
+					// Check which beats are allowed by rules
+					// if (!accept[x]) s3 = 0;
+					// if (!accept[x]) s5 = 0;
+					// Notes not on beat?
+					if (!accept[286]) {
+						if (acc[cpv][s3] == acc[cpv][s3 - 1]) s3 = 0;
+						if (acc[cpv][s4] == acc[cpv][s4 - 1]) s4 = 0;
+						if (acc[cpv][s5] == acc[cpv][s5 - 1]) s5 = 0;
+						FLAG2C(286);
+					}
 					// Suspension of non-leading tone in species 2
 					if (species == 2) {
-						if (apcc[cpv][s3] != 11) FLAG2(299, s);
+						if (apcc[cpv][s4] != 11) FLAG2(299, s);
 					}
-					// If resolution note is too short
-					ls3 = bli[s3];
-					if (llen[ls3] < npm / 4 && ls3 < fli_size - 1) FLAG2L(291, s3, sus[ls]);
+					// Notes too short?
+					if (!accept[291]) {
+						if (s3 && llen[ls3] < npm / 4 && ls3 < fli_size - 1) s3 = 0;
+						if (s4 && llen[ls4] < npm / 4 && ls4 < fli_size - 1) s4 = 0;
+						if (s5 && llen[ls5] < npm / 4 && ls5 < fli_size - 1) s5 = 0;
+						FLAG2C(291);
+					}
+					// Notes not harmonic?
+					if (!accept[220]) {
+						if (s3 && tivl[s3] < 0) s3 = 0;
+						if (s4 && tivl[s4] < 0) s4 = 0;
+						if (s5 && tivl[s5] < 0) s5 = 0;
+						FLAG2C(220);
+					}
+					// Resolution by leap
+					if (!accept[221]) {
+						if (s3 && abs(ac[cpv][s3] - ac[cpv][s2]) > 1) s3 = 0;
+						if (s4 && abs(ac[cpv][s4] - ac[cpv][s2]) > 1) s4 = 0;
+						if (s5 && abs(ac[cpv][s5] - ac[cpv][s2]) > 1) s5 = 0;
+						FLAG2C(221);
+					}
+					// Notes have too many insertions?
+					if (!accept[292]) {
+						if (s3 && ls3 - ls > 3) s3 = 0;
+						if (s4 && ls4 - ls > 3) s4 = 0;
+						if (s5 && ls5 - ls > 3) s5 = 0;
+						FLAG2C(292);
+					}
+					// First leap is too long?
+					if (abs(acc[cpv][fli[ls + 1]] - acc[cpv][s2]) > sus_insert_max_leap)
+						FLAG2L(295, fli[ls + 1], sus[ls]);
+					// Single insertion
+					if (!accept[136]) {
+						if (s3 && ls3 == ls + 2 && aleap[cpv][fli2[ls + 1]] > 0) s3 = 0;
+						if (s4 && ls4 == ls + 2 && aleap[cpv][fli2[ls + 1]] > 0) s4 = 0;
+						if (s5 && ls5 == ls + 2 && aleap[cpv][fli2[ls + 1]] > 0) s5 = 0;
+						FLAG2LC(136);
+					}
 					if (FailSusResolution(s3)) return 1;
-					// If there is one intermediate step
-					if (ls3 - ls == 2) {
-						// If leap is too long
-						if (abs(acc[cpv][fli[ls + 1]] - acc[cpv][s2]) > sus_insert_max_leap) 
-							FLAG2L(295, fli[ls + 1], sus[ls]);
-						// If second movement is leap
-						if (aleap[cpv][fli2[ls + 1]] > 0) FLAG2L(136, fli[ls + 1], sus[ls]);
-						else if (aleap[cpv][fli2[ls + 1]] < 0) FLAG2L(296, fli[ls + 1], sus[ls]);
-						else {
-							// Mark insertion as non-harmonic in basic msh if resolution is harmonic and sus ends with dissonance
-							if (tivl[s2] < 0 && tivl[s3] > 0) mshb[ls + 1] = pAux;
-							if (asmooth[cpv][fli2[ls + 1]] > 0) FLAG2L(137, fli[ls + 1], sus[ls]);
-							else if (asmooth[cpv][fli2[ls + 1]] < 0) FLAG2L(138, fli[ls + 1], sus[ls]);
-						}
-					}
-					// If there are two intermediate steps - do nothing
-					// If there are more than two intermediate steps
-					else if (ls3 - ls > 3) {
-						FLAG2L(292, s3, sus[ls]);
-					}
 				}
 			}
 			else if (ep2 == c_len) {
@@ -971,6 +997,20 @@ int CGenCP1::FailSus2() {
 				FLAG2(220, s);
 			}
 		}
+	}
+	return 0;
+}
+
+int CGenCP1::FailSusIns1() {
+	// If second movement is leap
+	if (aleap[cpv][fli2[ls + 1]] > 0) FLAG2L(136, fli[ls + 1], sus[ls]);
+	else if (aleap[cpv][fli2[ls + 1]] < 0) FLAG2L(296, fli[ls + 1], sus[ls]);
+	else {
+		// Mark insertion as non-harmonic in basic msh if resolution is harmonic and sus ends with dissonance
+		if (tivl[s2] < 0 && tivl[fli[ls + 2]] > 0) mshb[ls + 1] = pAux;
+		// Normal smooth insertions
+		if (asmooth[cpv][fli2[ls + 1]] > 0) FLAG2L(137, fli[ls + 1], sus[ls]);
+		else if (asmooth[cpv][fli2[ls + 1]] < 0) FLAG2L(138, fli[ls + 1], sus[ls]);
 	}
 	return 0;
 }
