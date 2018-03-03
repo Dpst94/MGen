@@ -1005,6 +1005,10 @@ int CGenCP1::FailSus2() {
 					if (s4) mshb[ls4] = pSusRes;
 					if (s5) mshb[ls5] = pSusRes;
 				}
+				// If full measure is not generated, allow non-harmonic insertion
+				else {
+					mshb[ls + 1] = pAux;
+				}
 			}
 			else if (ep2 == c_len) {
 				// If sus is absolute last note, flag unresolved
