@@ -2400,7 +2400,7 @@ void CGMidi::AddMidiEvent(long long timestamp, int mm_type, int data1, int data2
 	}
 	else {
 		CString est;
-		est.Format("Blocked AddMidiEvent to past %lld step %d, type %02X, data %d/%d (before %lld step %d, type %02X, data %d/%d) [start = %lld]",
+		est.Format("Blocked AddMidiEvent to past %lld ms, step %d, type %02X, data %d/%d (before %lld ms, step %d, type %02X, data %d/%d) [start = %lld]",
 			timestamp, midi_current_step, mm_type, data1, data2, midi_sent_t - midi_start_time, midi_sent,
 			Pm_MessageStatus(midi_sent_msg), Pm_MessageData1(midi_sent_msg), Pm_MessageData2(midi_sent_msg), midi_start_time); // , midi_buf_lim - midi_start_time
 		WriteLog(5, est);
@@ -2576,27 +2576,27 @@ void CGMidi::SendMIDI(int step1, int step2)
 		// Send initialization commands
 		if (midi_first_run) {
 			for (auto const& it : icf[ii].InitCommands) {
-				AddMidiEvent(- midi_prepause, 
+				AddMidiEvent(midi_sent_t - midi_start_time - midi_prepause,
 					Pm_MessageStatus(it) + midi_channel, 
 					Pm_MessageData1(it), Pm_MessageData2(it));
 				if (Pm_MessageStatus(it) == MIDI_NOTEON) {
-					AddKsOff(- midi_prepause + 1,
+					AddKsOff(midi_sent_t - midi_start_time - midi_prepause + 1,
 						Pm_MessageData1(it), 0);
 				}
 			}
 			// Send pan
-			AddCC(- midi_prepause, 10, 
+			AddCC(midi_sent_t - midi_start_time - midi_prepause, 10,
 				(icf[ii].pan * 127) / 100);
 			// Send vol
-			AddCC(- midi_prepause, 7, 
+			AddCC(midi_sent_t - midi_start_time - midi_prepause, 7,
 				(icf[ii].vol * icf[ii].vol_default * master_vol) / 10000);
 			if (icf[ii].trem_chan > -1) {
 				midi_channel = icf[ii].trem_chan - 1;
 				// Send pan
-				AddCC(- midi_prepause, 10, 
+				AddCC(midi_sent_t - midi_start_time - midi_prepause, 10,
 					(icf[ii].pan * 127) / 100);
 				// Send vol
-				AddCC(- midi_prepause, 7, 
+				AddCC(midi_sent_t - midi_start_time - midi_prepause, 7,
 					(icf[ii].vol * icf[ii].vol_default * master_vol) / 10000);
 				midi_channel = midi_channel_saved;
 			}
@@ -2962,7 +2962,7 @@ void CGMidi::InterpolateCC(int CC, float rnd, int step1, int step2, vector< vect
 	for (int c = first_cc; c <= last_cc; c++) {
 		float t = cc_time[c];
 		if (is_first_cc) {
-			if (midi_first_run) AddCC(- midi_prepause,
+			if (midi_first_run) AddCC(midi_sent_t - midi_start_time - midi_prepause,
 				CC, cc_ma[c]);
 			is_first_cc = 0;
 		}
