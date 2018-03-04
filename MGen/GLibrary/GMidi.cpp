@@ -1162,8 +1162,9 @@ void CGMidi::ExportAdaptedMidi(CString dir, CString fname) {
 			//midifile.addPatchChange(track, 0, channel, 0); // 0=piano, 40=violin, 70=bassoon
 			//smidifile[sta].addPatchChange(strack, 0, channel, 0); // 0=piano, 40=violin, 70=bassoon
 			for (int i = 0; i < midifile_buf[sta][tr].size(); i++) {
-				if (toload_time && midifile_buf[sta][tr][i].timestamp > toload_time * 1000) continue;
-				tick = midifile_buf[sta][tr][i].timestamp / 1000.0 / spq * tpq;
+				long long ts = max(0, midifile_buf[sta][tr][i].timestamp);
+				if (toload_time && ts > toload_time * 1000) continue;
+				tick = ts / 1000.0 / spq * tpq;
 				type = Pm_MessageStatus(midifile_buf[sta][tr][i].message) & 0xF0;
 				data1 = Pm_MessageData1(midifile_buf[sta][tr][i].message);
 				data2 = Pm_MessageData2(midifile_buf[sta][tr][i].message);
@@ -2960,14 +2961,12 @@ void CGMidi::InterpolateCC(int CC, float rnd, int step1, int step2, vector< vect
 	// Send ma CC
 	for (int c = first_cc; c <= last_cc; c++) {
 		float t = cc_time[c];
-		if (t >= midi_sent_t - midi_start_time + midi_prepause) {
-			if (is_first_cc) {
-				if (midi_first_run) AddCC(midi_sent_t - midi_start_time - midi_prepause,
-					CC, cc_ma[c]);
-				is_first_cc = 0;
-			}
-			AddCC(t, CC, cc_ma[c]);
+		if (is_first_cc) {
+			if (midi_first_run) AddCC(- midi_prepause,
+				CC, cc_ma[c]);
+			is_first_cc = 0;
 		}
+		AddCC(t, CC, cc_ma[c]);
 	}
 }
 
