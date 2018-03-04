@@ -742,6 +742,7 @@ void CGAdapt::AdaptTrem(int step1, int step2, int v, int ii) {
 	int i = step1;
 	int first_step = -1;
 	int pi = -1;
+	int ppi = 0;
 	int pei = -1;
 	int pndur = -1;
 	int short_count = 0;
@@ -757,7 +758,10 @@ void CGAdapt::AdaptTrem(int step1, int step2, int v, int ii) {
 					// Start to start time
 					int nss = (sstime[i][v] - sstime[pi][v]) * 100 / m_pspeed + dstime[i][v] - dstime[pi][v];
 					// Two short notes follow
-					if (nss < icf[ii].trem_maxlen && note[i][v] == note[pi][v] && ndur < pndur * 1.1 && ndur > pndur * 0.9) {
+					if (nss < icf[ii].trem_maxlen && 
+						abs(note[i][v] - note[first_step][v]) <= icf[ii].trem_maxint && 
+						(short_count < 3 || note[i][v] == note[ppi][v]) &&
+						ndur < pndur * 1.5 && ndur > pndur * 0.5) {
 						if (short_count >= icf[ii].trem_min_repeats) {
 							started = 1;
 						}
@@ -771,6 +775,7 @@ void CGAdapt::AdaptTrem(int step1, int step2, int v, int ii) {
 				else {
 					first_step = i;
 				}
+				ppi = pi;
 				pi = i;
 				pei = i + len[i][v] - 1;
 				pndur = ndur;
