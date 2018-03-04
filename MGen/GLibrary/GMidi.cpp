@@ -2591,6 +2591,9 @@ void CGMidi::SendMIDI(int step1, int step2)
 			AddCC(midi_sent_t - midi_start_time - midi_prepause, 7,
 				(icf[ii].vol * icf[ii].vol_default * master_vol) / 10000);
 			if (icf[ii].trem_chan > -1) {
+				// These CC can seem to be already sent, so clear them
+				last_cc.clear();
+				last_cc.resize(128, -1);
 				midi_channel = icf[ii].trem_chan - 1;
 				// Send pan
 				AddCC(midi_sent_t - midi_start_time - midi_prepause, 10,
@@ -2599,6 +2602,9 @@ void CGMidi::SendMIDI(int step1, int step2)
 				AddCC(midi_sent_t - midi_start_time - midi_prepause, 7,
 					(icf[ii].vol * icf[ii].vol_default * master_vol) / 10000);
 				midi_channel = midi_channel_saved;
+				// These CC can seem to be already sent, so clear them
+				last_cc.clear();
+				last_cc.resize(128, -1);
 			}
 		}
 		// Move to note start
