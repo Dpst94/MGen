@@ -256,11 +256,11 @@ void CGAdapt::AdaptNonlegatoStep(int v, int x, int i, int ii, int ei, int pi, in
 }
 
 int CGAdapt::MapDrange(int src, int range1, int range2) {
-	return src * (range2 - range1) / 100.0 + range1 * 127.0 / 100.0;
+	return max(0, min(127, src * (range2 - range1) / 100.0 + range1 * 127.0 / 100.0));
 }
 
 int CGAdapt::MapInRange(int src, int range1, int range2) {
-	return src * (range2 - range1) / 127.0 + range1;
+	return max(0, min(127, src * (range2 - range1) / 127.0 + range1));
 }
 
 int CGAdapt::RandInRange(int src, int range1, int range2, int rand_range) {
@@ -318,7 +318,7 @@ void CGAdapt::AdaptTremStep(int v, int x, int i, int ii, int ei, int pi, int pei
 	// Change pizz dynamics
 	if (artic[i][v] == aTREM) {
 		for (int z = i; z <= ei; ++z) {
-			dyn[z][v] = MapInRange(dyn[z][v], icf[ii].trem_dyn_range1, icf[ii].trem_dyn_range2);
+			dyn[z][v] = MapDrange(dyn[z][v], icf[ii].trem_dyn_range1, icf[ii].trem_dyn_range2);
 		}
 		if (comment_adapt) adapt_comment[i][v] += "Trem dyn. ";
 	}
@@ -722,7 +722,7 @@ void CGAdapt::ApplyTrem(int &started, int step1, int step2, int v, int ii) {
 		len[i][v] = step2 - step1 + 1;
 		coff[i][v] = i - step1;
 		if (!dyn[i][v]) dyn[i][v] = dyn[i - 1][v];
-		dyn[i][v] = MapInRange(dyn[i][v], icf[ii].trem_dyn_range1, icf[ii].trem_dyn_range2);
+		dyn[i][v] = MapDrange(dyn[i][v], icf[ii].trem_dyn_range1, icf[ii].trem_dyn_range2);
 		midi_ch[i][v] = midi_ch[step1][v];
 	}
 	int step22 = step2;

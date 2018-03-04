@@ -125,6 +125,7 @@ struct IConf {
 	int pizz_import = 1; // Set to 0 to ignore pizzicato in source MIDI file and play as normal notes
 	int mute_import = 1; // Set to 0 to ignore mutes in source MIDI file and play as normal notes
 	int trem_import = 1; // Set to 0 to ignore tremolo keyswitches and program changes in source MIDI file and play as normal notes
+	int trem_maxint = 0; // Maximum interval between notes of a trill in semitones to be considered a tremolo
 	int mute_predelay = 300; // Delay between mute keyswitch and note in ms
 	int mute_activate = -1; // Technique that will be triggered with mute command from MIDI file
 	int mute_deactivate = -1; // Technique that will be triggered with open command from MIDI file

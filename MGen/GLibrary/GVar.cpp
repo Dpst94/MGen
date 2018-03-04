@@ -913,6 +913,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "trem_transpose", &icf[i].trem_transpose, -127, 127);
 	CheckVar(&st2, &st3, "trem_chan", &icf[i].trem_chan, 1, 16);
 	CheckVar(&st2, &st3, "trem_lock", &icf[i].trem_lock, 0, 1);
+	CheckVar(&st2, &st3, "trem_maxint", &icf[i].trem_maxint, 0, 127);
 	CheckVar(&st2, &st3, "bow_lock", &icf[i].bow_lock, 0, 2);
 	LoadCCName(&st2, &st3, "cc_name", i);
 	LoadKswGroup(&st2, &st3, "kswgroup", i);
@@ -933,8 +934,8 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckRange(&st2, &st3, "vib_bell", &icf[i].vib_bell1, &icf[i].vib_bell2);
 	CheckRange(&st2, &st3, "vibf_bell", &icf[i].vibf_bell1, &icf[i].vibf_bell2);
 	CheckRange(&st2, &st3, "vib_bell_dur", &icf[i].vib_bell_mindur, &icf[i].vib_bell_dur);
-	CheckRange(&st2, &st3, "dyn_range", &icf[i].dyn_range1, &icf[i].dyn_range2);
-	CheckRange(&st2, &st3, "acc_range", &icf[i].acc_range1, &icf[i].acc_range2);
+	CheckRange(&st2, &st3, "dyn_range", &icf[i].dyn_range1, &icf[i].dyn_range2, 0, 100);
+	CheckRange(&st2, &st3, "acc_range", &icf[i].acc_range1, &icf[i].acc_range2, 1, 127);
 	CheckVar(&st2, &st3, "unison_mute", &icf[i].unis_mute, 0, 1);
 	CheckVar(&st2, &st3, "unison_dyn_mul", &icf[i].unis_dyn_mul, 0);
 	CheckVar(&st2, &st3, "vib_bell_freq", &icf[i].vib_bell_freq);
@@ -963,7 +964,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "fix_transpose", &icf[i].fix_transpose);
 	CheckVar(&st2, &st3, "pedal_import", &icf[i].pedal_import);
 	CheckVar(&st2, &st3, "trem_maxlen", &icf[i].trem_maxlen);
-	CheckRange(&st2, &st3, "trem_dyn_range", &icf[i].trem_dyn_range1, &icf[i].trem_dyn_range2, 0, 127);
+	CheckRange(&st2, &st3, "trem_dyn_range", &icf[i].trem_dyn_range1, &icf[i].trem_dyn_range2, 0, 100);
 	CheckVar(&st2, &st3, "trem_min_repeats", &icf[i].trem_min_repeats);
 	CheckVar(&st2, &st3, "all_ahead", &icf[i].all_ahead);
 	LoadVectorPar(&st2, &st3, "legato_ahead", icf[i].legato_ahead);
@@ -978,7 +979,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "stac_auto", &icf[i].stac_auto, 0, 1);
 	CheckVar(&st2, &st3, "stac_ahead", &icf[i].stac_ahead);
 	CheckVar(&st2, &st3, "stac_maxlen", &icf[i].stac_maxlen);
-	CheckRange(&st2, &st3, "stac_dyn_range", &icf[i].stac_dyn_range1, &icf[i].stac_dyn_range2, 1, 127);
+	CheckRange(&st2, &st3, "stac_dyn_range", &icf[i].stac_dyn_range1, &icf[i].stac_dyn_range2, 1, 100);
 	CheckVar(&st2, &st3, "pizz_import", &icf[i].pizz_import, 0, 1);
 	CheckVar(&st2, &st3, "pizz_ahead", &icf[i].pizz_ahead);
 	CheckVar(&st2, &st3, "mute_lock", &icf[i].mute_lock, 0, 1);
@@ -988,7 +989,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "stac_import", &icf[i].stac_import, 0, 1);
 	CheckVar(&st2, &st3, "marc_import", &icf[i].marc_import, 0, 1);
 	CheckVar(&st2, &st3, "tasto_import", &icf[i].tasto_import, 0, 1);
-	CheckRange(&st2, &st3, "pizz_dyn_range", &icf[i].pizz_dyn_range1, &icf[i].pizz_dyn_range2, 1, 127);
+	CheckRange(&st2, &st3, "pizz_dyn_range", &icf[i].pizz_dyn_range1, &icf[i].pizz_dyn_range2, 1, 100);
 	CheckVar(&st2, &st3, "mute_predelay", &icf[i].mute_predelay);
 	CheckVar(&st2, &st3, "nonlegato_freq", &icf[i].nonlegato_freq);
 	CheckVar(&st2, &st3, "lengroup2", &icf[i].lengroup2);
