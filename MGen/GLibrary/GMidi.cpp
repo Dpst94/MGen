@@ -1147,6 +1147,8 @@ void CGMidi::ExportAdaptedMidi(CString dir, CString fname) {
 	for (int sta = 0; sta < stage_max; ++sta) {
 		for (int tr = 0; tr < MAX_VOICE; ++tr) {
 			if (!midifile_buf[sta][tr].size()) continue;
+			// Sort by timestamp before sending
+			qsort(midifile_buf[sta][tr].data(), midifile_buf[sta][tr].size(), sizeof(PmEvent), PmEvent_comparator);
 			// Convert DAW track to midi file track number
 			strack = tr + 1;
 			++track;
@@ -2360,6 +2362,8 @@ void CGMidi::AddMidiEvent(long long timestamp, int mm_type, int data1, int data2
 	event.timestamp = real_timestamp;
 	event.message = Pm_Message(mm_type, data1, data2);
 	if (amidi_export) {
+		// Do not include real start time
+		event.timestamp = timestamp + midi_prepause;
 		midifile_buf[midi_stage][midi_track].push_back(event);
 		return;
 	}
@@ -2383,8 +2387,9 @@ void CGMidi::AddMidiEvent(long long timestamp, int mm_type, int data1, int data2
 			}
 		}
 		else {
-			if (midi_sending_buf_next || (!v_stage[midi_voice] && icf[instr[midi_voice]].port)) 
+			if (midi_sending_buf_next || (!v_stage[midi_voice] && icf[instr[midi_voice]].port)) {
 				midi_buf.push_back(event);
+			}
 			// Save maximum message and its time
 			if (real_timestamp > midi_sent_t2) {
 				midi_sent_t2 = real_timestamp;
@@ -2570,27 +2575,27 @@ void CGMidi::SendMIDI(int step1, int step2)
 		// Send initialization commands
 		if (midi_first_run) {
 			for (auto const& it : icf[ii].InitCommands) {
-				AddMidiEvent(midi_sent_t - midi_start_time - midi_prepause, 
+				AddMidiEvent(- midi_prepause, 
 					Pm_MessageStatus(it) + midi_channel, 
 					Pm_MessageData1(it), Pm_MessageData2(it));
 				if (Pm_MessageStatus(it) == MIDI_NOTEON) {
-					AddKsOff(midi_sent_t - midi_start_time - midi_prepause + 1,
+					AddKsOff(- midi_prepause + 1,
 						Pm_MessageData1(it), 0);
 				}
 			}
 			// Send pan
-			AddCC(midi_sent_t - midi_start_time - midi_prepause, 10, 
+			AddCC(- midi_prepause, 10, 
 				(icf[ii].pan * 127) / 100);
 			// Send vol
-			AddCC(midi_sent_t - midi_start_time - midi_prepause, 7, 
+			AddCC(- midi_prepause, 7, 
 				(icf[ii].vol * icf[ii].vol_default * master_vol) / 10000);
 			if (icf[ii].trem_chan > -1) {
 				midi_channel = icf[ii].trem_chan - 1;
 				// Send pan
-				AddCC(midi_sent_t - midi_start_time - midi_prepause, 10, 
+				AddCC(- midi_prepause, 10, 
 					(icf[ii].pan * 127) / 100);
 				// Send vol
-				AddCC(midi_sent_t - midi_start_time - midi_prepause, 7, 
+				AddCC(- midi_prepause, 7, 
 					(icf[ii].vol * icf[ii].vol_default * master_vol) / 10000);
 				midi_channel = midi_channel_saved;
 			}
