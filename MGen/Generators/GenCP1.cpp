@@ -910,13 +910,13 @@ int CGenCP1::FailSus2() {
 						s5 = 0;
 					}
 					// Check which beats are allowed by rules
-					// if (!accept[x]) s3 = 0;
-					// if (!accept[x]) s5 = 0;
-					// Notes not on beat?
+					if (!accept[419]) s3 = 0;
+					if (!accept[420]) s5 = 0;
+					// Notes not on beat? 
 					if (!accept[286]) {
-						if (acc[cpv][s3] == acc[cpv][s3 - 1]) s3 = 0;
-						if (acc[cpv][s4] == acc[cpv][s4 - 1]) s4 = 0;
-						if (acc[cpv][s5] == acc[cpv][s5 - 1]) s5 = 0;
+						if (s3 && acc[cpv][s3] == acc[cpv][s3 - 1]) s3 = 0;
+						if (s4 && acc[cpv][s4] == acc[cpv][s4 - 1]) s4 = 0;
+						if (s5 && acc[cpv][s5] == acc[cpv][s5 - 1]) s5 = 0;
 						FLAG2C(286);
 					}
 					// Suspension of non-leading tone in species 2
