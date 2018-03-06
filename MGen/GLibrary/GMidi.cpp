@@ -456,7 +456,10 @@ void CGMidi::SendLyNoteColor(ofstream &fs, DWORD col) {
 CString CGMidi::GetRealIntName(int s, int v1, int v2) {
 	// Exact interval
 	int in = abs(note[s][v2] - note[s][v1]);
-	in = in ? ((in % 12) ? (in % 12) : 12) : 0;
+	if (in > 14) {
+		in = in % 12;
+		if (in < 3) in += 12;
+	}
 	// Interval between base notes
 	int no, oct, alter;
 	int no2, oct2, alter2;
@@ -465,12 +468,19 @@ CString CGMidi::GetRealIntName(int s, int v1, int v2) {
 	int fno = no + oct * 12;
 	int fno2 = no2 + oct2 * 12;
 	int bin = abs(fno - fno2);
-	bin = bin ? ((bin % 12) ? (bin % 12) : 12) : 0;
+	if (bin > 14) {
+		bin = bin % 12;
+		if (bin < 3) bin += 12;
+	}
 	// Diatonic interval
-	int din = CC_C(abs(note[s][v1] - note[s][v2]), 0, 0);
+	int din = CC_C(abs(note[s][v1] - note[s][v2]), 0, 0) - 7;
 	// Base diatonic interval
-	int bdin = CC_C(abs(fno - fno2), 0, 0);
-	int bdin2 = bdin ? ((bdin % 7) ? (bdin % 7) : 7) : 0;
+	int bdin = CC_C(abs(fno - fno2), 0, 0) - 7;
+	int bdin2 = bdin;
+	if (bdin2 > 8) {
+		bdin2 = bdin2 % 7;
+		if (bdin2 < 3) bdin2 += 7;
+	}
 	// Build string
 	// Diatonic did not change or triton / triton base
 	if (din == bdin || in == 6 || bin == 6) {
@@ -486,7 +496,9 @@ CString CGMidi::GetRealIntName(int s, int v1, int v2) {
 		else if (in == 9) return "M6";
 		else if (in == 10) return "m7";
 		else if (in == 11) return "M7";
-		else return "8";
+		else if (in == 12) return "8";
+		else if (in == 13) return "m9";
+		else if (in == 14) return "M9";
 	}
 	// Diatonic changed
 	CString st;
