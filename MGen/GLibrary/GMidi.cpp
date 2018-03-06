@@ -1307,7 +1307,7 @@ void CGMidi::LoadMidi(CString path)
 
 	midifile.absoluteTicks();
 	in_ppq = midifile.getTicksPerQuarterNote();
-	int tpc = (float)in_ppq / (float)2 / (float)midifile_in_mul; // ticks per croche
+	int tpc = max(1, (float)in_ppq / (float)2 / (float)midifile_in_mul); // ticks per croche
 	vector<int> vlast_step(MAX_VOICE);
 	vector<int> vlast_pitch(MAX_VOICE);
 	vector<int> voverlap(MAX_VOICE);
