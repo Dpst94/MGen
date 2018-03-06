@@ -1196,6 +1196,10 @@ void CGMidi::ExportAdaptedMidi(CString dir, CString fname) {
 					smidifile[sta].addController(strack, tick, channel, data1, data2);
 				}
 			}
+			if (toload_time) {
+				smidifile[sta].addNoteOff(strack, toload_time / spq * tpq, 0, 0, 0);
+				midifile.addNoteOff(track, toload_time / spq * tpq, 0, 0, 0);
+			}
 		}
 	}
 	for (int sta = 0; sta < stage_max; ++sta) {
