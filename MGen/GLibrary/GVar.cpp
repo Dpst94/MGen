@@ -976,6 +976,7 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "splitpo_mindur", &icf[i].splitpo_mindur);
 	CheckVar(&st2, &st3, "gliss_mindur", &icf[i].gliss_mindur);
 	CheckVar(&st2, &st3, "nonlegato_minlen", &icf[i].nonlegato_minlen);
+	CheckVar(&st2, &st3, "divisi_auto", &icf[i].divisi_auto, 0, 1);
 	CheckVar(&st2, &st3, "stac_auto", &icf[i].stac_auto, 0, 1);
 	CheckVar(&st2, &st3, "stac_ahead", &icf[i].stac_ahead);
 	CheckVar(&st2, &st3, "stac_maxlen", &icf[i].stac_maxlen);

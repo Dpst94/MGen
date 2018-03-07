@@ -54,10 +54,11 @@ void CGAdapt::CheckInstrumentRange(int v, int ii) {
 			}
 		}
 		else {
-			st.Format("Generated notes range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s). Transposed automatically to %d semitones. Consider changing instrument or generation range.",
+			st.Format("Generated notes range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s). Transposed automatically %s %d semitones. Consider changing instrument or generation range.",
 				GetNoteName(ngv_min[v]), GetNoteName(ngv_max[v]), 
 				icf[ii].group, icf[ii].name, v,
-				GetNoteName(icf[ii].nmin), GetNoteName(icf[ii].nmax), play_transpose[v]);
+				GetNoteName(icf[ii].nmin), GetNoteName(icf[ii].nmax), play_transpose[v]<0?"down":"up",
+				abs(play_transpose[v]));
 			WriteLog(1, st);
 		}
 	}

@@ -1581,6 +1581,34 @@ void CGMidi::LoadMidi(CString path)
 						}
 					} // if (instr_poly[instr[v]] > 1)
 					else {
+						// Find lowest voice without note start
+						if (icf[instr[v]].divisi_auto) {
+							int found = 0;
+							for (v = v1; v <= v2; ++v) {
+								if (coff[pos][v] || pause[pos][v] || !note[pos][v]) {
+									found = 1;
+									break;
+								}
+							}
+							// If no voice without overlaps, create new
+							if (!found) {
+								v2++;
+								v = v2;
+								// Copy instrument
+								instr[v] = instr[v1];
+								if (v >= MAX_VOICE) {
+									CString st;
+									st.Format("Too many voices need to be created for loading file %s. Maximum number of voices %d. Increase MAX_VOICE", path, MAX_VOICE);
+									WriteLog(5, st);
+									break;
+								}
+								track_id[v] = track - first_track + 1;
+								track_vid[v] = v - v1;
+								track_name[v] = track_name[v1];
+								// Resize vectors for new voice number
+								if (v > v_cnt - 1) ResizeVectors(t_allocated, v + 1);
+							}
+						}
 						// Check if overwriting long overlap
 						if (!pause[pos][v] && noff[pos][v]) {
 							// Update previous note ending

@@ -86,6 +86,7 @@ struct IConf {
 	int CC_steps = 0;
 	int CC_ma = 0;
 	int CC_dyn = 0;
+	int divisi_auto = 1; // Automatically detect divisi for monophonic instruments
 	int CC_retrigger = 0;
 	int retrigger_freq = 0;
 	int max_slur_count = 0;
