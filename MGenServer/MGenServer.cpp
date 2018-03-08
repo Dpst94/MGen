@@ -446,7 +446,7 @@ void LoadVoices() {
 		//WriteLog(sa[5] + "/" + sa[6]);
 		st_used[atoi(sa[5])][atoi(sa[6])] = 1;
 		st_reverb[atoi(sa[5])] = atoi(sa[10]);
-		tr_name[atoi(sa[6])] = sa[1];
+		tr_name[atoi(sa[6])] = sa[3] + "/" + sa[4];
 	}
 }
 
@@ -689,6 +689,7 @@ void ProcessDyn() {
 	ofstream fs;
 	CreateDirectory(share + j_folder + "waveform", NULL);
 	fs.open(share + j_folder + "waveform\\volume-analysis.csv");
+	fs << "Stage;Track;VolCorrect;Track name;Comment\n";
 	for (map<int, vector<int>>::iterator it = dyn.begin(); it != dyn.end(); ++it) {
 		tr = it->first % MAX_TRACK;
 		sta = it->first / MAX_TRACK;
@@ -722,7 +723,7 @@ void ProcessDyn() {
 				if (rms > 0) {
 					correct += pow(common, 1 / 4) * (rms2 - rms) / rms;
 					sum_common += pow(common, 1 / 4);
-					st.Format("%d:%d-%d:%d rms %.3lf-%.3lf (common %d), ", sta, tr, sta2, tr2, rms, rms2, common);
+					st.Format("%d:%d %.3lf-%.3lf [%d], ", sta, tr, sta2, tr2, rms, rms2, common);
 					vol_comment += st;
 					//WriteLog(st);
 				}
