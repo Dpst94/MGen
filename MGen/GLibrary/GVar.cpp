@@ -986,6 +986,8 @@ void CGVar::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "mute_lock", &icf[i].mute_lock, 0, 1);
 	CheckVar(&st2, &st3, "mute_import", &icf[i].mute_import, 0, 1);
 	CheckVar(&st2, &st3, "trem_import", &icf[i].trem_import, 0, 1);
+	CheckVar(&st2, &st3, "trem_len", &icf[i].trem_len, 0);
+	CheckVar(&st2, &st3, "trem_end", &icf[i].trem_end, 0, 2);
 	CheckVar(&st2, &st3, "spic_import", &icf[i].spic_import, 0, 1);
 	CheckVar(&st2, &st3, "stac_import", &icf[i].stac_import, 0, 1);
 	CheckVar(&st2, &st3, "marc_import", &icf[i].marc_import, 0, 1);

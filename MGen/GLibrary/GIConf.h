@@ -58,6 +58,8 @@ struct IConf {
 	int trem_replace = -1;
 	int trem_transpose = 0;
 	int trem_chan = -1;
+	int trem_len = 0;
+	int trem_end = 0;
 	int trem_activate = -1; // Technique that will be triggered with trem command from MIDI file
 	int trem_deactivate = -1; // Technique that will be triggered with trem command from MIDI file
 	int dyn_range1 = 0; // Minimum allowed dynamics value in percent
