@@ -13,6 +13,8 @@
 #define new DEBUG_NEW
 #endif
 
+#define MAX_TRACK 1000
+
 // The one and only application object
 CWinApp theApp;
 
@@ -36,6 +38,7 @@ CString db_driver, db_server, db_port, db_login, db_pass, db_name;
 int daw_wait = 200;
 int run_minimized = 0;
 int screenshots_enabled = 0;
+float rms_exp = 10;
 
 // Job
 int j_timeout;
@@ -58,6 +61,7 @@ int max_screenshot = 10;
 
 map <int, map<int, int>> st_used; // [stage][track]
 map <int, float> st_reverb; // [stage]
+map <int, CString> tr_name; // [track]
 map <int, vector<int>> dyn; // [track][time]
 
 // Children
@@ -430,6 +434,7 @@ int SendKeyToWindowClass(CString wClass, short vk) {
 
 void LoadVoices() {
 	vector <CString> sv, sa;
+	tr_name.clear();
 	st_used.clear();
 	st_reverb.clear();
 	if (!CGLib::fileExists(share + j_folder + j_basefile + ".csv")) return;
@@ -441,6 +446,7 @@ void LoadVoices() {
 		//WriteLog(sa[5] + "/" + sa[6]);
 		st_used[atoi(sa[5])][atoi(sa[6])] = 1;
 		st_reverb[atoi(sa[5])] = atoi(sa[10]);
+		tr_name[atoi(sa[6])] = sa[1];
 	}
 }
 
@@ -459,14 +465,25 @@ void MakeRenderLua(int sta) {
 	fs.close();
 }
 
-void AnalyseWaveform(CString fname2) {
-	// Create waveform graphic
+void AnalyseWaveform(int sta, CString fname2) {
 	SendProgress("Running waveform and information analysis");
+
+	// Remove extension
 	CString fname3 = fname2;
 	if (fname3.Find(".mp3") == fname3.GetLength() - 4) {
 		fname3 = fname3.Left(fname3.GetLength() - 4);
 	}
 
+	// Get track number
+	CString st;
+	st = fname3;
+	if (st.Find(j_basefile) == 0) st.Delete(0, j_basefile.GetLength());
+	if (st[0] == '-') st.Delete(0);
+	if (st.Find('-') != -1) st.Delete(st.Find('-'), st.GetLength());
+	int tr = -1;
+	if (IsCharAlphaNumeric(st[0]) && !IsCharAlpha(st[0])) tr = atoi(st) - 3;
+
+	// Create waveform graphic
 	CString par;
 	par.Format("-y -i \"%s\" -filter_complex showwavespic=s=1050x120 -frames:v 1 \"%s_.png\"",
 		share + j_folder + fname2,
@@ -503,13 +520,15 @@ void AnalyseWaveform(CString fname2) {
 	// Get volume
 	CImage img;
 	HRESULT res = img.Load(share + j_folder + fname3 + ".png");
-	if (res == S_OK) {
-		WriteLog("Get volume");
+	if (res == S_OK && tr >= 0) { 
+		st.Format("Get volume %d:%d " + fname3, sta, tr);
+		WriteLog(st);
 		ofstream fs;
-		CreateDirectory(share + j_folder + "wfd", NULL);
-		fs.open(share + j_folder + "wfd\\" + fname3 + ".wfd");
+		CreateDirectory(share + j_folder + "waveform", NULL);
+		fs.open(share + j_folder + "waveform\\" + fname3 + ".csv");
 		int ihei = img.GetHeight();
 		int iwid = img.GetWidth();
+		dyn[tr + sta * MAX_TRACK].resize(iwid);
 		COLORREF clr;
 		COLORREF white = RGB(255, 255, 255);
 		for (int x = 0; x < iwid; ++x) {
@@ -531,10 +550,12 @@ void AnalyseWaveform(CString fname2) {
 			if (high > ihei / 2) {
 				c = ((high - ihei / 2) * 255) / (ihei / 2);
 			}
-			fs.write(reinterpret_cast<const char*>(&c), 1);
+			fs << (int)c << "\n";
+			dyn[tr + sta * MAX_TRACK][x] = c;
+			//fs.write(reinterpret_cast<const char*>(&c), 1);
 		}
 		fs.close();
-		WriteLog("Volume recorded");
+		//WriteLog("Volume recorded");
 	}
 }
 
@@ -617,12 +638,12 @@ int RunRenderStage(int sta) {
 	if (sta) {
 		if (f_stems) {
 			CGLib::copy_file(reaperbuf + "output-00-master.mp3", share + j_folder + j_basefile + "_" + sta_st + ".mp3");
-			AnalyseWaveform(j_basefile + "_" + sta_st + ".mp3");
+			AnalyseWaveform(sta, j_basefile + "_" + sta_st + ".mp3");
 		}
 	}
 	else {
 		CGLib::copy_file(reaperbuf + "output-00-master.mp3", share + j_folder + j_basefile + ".mp3");
-		AnalyseWaveform(j_basefile + ".mp3");
+		AnalyseWaveform(sta, j_basefile + ".mp3");
 	}
 	// Copy stems
 	if (f_stems) {
@@ -652,7 +673,7 @@ int RunRenderStage(int sta) {
 			//WriteLog(finder.GetFilePath() + ": " + fname + " -> " + fname2);
 			CGLib::copy_file(finder.GetFilePath(),
 				share + j_folder + fname2);
-			AnalyseWaveform(fname2);
+			AnalyseWaveform(sta, fname2);
 		}
 		finder.Close();
 	}
@@ -661,14 +682,72 @@ int RunRenderStage(int sta) {
 	return 0;
 }
 
+void ProcessDyn() {
+	CString st;
+	int tr, tr2, sta, sta2;
+	int xmax = 0;
+	ofstream fs;
+	CreateDirectory(share + j_folder + "waveform", NULL);
+	fs.open(share + j_folder + "waveform\\volume-analysis.csv");
+	for (map<int, vector<int>>::iterator it = dyn.begin(); it != dyn.end(); ++it) {
+		tr = it->first % MAX_TRACK;
+		sta = it->first / MAX_TRACK;
+		xmax = it->second.size();
+		CString vol_comment;
+		//st.Format("Process dynamics for track %d:%d", sta, tr);
+		//WriteLog(st);
+		double correct = 0;
+		int sum_common = 0;
+		for (map<int, vector<int>>::iterator it2 = dyn.begin(); it2 != dyn.end(); ++it2) {
+			tr2 = it2->first % MAX_TRACK;
+			sta2 = it2->first / MAX_TRACK;
+			// Do not compare track to itself
+			if (tr2 == tr && sta == sta2) continue;
+			// Do not compare tracks with different size;
+			if (xmax != it->second.size()) continue;
+			int common = 0;
+			double esum = 0;
+			double esum2 = 0;
+			for (int x = 0; x < xmax; ++x) {
+				// Do not compare zero values
+				if (!it->second[x]) continue;
+				if (!it2->second[x]) continue;
+				++common;
+				esum += pow(it->second[x], rms_exp);
+				esum2 += pow(it2->second[x], rms_exp);
+			}
+			if (common && esum > 0) {
+				double rms = pow(esum / common, 1 / rms_exp);
+				double rms2 = pow(esum2 / common, 1 / rms_exp);
+				if (rms > 0) {
+					correct += pow(common, 1 / 4) * (rms2 - rms) / rms;
+					sum_common += pow(common, 1 / 4);
+					st.Format("%d:%d-%d:%d rms %.3lf-%.3lf (common %d), ", sta, tr, sta2, tr2, rms, rms2, common);
+					vol_comment += st;
+					//WriteLog(st);
+				}
+			}
+		}
+		if (sum_common) correct = correct / sum_common / 3 * 100;
+		//st.Format("Suggested volume correction for track %d:%d: %.0lf%%", sta, tr, correct);
+		//WriteLog(st);
+		st.Format("%d;%d;%.0lf;%s;%s", sta, tr, correct, tr_name[tr], vol_comment);
+		fs << st << "\n";
+	}
+	fs.close();
+}
+
 int RunRender() {
 	if (!j_render) return 0;
 	
 	LoadVoices();
+	dyn.clear();
 	DeleteFile(reaperbuf + "stage.temp");
 	for (int sta = j_stages - 1; sta >= 0; --sta) {
 		if (RunRenderStage(sta)) return 1;
 	}
+	// Process dynamics
+	ProcessDyn();
 
 	// Clean temporary files
 	CGLib::CleanFolder(ReaperTempFolder + "*.wav");

@@ -27,6 +27,8 @@
 #define INIT_PRESTEPS 2
 // Length of init prestep in ms
 #define INIT_PRESTEP 30
+// Tail for export adapted midi in ms
+#define EXPORT_MIDI_TAIL 1000
 
 // PortMIDI
 #define MIN_MIDI_BUF_MSEC 6000

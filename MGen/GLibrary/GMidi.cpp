@@ -1158,6 +1158,8 @@ void CGMidi::ExportAdaptedMidi(CString dir, CString fname) {
 	track = 0;
 	for (int sta = 0; sta < stage_max; ++sta) {
 		for (int tr = 0; tr < MAX_VOICE; ++tr) {
+			// 1 = note is ON
+			vector< vector <int> > note_on = vector<vector<int>>(16, vector<int>(128)); 
 			if (!midifile_buf[sta][tr].size()) continue;
 			// Sort by timestamp before sending
 			qsort(midifile_buf[sta][tr].data(), midifile_buf[sta][tr].size(), sizeof(PmEvent), PmEvent_comparator);
@@ -1173,8 +1175,9 @@ void CGMidi::ExportAdaptedMidi(CString dir, CString fname) {
 			smidifile[sta].addTrackName(strack, 0, st2);
 			//midifile.addPatchChange(track, 0, channel, 0); // 0=piano, 40=violin, 70=bassoon
 			//smidifile[sta].addPatchChange(strack, 0, channel, 0); // 0=piano, 40=violin, 70=bassoon
+			long long ts;
 			for (int i = 0; i < midifile_buf[sta][tr].size(); i++) {
-				long long ts = max(0, midifile_buf[sta][tr][i].timestamp);
+				ts = max(0, midifile_buf[sta][tr][i].timestamp);
 				if (toload_time && ts > toload_time * 1000) continue;
 				tick = ts / 1000.0 / spq * tpq;
 				type = Pm_MessageStatus(midifile_buf[sta][tr][i].message) & 0xF0;
@@ -1185,10 +1188,12 @@ void CGMidi::ExportAdaptedMidi(CString dir, CString fname) {
 					if (data2) {
 						midifile.addNoteOn(track, tick, channel, data1, data2);
 						smidifile[sta].addNoteOn(strack, tick, channel, data1, data2);
+						note_on[channel][data1] = 1;
 					}
 					else {
 						midifile.addNoteOff(track, tick, channel, data1, 0);
 						smidifile[sta].addNoteOff(strack, tick, channel, data1, 0);
+						note_on[channel][data1] = 0;
 					}
 				}
 				if (type == MIDI_CC) {
@@ -1196,10 +1201,20 @@ void CGMidi::ExportAdaptedMidi(CString dir, CString fname) {
 					smidifile[sta].addController(strack, tick, channel, data1, data2);
 				}
 			}
-			if (toload_time) {
-				smidifile[sta].addNoteOff(strack, toload_time / spq * tpq, 0, 0, 0);
-				midifile.addNoteOff(track, toload_time / spq * tpq, 0, 0, 0);
+			// Send note off
+			if (toload_time) ts = toload_time * 1000;
+			tick = ts / 1000.0 / spq * tpq;
+			for (int c = 0; c < 16; ++c) {
+				for (int i = 0; i < 128; ++i) if (note_on[c][i]) {
+					midifile.addNoteOff(track, tick, c, i, 0);
+					smidifile[sta].addNoteOff(strack, tick, c, i, 0);
+				}
 			}
+			// Send tail
+			if (toload_time) ts = toload_time * 1000 + EXPORT_MIDI_TAIL;
+			tick = ts / 1000.0 / spq * tpq;
+			smidifile[sta].addNoteOff(strack, tick, 0, 0, 0);
+			midifile.addNoteOff(track, tick, 0, 0, 0);
 		}
 	}
 	for (int sta = 0; sta < stage_max; ++sta) {
