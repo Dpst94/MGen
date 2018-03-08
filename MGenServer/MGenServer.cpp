@@ -58,6 +58,7 @@ int max_screenshot = 10;
 
 map <int, map<int, int>> st_used; // [stage][track]
 map <int, float> st_reverb; // [stage]
+map <int, vector<int>> dyn; // [track][time]
 
 // Children
 vector <CString> nChild; // Child process name
@@ -497,6 +498,43 @@ void AnalyseWaveform(CString fname2) {
 	ret = RunTimeout(fChild["ffmpeg.exe"] + "ffprobe.exe", par, 30000, 0);
 	if (!CGLib::fileExists(share + j_folder + fname3 + ".inf")) {
 		est.Format("File not found: " + share + j_folder + fname3 + ".inf");
+	}
+
+	// Get volume
+	CImage img;
+	HRESULT res = img.Load(share + j_folder + fname3 + ".png");
+	if (res == S_OK) {
+		WriteLog("Get volume");
+		ofstream fs;
+		CreateDirectory(share + j_folder + "wfd", NULL);
+		fs.open(share + j_folder + "wfd\\" + fname3 + ".wfd");
+		int ihei = img.GetHeight();
+		int iwid = img.GetWidth();
+		COLORREF clr;
+		COLORREF white = RGB(255, 255, 255);
+		for (int x = 0; x < iwid; ++x) {
+			int started = 0;
+			int low = -1;
+			int high = -1;
+			for (int y = ihei / 2; y < ihei; ++y) {
+				clr = img.GetPixel(x, y);
+				if (clr == CLR_INVALID) continue;
+				if (clr == 0) {
+					high = y;
+					break;
+				}
+			}
+			//CString st;
+			//st.Format("Dyn: %d %d %d", x, low, high);
+			//WriteLog(st);
+			unsigned char c = 0;
+			if (high > ihei / 2) {
+				c = ((high - ihei / 2) * 255) / (ihei / 2);
+			}
+			fs.write(reinterpret_cast<const char*>(&c), 1);
+		}
+		fs.close();
+		WriteLog("Volume recorded");
 	}
 }
 
