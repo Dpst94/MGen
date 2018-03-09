@@ -521,8 +521,8 @@ void AnalyseWaveform(int sta, CString fname2) {
 	CImage img;
 	HRESULT res = img.Load(share + j_folder + fname3 + ".png");
 	if (res == S_OK && tr >= 0) { 
-		st.Format("Get volume %d:%d " + fname3, sta, tr);
-		WriteLog(st);
+		//st.Format("Get volume %d:%d " + fname3, sta, tr);
+		//WriteLog(st);
 		ofstream fs;
 		CreateDirectory(share + j_folder + "waveform", NULL);
 		fs.open(share + j_folder + "waveform\\" + fname3 + ".csv");
