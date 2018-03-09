@@ -684,7 +684,17 @@ void CGMidi::InitLyI() {
 		ly_vlow = min(ly_v, ly_v2);
 	}
 	lyi.clear();
-	lyi.resize(ly_step2 - ly_step1);
+	lyi.resize(ly_step2 - ly_step1 + 1);
+	for (int i = 0; i < lyi.size(); ++i) {
+		// Init vectors
+		lyi[i].shs.resize(MAX_VIZ);
+		lyi[i].shsl.resize(MAX_VIZ);
+		lyi[i].shf.resize(MAX_VIZ);
+		lyi[i].shse.resize(MAX_VIZ, -1);
+		lyi[i].shflag.resize(MAX_VIZ, -1);
+		lyi[i].shfp.resize(MAX_VIZ, -1);
+		lyi[i].sht.resize(MAX_VIZ);
+	}
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
 		// Find current note position
@@ -698,14 +708,6 @@ void CGMidi::InitLyI() {
 				if (x == ly_step1) cur_note_step = x;
 			}
 		}
-		// Init vectors
-		lyi[ly_s2].shs.resize(MAX_VIZ);
-		lyi[ly_s2].shsl.resize(MAX_VIZ);
-		lyi[ly_s2].shf.resize(MAX_VIZ);
-		lyi[ly_s2].shse.resize(MAX_VIZ, -1);
-		lyi[ly_s2].shflag.resize(MAX_VIZ, -1);
-		lyi[ly_s2].shfp.resize(MAX_VIZ, -1);
-		lyi[ly_s2].sht.resize(MAX_VIZ);
 		// Parse flags
 		ParseNLinks(ly_s, ly_s, ly_v, 0);
 		if (!lyi[ly_s2].nflags.size() && v_cnt > 1) {
