@@ -1431,7 +1431,7 @@ void CGMidi::LoadMidi(CString path)
 			int chan = mev->getChannel();
 			// Get track names
 			if (mev->isMetaMessage()) {
-				if (mev->getMetaType() == 0x03 && track_name[v].IsEmpty()) {
+				if (mev->getMetaType() == 0x03) {
 					track_name[v].Empty();
 					for (int x = 0; x < mev->size(); x++) {
 						track_name[v] += mev->data()[x];
@@ -1451,7 +1451,7 @@ void CGMidi::LoadMidi(CString path)
 			}
 			if (mev->isPatchChange()) {
 				// Get program changes for MuseScore files
-				if (track_name[v] == "") {
+				if (track_name[v].IsEmpty()) {
 					track_name[v] = midi_iname[mev->data()[1]];
 				}
 				// Get program changes for Sibelius files
