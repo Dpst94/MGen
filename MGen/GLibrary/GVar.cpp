@@ -339,7 +339,7 @@ void CGVar::LoadConfigFile(CString fname, int load_includes) {
 					}
 				}
 				if (instr_id == -1) {
-					WriteLog(5, "Cannot find instrument " + ipath);
+					WriteLog(1, "Cannot find instrument (ignoring) " + ipath);
 				}
 				else {
 					// Check if instrument was overridden
