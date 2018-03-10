@@ -726,7 +726,7 @@ void CGMidi::InitLyI() {
 				est.Format("Detected flag at hidden position %d/%d: [%d] %s %s (%s)",
 					ly_s, ly_s + link, fl, accept[fl] ? "+" : "-", 
 					RuleName[rule_set][fl], SubRuleName[rule_set][fl]);
-				WriteLog(1, est);
+				WriteLog(5, est);
 			}
 		}
 	}
