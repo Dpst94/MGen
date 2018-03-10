@@ -2422,36 +2422,37 @@ void CGenCF1::GetTritoneResolution(int ta, int t1, int t2, int tb, int &res1, in
 		ta2 = tb;
 		tb2 = ta;
 	}
+	// No starting resolution
+	if (!fleap_start) return;
+	// No ending resolution
+	if (fleap_end >= fli_size - 1) return;
 	// Outer resolution is not a resolution
-	if (cc[fli[fleap_end]] > cc[fli[fleap_start]] && ta2 < pcc[fli[fleap_start]]) return;
+	if ((cc[fli[fleap_end]] - cc[fli[fleap_start]]) * 
+		(cc[fli[fleap_start]] - cc[fli[fleap_start - 1]]) > 1) return;
 	// Get resolution window
 	int rwin = 1;
 	if (svoices > 1) rwin = max(1, (npm * tritone_res_quart) / 4);
 	// Scan preparation
-	if (fleap_start > 0) {
-		int pos1 = max(0, fli[fleap_start] - rwin);
-		int pos2 = min(ep2, fli[fleap_end]);
-		for (int i = pos1; i < pos2; ++i) {
-			if (pcc[i] == ta2 && abs(cc[i] - cc[fli[fleap_start]]) < 5) {
-				res1 = 1;
-				break;
-			}
+	int pos1 = max(0, fli[fleap_start] - rwin);
+	int pos2 = min(ep2, fli[fleap_end]);
+	for (int i = pos1; i < pos2; ++i) {
+		if (pcc[i] == ta2 && abs(cc[i] - cc[fli[fleap_start]]) < 5) {
+			res1 = 1;
+			break;
 		}
-	} 
+	}
 	// Do not check if cut by scan window
 	if (fli2[fleap_end] + 1 + rwin > ep2 && ep2 < c_len) {
 		res2 = 1;
 		return;
 	}
 	// Scan resolution
-	if (fleap_end < fli_size - 1) {
-		int pos1 = max(0, fli2[fleap_start] + 1);
-		int pos2 = min(ep2, fli2[fleap_end] + 1 + rwin);
-		for (int i = pos1; i < pos2; ++i) {
-			if (pcc[i] == tb2 && abs(cc[i] - cc[fli[fleap_end]]) < 5) {
-				res2 = 1;
-				break;
-			}
+	pos1 = max(0, fli2[fleap_start] + 1);
+	pos2 = min(ep2, fli2[fleap_end] + 1 + rwin);
+	for (int i = pos1; i < pos2; ++i) {
+		if (pcc[i] == tb2 && abs(cc[i] - cc[fli[fleap_end]]) < 5) {
+			res2 = 1;
+			break;
 		}
 	}
 }
@@ -2502,7 +2503,8 @@ int CGenCF1::FailTritone(int ta, int t1, int t2, int tb, vector<int> &c, vector<
 		GetTritoneResolution(ta, t1, t2, tb, res1, res2, c, cc, pc, pcc);
 		// Flag resolution for consecutive tritone
 		if (found == 1) {
-			if (res1*res2 == 0) FLAG2(31, s0);
+			if (res1*res2 == 0) 
+				FLAG2(31, s0);
 			else FLAG2(2, s0);
 		}
 		// Flag resolution for tritone with intermediate note, framed
