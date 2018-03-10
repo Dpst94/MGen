@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../GLibrary/GMidi.h"
+#include "../GLibrary/GTemplate.h"
 class CGenMP1 :
-	public CGMidi
+	public CGTemplate
 {
 public:
 	CGenMP1();

@@ -3,9 +3,11 @@
 #include "../stdafx.h"
 #include "GVar.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW 
+#endif
 
-CGVar::CGVar()
-{
+CGVar::CGVar() {
 	color_noflag = MakeColor(0, 100, 100, 100);
 	// Init constant length arrays
 	ngv_min.resize(MAX_VOICE);

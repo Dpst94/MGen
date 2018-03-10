@@ -1,5 +1,5 @@
 #pragma once
-#include "../GLibrary/GMidi.h"
+#include "../GLibrary/GTemplate.h"
 #include "../GLibrary/VSet.h"
 
 // THESE MACROS CAN BE DISABLED TO IMPROVE PERFORMANCE
@@ -204,7 +204,7 @@ const CString TaskNames[] = {
 #define rsSubComment 3 // Subrule comment
 
 class CGenCF1 :
-	public CGMidi
+	public CGTemplate
 {
 public:
 	CGenCF1();

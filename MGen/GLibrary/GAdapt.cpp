@@ -4,6 +4,10 @@
 #include "GAdapt.h"
 #include "SmRnd.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW 
+#endif
+
 CGAdapt::CGAdapt() {
 	play_transpose.resize(MAX_VOICE);
 	warning_note_range.resize(MAX_VOICE);
