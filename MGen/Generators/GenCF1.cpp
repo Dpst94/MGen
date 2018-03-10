@@ -2412,33 +2412,32 @@ void CGenCF1::GetTritoneResolution(int ta, int t1, int t2, int tb, int &res1, in
 	res1 = 0;
 	res2 = 0;
 	// Real resolution notes
-	int ta2, tb2; 
+	int ta2, tb2;
 	// Get real resolution notes
 	if (pcc[fli[fleap_end]] == t2) {
 		ta2 = ta;
 		tb2 = tb;
+		// Outer resolution is not a resolution
+		if (cc[fli[fleap_end]] > cc[fli[fleap_start]]) return;
 	}
 	else {
 		ta2 = tb;
 		tb2 = ta;
+		// Outer resolution is not a resolution
+		if (cc[fli[fleap_end]] < cc[fli[fleap_start]]) return;
 	}
-	// No starting resolution
-	if (!fleap_start) return;
-	// No ending resolution
-	if (fleap_end >= fli_size - 1) return;
-	// Outer resolution is not a resolution
-	if ((cc[fli[fleap_end]] - cc[fli[fleap_start]]) * 
-		(cc[fli[fleap_start]] - cc[fli[fleap_start - 1]]) > 1) return;
 	// Get resolution window
 	int rwin = 1;
 	if (svoices > 1) rwin = max(1, (npm * tritone_res_quart) / 4);
 	// Scan preparation
-	int pos1 = max(0, fli[fleap_start] - rwin);
-	int pos2 = min(ep2, fli[fleap_end]);
-	for (int i = pos1; i < pos2; ++i) {
-		if (pcc[i] == ta2 && abs(cc[i] - cc[fli[fleap_start]]) < 5) {
-			res1 = 1;
-			break;
+	if (fleap_start > 0) {
+		int pos1 = max(0, fli[fleap_start] - rwin);
+		int pos2 = min(ep2, fli[fleap_end]);
+		for (int i = pos1; i < pos2; ++i) {
+			if (pcc[i] == ta2 && abs(cc[i] - cc[fli[fleap_start]]) < 5) {
+				res1 = 1;
+				break;
+			}
 		}
 	}
 	// Do not check if cut by scan window
@@ -2447,12 +2446,14 @@ void CGenCF1::GetTritoneResolution(int ta, int t1, int t2, int tb, int &res1, in
 		return;
 	}
 	// Scan resolution
-	pos1 = max(0, fli2[fleap_start] + 1);
-	pos2 = min(ep2, fli2[fleap_end] + 1 + rwin);
-	for (int i = pos1; i < pos2; ++i) {
-		if (pcc[i] == tb2 && abs(cc[i] - cc[fli[fleap_end]]) < 5) {
-			res2 = 1;
-			break;
+	if (fleap_end < fli_size - 1) {
+		int pos1 = max(0, fli2[fleap_start] + 1);
+		int pos2 = min(ep2, fli2[fleap_end] + 1 + rwin);
+		for (int i = pos1; i < pos2; ++i) {
+			if (pcc[i] == tb2 && abs(cc[i] - cc[fli[fleap_end]]) < 5) {
+				res2 = 1;
+				break;
+			}
 		}
 	}
 }
