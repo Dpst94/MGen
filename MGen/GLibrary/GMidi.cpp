@@ -262,6 +262,12 @@ void CGMidi::SendLyViz(ofstream &fs, int pos, CString &ev, int le, int i, int v,
 	for (int x = 0; x < lyi[ly_s2].shs.size(); ++x) {
 		if (!lyi[ly_s2].shs[x]) continue;
 		int sev = lyi[ly_s2].shse[x];
+		if (x == vBracket) {
+			if (phase == 9) {
+				fs << " -\\tweak #'stencil #(label \"" + lyi[ly_s2].sht[x] + "\" (rgb-color "
+					<< GetLyColor(flag_color[sev]) << "))\\startGroup\n";
+			}
+		}
 		if (x == vGlis) {
 			if (phase == 1) {
 				fs << " \\override Glissando.color=#(rgb-color "
@@ -305,10 +311,6 @@ void CGMidi::SendLyViz(ofstream &fs, int pos, CString &ev, int le, int i, int v,
 			if (phase == 1) {
 				fs << " \\override HorizontalBracket.color=#(rgb-color "
 					<< GetLyColor(flag_color[sev]) << ")\n ";
-			}
-			if (phase == 10) {
-				fs << " -\\tweak #'stencil #(label \"" + lyi[ly_s2].sht[x] + "\" (rgb-color "
-					<< GetLyColor(flag_color[sev]) << "))\\startGroup\n";
 			}
 		}
 		if (x == vTrill) {
