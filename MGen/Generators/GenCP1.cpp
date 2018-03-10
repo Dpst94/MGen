@@ -2522,10 +2522,10 @@ int CGenCP1::FailMissSlurs() {
 			}
 		}
 	}
-	if (max_miss == 1) FLAG2(188, max_i);
-	else if (max_miss == 2) FLAG2(189, max_i);
+	if (max_miss == 1) FLAG2(188, fli[bli[max_i]]);
+	else if (max_miss == 2) FLAG2(189, fli[bli[max_i]]);
 	else if (max_miss > 2) {
-		FLAG2(190, max_i);
+		FLAG2(190, fli[bli[max_i]]);
 		if (!accept[190]) fpenalty[190] += (max_miss - 2) * 50;
 	}
 	return 0;
