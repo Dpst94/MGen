@@ -466,7 +466,9 @@ void MakeRenderLua(int sta) {
 }
 
 void AnalyseWaveform(int sta, CString fname2) {
-	SendProgress("Running waveform and information analysis");
+	CString st;
+	st.Format("Stage %d/%d: Waveform and information analysis", j_stages - sta, j_stages);
+	SendProgress(st);
 
 	// Remove extension
 	CString fname3 = fname2;
@@ -475,7 +477,6 @@ void AnalyseWaveform(int sta, CString fname2) {
 	}
 
 	// Get track number
-	CString st;
 	st = fname3;
 	if (st.Find(j_basefile) == 0) st.Delete(0, j_basefile.GetLength());
 	if (st[0] == '-') st.Delete(0);
