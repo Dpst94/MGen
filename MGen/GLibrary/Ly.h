@@ -3,7 +3,7 @@
 #pragma once
 #include "MFOut.h"
 
-#define SHAPE_PHASE_CNT 12
+#define SHAPE_PHASE_CNT 15
 
 #define ssStart 0
 #define ssFinish 1

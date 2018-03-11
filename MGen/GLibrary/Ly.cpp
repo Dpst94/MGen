@@ -79,10 +79,10 @@ void CLy::LoadLyShapes(CString fname) {
 	// Init
 	shsc.resize(SHAPE_PHASE_CNT);
 	for (int i = 0; i < shsc.size(); ++i) shsc[i].resize(2);
-	shsc[10][ssStart][vBracket] = "1";
-	shsc[10][ssStart][vOttava] = "2";
-	shsc[10][ssStart][vInterval] = "3";
-	shsc[10][ssStart][vOttava] = "4";
+	//shsc[10][ssStart][vBracket] = "1";
+	//shsc[10][ssStart][vOttava] = "2";
+	//shsc[10][ssStart][vInterval] = "3";
+	//shsc[10][ssStart][vOttava] = "4";
 	// Load header
 	fs.getline(pch, 2550);
 	while (fs.good()) {
@@ -144,8 +144,11 @@ void CLy::LoadLyShapes(CString fname) {
 			if (ast[3][0] == '"') ast[3].Delete(0);
 			if (ast[3][ast[3].GetLength() - 1] == '"') ast[3].Delete(ast[3].GetLength() - 1);
 			ast[3].Replace("\"\"", "\"");
-			WriteLog(1, ast[3]);
 			// Save
+			if (shsc[phase][task][shape] != "") {
+				est.Format("Duplicate phase/task/shape at line %d in shapes file %s: '%s'", i, fname, st);
+				WriteLog(5, est);
+			}
 			shsc[phase][task][shape] = ast[3];
 		}
 	}
@@ -291,160 +294,32 @@ void CLy::SplitLyNote(int pos, int le, vector<int> &la) {
 }
 
 void CLy::SendLyViz(ofstream &fs, int pos, CString &ev, int le, int i, int v, int phase) {
+	int shape, sev;
 	if (!lyi.size()) return;
-	// Show flag finish
-	for (int x = 0; x < lyi[ly_s2].shf.size(); ++x) {
-		if (!lyi[ly_s2].shf[x]) continue;
-		int sev = lyi[ly_s2 + lyi[ly_s2].shsl[x]].shse[x];
-		if (x == vSlur) {
-			if (phase == 10) fs << " ) ";
-		}
-		if (x == vGlis) {
-			if (phase == 1)
-				fs << " \\override NoteColumn.glissando-skip = ##f\n ";
-		}
-		if (x == vPSlur) {
-			if (phase == 10) fs << " \\) ";
-		}
-		if (x == vBracket) {
-			if (phase == 10) {
-				fs << " \\stopGroup\n ";
+	for (int task = ssFinish; task >= ssStart; --task) {
+		for (auto it : shsc[phase][task]) {
+			shape = it.first;
+			if (task == ssFinish) {
+				if (!lyi[ly_s2].shf[shape]) continue;
+				sev = lyi[ly_s2 + lyi[ly_s2].shsl[shape]].shse[shape];
 			}
-		}
-		if (x == vTS) {
-			if (phase == 10) {
-				fs << " \\stopTextSpan\n";
+			if (task == ssStart) {
+				if (!lyi[ly_s2].shs[shape]) continue;
+				sev = lyi[ly_s2].shse[shape];
 			}
-		}
-		if (x == vVBracket) {
-			if (phase == 11) fs << " \\override BreathingSign.color = #(rgb-color "
-				<< GetLyColor(flag_color[sev])
-				<< ")\n \\rightBracket\n";
-		}
-		if (x == vVolta) {
-			if (phase == 11)
-				fs << " \\set Score.repeatCommands = #'((volta #f))\n";
-		}
-		if (x == vTrill) {
-			if (phase == 10) {
-				fs << " \\stopTrillSpan\n";
+			CString script = it.second;
+			CString text2;
+			if (lyi[ly_s2].sht[shape].IsEmpty()) {
+				text2 = "#f\n ";
 			}
-		}
-		if (x == vOttava) {
-			if (phase == 11) {
-				fs << " \\unset Staff.ottavation\n";
+			else {
+				text2 = "\\markup{ \\raise #0.6 \\teeny \"" + lyi[ly_s2].sht[shape] + "\" }\n ";
 			}
-		}
-		if (x == vPedal) {
-			if (phase == 10) {
-				fs << " \\sustainOff\n";
-			}
-		}
-	}
-	// Show flag start
-	for (int x = 0; x < lyi[ly_s2].shs.size(); ++x) {
-		if (!lyi[ly_s2].shs[x]) continue;
-		int sev = lyi[ly_s2].shse[x];
-		if (x == vBracket) {
-			if (phase == 9) {
-				fs << " -\\tweak #'stencil #(label \"" + lyi[ly_s2].sht[x] + "\" (rgb-color "
-					<< GetLyColor(flag_color[sev]) << "))\\startGroup\n";
-			}
-		}
-		if (x == vGlis) {
-			if (phase == 1) {
-				fs << " \\override Glissando.color=#(rgb-color "
-					<< GetLyColor(flag_color[sev])
-					<< ")\n";
-			}
-			if (phase == 10)
-				fs << " \\glissando\n \\override NoteColumn.glissando-skip = ##t\n";
-		}
-		if (x == vSlur) {
-			if (phase == 1) {
-				fs << " \\override Slur.color=#(rgb-color "
-					<< GetLyColor(flag_color[sev])
-					<< ")\n";
-			}
-			if (phase == 10)
-				fs << " ( ";
-		}
-		if (x == vPSlur) {
-			if (phase == 1) {
-				fs << " \\override PhrasingSlur.color=#(rgb-color "
-					<< GetLyColor(flag_color[sev])
-					<< ")\n";
-			}
-			if (phase == 10)
-				fs << " \\( ";
-		}
-		if (x == vVBracket) {
-			if (phase == 1)
-				fs << " \\override BreathingSign.color = #(rgb-color "
-				<< GetLyColor(flag_color[sev]) << ")\n \\leftBracket\n";
-		}
-		if (x == vVolta) {
-			if (phase == 1)
-				fs << " \\override Score.VoltaBracket.color = #(rgb-color "
-				<< GetLyColor(flag_color[sev])
-				<< ")\n \\set Score.repeatCommands = #'((volta \"" +
-				lyi[ly_s2].sht[x] + "\"))\n";
-		}
-		if (x == vBracket) {
-			if (phase == 1) {
-				fs << " \\override HorizontalBracket.color=#(rgb-color "
-					<< GetLyColor(flag_color[sev]) << ")\n ";
-			}
-		}
-		if (x == vTrill) {
-			if (phase == 1) {
-				fs << " \\override TrillSpanner.bound-details.left.text = ";
-				if (lyi[ly_s2].sht[x].IsEmpty()) {
-					fs << "#f\n ";
-				}
-				else {
-					fs << "\\markup{ \\raise #0.6 \\teeny \"" + lyi[ly_s2].sht[x] + "\" }\n ";
-				}
-				fs << " \\override TrillSpanner.color = #(rgb-color "
-					<< GetLyColor(flag_color[sev]) << ")\n";
-			}
-			if (phase == 9) {
-				fs << " \\startTrillSpan\n";
-			}
-		}
-		if (x == vOttava) {
-			if (phase == 1) {
-				fs << " \\set Staff.ottavation = \\markup { \\teeny \""
-					+ lyi[ly_s2].sht[x] + "\" }\n ";
-				fs << " \\override Staff.OttavaBracket.color = #(rgb-color "
-					<< GetLyColor(flag_color[sev]) << ")\n";
-			}
-		}
-		if (x == vTS) {
-			if (phase == 1) {
-				fs << " \\myTS \""
-					+ lyi[ly_s2].sht[x] + "\" #(rgb-color " +
-					GetLyColor(flag_color[sev]) << ")\n";
-				fs << "\\textSpannerDown\n";
-			}
-			if (phase == 9) {
-				fs << "\\startTextSpan\n";
-			}
-		}
-		if (x == vPedal) {
-			if (phase == 1) {
-				fs << " \\override Staff.PianoPedalBracket.color = #(rgb-color " +
-					GetLyColor(flag_color[sev]) << ")\n";
-				fs << "  \\override Staff.SustainPedal #'stencil = \n" <<
-					"  #(lambda (grob) (grob-interpret-markup grob (markup \n" <<
-					"  #:with-color (rgb-color " + GetLyColor(flag_color[sev]) + ")\n" <<
-					"  #:lower 0.4\n" <<
-					"	 (#:teeny \"" + lyi[ly_s2].sht[x] + "\")))) \n";
-				fs << "\\textSpannerDown\n";
-			}
-			if (phase == 9) {
-				fs << "\\sustainOn\n";
-			}
+			script.Replace("$n$", "\n");
+			script.Replace("$COLOR$", GetLyColor(flag_color[sev]));
+			script.Replace("$TEXT$", lyi[ly_s2].sht[shape]);
+			script.Replace("$TEXT2$", text2);
+			fs << script << "\n";
 		}
 	}
 }
