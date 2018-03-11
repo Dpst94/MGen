@@ -88,9 +88,11 @@ void MFOut::ExportAdaptedMidi(CString dir, CString fname) {
 			//midifile.addPatchChange(track, 0, channel, 0); // 0=piano, 40=violin, 70=bassoon
 			//smidifile[sta].addPatchChange(strack, 0, channel, 0); // 0=piano, 40=violin, 70=bassoon
 			long long ts;
+			long long max_ts = 0;
 			for (int i = 0; i < midifile_buf[sta][tr].size(); i++) {
 				ts = max(0, midifile_buf[sta][tr][i].timestamp);
 				if (toload_time && ts > toload_time * 1000) continue;
+				if (ts > max_ts) max_ts = ts;
 				tick = ts / 1000.0 / spq * tpq;
 				type = Pm_MessageStatus(midifile_buf[sta][tr][i].message) & 0xF0;
 				data1 = Pm_MessageData1(midifile_buf[sta][tr][i].message);
@@ -123,6 +125,7 @@ void MFOut::ExportAdaptedMidi(CString dir, CString fname) {
 				}
 			}
 			// Send tail
+			ts = max_ts + EXPORT_MIDI_TAIL;
 			if (toload_time) ts = toload_time * 1000 + EXPORT_MIDI_TAIL;
 			tick = ts / 1000.0 / spq * tpq;
 			smidifile[sta].addNoteOff(strack, tick, 0, 0, 0);

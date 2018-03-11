@@ -4,7 +4,7 @@
 #include "MFIn.h"
 
 // Tail for export adapted midi in ms
-#define EXPORT_MIDI_TAIL 1000
+#define EXPORT_MIDI_TAIL 3000
 
 // Bass instruments
 const int bass_program[] = { 45, 33, 70, 58, 34, 35, 36, 37, 38 };
