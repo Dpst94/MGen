@@ -3,6 +3,11 @@
 #pragma once
 #include "MFOut.h"
 
+#define SHAPE_PHASE_CNT 12
+
+#define ssStart 0
+#define ssFinish 1
+
 #define MAX_CLEF 6
 const int LyClefCenter[] = { 26, 38, 50, 71, 83, 95 };
 const CString LyClef[] = { "bass_15", "bass_8", "bass", "treble", "treble^8", "treble^15" };
@@ -201,6 +206,7 @@ public:
 	~CLy();
 
 	void TestKeyMatrix();
+	void LoadLyShapes(CString fname);
 	void GetLyRange(int step1, int step2, vector<int>& vm_min, vector<int>& vm_max);
 	void GetLyVcnt(int step1, int step2, vector<int>& vm_max);
 	CString GetLyAlter(int alter);
@@ -234,6 +240,10 @@ public:
 	void SendLyNoteNames();
 	void SaveLy(CString dir, CString fname);
 
+	// Shape scripts
+	vector <vector<unordered_map<int, CString>>> shsc;
+
+	// Rules
 	vector <int> accept; // Each 1 allows showing canti with specific properties
 	vector<int> rule_viz; // [r_id] Rule visualization type
 	vector<int> rule_viz_v2; // [r_id] Rule visualization type for second voice

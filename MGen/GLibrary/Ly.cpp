@@ -62,6 +62,96 @@ void CLy::TestKeyMatrix() {
 	}
 }
 
+void CLy::LoadLyShapes(CString fname) {
+	// Check file exists
+	if (!fileExists(fname)) {
+		CString est;
+		est.Format("LoadLyShapes cannot find file: %s", fname);
+		WriteLog(5, est);
+		return;
+	}
+	ifstream fs;
+	int i = 0;
+	vector <CString> ast;
+	CString st, est;
+	fs.open(fname);
+	char pch[2550];
+	// Init
+	shsc.resize(SHAPE_PHASE_CNT);
+	for (int i = 0; i < shsc.size(); ++i) shsc[i].resize(2);
+	shsc[10][ssStart][vBracket] = "1";
+	shsc[10][ssStart][vOttava] = "2";
+	shsc[10][ssStart][vInterval] = "3";
+	shsc[10][ssStart][vOttava] = "4";
+	// Load header
+	fs.getline(pch, 2550);
+	while (fs.good()) {
+		i++;
+		// Get line
+		fs.getline(pch, 2550);
+		st = pch;
+		st.Trim();
+		if (st.Find(";") != -1) {
+			Tokenize(st, ast, ";");
+			if (ast.size() != 4) {
+				est.Format("Wrong column count at line %d in shapes file %s: '%s'", i, fname, st);
+				WriteLog(5, est);
+				error = 1;
+				return;
+			}
+			ast[0].Trim();
+			ast[1].Trim();
+			ast[2].Trim();
+			ast[3].Trim();
+			int phase = atoi(ast[0]);
+			if (phase >= SHAPE_PHASE_CNT) {
+				est.Format("Wrong phase number at line %d in shapes file %s: '%s'", i, fname, st);
+				WriteLog(5, est);
+				error = 1;
+				return;
+			}
+			int task = -1;
+			if (ast[1] == "Start") task = ssStart;
+			if (ast[1] == "Finish") task = ssFinish;
+			if (task == -1) {
+				est.Format("Wrong task at line %d in shapes file %s: '%s'", i, fname, st);
+				WriteLog(5, est);
+				error = 1;
+				return;
+			}
+			int shape = -1;
+			ast[2].MakeLower();
+			if (ast[2] == "default") shape = vDefault;
+			if (ast[2] == "harm") shape = vHarm;
+			if (ast[2] == "interval") shape = vInterval;
+			if (ast[2] == "vbracket") shape = vVBracket;
+			if (ast[2] == "volta") shape = vVolta;
+			if (ast[2] == "slur") shape = vSlur;
+			if (ast[2] == "pslur") shape = vPSlur;
+			if (ast[2] == "glis") shape = vGlis;
+			if (ast[2] == "bracket") shape = vBracket;
+			if (ast[2] == "trill") shape = vTrill;
+			if (ast[2] == "ts") shape = vTS;
+			if (ast[2] == "ottava") shape = vOttava;
+			if (ast[2] == "pedal") shape = vPedal;
+			if (ast[2] == "notename") shape = vNoteName;
+			if (shape == -1) {
+				est.Format("Wrong shape at line %d in shapes file %s: '%s'", i, fname, st);
+				WriteLog(5, est);
+				error = 1;
+				return;
+			}
+			if (ast[3][0] == '"') ast[3].Delete(0);
+			if (ast[3][ast[3].GetLength() - 1] == '"') ast[3].Delete(ast[3].GetLength() - 1);
+			ast[3].Replace("\"\"", "\"");
+			WriteLog(1, ast[3]);
+			// Save
+			shsc[phase][task][shape] = ast[3];
+		}
+	}
+	return;
+}
+
 void CLy::GetLyRange(int step1, int step2, vector<int> &vm_min, vector<int> &vm_max) {
 	vm_min.clear();
 	vm_max.clear();
@@ -1051,6 +1141,7 @@ void CLy::SendLyNoteNames() {
 }
 
 void CLy::SaveLy(CString dir, CString fname) {
+	LoadLyShapes("configs\\ly\\shapes.csv");
 	vector<CString> sv;
 	CString title;
 	DeleteFile("log\\lyi-" + m_config + ".csv");
