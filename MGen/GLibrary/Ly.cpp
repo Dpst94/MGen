@@ -495,7 +495,8 @@ void CLy::AddNLink(int i, int i2, int v, CString st, int fl, int ln, int foreign
 	lyi[i2 - ly_step1].nfn.push_back(ly_flags + 1);
 	lyi[i2 - ly_step1].nff.push_back(foreign);
 	lyi[i2 - ly_step1].nfs.push_back(0);
-	lyi[i2 - ly_step1].nfc.push_back(st);
+	//lyi[i2 - ly_step1].nfc.push_back(st);
+	lyi[i2 - ly_step1].nfc.push_back("");
 	if (!foreign) ++ly_flags;
 }
 
@@ -536,6 +537,7 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 			com = st + RuleName[rule_set][fl] + " (" + SubRuleName[rule_set][fl] + ")";
 			if (!RuleComment[fl].IsEmpty()) com += ". " + RuleComment[fl];
 			if (!SubRuleComment[rule_set][fl].IsEmpty()) com += " (" + SubRuleComment[rule_set][fl] + ")";
+			com += " " + lyi[ly_s2].nfc[c];
 			// Send note number with first comment
 			if (!found) {
 				found = 1;
@@ -636,8 +638,9 @@ void CLy::ExportLyI() {
 
 void CLy::InitLyITest() {
 	if (m_config != "test-ly-overlap") return;
+	if (ly_v != ly_vhigh) return;
 	int step0, step1, step2, step3, step4;
-	int fl = 1;
+	int fl = 31;
 	step0 = 4;
 	ly_flags = 0;
 	for (int shape = 0; shape < MAX_VIZ; ++shape) {
@@ -665,7 +668,8 @@ void CLy::InitLyITest() {
 		lyi[step1].nfn.push_back(ly_flags + 1);
 		lyi[step1].nff.push_back(0);
 		lyi[step1].nfs.push_back(0);
-		lyi[step1].nfc.push_back("Some");
+		lyi[step1].nfc.push_back("");
+		lyi[step1].nfc[lyi[step1].nfc.size() - 1].Format("Type %d", shape);
 		SetLyShape(step1, step2, lyi[step1].nfs.size() - 1, fl, shape);
 		++ly_flags;
 	}
