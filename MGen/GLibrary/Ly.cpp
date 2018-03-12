@@ -636,6 +636,19 @@ void CLy::ExportLyI() {
 	fs.close();
 }
 
+void CLy::AddLyITest(int step1, int step2, int fl, int shape) {
+	ly_s2 = step1;
+	lyi[step1].nflags.push_back(fl);
+	lyi[step1].nfl.push_back(step2 - step1);
+	lyi[step1].nfn.push_back(ly_flags + 1);
+	lyi[step1].nff.push_back(0);
+	lyi[step1].nfs.push_back(0);
+	lyi[step1].nfc.push_back("");
+	lyi[step1].nfc[lyi[step1].nfc.size() - 1].Format("Type %d", shape);
+	SetLyShape(step1, step2, lyi[step1].nfs.size() - 1, fl, shape);
+	++ly_flags;
+}
+
 void CLy::InitLyITest() {
 	if (m_config != "test-ly-overlap") return;
 	if (ly_v != ly_vhigh) return;
@@ -662,16 +675,7 @@ void CLy::InitLyITest() {
 			step3 = step0 + 1;
 			step4 = step0 + 2;
 		}
-		ly_s2 = step1;
-		lyi[step1].nflags.push_back(fl);
-		lyi[step1].nfl.push_back(step2 - step1);
-		lyi[step1].nfn.push_back(ly_flags + 1);
-		lyi[step1].nff.push_back(0);
-		lyi[step1].nfs.push_back(0);
-		lyi[step1].nfc.push_back("");
-		lyi[step1].nfc[lyi[step1].nfc.size() - 1].Format("Type %d", shape);
-		SetLyShape(step1, step2, lyi[step1].nfs.size() - 1, fl, shape);
-		++ly_flags;
+		AddLyITest(step1, step2, fl, shape);
 	}
 }
 
