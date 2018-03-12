@@ -484,23 +484,27 @@ CString CLy::GetIntName(int iv) {
 	else return "8";
 }
 
+void CLy::AddNLink(int i, int i2, int v, CString st, int fl, int ln, int foreign) {
+	lyi[i2 - ly_step1].nflags.push_back(fl);
+	if (foreign) {
+		lyi[i2 - ly_step1].nfl.push_back(i + ln - coff[i + ln][v] - i2);
+	}
+	else {
+		lyi[i2 - ly_step1].nfl.push_back(ln);
+	}
+	lyi[i2 - ly_step1].nfn.push_back(ly_flags + 1);
+	lyi[i2 - ly_step1].nff.push_back(foreign);
+	lyi[i2 - ly_step1].nfs.push_back(0);
+	lyi[i2 - ly_step1].nfc.push_back(st);
+	if (!foreign) ++ly_flags;
+}
+
 void CLy::ParseNLinks(int i, int i2, int v, int foreign) {
 	CString com;
 	int x = 0;
 	for (auto const& it : nlink[i][v]) {
 		if (foreign && !rule_viz_v2[it.first]) continue;
-		lyi[i2 - ly_step1].nflags.push_back(it.first);
-		if (foreign) {
-			lyi[i2 - ly_step1].nfl.push_back(i + it.second - coff[i + it.second][v] - i2);
-		}
-		else {
-			lyi[i2 - ly_step1].nfl.push_back(it.second);
-		}
-		lyi[i2 - ly_step1].nfn.push_back(ly_flags + 1);
-		lyi[i2 - ly_step1].nff.push_back(foreign);
-		lyi[i2 - ly_step1].nfs.push_back(0);
-		lyi[i2 - ly_step1].nfc.push_back(comment[i][v][x]);
-		if (!foreign) ++ly_flags;
+		AddNLink(i, i2, v, comment[i][v][x], it.first, it.second, foreign);
 		++x;
 	}
 }
@@ -662,7 +666,7 @@ void CLy::InitLyITest() {
 		lyi[step1].nff.push_back(0);
 		lyi[step1].nfs.push_back(0);
 		lyi[step1].nfc.push_back("Some");
-		SetLyShape(step1, step2, ly_flags, fl, shape);
+		SetLyShape(step1, step2, lyi[step1].nfs.size() - 1, fl, shape);
 		++ly_flags;
 	}
 }
