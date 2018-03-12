@@ -645,6 +645,7 @@ void CLy::AddLyITest(int step1, int step2, int fl, int shape) {
 	lyi[step1].nfs.push_back(0);
 	lyi[step1].nfc.push_back("");
 	lyi[step1].nfc[lyi[step1].nfc.size() - 1].Format("Type %d", shape);
+	severity[fl] = randbw(0, 100);
 	SetLyShape(step1, step2, lyi[step1].nfs.size() - 1, fl, shape);
 	++ly_flags;
 }
@@ -669,13 +670,20 @@ void CLy::InitLyITest() {
 			step3 = step0 + 2;
 			step4 = step0 + 3;
 		}
-		else {
+		else if (viz_type[shape] == vtGroup || viz_type[shape] == vtVolta) {
 			step1 = step0 - 1;
 			step2 = step0;
 			step3 = step0 + 1;
 			step4 = step0 + 2;
 		}
+		else {
+			step1 = step0 - 1;
+			step2 = step0;
+			step3 = step0;
+			step4 = step0 + 1;
+		}
 		AddLyITest(step1, step2, fl, shape);
+		AddLyITest(step3, step4, fl, shape);
 	}
 }
 
