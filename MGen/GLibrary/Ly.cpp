@@ -629,6 +629,44 @@ void CLy::ExportLyI() {
 	fs << "\n";
 	fs.close();
 }
+
+void CLy::InitLyITest() {
+	if (m_config != "test-ly-overlap") return;
+	int step0, step1, step2, step3, step4;
+	int fl = 1;
+	step0 = 4;
+	ly_flags = 0;
+	for (int shape = 0; shape < MAX_VIZ; ++shape) {
+		if (viz_type[shape] == vtPoint) {
+			step1 = step0;
+			step2 = step0;
+			step3 = step0;
+			step4 = step0;
+		}
+		else if (viz_type[shape] == vtVBracket) {
+			step1 = step0 - 1;
+			step2 = step0;
+			step3 = step0 + 2;
+			step4 = step0 + 3;
+		}
+		else {
+			step1 = step0 - 1;
+			step2 = step0;
+			step3 = step0 + 1;
+			step4 = step0 + 2;
+		}
+		ly_s2 = step1;
+		lyi[step1].nflags.push_back(fl);
+		lyi[step1].nfl.push_back(step2 - step1);
+		lyi[step1].nfn.push_back(ly_flags + 1);
+		lyi[step1].nff.push_back(0);
+		lyi[step1].nfs.push_back(0);
+		lyi[step1].nfc.push_back("Some");
+		SetLyShape(step1, step2, ly_flags, fl, shape);
+		++ly_flags;
+	}
+}
+
 void CLy::InitLyI() {
 	if (ly_mel == -1) return;
 	ly_v2 = ly_v;
@@ -655,6 +693,7 @@ void CLy::InitLyI() {
 		lyi[i].shfp.resize(MAX_VIZ, -1);
 		lyi[i].sht.resize(MAX_VIZ);
 	}
+	if (m_config == "test-ly-overlap") return;
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
 		// Find current note position
@@ -806,6 +845,7 @@ void CLy::SaveLySegment(ofstream &fs, CString st, CString st2, int step1, int st
 		if (!vm_max[v]) continue;
 		ly_v = v;
 		InitLyI();
+		InitLyITest();
 		// Select best clef
 		clef = DetectLyClef(vm_min[v], vm_max[v]);
 		st.Format("\\new Staff = \"staff%d\" {\n", ly_v);

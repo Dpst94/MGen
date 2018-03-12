@@ -231,6 +231,7 @@ public:
 	void SetLyShape(int s1, int s2, int f, int fl, int vtype);
 	void ClearLyShape(int s1, int s2, int vtype);
 	void ExportLyI();
+	void InitLyITest();
 	void InitLyI();
 	void SaveLySegment(ofstream & fs, CString st, CString st2, int step1, int step2);
 	void SendLySkips(int count);
