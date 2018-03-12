@@ -247,8 +247,10 @@ void CConf::LoadConfig(CString fname, int load_includes) {
 
 void CConf::ProcessConfig() {
 	int max_vol = 100;
-	for (int ii = 0; ii < icf.size(); ++ii) {
+	int test = 0;
+	for (int ii = 0; ii < icf.size(); ++ii) if (icf[ii].used) {
 		if (icf[ii].vol > max_vol) max_vol = icf[ii].vol;
+		test++;
 	}
 	for (int ii = 0; ii < icf.size(); ++ii) {
 		icf[ii].vol = icf[ii].vol * 100.0 / max_vol;
@@ -282,6 +284,7 @@ void CConf::LoadVarInstr(CString * sName, CString * sValue, char* sSearch, vecto
 					if (icf[ii].group == st) {
 						++found;
 						Dest[v] = ii;
+						++icf[ii].used;
 						break;
 					}
 				}
@@ -294,6 +297,7 @@ void CConf::LoadVarInstr(CString * sName, CString * sValue, char* sSearch, vecto
 					if (icf[ii].group == gname && icf[ii].name == cname) {
 						++found;
 						Dest[v] = ii;
+						++icf[ii].used;
 						break;
 					}
 				}
@@ -309,6 +313,7 @@ void CConf::LoadVarInstr(CString * sName, CString * sValue, char* sSearch, vecto
 				if (icf[ii].child.find(v + 1) != icf[ii].child.end()) {
 					ii = icf[ii].child[v + 1];
 					instr[v] = ii;
+					++icf[ii].used;
 				}
 			}
 		}
