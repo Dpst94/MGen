@@ -477,6 +477,7 @@ void CGenCA2::FixStartPause() {
 }
 
 void CGenCA2::ReduceBetween() {
+	reduce_between_st = "";
 	int bsteps = 0;
 	int between;
 	int between_sum = 0;
@@ -500,7 +501,9 @@ void CGenCA2::ReduceBetween() {
 			CString est;
 			est.Format("In counterpoint #%d (cantus %s), counterpoint voice was moved closer to cantus by %d octaves, because it was too far. Reset reduce_between to disable this function",
 				cantus_id + 1, cantus_high ? "high" : "low", move_oct);
-			WriteLog(0, est); 
+			WriteLog(0, est);
+			reduce_between_st.Format("Counterpoint voice was moved closer to cantus by %d octaves, because it was too far.",
+				move_oct);
 		}
 		if (cantus_high) {
 			for (s = 0; s < cpoint[cantus_id][cpv].size(); ++s)

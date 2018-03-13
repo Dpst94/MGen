@@ -621,7 +621,7 @@ int CGenCP1::SendCP() {
 				st2.Format("Flags penalty: %s\nKey selection: %s\n%s", rpst, key_eval, pmap);
 			}
 		}
-		AddMelody(step000, pos - 1, svoice + cpv, st, st2);
+		AddMelody(step000, pos - 1, svoice + cpv, st, st2, reduce_between_st);
 		AddMelody(step000, pos - 1, 0, st);
 	}
 	if (debug_level > 2) {

@@ -800,6 +800,7 @@ protected:
 	int emulate_sas = 0; // 0 = disable emulator, 1 = Enables SAS algorithm emulator in CA2
 
 	// Counterpoint
+	CString reduce_between_st; // Information about reduce_between algorithm run
 	vector<vector<int>> ac; // [v][s] Diatonic
 	vector<vector<int>> acc; // [v][s] Chromatic
 	vector<vector<int>> acc_old; // [v][s] Chromatic

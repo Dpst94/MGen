@@ -824,7 +824,7 @@ void CLy::InitLyI() {
 	ExportLyI();
 }
 
-void CLy::SaveLySegment(ofstream &fs, CString st, CString st2, int step1, int step2) {
+void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	vector<CString> sv;
 	CString clef, key, key_visual;
 	int pos, pos2, le, le2, pause_accum, pause_pos, pause_i;
@@ -853,6 +853,12 @@ void CLy::SaveLySegment(ofstream &fs, CString st, CString st2, int step1, int st
 	if (key[1] == 'f') key_visual += "\\flat ";
 	if (key[1] == 's') key_visual = "\"" + key_visual + "#\"";
 	// First info
+	CString st, st3;
+	if (mel == -1) st = "Whole piece";
+	else {
+		st = mel_info[mel];
+		st3 = mel_info3[mel];
+	}
 	st.Replace("\n", ", ");
 	st.Replace("#", "\"#\"");
 	st.Replace("\\", "/");
@@ -918,6 +924,7 @@ void CLy::SaveLySegment(ofstream &fs, CString st, CString st2, int step1, int st
 	}
 	fs << ly_ly_st;
 	fs << ">>\n";
+	if (st3 != "") fs << "\\markup { " << st3 << " }\n";
 	fs << ly_com_st;
 	// Second info
 	//st2.Replace("\n", "\n}\n\\markup \\wordwrap \\italic {\n  ");
@@ -1096,7 +1103,7 @@ void CLy::SaveLy(CString dir, CString fname) {
 		CString st;
 		st = "Whole piece";
 		ly_mel = -1;
-		SaveLySegment(ly_fs, st, "", 0, t_generated);
+		SaveLySegment(ly_fs, -1, 0, t_generated);
 	}
 	else {
 		int first_step = 0;
@@ -1118,7 +1125,7 @@ void CLy::SaveLy(CString dir, CString fname) {
 			if (s >= t_generated - 1 && mel_id[t_generated - 1][0] > -1 &&
 				found && first_step == last_step)	last_step = t_generated - 1;
 			ly_mel = m;
-			if (found) SaveLySegment(ly_fs, mel_info[m], mel_info2[m], first_step, last_step);
+			if (found) SaveLySegment(ly_fs, m, first_step, last_step);
 			//if (m < mel_info.size() - 1) fs << "\\pageBreak\n";
 		}
 	}

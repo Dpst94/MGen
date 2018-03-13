@@ -235,7 +235,7 @@ public:
 	void AddLyITest(int step1, int step2, int fl, int shape);
 	void InitLyITest();
 	void InitLyI();
-	void SaveLySegment(ofstream & fs, CString st, CString st2, int step1, int step2);
+	void SaveLySegment(ofstream & fs, int mel, int step1, int step2);
 	void SendLySkips(int count);
 	void SendLyMistakes();
 	void SendLyHarm();
@@ -260,7 +260,7 @@ public:
 	vector<vector <CString>> SubRuleComment; // Comments for flags
 	int rule_set = 0; // id of current rule set
 
-										// Lilypond
+	// Lilypond
 	ofstream ly_fs;
 	float ly_mul = 1; // midifile_mul
 	int ly_flag_style = 1; // 0 - no flag visualisation, 1 - color note, 2 - x above note

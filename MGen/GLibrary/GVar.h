@@ -25,7 +25,6 @@ public:
 	void LoadResults(CString dir, CString fname);
 	void LoadResultLogs(CString dir, CString fname);
 	void LoadResultMusic(CString dir, CString fname);
-	void AddMelody(int step1, int step2, int v, CString info, CString info2 = "");
 
 	// Warnings
 	int warning_loadvectors = 0;
@@ -90,6 +89,7 @@ public:
 	vector< vector <CString> > mark; // Mark on note
 	vector<CString> mel_info; // Information about melody
 	vector<CString> mel_info2; // Information about melody
+	vector<CString> mel_info3; // Information about melody
 	vector< vector <DWORD> > mark_color; // Mark color
 	vector< vector <unsigned char> > midi_ch; // Midi channel of each note
 	vector< DWORD > linecolor; // Shows color of bar line if not zero
@@ -147,6 +147,7 @@ protected:
 	void FillPause(int start, int length, int v);
 	void RegisterGraph(CString name, float scale);
 	inline void SetProgress(int i, int value);
+	void AddMelody(int step1, int step2, int v, CString info, CString info2="", CString info3="");
 	inline void ResizeVectors(int size, int vsize = -1);
 
 	DWORD color_noflag; // Color for notes with no flags
