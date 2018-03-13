@@ -653,7 +653,7 @@ void CLy::AddLyITest(int step1, int step2, int fl, int shape) {
 void CLy::InitLyITest() {
 	if (m_config != "test-ly-overlap") return;
 	if (ly_v != ly_vhigh) return;
-	int step0, step1, step2, step3, step4;
+	int step0, step1, step2, step3, step4, step5, step6;
 	int fl = 31;
 	step0 = 4;
 	ly_flags = 0;
@@ -682,8 +682,11 @@ void CLy::InitLyITest() {
 			step3 = step0;
 			step4 = step0 + 1;
 		}
+		step5 = lyi.size() - 2;
+		step6 = lyi.size() - 1;
 		AddLyITest(step1, step2, fl, shape);
 		AddLyITest(step3, step4, fl, shape);
+		AddLyITest(step5, step6, fl, shape);
 	}
 }
 
