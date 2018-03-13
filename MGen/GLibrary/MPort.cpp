@@ -215,7 +215,14 @@ void MPort::SendMIDI(int step1, int step2)
 	if (!midi_start_time) midi_start_time = timestamp_current + MIDI_BUF_PROTECT -
 		(long long)(stime[step1] / m_pspeed * 100);
 	// Set real time when playback started
-	if (!midi_sent_t) midi_sent_t = (long long)(stime[step1] / m_pspeed * 100) + midi_start_time - 100;
+	if (!midi_sent_t) {
+		if (amidi_export) {
+			midi_sent_t = (long long)(stime[step1] / m_pspeed * 100) + midi_start_time;
+		}
+		else {
+			midi_sent_t = (long long)(stime[step1] / m_pspeed * 100) + midi_start_time - 100;
+		}
+	}
 	// Check if we have buf underrun
 	if (midi_sent_t < timestamp_current) {
 		CString st;
@@ -309,7 +316,7 @@ void MPort::SendMIDI(int step1, int step2)
 					Pm_MessageStatus(it) + midi_channel,
 					Pm_MessageData1(it), Pm_MessageData2(it));
 				if (Pm_MessageStatus(it) == MIDI_NOTEON) {
-					AddKsOff(midi_sent_t - midi_start_time - midi_prepause + 1,
+					AddKsOff(midi_sent_t - midi_start_time - midi_prepause + 3,
 						Pm_MessageData1(it), 0);
 				}
 			}
