@@ -610,7 +610,7 @@ void CLy::ClearLyShape(int s1, int s2, int vtype) {
 
 void CLy::ExportLyI() {
 	ofstream fs;
-	fs.open("log\\lyi-" + m_config + ".csv", ios_base::app);
+	fs.open(as_dir + "\\lyi-" + as_fname + ".csv", ios_base::app);
 	fs << "Step[" << ly_mel << "];";
 	for (int x = 0; x < MAX_VIZ; ++x) {
 		fs << "shs[" << x << "];";
@@ -821,7 +821,9 @@ void CLy::InitLyI() {
 			SetLyShape(s1, s2, f, fl, vtype);
 		}
 	}
+#if defined(_DEBUG)
 	ExportLyI();
+#endif
 }
 
 void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
@@ -1089,7 +1091,7 @@ void CLy::SaveLy(CString dir, CString fname) {
 	LoadLyShapes("configs\\ly\\shapes.csv");
 	vector<CString> sv;
 	CString title;
-	DeleteFile("log\\lyi-" + m_config + ".csv");
+	DeleteFile(dir + "\\lyi-" + fname + ".csv");
 	title = m_algo_folder + ": " + m_config + " (" +
 		CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M") + ")";
 	ly_fs.open(dir + "\\" + fname + ".ly");
