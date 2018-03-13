@@ -282,5 +282,6 @@ public:
 	int ly_mel = -1; // Currentn ly melody id
 	int ly_flags = 0; // Number of flags in current melody
 	int ly_notenames = 0; // Number of note names in current melody
+	int ly_saved = 0;
 };
 

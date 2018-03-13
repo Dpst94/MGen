@@ -1134,5 +1134,6 @@ void CLy::SaveLy(CString dir, CString fname) {
 	read_file_sv("configs\\ly\\footer.ly", sv);
 	write_file_sv(ly_fs, sv);
 	ly_fs.close();
+	ly_saved = 1;
 }
 

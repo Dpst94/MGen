@@ -80,6 +80,5 @@ protected:
 	int midi_stage = 0;
 	int midi_voice = 0;
 	int midi_sending_buf_next = 0;
-
 };
 

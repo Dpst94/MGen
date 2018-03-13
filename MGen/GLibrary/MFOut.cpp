@@ -147,6 +147,7 @@ void MFOut::ExportAdaptedMidi(CString dir, CString fname) {
 	est.Format("Exported adapted midi file %s in %lld ms",
 		as_fname, time_stop - time_start);
 	WriteLog(0, est);
+	amidi_saved = 1;
 }
 
 void MFOut::SaveMidi(CString dir, CString fname) {
@@ -203,5 +204,6 @@ void MFOut::SaveMidi(CString dir, CString fname) {
 	}
 	midifile.sortTracks();         // ensure tick times are in correct order
 	midifile.write(dir + "\\" + fname + ".mid");
+	midi_saved = 1;
 }
 
