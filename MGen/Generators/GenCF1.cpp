@@ -2495,7 +2495,7 @@ int CGenCF1::FailTritone(int ta, int t1, int t2, int tb, vector<int> &c, vector<
 		if (ep2 == c_len && (svoices == 1 || !cantus_high)) {
 			if ((cc[leap_start] >= lclimax[leap_start]) || (cc[s1] >= lclimax[leap_start])) {
 				// Consecutive
-				if (found == 1) FLAG2(32, s0);
+				if (found == 1) FLAG2L(32, s0, fli[ls + 1]);
 				// Compound framed
 				else if (found == 2) FLAG2L(373, fli[ls - 1], fli[ls + 1]); //-V547
 			}
@@ -2505,8 +2505,8 @@ int CGenCF1::FailTritone(int ta, int t1, int t2, int tb, vector<int> &c, vector<
 		// Flag resolution for consecutive tritone
 		if (found == 1) {
 			if (res1*res2 == 0) 
-				FLAG2(31, s0);
-			else FLAG2(2, s0);
+				FLAG2L(31, s0, fli[ls + 1]);
+			else FLAG2L(2, s0, fli[ls + 1]);
 		}
 		// Flag resolution for tritone with intermediate note, framed
 		else if (found == 2) { //-V547
