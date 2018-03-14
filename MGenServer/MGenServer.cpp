@@ -46,6 +46,7 @@ int j_timeout2;
 int j_engrave = 0;
 int j_render = 0;
 int j_priority;
+int j_autorestart = 0;
 CString progress_fname;
 CString j_type;
 CString f_folder;
@@ -415,9 +416,11 @@ int Connect() {
 }
 
 int FinishJob(int res, CString st) {
+	int state = 3;
+	if (j_autorestart && !res) state = 1;
 	CString q;
-	q.Format("UPDATE jobs SET j_updated=NOW(), j_duration=TIMESTAMPDIFF(SECOND, j_started, NOW()), j_finished=NOW(), j_state=3, j_result='%d', j_progress='%s' WHERE j_id='%ld'",
-		res, db.Escape(st), CDb::j_id);
+	q.Format("UPDATE jobs SET j_updated=NOW(), j_duration=TIMESTAMPDIFF(SECOND, j_started, NOW()), j_finished=NOW(), j_state='%d', j_result='%d', j_progress='%s' WHERE j_id='%ld'",
+		state, res, db.Escape(st), CDb::j_id);
 	db.Query(q);
 	WriteLog(st);
 	return res;
@@ -914,6 +917,7 @@ void TakeJob() {
 		// Load job
 		CDb::j_id = db.GetInt("j_id");
 		j_priority = db.GetInt("j_priority");
+		j_autorestart = db.GetInt("j_autorestart");
 		f_stems = db.GetInt("f_stems");
 		j_timeout = db.GetInt("j_timeout");
 		j_timeout2 = db.GetInt("j_timeout2");
