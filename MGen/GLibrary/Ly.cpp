@@ -185,11 +185,11 @@ CString CLy::GetLyAlter(int alter) {
 	return "";
 }
 
-CString CLy::GetLyAlterVisual(int alter) {
+CString CLy::GetLyAlterVisual(int alter, CString sz) {
 	if (alter > 2) alter -= 12;
-	if (alter < -2) alter += 12;
-	if (alter == -1) return "\\flat ";
-	else if (alter == -2) return "\\doubleflat ";
+	if (alter < -2) alter += 12; 
+	if (alter == -1) return sz + "\\flat ";
+	else if (alter == -2) return sz + "\\doubleflat ";
 	else if (alter == 1) return "\"#\"";
 	else if (alter == 2) return "\\doublesharp ";
 	return "";
@@ -201,10 +201,10 @@ CString CLy::GetLyNote(int i, int v) {
 	return LyNoteSharp[no2] + GetLyAlter(alter) + LyOctave[oct];
 }
 
-CString CLy::GetLyNoteVisual(int i, int v) {
+CString CLy::GetLyNoteVisual(int i, int v, CString sz) {
 	int no2, oct, alter;
 	GetRealNote(note[i][v], tonic[i][v], minor[i][v], no2, oct, alter);
-	return NoteName[no2] + GetLyAlterVisual(alter);
+	return NoteName[no2] + GetLyAlterVisual(alter, sz);
 }
 
 CString CLy::GetLyLen(int length) {
@@ -522,7 +522,7 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 			note_st += st;
 		}
 		st.Format("NOTE %d at %d:%d - %s",
-			ly_nnum, pos / 8 + 1, pos % 8 + 1, GetLyNoteVisual(i, v));
+			ly_nnum, pos / 8 + 1, pos % 8 + 1, GetLyNoteVisual(i, v, "\\raise #0.3 \\magnify #0.7 "));
 		if (coff[i][v])
 			st += " (slur)";
 		note_st += st + "\n}\n";
@@ -1071,7 +1071,7 @@ void CLy::SendLyNoteNames() {
 			SendLySkips(ly_mul);
 			continue;
 		}
-		CString st = GetLyNoteVisual(ly_s, ly_v);
+		CString st = GetLyNoteVisual(ly_s, ly_v, "\\raise #0.3 \\magnify #0.5 ");
 		ly_ly_st += "\\markup{ ";
 		ly_ly_st += "\\teeny ";
 		if (lyi[ly_s2].shse[vNoteName] > -1) {

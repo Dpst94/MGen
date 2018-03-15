@@ -210,9 +210,9 @@ public:
 	void GetLyRange(int step1, int step2, vector<int>& vm_min, vector<int>& vm_max);
 	void GetLyVcnt(int step1, int step2, vector<int>& vm_max);
 	CString GetLyAlter(int alter);
-	CString GetLyAlterVisual(int alter);
+	CString GetLyAlterVisual(int alter, CString sz);
 	CString GetLyNote(int i, int v);
-	CString GetLyNoteVisual(int i, int v);
+	CString GetLyNoteVisual(int i, int v, CString sz);
 	CString GetLyLen(int length);
 	void SplitLyNote5(int pos, vector<int>& la);
 	void SplitLyNoteMeasure(int pos, int le, vector<int>& la);
