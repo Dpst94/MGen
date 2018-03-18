@@ -2861,12 +2861,15 @@ int CGenCP1::FailFirstIntervals() {
 	CHECK_READY(DR_fli, DR_pc, DR_ivl);
 	if (apc[0][0] == 0) {
 		if (apc[1][0] == 0) FLAG2(268, 0);
-		else if (apc[1][0] == 4) FLAG2(269, 0);
 		else if (apc[1][0] == 2) FLAG2(270, 0);
+		else if (apc[1][0] == 4) FLAG2(269, 0);
+		else if (apc[1][0] == 5) FLAG2(421, 0);
 		else FLAG2(272, 0);
 	}
-	else if (apc[0][0] == 2) {
-		if (apc[1][0] == 0) FLAG2(271, 0);
+	else if (apc[1][0] == 0) {
+		if (apc[0][0] == 2) FLAG2(271, 0);
+		else if (apc[0][0] == 3) FLAG2(423, 0);
+		else if (apc[0][0] == 5) FLAG2(425, 0);
 		else FLAG2(272, 0);
 	}
 	else FLAG2(272, 0);
@@ -2887,12 +2890,15 @@ int CGenCP1::FailLastIntervals() {
 		// Check last intervals
 		if (apc[0][c_len - 1] == 0) {
 			if (apc[1][c_len - 1] == 0) FLAG2(354, fs);
-			else if (apc[1][c_len - 1] == 4) FLAG2(355, fs);
 			else if (apc[1][c_len - 1] == 2) FLAG2(356, fs);
+			else if (apc[1][c_len - 1] == 4) FLAG2(355, fs);
+			else if (apc[1][c_len - 1] == 5) FLAG2(422, fs);
 			else FLAG2(358, fs);
 		}
-		else if (apc[0][c_len - 1] == 2) {
-			if (apc[1][c_len - 1] == 0) FLAG2(357, fs);
+		else if (apc[1][c_len - 1] == 0) {
+			if (apc[0][c_len - 1] == 2) FLAG2(357, fs);
+			if (apc[0][c_len - 1] == 3) FLAG2(424, fs);
+			if (apc[0][c_len - 1] == 5) FLAG2(426, fs);
 			else FLAG2(358, fs);
 		}
 		else FLAG2(358, fs);
