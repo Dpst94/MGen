@@ -992,10 +992,10 @@ int CGenCP1::FailSus2() {
 						if (s5 && ls5 == ls + 2 && aleap[cpv][fli2[ls + 1]] < 0) s5 = 0;
 						FLAG2C(296);
 					}
-					// Mark insertion as non-harmonic in basic msh if resolution is harmonic and sus ends with dissonance
-					if (s3 && ls3 == ls + 2 && tivl[fli[ls + 2]] > 0) mshb[ls + 1] = pAux;
-					if (s4 && ls4 == ls + 2 && tivl[fli[ls + 2]] > 0) mshb[ls + 1] = pAux;
-					if (s5 && ls5 == ls + 2 && tivl[fli[ls + 2]] > 0) mshb[ls + 1] = pAux;
+					// Mark insertion as non-harmonic in basic msh if resolution is harmonic, sus ends with dissonance and not both movements are leaps
+					if (s3 && ls3 == ls + 2 && tivl[fli[ls + 2]] > 0 && aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
+					if (s4 && ls4 == ls + 2 && tivl[fli[ls + 2]] > 0 && aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
+					if (s5 && ls5 == ls + 2 && tivl[fli[ls + 2]] > 0 && aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
 					// Mark resolution as obligatory harmonic in basic msh
 					if (s3) mshb[ls3] = pSusRes;
 					if (s4) mshb[ls4] = pSusRes;
