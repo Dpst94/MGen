@@ -887,6 +887,8 @@ int CGenCP1::FailSus2() {
 			mshb[ls] = pSusStart;
 			// 1/4 + ?
 			if (sus[ls] - fli[ls] == npm / 4) FLAG2(251, s);
+			// Start < finish
+			if (sus[ls] - fli[ls] < fli2[ls] - sus[ls] + 1) FLAG2(427, s);
 			// Long start
 			if (sus[ls] - fli[ls] > npm / 2) FLAG2(274, s);
 			// Long finish
