@@ -109,7 +109,7 @@ protected:
 	void EmulateSASCP();
 	inline void GetCfli();
 	inline int FailGisTrail2();
-	inline int FailHarmStep(int i, const int * hv, int & count, int & wcount);
+	inline int FailHarmStep(int i, const int * hv, int & count, int & wcount, int repeat_letters, int miss_letters, int flagr, int flagm);
 	inline int EvalHarm();
 	inline int FailTonicCP();
 	inline void RemoveHarmDuplicate();

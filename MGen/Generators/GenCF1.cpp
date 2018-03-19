@@ -440,8 +440,12 @@ void CGenCF1::SetRuleParams() {
 	early_culm3 = GetRuleParam(rule_set, 193, rsSubName, 0);
 	late_culm = GetRuleParam(rule_set, 21, rsSubName, 0);
 	hsp_leap = Interval2Chromatic(GetRuleParam(rule_set, 194, rsSubName, 0));
-	repeat_letters = GetRuleParam(rule_set, 17, rsSubName, 0);
-	miss_letters = GetRuleParam(rule_set, 20, rsSubName, 0);
+	repeat_letters_t = GetRuleParam(rule_set, 17, rsSubName, 0);
+	repeat_letters_d = GetRuleParam(rule_set, 428, rsSubName, 0);
+	repeat_letters_s = GetRuleParam(rule_set, 429, rsSubName, 0);
+	miss_letters_t = GetRuleParam(rule_set, 20, rsSubName, 0);
+	miss_letters_d = GetRuleParam(rule_set, 430, rsSubName, 0);
+	miss_letters_s = GetRuleParam(rule_set, 431, rsSubName, 0);
 	ico_chain = GetRuleParam(rule_set, 89, rsSubName, 0);
 	ico_chain2 = GetRuleParam(rule_set, 96, rsSubName, 0);
 	gis_trail_max = GetRuleParam(rule_set, 200, rsSubName, 0);
@@ -1179,7 +1183,7 @@ int CGenCF1::FailFisTrail(vector<int> &pcc) {
 	return 0;
 }
 
-int CGenCF1::FailMelodyHarmStep(int i, const int* hv, int &count, int &wcount, int &last_flag, int &max_p) {
+int CGenCF1::FailMelodyHarmStep(int i, const int* hv, int &count, int &wcount, int &last_flag, int &max_p, int repeat_letters, int miss_letters, int flagr, int flagm) {
 	if (hv[chm[i]]) {
 		++count;
 		wcount = 0;
@@ -1188,8 +1192,8 @@ int CGenCF1::FailMelodyHarmStep(int i, const int* hv, int &count, int &wcount, i
 		++wcount;
 		count = 0;
 	}
-	if (count > repeat_letters) FLAG3(17, i);
-	if (wcount > miss_letters) FLAG3(20, i);
+	if (count > repeat_letters) FLAG3(flagr, i);
+	if (wcount > miss_letters) FLAG3(flagm, i);
 	return 0;
 }
 
@@ -1225,9 +1229,9 @@ int CGenCF1::EvalMelodyHarm(int hp, int &last_flag, int &max_p) {
 			}
 		}
 		// Check letter repeat and miss
-		if (FailMelodyHarmStep(i, hvt, tcount, wtcount, last_flag, max_p)) return 1;
-		if (FailMelodyHarmStep(i, hvd, dcount, wdcount, last_flag, max_p)) return 1;
-		if (FailMelodyHarmStep(i, hvs, scount, wscount, last_flag, max_p)) return 1;
+		if (FailMelodyHarmStep(i, hvt, tcount, wtcount, last_flag, max_p, repeat_letters_t, miss_letters_t, 17, 20)) return 1;
+		if (FailMelodyHarmStep(i, hvd, dcount, wdcount, last_flag, max_p, repeat_letters_d, miss_letters_d, 428, 430)) return 1;
+		if (FailMelodyHarmStep(i, hvs, scount, wscount, last_flag, max_p, repeat_letters_s, miss_letters_s, 429, 431)) return 1;
 	}
 	return 0;
 }

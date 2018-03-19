@@ -236,9 +236,9 @@ protected:
 	inline void GetMelodyInterval(vector<int>& cc, int step1, int step2, int & nmin, int & nmax);
 	inline void ClearFlags(int step1, int step2);
 	inline void GetPitchClass(vector<int>& c, vector<int>& cc, vector<int>& pc, vector<int>& pcc, int step1, int step2);
-	inline int FailMelodyHarmStep(int i, const int * hv, int & count, int & wcount, int & last_flag, int & max_p);
 	inline int FailGisTrail(vector<int>& pcc);
 	inline int FailFisTrail(vector<int>& pcc);
+	inline int FailMelodyHarmStep(int i, const int * hv, int & count, int & wcount, int & last_flag, int & max_p, int repeat_letters, int miss_letters, int flagr, int flagm);
 	inline int EvalMelodyHarm(int p, int & last_flag, int & max_p);
 	inline int FailMelodyHarm(vector<int>& pc, vector<int>& pcc);
 	//inline void UpdateNoteHarm(int i);
@@ -487,8 +487,12 @@ protected:
 	int calculate_ssf = 1; // Enables SWA stuck flags statistics calculation algorithm.
 	int best_rejected = 0; // Show best rejected results if rejecting more than X ms. Set to 0 to disable. Slows down generation
 	int show_severity = 0; // =1 to show severity and flag id in square brackets in comments to notes (also when exporting to MIDI file)
-	int repeat_letters = 3; // Maximum repeated letters in a row of harmonies
-	int miss_letters = 3; // Maximum steps with missed letters in a row of harmonies
+	int repeat_letters_t = 3; // Maximum repeated letters in a row of harmonies
+	int repeat_letters_d = 3; // Maximum repeated letters in a row of harmonies
+	int repeat_letters_s = 3; // Maximum repeated letters in a row of harmonies
+	int miss_letters_t = 3; // Maximum steps with missed letters in a row of harmonies
+	int miss_letters_d = 3; // Maximum steps with missed letters in a row of harmonies
+	int miss_letters_s = 3; // Maximum steps with missed letters in a row of harmonies
 	int gis_trail_max = 7; // Minimum notes between G# and next G note in Am
 	int fis_leap = 5; // Maximum allowed chromatic leap size before F#
 	int c4p_last_meas = 3; // Last measures that can have leap c4p compensated

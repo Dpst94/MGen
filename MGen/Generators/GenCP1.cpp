@@ -3119,7 +3119,7 @@ int CGenCP1::FailGisTrail2() {
 	return 0;
 }
 
-int CGenCP1::FailHarmStep(int i, const int* hv, int &count, int &wcount) {
+int CGenCP1::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat_letters, int miss_letters, int flagr, int flagm) {
 	if (hv[chm[i]]) {
 		++count;
 		wcount = 0;
@@ -3129,11 +3129,11 @@ int CGenCP1::FailHarmStep(int i, const int* hv, int &count, int &wcount) {
 		count = 0;
 	}
 	if (count > repeat_letters && !hrepeat_fired) {
-		FLAG2(17, s);
+		FLAG2(flagr, s);
 		hrepeat_fired = 1;
 	}
 	if (wcount > miss_letters && !hmiss_fired) {
-		FLAG2(20, s);
+		FLAG2(flagm, s);
 		hmiss_fired = 1;
 	}
 	return 0;
@@ -3213,9 +3213,9 @@ int CGenCP1::EvalHarm() {
 		// Check letter repeat and miss
 		hrepeat_fired = 0;
 		hmiss_fired = 0;
-		if (FailHarmStep(i, hvt, tcount, wtcount)) return 1;
-		if (FailHarmStep(i, hvd, dcount, wdcount)) return 1;
-		if (FailHarmStep(i, hvs, scount, wscount)) return 1;
+		if (FailHarmStep(i, hvt, tcount, wtcount, repeat_letters_t, miss_letters_t, 17, 20)) return 1;
+		if (FailHarmStep(i, hvd, dcount, wdcount, repeat_letters_d, miss_letters_d, 428, 430)) return 1;
+		if (FailHarmStep(i, hvs, scount, wscount, repeat_letters_s, miss_letters_s, 429, 431)) return 1;
 	}
 	return 0;
 }
