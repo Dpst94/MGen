@@ -3195,7 +3195,7 @@ int CGenCP1::EvalHarm() {
 				else if (p2c == 2) FLAG2(92, s);
 				else if (p2c == 3) FLAG2(23, s);
 			}
-			else {
+			else if (pen1 < 2) {
 				p2c = 0;
 			}
 			if (pen1 == 3) {
