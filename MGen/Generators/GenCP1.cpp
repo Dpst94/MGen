@@ -3188,12 +3188,12 @@ int CGenCP1::EvalHarm() {
 			}
 			// Check harmonic penalty	
 			pen1 = hsp[chm[i - 1]][chm[i]];
-			if (pen1 == 1) FLAG2(77, s);
+			if (pen1 == 1) FLAG2L(77, s, hli[i - 1]);
 			if (pen1 == 2) {
 				++p2c;
-				if (p2c == 1) FLAG2(57, s);
-				else if (p2c == 2) FLAG2(92, s);
-				else if (p2c == 3) FLAG2(23, s);
+				if (p2c == 1) FLAG2L(57, s, hli[i - 1]);
+				else if (p2c == 2) FLAG2L(92, s, hli[i - 2]);
+				else if (p2c == 3) FLAG2L(23, s, hli[i - 3]);
 			}
 			else if (pen1 < 2) {
 				p2c = 0;
@@ -3201,10 +3201,10 @@ int CGenCP1::EvalHarm() {
 			if (pen1 == 3) {
 				++p3c;
 				if (p3c == 1) {
-					if (hbc[i] % 7 == hbc[i - 1] % 7) FLAG2(99, s);
-					else FLAG2(418, s);
+					if (hbc[i] % 7 == hbc[i - 1] % 7) FLAG2L(99, s, hli[i - 1]);
+					else FLAG2L(418, s, hli[i - 1]);
 				}
-				else if (p3c == 2) FLAG2(321, s);
+				else if (p3c == 2) FLAG2L(321, s, hli[i - 2]);
 			}
 			else {
 				p3c = 0;
