@@ -3129,11 +3129,11 @@ int CGenCP1::FailHarmStep(int i, const int* hv, int &count, int &wcount, int rep
 		count = 0;
 	}
 	if (count > repeat_letters && !hrepeat_fired) {
-		FLAG2L(flagr, s, hli[i - count]);
+		FLAG2L(flagr, s, hli[i - count + 1]);
 		hrepeat_fired = 1;
 	}
 	if (wcount > miss_letters && !hmiss_fired) {
-		FLAG2L(flagm, s, hli[i - wcount]);
+		FLAG2L(flagm, s, hli[i - wcount + 1]);
 		hmiss_fired = 1;
 	}
 	return 0;
