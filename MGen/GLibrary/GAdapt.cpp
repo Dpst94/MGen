@@ -332,8 +332,8 @@ void CGAdapt::AdaptTremStep(int v, int x, int i, int ii, int ei, int pi, int pei
 void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
 	float max_shift = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed * icf[ii].rand_start / 100;
 	if ((icf[ii].rand_start_max > 0) && (max_shift > icf[ii].rand_start_max)) max_shift = icf[ii].rand_start_max;
-	// Prohibit random legato ahead for EIS because EIS samples already have non-ideal rhythm sync
-	if (icf[ii].type == itEIS) max_shift = 0;
+	// Decrease random legato ahead for EIS because EIS samples already have non-ideal rhythm sync
+	if (icf[ii].type == itEIS) max_shift = max(0, max_shift - 70);
 	int rand_ahead = max(1, icf[ii].legato_ahead[0] - (rand01() - 0.5) * max_shift);
 	// Advance start for legato (not longer than previous note length)
 	if (i > 0 && pi < i) {
