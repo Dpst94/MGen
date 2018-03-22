@@ -3,6 +3,7 @@
 #include "../stdafx.h"
 #include "GAdapt.h"
 #include "SmRnd.h"
+#include "SinRand.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW 
@@ -1098,8 +1099,10 @@ void CGAdapt::Adapt(int step1, int step2) {
 		} // for x
 		SetPauseDyn(v, step1, step2);
 	} // for v
+	//CSinRand sr(4, 0.1, 1, 3, 30);
 	CSmoothRandom sr;
-	float tr;
+	float tr, sr_val, sr_prev;
+	int sr_multi = 8;
 	for (int i = step1; i <= step2; i++) {
 		// Load tempo if it was randomized before
 		if (tempo_src[i]) { //-V550
@@ -1111,7 +1114,30 @@ void CGAdapt::Adapt(int step1, int step2) {
 		if (i > 0) {
 			// Calculate fadeout
 			float fadeout = 1;
+			int sr_i = i % sr_multi;
 			if (stime[step2] - CC_FADEOUT_RESERVE - stime[i] < CC_FADEOUT) 
+				fadeout = max(0, stime[step2] - CC_FADEOUT_RESERVE - stime[i]) / CC_FADEOUT;
+			// Create random
+			if (!sr_i) {
+				sr_prev = sr.sig / sr.s_range;
+				sr.MakeNext();
+			}
+			sr_val = sr_prev * (sr_multi - sr_i) / sr_multi +
+				sr.sig / sr.s_range * (sr_i) / sr_multi;
+			tr = sr_val * (float)rnd_tempo * (float)tempo_src[i] / 200.0 * fadeout;
+			//tr = sr.val * (float)rnd_tempo * (float)tempo_src[i] / 200.0 * fadeout;
+			// Correct tempo range
+			//tr = max(tr, -tempo[i] * (rnd_tempo / 2.0) / 100.0);
+			//tr = min(tr, tempo[i] * (rnd_tempo / 2.0) / 100.0);
+			// Apply tempo randomization
+			tempo[i] += tr;
+		}
+		/*
+		// Randomize tempo
+		if (i > 0) {
+			// Calculate fadeout
+			float fadeout = 1;
+			if (stime[step2] - CC_FADEOUT_RESERVE - stime[i] < CC_FADEOUT)
 				fadeout = max(0, stime[step2] - CC_FADEOUT_RESERVE - stime[i]) / CC_FADEOUT;
 			// Create random
 			sr.MakeNext();
@@ -1123,6 +1149,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 			// Apply tempo randomization
 			tempo[i] += tr;
 		}
+		*/
 	}
 	// Count time
 	if (debug_level > 1) {

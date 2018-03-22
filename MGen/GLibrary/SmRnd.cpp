@@ -13,6 +13,7 @@ CSmoothRandom::CSmoothRandom()
 	a_range = 0.3;
 	v_range = 3;
 	s_range = 100;
+	sig = 0;
 	cycles = 6;
 	v_grav = 1; // 1 = maximum gravity, 0 = no gravity
 	s_grav = 1; // 1 = maximum gravity, 0 = no gravity

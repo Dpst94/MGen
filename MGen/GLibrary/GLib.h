@@ -2,6 +2,7 @@
 
 #include "pvector.h"
 
+#define PI 3.14159265
 #define MGR_VERSION "1.9" // Version of MGR file format (should change only when format changes)
 // Maximum memory usage without warning in Megabytes
 #define MAX_MEMORY_WARN 8000
