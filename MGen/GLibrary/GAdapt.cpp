@@ -351,7 +351,7 @@ void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pe
 			int rand_ahead = max(1, icf[ii].legato_ahead[0] - (rand01() - 0.5) * max_shift);
 			// Move
 			dstime[i][v] = -rand_ahead;
-			detime[i - 1][v] = 0.9 * dstime[i][v];
+			detime[i - 1][v] = dstime[i][v] + 0.1 * abs(dstime[i][v]);
 			if (comment_adapt) {
 				adapt_comment[i][v] += "Ahead legato start. ";
 				adapt_comment[i - 1][v] += "Ahead legato end. ";
@@ -450,7 +450,7 @@ void CGAdapt::AdaptFlexAheadStep(int v, int x, int i, int ii, int ei, int pi, in
 		float adur = pow(128 - vel[i][v], icf[ii].legato_ahead_exp) * adur0 / pow(127, icf[ii].legato_ahead_exp);
 		// Move notes
 		dstime[i][v] = - adur - icf[ii].all_ahead;
-		detime[i - 1][v] = 0.9 * dstime[i][v];
+		detime[i - 1][v] = dstime[i][v] + 0.1 * abs(dstime[i][v]);
 		// Add comments
 		if (comment_adapt) {
 			adapt_comment[i][v] += "Ahead flex start. ";
