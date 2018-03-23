@@ -844,6 +844,12 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "lengroup_edt2", &icf[i].lengroup_edt2);
 	CheckRange(&st2, &st3, "rand_pos", &icf[i].rand_start, &icf[i].rand_end);
 	CheckRange(&st2, &st3, "rand_pos_max", &icf[i].rand_start_max, &icf[i].rand_end_max);
+	CheckVar(&st2, &st3, "rand_start", &icf[i].rand_start);
+	CheckVar(&st2, &st3, "rand_end", &icf[i].rand_end);
+	CheckVar(&st2, &st3, "rand_start_max", &icf[i].rand_start_max);
+	CheckVar(&st2, &st3, "rand_end_max", &icf[i].rand_end_max);
+	CheckVar(&st2, &st3, "lengroup_edt2", &icf[i].lengroup_edt2);
+	CheckVar(&st2, &st3, "lengroup_edt2", &icf[i].lengroup_edt2);
 	CheckVar(&st2, &st3, "retrigger_min_len", &icf[i].retrigger_min_len);
 	CheckVar(&st2, &st3, "retrigger_rand_end", &icf[i].retrigger_rand_end);
 	CheckVar(&st2, &st3, "retrigger_rand_max", &icf[i].retrigger_rand_max);
