@@ -340,7 +340,7 @@ void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pe
 			if ((icf[ii].rand_start_max > 0) && (max_shift > icf[ii].rand_start_max)) max_shift = icf[ii].rand_start_max;
 			// Decrease random legato ahead for EIS because EIS samples already have non-ideal rhythm sync
 			if (icf[ii].type == itEIS) max_shift = max(0, max_shift - 70);
-			int rand_ahead = max(1, icf[ii].legato_ahead[0] - (rand01() - 0.5) * max_shift);
+			int rand_ahead = max(1, icf[ii].legato_ahead[0] - (rand01()) * max_shift);
 			// Move
 			dstime[i][v] = -min(rand_ahead, (setime[i - 1][v] - sstime[pi][v]) * 100 / m_pspeed +
 				detime[i - 1][v] - dstime[pi][v] - 1);
