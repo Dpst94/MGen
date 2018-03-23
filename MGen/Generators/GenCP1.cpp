@@ -1646,7 +1646,7 @@ int CGenCP1::FailTritones2() {
 		// Stop processing when last measure is not fully generated
 		if (ms == mli.size() - 1 && ep2 < c_len) break;
 		// Get first and last measure notes
-		if (ms < mli.size() - 1) mea_end = mli[ms + 1] - 1;
+		if (ms + 1 < mli.size()) mea_end = mli[ms + 1] - 1;
 		else mea_end = c_len - 1;
 		// Prevent going out of window
 		if (mea_end >= ep2) break;
@@ -3299,7 +3299,7 @@ int CGenCP1::FailHarm() {
 		// Stop processing when last measure is not fully generated
 		if (ms == mli.size() - 1 && ep2 < c_len) break;
 		// Get first and last measure notes
-		if (ms < mli.size() - 1) mea_end = mli[ms + 1] - 1;
+		if (ms + 1 < mli.size()) mea_end = mli[ms + 1] - 1;
 		else mea_end = c_len - 1;
 		// Prevent going out of window
 		if (mea_end >= ep2) break;

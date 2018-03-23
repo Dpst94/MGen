@@ -598,7 +598,7 @@ void CGenCA2::Generate() {
 			WriteLog(3, "Reached t_cnt steps. Generation stopped");
 			break;
 		}
-		st.Format("Analyzing: %d of %d", cantus_id+1, cpoint.size());
+		st.Format("Analyzing: %d of %zu", cantus_id+1, cpoint.size());
 		SetStatusText(3, st);
 		if (need_exit) break;
 		if (step < 0) step = 0;

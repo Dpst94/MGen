@@ -104,7 +104,7 @@ void GetProgress(CString cn) {
 			int i = sv.size() - 1;
 			// Protect from empty string
 			if (sv[i].IsEmpty()) i = max(0, i - 1);
-			j_progress.Format("[%d] %s", sv.size(), sv[i]);
+			j_progress.Format("[%zu] %s", sv.size(), sv[i]);
 		}
 		else j_progress = "";
 	}

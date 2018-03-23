@@ -597,7 +597,7 @@ void MPort::InterpolateCC(int CC, float rnd, int step1, int step2, vector< vecto
 	// Time of last cc sent here
 	float last_time = stime[step2 - 1];
 	int first_cc = 0;
-	int last_cc = 0;
+	int end_cc = 0;
 	// Find step that will give enough information for ma junction
 	int pre_cc = 0;
 	int first_step = step1 - 2;
@@ -623,7 +623,7 @@ void MPort::InterpolateCC(int CC, float rnd, int step1, int step2, vector< vecto
 		if (steps % 2 == 0) steps++;
 		// Calculate first and last ma positions to send
 		if (i == step1 - 1) first_cc = cc_lin.size();
-		if (i == step2 - 1) last_cc = cc_lin.size() - 1;
+		if (i == step2 - 1) end_cc = cc_lin.size() - 1;
 		// Linear interpolation
 		for (int c = 0; c < steps; c++) {
 			cc_time.push_back(stime[i] * 100 / m_pspeed + (etime[i] - stime[i]) * 100 / m_pspeed*(float)c / (float)steps);
@@ -660,7 +660,7 @@ void MPort::InterpolateCC(int CC, float rnd, int step1, int step2, vector< vecto
 	int CC_ma2 = icf[ii].CC_ma / 2;
 	// Move cc sending ma window to the left
 	first_cc = max(0, first_cc - CC_ma2 - 1);
-	last_cc = max(0, last_cc - CC_ma2 - 1);
+	end_cc = max(0, end_cc - CC_ma2 - 1);
 	// Set border ma
 	cc_ma[0] = cc_lin[0];
 	cc_ma[cc_lin.size() - 1] = cc_lin[cc_lin.size() - 1];
@@ -701,7 +701,7 @@ void MPort::InterpolateCC(int CC, float rnd, int step1, int step2, vector< vecto
 	// Send starting CC
 	int is_first_cc = 1;
 	// Send ma CC
-	for (int c = first_cc; c <= last_cc; c++) {
+	for (int c = first_cc; c <= end_cc; c++) {
 		float t = cc_time[c];
 		if (is_first_cc) {
 			if (midi_first_run) AddCC(midi_sent_t - midi_start_time - midi_prepause,

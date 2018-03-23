@@ -3505,7 +3505,7 @@ void CGenCF1::ShowScanSpeed() {
 		speed_st = HumanFloat(sspeed) + "/ms";
 	}
 	// Create status
-	if (clib.size() > 0) st.Format("CL %d, ST %lld, CY %s", clib.size(), scan_time / 1000, speed_st);
+	if (clib.size() > 0) st.Format("CL %zu, ST %lld, CY %s", clib.size(), scan_time / 1000, speed_st);
 	else st.Format("ST %lld, CY %s", scan_time / 1000, speed_st);
 	// Send status
 	SetStatusText(5, st);
