@@ -1102,7 +1102,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 	//CSinRand sr(4, 0.1, 1, 3, 30);
 	CSmoothRandom sr;
 	float tr, sr_val, sr_prev;
-	int sr_multi = 8;
+	int sr_multi = max(1, tempo[0] / 100);
 	for (int i = step1; i <= step2; i++) {
 		// Load tempo if it was randomized before
 		if (tempo_src[i]) { //-V550
