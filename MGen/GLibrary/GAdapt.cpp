@@ -969,6 +969,56 @@ void CGAdapt::Adapt(int step1, int step2) {
 	// Set new adapted limit
 	t_adapted = step2 + 1;
 	ValidateVectors(step1, step2);
+	// Randomize tempo
+	CSmoothRandom sr;
+	float tr, sr_val, sr_prev;
+	int sr_multi = max(1, tempo[0] / 100);
+	for (int i = step1; i <= step2; i++) {
+		// Load tempo if it was randomized before
+		if (tempo_src[i]) { //-V550
+			tempo[i] = tempo_src[i];
+		}
+		// Save source tempo
+		tempo_src[i] = tempo[i];
+		// Randomize tempo
+		if (i > 0) {
+			// Calculate fadeout
+			float fadeout = 1;
+			int sr_i = i % sr_multi;
+			if (stime[step2] - CC_FADEOUT_RESERVE - stime[i] < CC_FADEOUT)
+				fadeout = max(0, stime[step2] - CC_FADEOUT_RESERVE - stime[i]) / CC_FADEOUT;
+			// Create random
+			if (!sr_i) {
+				sr_prev = sr.sig / sr.s_range;
+				sr.MakeNext();
+			}
+			sr_val = sr_prev * (sr_multi - sr_i) / sr_multi +
+				sr.sig / sr.s_range * (sr_i) / sr_multi;
+			tr = sr_val * (float)rnd_tempo * (float)tempo_src[i] / 200.0 * fadeout;
+			//tr = sr.val * (float)rnd_tempo * (float)tempo_src[i] / 200.0 * fadeout;
+			// Apply tempo randomization
+			tempo[i] += tr;
+		}
+	}
+	// Tempo could change
+	UpdateTempoMinMax(step1, step2);
+	// Make sstime delta before recalculating stime
+	for (int i = step1; i <= step2; i++) {
+		for (int v = 0; v < v_cnt; v++) {
+			sstime[i][v] -= stime[i];
+			setime[i][v] -= etime[i];
+		}
+	}
+	CountTime(step1, step2);
+	// Recalculate sstime/setime to new tempo
+	for (int i = step1; i <= step2; i++) {
+		for (int v = 0; v < v_cnt; v++) {
+			sstime[i][v] *= tempo_src[i] / tempo[i];
+			setime[i][v] *= tempo_src[i] / tempo[i];
+			sstime[i][v] += stime[i];
+			setime[i][v] += etime[i];
+		}
+	}
 	long long time_start = CGLib::time();
 	int ei; // ending step
 	int pi; // previous note step
@@ -1100,57 +1150,6 @@ void CGAdapt::Adapt(int step1, int step2) {
 		SetPauseDyn(v, step1, step2);
 	} // for v
 	//CSinRand sr(4, 0.1, 1, 3, 30);
-	CSmoothRandom sr;
-	float tr, sr_val, sr_prev;
-	int sr_multi = max(1, tempo[0] / 100);
-	for (int i = step1; i <= step2; i++) {
-		// Load tempo if it was randomized before
-		if (tempo_src[i]) { //-V550
-			tempo[i] = tempo_src[i];
-		}
-		// Save source tempo
-		tempo_src[i] = tempo[i];
-		// Randomize tempo
-		if (i > 0) {
-			// Calculate fadeout
-			float fadeout = 1;
-			int sr_i = i % sr_multi;
-			if (stime[step2] - CC_FADEOUT_RESERVE - stime[i] < CC_FADEOUT) 
-				fadeout = max(0, stime[step2] - CC_FADEOUT_RESERVE - stime[i]) / CC_FADEOUT;
-			// Create random
-			if (!sr_i) {
-				sr_prev = sr.sig / sr.s_range;
-				sr.MakeNext();
-			}
-			sr_val = sr_prev * (sr_multi - sr_i) / sr_multi +
-				sr.sig / sr.s_range * (sr_i) / sr_multi;
-			tr = sr_val * (float)rnd_tempo * (float)tempo_src[i] / 200.0 * fadeout;
-			//tr = sr.val * (float)rnd_tempo * (float)tempo_src[i] / 200.0 * fadeout;
-			// Correct tempo range
-			//tr = max(tr, -tempo[i] * (rnd_tempo / 2.0) / 100.0);
-			//tr = min(tr, tempo[i] * (rnd_tempo / 2.0) / 100.0);
-			// Apply tempo randomization
-			tempo[i] += tr;
-		}
-		/*
-		// Randomize tempo
-		if (i > 0) {
-			// Calculate fadeout
-			float fadeout = 1;
-			if (stime[step2] - CC_FADEOUT_RESERVE - stime[i] < CC_FADEOUT)
-				fadeout = max(0, stime[step2] - CC_FADEOUT_RESERVE - stime[i]) / CC_FADEOUT;
-			// Create random
-			sr.MakeNext();
-			tr = sr.sig / sr.s_range * (float)rnd_tempo * (float)tempo_src[i] / 200.0 * fadeout;
-			//tr = tempo[i - 1] - tempo_src[i - 1] + randbw(-rnd_tempo_step * tempo[i] / 100.0, rnd_tempo_step * tempo[i] / 100.0);
-			// Correct tempo range
-			//tr = max(tr, -tempo[i] * (rnd_tempo / 2.0) / 100.0);
-			//tr = min(tr, tempo[i] * (rnd_tempo / 2.0) / 100.0);
-			// Apply tempo randomization
-			tempo[i] += tr;
-		}
-		*/
-	}
 	// Count time
 	if (debug_level > 1) {
 		long long time_stop = CGLib::time();
@@ -1158,8 +1157,6 @@ void CGAdapt::Adapt(int step1, int step2) {
 		st.Format("Adapt steps %d-%d in %lld ms", step1, step2, time_stop - time_start);
 		WriteLog(0, st);
 	}
-	// Tempo could change
-	UpdateTempoMinMax(step1, step2);
 	// Check adaptation results
 	ValidateVectors2(step1, step2);
 }
