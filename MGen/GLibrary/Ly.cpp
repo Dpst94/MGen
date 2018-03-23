@@ -145,7 +145,7 @@ void CLy::LoadLyShapes(CString fname) {
 			if (ast[3][ast[3].GetLength() - 1] == '"') ast[3].Delete(ast[3].GetLength() - 1);
 			ast[3].Replace("\"\"", "\"");
 			// Save
-			if (shsc[phase][task][shape] != "") {
+			if (!(shsc[phase][task][shape].IsEmpty())) {
 				est.Format("Duplicate phase/task/shape at line %d in shapes file %s: '%s'", i, fname, st);
 				WriteLog(5, est);
 			}

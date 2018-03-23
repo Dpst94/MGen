@@ -854,7 +854,7 @@ void CGVar::LoadResults(CString dir, CString fname)
 			}
 		}
 		else {
-			if (st != "") {
+			if (!st.IsEmpty()) {
 				WriteLog(5, "No equal sign in line, which is not a comment: '" + st + "' in file " + path);
 			}
 		}

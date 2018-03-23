@@ -61,7 +61,7 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 		// Load include
 		if (load_includes && CheckInclude(st, fname, iname)) {
 			LoadConfigFile(iname);
-			st = "";
+			st.Empty();
 		}
 		if (error) break;
 		pos = st.Find("=");
@@ -201,7 +201,7 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 			if (error) break;
 		}
 		else {
-			if (st != "") {
+			if (!st.IsEmpty()) {
 				WriteLog(5, "No equal sign in line, which is not a comment: '" + st + "' in file " + fname);
 			}
 		}
@@ -361,7 +361,7 @@ void CConf::LoadInstrumentLayout()
 				iclass = st2.Left(st2.Find("/"));
 				st2 = st2.Mid(st2.Find("/") + 1);
 			}
-			else iclass = "";
+			else iclass.Empty();
 			for (int x = 0; x < icf.size(); ++x) {
 				if (icf[x].group == st2) {
 					WriteLog(5, "Instrument layout should contain unique instrument groups. Detected duplicate: " + st2);
@@ -490,7 +490,7 @@ void CConf::LoadInstrument(int i, CString fname)
 		// Load include
 		if (CheckInclude(st, fname, iname)) {
 			LoadInstrument(i, iname);
-			st = "";
+			st.Empty();
 		}
 		// Find equals
 		pos = st.Find("=");
@@ -508,7 +508,7 @@ void CConf::LoadInstrument(int i, CString fname)
 			//CConf::LoadVar(&st2, &st3, "save_format_version", &save_format_version);
 		}
 		else {
-			if (st != "") {
+			if (!st.IsEmpty()) {
 				WriteLog(5, "No equal sign in line, which is not a comment: '" + st + "' in file " + fname);
 			}
 		}
