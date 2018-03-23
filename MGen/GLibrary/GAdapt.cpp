@@ -269,6 +269,7 @@ int CGAdapt::MapInRange(int src, int range1, int range2) {
 	return max(0, min(127, src * (range2 - range1) / 127.0 + range1));
 }
 
+// This function first makes random value, then cuts in range
 int CGAdapt::RandInRange(int src, int range1, int range2, int rand_range) {
 	int res = src + randbw(-rand_range * src / 100, rand_range * src / 100);
 	if (res < range1) res = range1;
