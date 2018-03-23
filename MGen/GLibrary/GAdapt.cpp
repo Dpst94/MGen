@@ -978,7 +978,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 	ValidateVectors(step1, step2);
 	// Randomize tempo
 	CSmoothRandom sr;
-	float tr, sr_val, sr_prev;
+	float tr, sr_val;
+	float sr_prev = 0;
 	int sr_multi = max(1, tempo[0] / 100);
 	for (int i = step1; i <= step2; i++) {
 		// Load tempo if it was randomized before
@@ -987,18 +988,18 @@ void CGAdapt::Adapt(int step1, int step2) {
 		}
 		// Save source tempo
 		tempo_src[i] = tempo[i];
+		int sr_i = i % sr_multi;
+		if (!sr_i) {
+			sr_prev = sr.sig / sr.s_range;
+			sr.MakeNext();
+		}
 		// Randomize tempo
 		if (i > 0) {
 			// Calculate fadeout
 			float fadeout = 1;
-			int sr_i = i % sr_multi;
 			if (stime[step2] - CC_FADEOUT_RESERVE - stime[i] < CC_FADEOUT)
 				fadeout = max(0, stime[step2] - CC_FADEOUT_RESERVE - stime[i]) / CC_FADEOUT;
 			// Create random
-			if (!sr_i) {
-				sr_prev = sr.sig / sr.s_range;
-				sr.MakeNext();
-			}
 			sr_val = sr_prev * (sr_multi - sr_i) / sr_multi +
 				sr.sig / sr.s_range * (sr_i) / sr_multi;
 			tr = sr_val * (float)rnd_tempo * (float)tempo_src[i] / 200.0 * fadeout;
