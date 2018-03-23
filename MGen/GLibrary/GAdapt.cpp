@@ -338,13 +338,19 @@ void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pe
 			(!pause[pi][v]) && (abs(note[i][v] - note[i - 1][v]) <= icf[ii].max_ahead_note)) {
 			// Calculate maximum randomization of legato ahead, including this and previous note
 			float max_shift = min(setime[ei][v] - sstime[i][v], sstime[i][v] - sstime[pi][v]) * 100 / m_pspeed * icf[ii].rand_start / 100;
+			float pdur = (setime[i - 1][v] - sstime[pi][v]) * 100 / m_pspeed +
+				detime[i - 1][v] - dstime[pi][v] - 1;
 			if ((icf[ii].rand_start_max > 0) && (max_shift > icf[ii].rand_start_max)) max_shift = icf[ii].rand_start_max;
 			// Decrease random legato ahead for EIS because EIS samples already have non-ideal rhythm sync
 			if (icf[ii].type == itEIS) max_shift = max(0, max_shift - 70);
-			int rand_ahead = max(1, icf[ii].legato_ahead[0] - (rand01()) * max_shift);
+			// Decrease max_shift if it is greater than previous note length
+			if (icf[ii].legato_ahead[0] + max_shift / 2 >	pdur) {
+				max_shift = (pdur - icf[ii].legato_ahead[0] - 1) * 2;
+			}
+			// Calculate real randomized ahead
+			int rand_ahead = max(1, icf[ii].legato_ahead[0] - (rand01() - 0.5) * max_shift);
 			// Move
-			dstime[i][v] = -min(rand_ahead, (setime[i - 1][v] - sstime[pi][v]) * 100 / m_pspeed +
-				detime[i - 1][v] - dstime[pi][v] - 1);
+			dstime[i][v] = -rand_ahead;
 			detime[i - 1][v] = 0.9 * dstime[i][v];
 			if (comment_adapt) {
 				adapt_comment[i][v] += "Ahead legato start. ";
