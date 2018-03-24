@@ -7,8 +7,8 @@
 #define new DEBUG_NEW 
 #endif
 
-CSmoothRandom::CSmoothRandom()
-{
+CSmoothRandom::CSmoothRandom(int inter_steps0) {
+	inter_steps = inter_steps0;
 	a2_range = 0.03;
 	a_range = 0.3;
 	v_range = 3;
@@ -21,12 +21,10 @@ CSmoothRandom::CSmoothRandom()
 	InitRandom();
 }
 
-CSmoothRandom::~CSmoothRandom()
-{
+CSmoothRandom::~CSmoothRandom() {
 }
 
-float CSmoothRandom::MakeNext()
-{
+float CSmoothRandom::MakeNext() {
 	for (int i = 0; i < cycles; i++) {
 		float a2_max = a2_range;
 		float a2_min = -a2_range;
@@ -78,4 +76,16 @@ float CSmoothRandom::MakeNext()
 		}
 	}
 	return sig;
+}
+
+float CSmoothRandom::MakeNextInter() {
+	int sr_i = step % inter_steps;
+	if (!sr_i) {
+		prev_inter_sig = sig;
+		MakeNext();
+	}
+	inter_sig = prev_inter_sig * (inter_steps - sr_i) / inter_steps +
+		sig * (sr_i) / inter_steps;
+	++step;
+	return 0.0f;
 }

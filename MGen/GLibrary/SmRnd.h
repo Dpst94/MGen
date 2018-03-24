@@ -6,16 +6,23 @@ class CSmoothRandom :
 	public CGLib
 {
 public:
-	CSmoothRandom();
+	CSmoothRandom(int inter_steps0 = 1);
 	~CSmoothRandom();
 
 	float MakeNext();
+	float MakeNextInter();
 
 	// Variables
 	float acc2 = 0; // Second derivative of velocity
 	float acc = 0; // First derivative of velocity (acceleration)
 	float vel = 0; // Velocity
 	float sig = 0; // Signal
+
+	// Interpolation
+	int inter_steps = 1;
+	int step = 0;
+	float inter_sig = 0;
+	float prev_inter_sig = 0;
 
 	// Constants
 	float a2_range;
