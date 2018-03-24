@@ -81,7 +81,9 @@ struct IConf {
 	float vib_bell_exp = 0; // Exponent to create non - linear bell shape
 	float vibf_bell_exp = 0; // Exponent to create non - linear bell shape
 	float rnd_vib = 0; // Randomize vibrato intensity not greater than this percent
+	int rnd_vib_slow = 1; // Slow down random vibrato function by this value. Can be only integer: 1 and above
 	float rnd_vibf = 0; // Randomize vibrato speed not greater than this percent
+	int rnd_vibf_slow = 1; // Slow down random vibrato speed function by this value. Can be only integer: 1 and above
 	int replace_pitch = -1; // Single note that should be sent instead of all other notes
 	map<int, int> map_pitch; // Map pitches to other pitches
 	map<int, int> map_tremolo; // Map pitches to other pitches
@@ -151,6 +153,7 @@ struct IConf {
 	float rnd_vel = 0; // Randomize note velocity not greater than this percent
 	float rnd_vel_repeat = 0; // Randomize note velocity not greater than this percent for note retriggers
 	float rnd_dyn = 0; // Randomize step dynamics not greater than this percent
+	int rnd_dyn_slow = 1; // Slow down random dynamics function by this value. Can be only integer: 1 and above
 	int retrigger_min_len = 0; // Minimum next note length in ms to use retrigger
 	int retrigger_rand_end = 0; // Maximum percent of note length to move note end to the left in case of nonlegato
 	int retrigger_rand_max = 0; // Maximum length in ms to move note end to the left in case of nonlegato retrigger

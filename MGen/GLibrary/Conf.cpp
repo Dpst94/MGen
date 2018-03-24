@@ -786,8 +786,11 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "rnd_vel", &icf[i].rnd_vel);
 	CheckVar(&st2, &st3, "rnd_vel_repeat", &icf[i].rnd_vel_repeat);
 	CheckVar(&st2, &st3, "rnd_dyn", &icf[i].rnd_dyn);
+	CheckVar(&st2, &st3, "rnd_dyn_slow", &icf[i].rnd_dyn_slow, 1);
 	CheckVar(&st2, &st3, "rnd_vib", &icf[i].rnd_vib);
+	CheckVar(&st2, &st3, "rnd_vib_slow", &icf[i].rnd_vib_slow, 1);
 	CheckVar(&st2, &st3, "rnd_vibf", &icf[i].rnd_vibf);
+	CheckVar(&st2, &st3, "rnd_vibf_slow", &icf[i].rnd_vibf_slow, 1);
 	CheckVar(&st2, &st3, "splitpo_pent_minint", &icf[i].splitpo_pent_minint);
 	CheckVar(&st2, &st3, "cc_vib", &icf[i].CC_vib);
 	CheckVar(&st2, &st3, "cc_vibf", &icf[i].CC_vibf);

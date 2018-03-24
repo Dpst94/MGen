@@ -533,9 +533,9 @@ void MPort::SendMIDI(int step1, int step2)
 		}
 		// Send CC
 		if (icf[ii].trem_chan > -1) midi_channel = icf[ii].trem_chan - 1;
-		InterpolateCC(icf[ii].CC_dyn, icf[ii].rnd_dyn, step1, step22, dyn, ii, v);
-		InterpolateCC(icf[ii].CC_vib, icf[ii].rnd_vib, step1, step22, vib, ii, v);
-		InterpolateCC(icf[ii].CC_vibf, icf[ii].rnd_vibf, step1, step22, vibf, ii, v);
+		InterpolateCC(icf[ii].CC_dyn, icf[ii].rnd_dyn, icf[ii].rnd_dyn_slow, step1, step22, dyn, ii, v);
+		InterpolateCC(icf[ii].CC_vib, icf[ii].rnd_vib, icf[ii].rnd_vib_slow, step1, step22, vib, ii, v);
+		InterpolateCC(icf[ii].CC_vibf, icf[ii].rnd_vibf, icf[ii].rnd_vibf_slow, step1, step22, vibf, ii, v);
 		SendPedalCC(step1, step22, ii, v);
 		midi_channel = midi_channel_saved;
 	}
@@ -579,13 +579,13 @@ void MPort::SendPedalCC(int step1, int step2, int ii, int v) {
 
 // First cc sent by this function is with i = step1 - 2, time = stime[i + 1] = stime[step1-1]
 // Last cc sent by this function is with i = step2 - 2, time = etime[i] = etime[step2-2] = stime[step2-1]
-void MPort::InterpolateCC(int CC, float rnd, int step1, int step2, vector< vector <unsigned char> > & dv, int ii, int v)
+void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2, vector< vector <unsigned char> > & dv, int ii, int v)
 {
 	//CString st;
 	//st.Format("Send CC%d from %d to %d", CC, step1, step2);
 	//WriteLog(4, st);
 	if (!CC) return;
-	CSmoothRandom sr;
+	CSmoothRandom sr(rnd_slow);
 	int steps;
 	float fsteps;
 	// Linear interpolation
@@ -692,8 +692,8 @@ void MPort::InterpolateCC(int CC, float rnd, int step1, int step2, vector< vecto
 		float fadeout = 1;
 		if (last_time - CC_FADEOUT_RESERVE - t < CC_FADEOUT) fadeout = max(0, last_time - CC_FADEOUT_RESERVE - t) / CC_FADEOUT;
 		// Add random
-		sr.MakeNext();
-		cc_ma[c] += sr.sig / sr.s_range * (float)rnd * (float)cc_ma[c] / 200.0 * fadeout;
+		sr.MakeNextInter();
+		cc_ma[c] += sr.inter_sig / sr.s_range * (float)rnd * (float)cc_ma[c] / 200.0 * fadeout;
 		// Check limits
 		if (cc_ma[c] < 1) cc_ma[c] = 1;
 		if (cc_ma[c] > 127) cc_ma[c] = 127;
