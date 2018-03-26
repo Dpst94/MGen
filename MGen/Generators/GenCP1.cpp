@@ -465,7 +465,7 @@ int CGenCP1::SendCP() {
 	float l_rpenalty_cur;
 	CString st, st2, rpst;
 	int pos = 0, plen;
-	int v, x1;
+	int v, x1, pos_harm;
 	int chm_id = 0;
 	if (svoice < 0) return 0;
 	Sleep(sleep_ms);
@@ -504,6 +504,8 @@ int CGenCP1::SendCP() {
 		// Copy cantus to output
 		if (step + real_len >= t_allocated) ResizeVectors(t_allocated * 2);
 		for (int x = 0; x < ep2; ++x) {
+			pos_harm = pos;
+			if (pos == step) pos_harm += fn;
 			mark_color[pos][v] = MakeColor(255, 120, 120, 120);
 			mark[pos][v].Empty();
 			if (av == cpv) {
@@ -519,22 +521,22 @@ int CGenCP1::SendCP() {
 			}
 			else {
 				if (chm.size() > chm_id && hli[chm_id] == x) {
-					mark[pos][v] = GetHarmName(chm[chm_id], chm_alter[chm_id]);
+					mark[pos_harm][v] = GetHarmName(chm[chm_id], chm_alter[chm_id]);
 					if (show_harmony_bass && hbc[chm_id] % 7 != chm[chm_id]) {
 						if (show_harmony_bass == 1) {
-							mark[pos][v] += "/" +
+							mark[pos_harm][v] += "/" +
 								GetRealNoteName(hbcc[chm_id] % 12, tonic_cur, minor_cur);
 						}
 						else {
 							if ((hbc[chm_id] % 7 - chm[chm_id] + 7) % 7 == 2) {
-								mark[pos][v] += "6";
+								mark[pos_harm][v] += "6";
 							}
 							else {
-								mark[pos][v] += "6/4";
+								mark[pos_harm][v] += "6/4";
 							}
 						}
 					}
-					SendHarmColorCP(pos, v, chm_id);
+					SendHarmColorCP(pos_harm, v, chm_id);
 					++chm_id;
 				}
 			}
