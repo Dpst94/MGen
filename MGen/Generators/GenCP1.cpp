@@ -660,8 +660,9 @@ void CGenCP1::ReseedCP()
 }
 
 int CGenCP1::FailAlteredInt2(int i, int c1, int c2, int flag) {
-	if ((apcc[0][i] == c1 && apcc[1][i] == c2) || (apcc[0][i] == c2 && apcc[1][i] == c1))
-		FLAG2(flag, fli[bli[i]]);
+	if ((apcc[0][i] == c1 && apcc[1][i] == c2) || (apcc[0][i] == c2 && apcc[1][i] == c1)) {
+		FLAG2(flag, i);
+	}
 	return 0;
 }
 
@@ -674,9 +675,17 @@ void CGenCP1::GetAlteredInt(int i, int c1, int c2, int flag) {
 // Fail vertical altered intervals
 int CGenCP1::FailAlteredInt() {
 	CHECK_READY(DR_pc, DR_ivl);
+	for (ls = 0; ls < fli_size; ++ls) {
+		s = fli[ls];
+		if (FailAlteredInt2(s, 9, 8, 170)) return 1;
+		if (FailAlteredInt2(s, 11, 10, 171)) return 1;
+		// Do not process suspension and anticipation 4th
+		if (sus[ls]) {
+			if (FailAlteredInt2(sus[ls], 9, 8, 170)) return 1;
+			if (FailAlteredInt2(sus[ls], 11, 10, 171)) return 1;
+		}
+	}
 	for (int i = 0; i < ep2; ++i) {
-		if (FailAlteredInt2(i, 9, 8, 170)) return 1;
-		if (FailAlteredInt2(i, 11, 10, 171)) return 1;
 	}
 	return 0;
 }
