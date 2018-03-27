@@ -660,9 +660,15 @@ void CGenCP1::ReseedCP()
 }
 
 int CGenCP1::FailAlteredInt2(int i, int c1, int c2, int flag) {
-	if ((apcc[0][i] == c1 && apcc[1][i] == c2) || (apcc[0][i] == c2 && apcc[1][i] == c1)) 
+	if ((apcc[0][i] == c1 && apcc[1][i] == c2) || (apcc[0][i] == c2 && apcc[1][i] == c1))
 		FLAG2(flag, fli[bli[i]]);
 	return 0;
+}
+
+void CGenCP1::GetAlteredInt(int i, int c1, int c2, int flag) {
+	if ((apcc[0][i] == c1 && apcc[1][i] == c2) || (apcc[0][i] == c2 && apcc[1][i] == c1)) {
+		if (!accept[flag]) tivl[i] = iDis;
+	}
 }
 
 // Fail vertical altered intervals
@@ -671,9 +677,6 @@ int CGenCP1::FailAlteredInt() {
 	for (int i = 0; i < ep2; ++i) {
 		if (FailAlteredInt2(i, 9, 8, 170)) return 1;
 		if (FailAlteredInt2(i, 11, 10, 171)) return 1;
-		if (FailAlteredInt2(i, 11, 8, 172)) return 1;
-		if (FailAlteredInt2(i, 9, 3, 173)) return 1;
-		if (FailAlteredInt2(i, 11, 3, 174)) return 1;
 	}
 	return 0;
 }
@@ -703,7 +706,7 @@ int CGenCP1::FailCrossInt() {
 }
 
 void CGenCP1::GetVIntervals() {
-	CHECK_READY(DR_c);
+	CHECK_READY(DR_c, DR_pc);
 	SET_READY(DR_ivl);
 	// Calculate intervals
 	for (int i = 0; i < ep2; ++i) {
@@ -716,6 +719,9 @@ void CGenCP1::GetVIntervals() {
 		if (civlc[i] == 3 || civlc[i] == 4 || civlc[i] == 8 || civlc[i] == 9) tivl[i] = iIco;
 		else if (civlc[i] == 7 || civlc[i] == 0) tivl[i] = iPco;
 		else tivl[i] = iDis;
+		GetAlteredInt(i, 11, 8, 172);
+		GetAlteredInt(i, 9, 3, 173);
+		GetAlteredInt(i, 11, 3, 174);
 	}
 }
 

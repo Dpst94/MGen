@@ -718,10 +718,12 @@ void ProcessDyn() {
 				if (!it->second[x]) continue;
 				if (!it2->second[x]) continue;
 				++common;
+				// Calculate sums of powered values 
 				esum += pow(it->second[x], rms_exp);
 				esum2 += pow(it2->second[x], rms_exp);
 			}
 			if (common && esum > 0) {
+				// Get rms values of both tracks
 				double rms = pow(esum / common, 1 / rms_exp);
 				double rms2 = pow(esum2 / common, 1 / rms_exp);
 				if (rms > 0) {
