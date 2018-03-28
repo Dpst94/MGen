@@ -512,6 +512,7 @@ protected:
 	int tonic_max = 1; // Maximum number of tonic notes that can be contained in tonic window
 	int tonic_window_cp = 9; // Number of harmonies that are searched for number of tonic chords
 	int tonic_max_cp = 1; // Maximum number of tonic chords that can be contained in tonic window
+	int tonic_wei_inv = 50; // Percent of weight for inverted tonic chord
 	vector<int> max_note_len; // [sp] Maximum note real length in croches by species
 
 	int tonic_leap = 4; // Maximum allowed leap to tonic (chromatic) without weight change

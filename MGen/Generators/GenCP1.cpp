@@ -3247,7 +3247,8 @@ int CGenCP1::EvalHarm() {
 
 
 int CGenCP1::FailTonicCP() {
-	int tcount = 0;
+	CHECK_READY(DR_hbc);
+	float tcount = 0;
 	int fire, fired = 0;
 	// Do not check if melody is short
 	if (hli.size() < 3) return 0;
@@ -3259,8 +3260,9 @@ int CGenCP1::FailTonicCP() {
 			if (!chm[hs - tonic_window_cp]) --tcount;
 		}
 		if (!chm[hs]) {
-			// Increment for current tonic note
-			++tcount;
+			// Increment for current tonic note (depending on inversion)
+			if (hbc[hs] % 7 == chm[hs]) ++tcount;
+			else tcount += tonic_wei_inv / 100.0;
 			// Check count of tonic notes
 			if (tcount > tonic_max_cp) {
 				// Grant one more tonic in first window if first chord not tonic

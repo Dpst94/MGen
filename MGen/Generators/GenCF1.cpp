@@ -454,6 +454,7 @@ void CGenCF1::SetRuleParams() {
 	tonic_window = GetRuleParam(rule_set, 196, rsSubName, 1);
 	tonic_max_cp = GetRuleParam(rule_set, 310, rsSubName, 0);
 	tonic_window_cp = GetRuleParam(rule_set, 310, rsSubName, 1);
+	tonic_wei_inv = GetRuleParam(rule_set, 310, rsSubComment, 0);
 	tonic_leap = Interval2Chromatic(GetRuleParam(rule_set, 196, rsSubComment, 0));
 	tonic_wei_leap = GetRuleParam(rule_set, 196, rsSubComment, 1);
 	tonic_wei_len = GetRuleParam(rule_set, 196, rsSubComment, 2);
