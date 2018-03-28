@@ -3245,7 +3245,6 @@ int CGenCP1::EvalHarm() {
 	return 0;
 }
 
-
 int CGenCP1::FailTonicCP() {
 	CHECK_READY(DR_hbc);
 	float tcount = 0;
@@ -3505,6 +3504,8 @@ void CGenCP1::GetHarmBass() {
 			nt = ac[cpv][s] % 7;
 			// Do not process notes that are not harmonic
 			if (nt != de1 && nt != de2 && nt != de3) continue;
+			// Do not process 5th on beat 2 and 4 (or offbeat)
+			if (nt == de3 && beat[ls] > 1) continue;
 			if (hbcc[hs] > acc[0][s]) hbcc[hs] = acc[0][s];
 			if (hbc[hs] > ac[0][s]) hbc[hs] = ac[0][s];
 		}
