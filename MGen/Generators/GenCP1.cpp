@@ -2210,7 +2210,7 @@ int CGenCP1::FailPcoApartStep2(int iv, int &pco_last, int &mli_last, int &pco_la
 					// Contrary compound
 					else FLAG2L(248, s, pco_last);
 				}
-				// Stepwize
+				// One of intervals is approached and left by stepwize movement 
 				else if ((!sus[ls_1] && (!pco_last || asmooth[cpv][pco_last - 1]) &&
 					(pco_last2 + 1 >= ep2 || asmooth[cpv][pco_last2])) ||
 					(!sus[ls] && (!s || asmooth[cpv][s - 1]) &&
