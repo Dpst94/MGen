@@ -3186,7 +3186,8 @@ int CGenCP1::EvalHarm() {
 				s > 0 && apc[0][s - 1] == 4) FLAG2(48, s);
 			// Prohibit 64 chord
 			if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
-				FLAG2(383, s);
+				if (hsev[i]) FLAG2(433, s);
+				else FLAG2(383, s);
 			}
 			if (minor_cur) {
 				// Prohibit VI<->VI# containing progression
@@ -3302,6 +3303,7 @@ void CGenCP1::RemoveHarmDuplicate() {
 	chm_alter.resize(chm_id);
 	hbc.resize(chm_id);
 	hbcc.resize(chm_id);
+	hsev.resize(chm_id);
 }
 
 int CGenCP1::FailHarm() {
@@ -3318,6 +3320,7 @@ int CGenCP1::FailHarm() {
 	cchn.resize(12);
 	hli.clear();
 	hli2.clear();
+	hsev.clear();
 	chm.clear();
 	hbcc.clear();
 	hbc.clear();
@@ -3345,6 +3348,7 @@ int CGenCP1::FailHarm() {
 		hli2.push_back(0);
 		hs = hli.size() - 1;
 		if (hli2.size() > 1) hli2[hli2.size() - 2] = hli[hli.size() - 1] - 1;
+		hsev.push_back(1);
 		hbcc.push_back(acc[cfv][mli[ms]]);
 		hbc.push_back(ac[cfv][mli[ms]]);
 		chm.push_back(r);
@@ -3409,6 +3413,7 @@ int CGenCP1::FailHarm() {
 				hs = hli.size() - 1;
 				if (hli2.size() > 1) hli2[hli2.size() - 2] = hli[hli.size() - 1] - 1;
 				chm.push_back(r);
+				hsev.push_back(1);
 				hbcc.push_back(acc[cfv][mli[ms]]);
 				hbc.push_back(ac[cfv][mli[ms]]);
 				chm_alter.push_back(0);
@@ -3498,16 +3503,30 @@ void CGenCP1::GetHarmBass() {
 		de1 = chm[hs];
 		de2 = (de1 + 2) % 7;
 		de3 = (de1 + 4) % 7;
+		// 5th for 6/4 count
+		int q_prev = -1;
 		// Loop inside harmony
 		for (ls = bli[hli[hs]]; ls <= bli[hli2[hs]]; ++ls) if (msh[ls] > 0) {
 			s = fli[ls];
 			nt = ac[cpv][s] % 7;
 			// Do not process notes that are not harmonic
 			if (nt != de1 && nt != de2 && nt != de3) continue;
-			// Do not process 5th on beat 2 and 4 (or offbeat)
-			if (nt == de3 && beat[ls] > 1) continue;
-			if (hbcc[hs] > acc[0][s]) hbcc[hs] = acc[0][s];
-			if (hbc[hs] > ac[0][s]) hbc[hs] = ac[0][s];
+			if (hbcc[hs] > acc[0][s]) {
+				// Set lower severity for 6/4 with non-repeating 5th on upbeat
+				if (nt == de3 && beat[ls] > 1) {
+					int found = 0;
+					for (int ls2 = bli[hli[hs]]; ls2 <= bli[hli2[hs]]; ++ls2) if (ls2 != ls) {
+						if (acc[0][s] == acc[0][fli[ls2]]) found = 1;
+					}
+					if (found) hsev[hs] = 1;
+					else {
+						hsev[hs] = 0;
+					}
+				} 
+				else hsev[hs] = 1;
+				hbcc[hs] = acc[0][s];
+				hbc[hs] = ac[0][s];
+			}
 		}
 	}
 }
