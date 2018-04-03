@@ -248,6 +248,7 @@ void CGenCP1::ScanCPInit() {
 	motion.resize(c_len);
 	beat.resize(c_len);
 	sus.resize(c_len);
+	susres.resize(c_len);
 	isus.resize(c_len);
 	ep2 = c_len;
 	voice_high = cpv;
@@ -1013,14 +1014,27 @@ int CGenCP1::FailSus2() {
 					if (s3 && ls3 == ls + 2 && tivl[fli[ls + 2]] > 0 && aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
 					if (s4 && ls4 == ls + 2 && tivl[fli[ls + 2]] > 0 && aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
 					if (s5 && ls5 == ls + 2 && tivl[fli[ls + 2]] > 0 && aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
-					// Mark resolution as obligatory harmonic in basic msh
-					if (s3) mshb[ls3] = pSusRes;
-					if (s4) mshb[ls4] = pSusRes;
-					if (s5) mshb[ls5] = pSusRes;
+					// Mark resolution as obligatory harmonic in basic msh and ending as non-harmonic
+					// In this case all resolutions are marked, although one of them is enough, but this is a very rare case that several resolutions pass all checks
+					if (s3) {
+						mshb[ls3] = pSusRes;
+						susres[ls] = 1;
+					}
+					if (s4) {
+						mshb[ls4] = pSusRes;
+						susres[ls] = 1;
+					}
+					if (s5) {
+						mshb[ls5] = pSusRes;
+						susres[ls] = 1;
+					}
 				}
 				// If full measure is not generated, allow non-harmonic insertion
+				// Second insertion note is not marked, because it should always be pAux
 				else {
 					mshb[ls + 1] = pAux;
+					// Also mark successful resolution
+					susres[ls] = 1;
 				}
 			}
 			else if (ep2 == c_len) {
@@ -1057,6 +1071,7 @@ int CGenCP1::FailSus() {
 	CHECK_READY(DR_mshb);
 	SET_READY(DR_retrigger);
 	fill(retrigger.begin(), retrigger.end(), 0);
+	fill(susres.begin(), susres.end(), 0);
 	if (species == 1) {
 		if (FailSus1()) return 1;
 	}
@@ -3371,9 +3386,9 @@ int CGenCP1::FailHarm() {
 			else s9 = fli[ls];
 			// Do not process non-harmonic notes if they are not consonant ending of first sus
 			// Sus ending 4th is also not processed
-			// For first suspended note do not check msh
+			// For first suspended dissonance resolved note do not check msh
 			if (ls == ls1 && sus[ls]) {
-				if (tivl[s9] < 0) continue;
+				if (tivl[s9] < 0 && susres[ls]) continue;
 			}
 			// For all other notes, check msh and iHarm4
 			else {
