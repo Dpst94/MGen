@@ -3487,7 +3487,7 @@ int CGenCP1::FailHarm() {
 			}
 			// Check if LT harmony is separated from last harmony with harmony without LT
 			if (last_b > -1) {
-				if (bhli[last_b] < hli.size() - 2) FLAG2(318, last_b);
+				if (bhli[last_b] < hli.size() - 2) FLAG2(318, max(mli[mli.size() - 2], last_b));
 			}
 		}
 	}
