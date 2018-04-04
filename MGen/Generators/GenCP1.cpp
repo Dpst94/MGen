@@ -1169,7 +1169,7 @@ int CGenCP1::FailPco() {
 			if (apcc[0][sus[ls]] == 11 && apcc[1][sus[ls]] == 11)
 				FLAG2(324, sus[ls]);
 			// Prohibit parallel pco on suspension
-			if (ivl[sus[ls]] == ivl[fli2[ls - 1]])
+			if (civl[sus[ls]] == civl[fli2[ls - 1]])
 				FLAG2L(385, sus[ls], isus[ls - 1]);
 		}
 	}
@@ -1194,7 +1194,7 @@ int CGenCP1::FailPco() {
 		// Do not prohibit parallel first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
 			// Prohibit parallel last - first
-		if (ivl[s] == ivl[fli2[ls - 1]]) 
+		if (civl[s] == civl[fli2[ls - 1]]) 
 			FLAG2L(84, isus[ls - 1], s);
 		else {
 			// Prohibit contrary movement
@@ -2284,6 +2284,7 @@ int CGenCP1::FailVIntervals() {
 		if (FailDis()) return 1;
 		if (FailPco()) return 1;
 		// Long parallel ico
+		// Here ivl, not civl is used because major-minor ico are the same for this rule
 		if (tivl[s] == iIco && ivl[s] == ivl[fli2[ls - 1]]) {
 			++pico_count;
 			++pm_pico;
