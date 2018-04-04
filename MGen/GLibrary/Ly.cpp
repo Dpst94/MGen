@@ -487,7 +487,7 @@ CString CLy::GetIntName(int iv) {
 void CLy::AddNLink(int i, int i2, int v, CString st, int fl, int ln, int foreign) {
 	lyi[i2 - ly_step1].nflags.push_back(fl);
 	if (foreign) {
-		lyi[i2 - ly_step1].nfl.push_back(i + ln - coff[i + ln][v] - i2);
+		lyi[i2 - ly_step1].nfl.push_back(i + ln - coff[i + ln][ly_v] - i2);
 	}
 	else {
 		lyi[i2 - ly_step1].nfl.push_back(ln);
