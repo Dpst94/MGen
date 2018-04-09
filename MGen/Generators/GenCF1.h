@@ -94,6 +94,16 @@
 	anfl[cpv][i].push_back(i);  \
 } while (0)
 
+// Report violation from main function and save link
+#define FLAGL(id, i, i2) do {  \
+	ASSERT_RULE(id);  \
+	if ((skip_flags SWA_OPTIMIZER(i)) && (accept[id] == 0)) goto skip;  \
+	flags[0] = 0;  \
+	++flags[id];  \
+	anflags[cpv][i].push_back(id);  \
+	anfl[cpv][i].push_back(i2);  \
+} while (0)
+
 // Report violation from child function
 #define FLAG2(id, i) do { \
   ASSERT_RULE(id);  \
