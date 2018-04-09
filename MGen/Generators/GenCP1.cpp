@@ -3715,20 +3715,8 @@ check:
 		nmind = CC_C(nmin, tonic_cur, minor_cur);
 		nmaxd = CC_C(nmax, tonic_cur, minor_cur);
 		if (FailGlobalFill(ac[cpv], nstat2)) goto skip;
-		if (npm == 1) {
-			if (FailLocalRange(ac[cpv], notes_lrange1, min_lrange1, 352)) goto skip;
-			if (FailLocalRange(ac[cpv], notes_lrange12, min_lrange12, 353)) goto skip;
-			if (FailLocalRange(ac[cpv], notes_lrange13, min_lrange13, 351)) goto skip;
-		}
-		else if (npm == 2) {
-			if (FailLocalRange(ac[cpv], notes_lrange, min_lrange, 98)) goto skip;
-			if (FailLocalRange(ac[cpv], notes_lrange2, min_lrange2, 198)) goto skip;
-			if (FailLocalRange(ac[cpv], notes_lrange3, min_lrange3, 300)) goto skip;
-		}
-		else {
-			if (FailLocalRange(ac[cpv], notes_lrange0, min_lrange0, 396)) goto skip;
-			if (FailLocalRange(ac[cpv], notes_lrange02, min_lrange02, 397)) goto skip;
-			if (FailLocalRange(ac[cpv], notes_lrange03, min_lrange03, 395)) goto skip;
+		for (int iv = 0; iv < 4; ++iv) {
+			if (FailLocalRange(ac[cpv], notes_lrange[iv][species], iv + 2, 434 + species*4 + iv)) goto skip;
 		}
 		if (FailAlteredInt()) goto skip;
 		if (FailCrossInt()) goto skip;

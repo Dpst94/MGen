@@ -7,8 +7,9 @@
 #define new DEBUG_NEW 
 #endif
 
-CGenCF1::CGenCF1()
-{
+CGenCF1::CGenCF1() {
+	// Init vector parameters
+	notes_lrange.resize(4, vector<int>(MAX_SPECIES, 19));
 	progress.resize(MAX_PROGRESS);
 	av_cnt = 1;
 	v_cnt = 1;
@@ -406,26 +407,9 @@ void CGenCF1::SetRuleParams() {
 	notes_picount3 = GetRuleParam(rule_set, 346, rsSubName, 0);
 	min_picount3 = GetRuleParam(rule_set, 346, rsSubName, 1);
 
-	notes_lrange0 = GetRuleParam(rule_set, 396, rsSubName, 0);
-	min_lrange0 = abs(GetRuleParam(rule_set, 396, rsSubName, 1)) - 1;
-	notes_lrange02 = GetRuleParam(rule_set, 397, rsSubName, 0);
-	min_lrange02 = abs(GetRuleParam(rule_set, 397, rsSubName, 1)) - 1;
-	notes_lrange03 = GetRuleParam(rule_set, 395, rsSubName, 0);
-	min_lrange03 = abs(GetRuleParam(rule_set, 395, rsSubName, 1)) - 1;
-
-	notes_lrange = GetRuleParam(rule_set, 98, rsSubName, 0);
-	min_lrange = abs(GetRuleParam(rule_set, 98, rsSubName, 1)) - 1;
-	notes_lrange2 = GetRuleParam(rule_set, 198, rsSubName, 0);
-	min_lrange2 = abs(GetRuleParam(rule_set, 198, rsSubName, 1)) - 1;
-	notes_lrange3 = GetRuleParam(rule_set, 300, rsSubName, 0);
-	min_lrange3 = abs(GetRuleParam(rule_set, 300, rsSubName, 1)) - 1;
-
-	notes_lrange1 = GetRuleParam(rule_set, 352, rsSubName, 0);
-	min_lrange1 = abs(GetRuleParam(rule_set, 352, rsSubName, 1)) - 1;
-	notes_lrange12 = GetRuleParam(rule_set, 353, rsSubName, 0);
-	min_lrange12 = abs(GetRuleParam(rule_set, 353, rsSubName, 1)) - 1;
-	notes_lrange13 = GetRuleParam(rule_set, 351, rsSubName, 0);
-	min_lrange13 = abs(GetRuleParam(rule_set, 351, rsSubName, 1)) - 1;
+	for (int fl = 0; fl < 24; ++fl) {
+		notes_lrange[fl % 4][fl / 4] = GetRuleParam(rule_set, 434 + fl, rsSubName, 0);
+	}
 
 	notes_arange = GetRuleParam(rule_set, 15, rsSubName, 0);
 	min_arange = GetRuleParam(rule_set, 15, rsSubName, 1) / 10.0;
@@ -4889,9 +4873,9 @@ check:
 		if (FailLongRepeat(m_c, m_cc, m_leap, repeat_steps5, repeat_notes5, 72)) goto skip;
 		if (FailLongRepeat(m_c, m_cc, m_leap, repeat_steps7, repeat_notes7, 73)) goto skip;
 		if (FailGlobalFill(m_c, nstat2)) goto skip;
-		if (FailLocalRange(m_c, notes_lrange1, min_lrange1, 352)) goto skip;
-		if (FailLocalRange(m_c, notes_lrange12, min_lrange12, 353)) goto skip;
-		if (FailLocalRange(m_c, notes_lrange13, min_lrange13, 351)) goto skip;
+		for (int iv = 0; iv < 4; ++iv) {
+			if (FailLocalRange(m_c, notes_lrange[iv][0], iv + 2, 434 + iv)) goto skip;
+		}
 		if (FailLocalPiCount(m_cc, notes_picount, min_picount, 344)) goto skip;
 		if (FailLocalPiCount(m_cc, notes_picount2, min_picount2, 345)) goto skip;
 		if (FailLocalPiCount(m_cc, notes_picount3, min_picount3, 346)) goto skip;
