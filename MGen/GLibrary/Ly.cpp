@@ -787,8 +787,14 @@ void CLy::InitLyI() {
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
 			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step - ly_step1;
 			// Set interval
-			if (rule_viz_int[fl]) {
+			if (rule_viz_int[fl] == 1) {
 				SetLyShape(s1, s2, f, fl, vInterval);
+			}
+			if (rule_viz_int[fl] == 2) {
+				SetLyShape(s1, s1, f, fl, vInterval);
+			}
+			if (rule_viz_int[fl] == 3) {
+				SetLyShape(s2, s2, f, fl, vInterval);
 			}
 			if (!viz_can_overlap[vtype]) {
 				// Check that flag overlaps
