@@ -1251,6 +1251,7 @@ int CGenCP1::FailPco() {
 
 // Do not scan sus
 int CGenCP1::SkipSus(int notes) {
+	// Position of found sus
 	int found = -1;
 	// Search for sus in first window
 	if (ls == 0) {
@@ -1261,10 +1262,14 @@ int CGenCP1::SkipSus(int notes) {
 	// Search for sus in last note
 	if (sus[ls + notes]) found = ls + notes;
 	if (found > -1) {
-		// Skip to note next to sus
-		ls += found + 1;
-		// Find next downbeat or half-downbeat note
-		while (ls < fli_size && beat[ls] > 1 && ls - found < 3) ++ls;
+		// Find next downbeat or half-downbeat note after sus
+		while (ls < fli_size - 1 && ls < found ||
+			(beat[ls] > 1 && ls - found < 3)) {
+			// Move to next note
+			++ls;
+			// Check if new window ends with sus
+			if (sus[ls + notes]) found = ls + notes;
+		}
 		return 1;
 	}
 	return 0;
