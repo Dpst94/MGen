@@ -389,6 +389,9 @@ void CGenCF1::SetRuleParams() {
 	repeat_notes5 = GetRuleParam(rule_set, 72, rsSubName, 0);
 	repeat_notes7 = GetRuleParam(rule_set, 73, rsSubName, 0);
 	min_interval = Interval2Chromatic(GetRuleParam(rule_set, 38, rsSubName, 0));
+	min_iv_minnotes = GetRuleParam(rule_set, 38, rsSubComment, 0);
+	min_iv_minmea = GetRuleParam(rule_set, 38, rsSubComment, 1);
+	min_interval = Interval2Chromatic(GetRuleParam(rule_set, 38, rsSubName, 0));
 	max_interval_cf = Interval2Chromatic(GetRuleParam(rule_set, 37, rsSubName, 0));
 	max_interval_cp = Interval2Chromatic(GetRuleParam(rule_set, 304, rsSubName, 0));
 	sum_interval = Interval2Chromatic(GetRuleParam(rule_set, 7, rsSubName, 0));
@@ -4831,7 +4834,8 @@ check:
 		++accepted3;
 		// Limit melody interval
 		if (nmax - nmin > max_interval) FLAG(37, 0);
-		if (c_len == ep2 && nmax - nmin < min_interval) FLAG(38, 0);
+		if (c_len == ep2 && nmax - nmin < min_interval && 
+			c_len >= min_iv_minnotes) FLAG(38, 0);
 		// Show status
 		long long time = CGLib::time();
 		scycle = (time - gen_start_time) / STATUS_PERIOD;

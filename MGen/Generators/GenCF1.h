@@ -394,6 +394,8 @@ protected:
 	int specified_high = 0; // If cantus_high was specified in midi file
 	int method = mUndefined; // Which generation / analysis method to use
 	int min_interval = 7; // Minimum chromatic interval in cantus (12 = octave)
+	int min_iv_minnotes = 8; // Minimum number of notes for min_interval
+	int min_iv_minmea = 4; // Minimum number of measures for min_interval
 	int max_interval = 12; // Maximum chromatic interval (12 = octave)
 	int max_interval_cf = 12; // Maximum chromatic interval in cf (12 = octave)
 	int max_interval_cp = 12; // Maximum chromatic interval in cp (12 = octave)

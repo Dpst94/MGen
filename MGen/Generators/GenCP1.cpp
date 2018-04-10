@@ -3645,7 +3645,8 @@ check:
 			else {
 				if (nmax - cf_nmin > sum_interval) FLAG(7, 0);
 			}
-			if (c_len == ep2 && nmax - nmin < min_interval) FLAG(38, 0);
+			if (c_len == ep2 && nmax - nmin < min_interval &&
+				c_len >= min_iv_minnotes && c_len / npm >= min_iv_minmea) FLAG(38, 0);
 		}
 		CreateLinks(acc[cpv], 1);
 		GetMovingMax(acc[cpv], max(lclimax_notes, lclimax_mea*npm), lclimax);
