@@ -1268,7 +1268,7 @@ int CGenCP1::SkipSus(int notes) {
 			// Move to next note
 			++ls;
 			// Check if new window ends with sus
-			if (sus[ls + notes]) found = ls + notes;
+			if (ls + notes < fli_size && sus[ls + notes]) found = ls + notes;
 		}
 		return 1;
 	}
