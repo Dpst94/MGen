@@ -693,7 +693,7 @@ int CGenCP1::FailAlteredInt() {
 
 int CGenCP1::FailCrossInt2(int i, int i_1, int c1, int c2, int flag) {
 	if ((apcc[cfv][i_1] == c1 && apcc[cpv][i] == c2) || (apcc[cfv][i_1] == c2 && apcc[cpv][i] == c1)) 
-		FLAG2(flag, fli[bli[i]]);
+		FLAG2(flag, fli[bli[i_1]]);
 	else if ((apcc[cpv][i_1] == c1 && apcc[cfv][i] == c2) || (apcc[cpv][i_1] == c2 && apcc[cfv][i] == c1)) 
 		FLAG2(flag, fli[bli[i_1]]);
 	return 0;
