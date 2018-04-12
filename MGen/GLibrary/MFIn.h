@@ -52,6 +52,6 @@ protected:
 	vector< vector <int> > cantus_len; // Cantus loaded from midi file
 	vector< vector <float> > cantus_tempo; // Cantus loaded from midi file
 	vector< vector <vector<int>>> cpoint; // Counterpoint loaded from midi file
-	vector< vector <vector<int>>> cp_retrig; // Counterpoint loaded from midi file
+	vector< vector <vector<int>>> cp_retrig; // [cantus_id][v][s] Counterpoint loaded from midi file
 };
 

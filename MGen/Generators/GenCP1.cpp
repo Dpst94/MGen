@@ -833,6 +833,23 @@ int CGenCP1::FailSus1() {
 	return 0;
 }
 
+int CGenCP1::GetAntici() {
+	// For CA2 analysis, use imported cp_retrig
+	if (task == tEval) {
+		return cp_retrig[cantus_id][cpv][sus[ls]];
+	}
+	// For generation and correction analyse notes
+	// If sus starts with dissonance, it is anticipation
+	if (tivl[s] < 0) return 1;
+	// If both consonances
+	else if (tivl[sus[ls]] > 0) {
+		// If sus starts with note shorter than 1/2, it is anticipation
+		if (sus[ls] - s < npm / 2) return 1;
+		// If sus second part is equal or longer than whole note
+		else if (s2 - sus[ls] >= npm - 1) return 1;
+	}
+}
+
 int CGenCP1::FailSus2() {
 	CHECK_READY(DR_fli, DR_ivl, DR_sus);
 	CHECK_READY(DR_leap);
@@ -843,18 +860,10 @@ int CGenCP1::FailSus2() {
 		s2 = fli2[ls];
 		// Do not check last note in scan window, because llen can change
 		if (ep2 < c_len && ls == fli_size - 1) break;
-		antici = 0;
-		// If sus starts with dissonance, it is anticipation
-		if (tivl[s] < 0) antici = 1;
-		// If both consonances
-		else if (tivl[sus[ls]] > 0) {
-			// If sus starts with note shorter than 1/2, it is anticipation
-			if (sus[ls] - s < npm / 2) antici = 1;
-			// If sus second part is equal or longer than whole note
-			else if (s2 - sus[ls] >= npm - 1) antici = 1;
-		}
+		antici = GetAntici();
 		// Check if sus starts from discord
 		if (antici) {
+			++retrigger[sus[ls]];
 			// Long start
 			if (sus[ls] - fli[ls] > npm / 2) FLAG2(333, s);
 			// Long finish
@@ -868,7 +877,6 @@ int CGenCP1::FailSus2() {
 			}
 			// Flag anticipation
 			FLAG2(287, s);
-			++retrigger[sus[ls]];
 			// Anticipation approached by leap
 			if (s > 0 && aleap[cpv][s - 1]) FLAG2(289, s);
 			// If anticipation is not last generated note
