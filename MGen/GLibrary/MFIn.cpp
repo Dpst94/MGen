@@ -899,6 +899,7 @@ void MFIn::LoadCP(CString path)
 						int max_voice = 0;
 						for (int x = 0; x < inter.size(); ++x) max_voice = max(max_voice, inter[x].size());
 						cpoint.resize(cid);
+						cp_retrig.resize(cid);
 						cpoint[cid - 1].resize(max_voice, vector<int>(inter.size()));
 						// Send cpoint
 						for (int x = 0; x < inter.size(); ++x) {
@@ -977,10 +978,16 @@ void MFIn::LoadCP(CString path)
 			int max_voice = 0;
 			for (int x = 0; x < inter.size(); ++x) max_voice = max(max_voice, inter[x].size());
 			cpoint.resize(cid);
+			cp_retrig.resize(cid);
 			cpoint[cid - 1].resize(max_voice, vector<int>(inter.size()));
+			cp_retrig[cid - 1].resize(max_voice, vector<int>(inter.size()));
 			for (int x = 0; x < inter.size(); ++x) {
 				for (int i = 0; i < inter[x].size(); ++i) {
 					cpoint[cid - 1][i][x] = inter[x][i].first;
+					if (x && i < inter[x - 1].size() && inter[x][i].first == inter[x - 1][i].first &&
+						inter[x - 1][i].second == 0) {
+						cp_retrig[cid - 1][i][x] = 1;
+					}
 				}
 			}
 			cantus_len.push_back(cl);
