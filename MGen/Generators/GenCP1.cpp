@@ -818,7 +818,7 @@ int CGenCP1::FailSus1() {
 		// Flag suspension
 		FLAG2(225, s);
 		// Check if sus starts from discord
-		if (tivl[s] < 0) FLAG2(224, s);
+		if (tivl[s] < 0) FLAG2(458, s);
 		last_cf = -1;
 		// Check all cantus note changes
 		for (s = sus[ls]; s <= s2; ++s) {
@@ -870,9 +870,9 @@ int CGenCP1::FailSus2() {
 			if (fli2[ls] - sus[ls] + 1 > npm) FLAG2(334, s);
 			// Mark anticipation start as non-harmonic always
 			mshb[ls] = pPass;
-			// Check if start and end of slur is a discord - then it is interbar discord
+			// Check if second part of anticipation is a discord
 			if (tivl[sus[ls]] == iDis) {
-				FLAG2(224, s);
+				FLAG2(459, sus[ls]);
 				continue;
 			}
 			// Flag anticipation
@@ -891,6 +891,8 @@ int CGenCP1::FailSus2() {
 			}
 		}
 		else {
+			// Check if sus starts from discord (this can happen only if retrigger was loaded from MIDI file)
+			if (tivl[s] < 0) FLAG2(458, s);
 			// Species 2
 			if (species == 2) {
 				// I -> LT penultimate
