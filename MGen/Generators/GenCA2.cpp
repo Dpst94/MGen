@@ -266,13 +266,17 @@ void CGenCA2::ExplodeCP() {
 	if (!min_vlen[cpv]) min_vlen[cpv] = 1;
 	// Save old cantus
 	vector<vector<int>> cc_old2 = cpoint[cantus_id];
+	vector<vector<int>> cpr_old2 = cp_retrig[cantus_id];
 	vector<float> tempo_old = cantus_tempo[cantus_id];
 	vector<CString> incom_old = cantus_incom[cantus_id];
 	cc_len = cantus_len[cantus_id];
 	cantus_len[cantus_id].clear();
 	cantus_tempo[cantus_id].clear();
 	cantus_incom[cantus_id].clear();
-	for (int v = 0; v < av_cnt; ++v) cpoint[cantus_id][v].clear();
+	for (int v = 0; v < av_cnt; ++v) {
+		cpoint[cantus_id][v].clear();
+		cp_retrig[cantus_id][v].clear();
+	}
 	int steps;
 	// Explode cpoint
 	int ln;
@@ -292,6 +296,8 @@ void CGenCA2::ExplodeCP() {
 		else for (int i = 0; i < steps; ++i) {
 			for (int v = 0; v < av_cnt; ++v) {
 				cpoint[cantus_id][v].push_back(cc_old2[v][s]);
+				if (i) cp_retrig[cantus_id][v].push_back(0);
+				else cp_retrig[cantus_id][v].push_back(cpr_old2[v][s]);
 			}
 			cantus_tempo[cantus_id].push_back(tempo_old[s]);
 			cantus_len[cantus_id].push_back(ln);
