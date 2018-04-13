@@ -48,7 +48,7 @@ protected:
 	inline void Get4th();
 	inline int FailVMotion();
 	inline int FailSus1();
-	inline int GetAntici();
+	inline int GetAntici(int antici_load);
 	inline int FailSus2();
 	inline int FailSusCount();
 	inline int FailSus();

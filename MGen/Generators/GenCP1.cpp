@@ -833,9 +833,9 @@ int CGenCP1::FailSus1() {
 	return 0;
 }
 
-int CGenCP1::GetAntici() {
+int CGenCP1::GetAntici(int antici_load) {
 	// For CA2 analysis, use imported cp_retrig
-	if (task == tEval) {
+	if (antici_load) {
 		return cp_retrig[cantus_id][cpv][sus[ls]];
 	}
 	// For generation and correction analyse notes
@@ -854,13 +854,16 @@ int CGenCP1::FailSus2() {
 	CHECK_READY(DR_fli, DR_ivl, DR_sus);
 	CHECK_READY(DR_leap);
 	int ls3, ls4, ls5, s3, s4, s5, antici;
+	// Load anticipation from midi file if evaluation in CA2 with key_eval
+	int antici_load = 0;
+	if (task == tEval && m_algo_id != 121 && !(key_eval.IsEmpty())) antici_load = 1;
 	for (ls = 0; ls < fli_size; ++ls) if (sus[ls]) {
 		// Run sus checks
 		s = fli[ls];
 		s2 = fli2[ls];
 		// Do not check last note in scan window, because llen can change
 		if (ep2 < c_len && ls == fli_size - 1) break;
-		antici = GetAntici();
+		antici = GetAntici(antici_load);
 		// Check if sus starts from discord
 		if (antici) {
 			++retrigger[sus[ls]];
