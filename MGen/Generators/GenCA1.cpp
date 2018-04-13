@@ -140,7 +140,7 @@ int CGenCA1::GetCPKey2(int &tonic_cur2, CString &ext_st, int minor_cur2)
 			ext_st.Format("Single key %s selected as last lower note", NoteName[tonic_cur2]);
 			return 500 - key_count;
 		}
-		if (acc[1][c_len - 1] % 12 == tonic_cur2) {
+		if (acc.size() > 1 && acc[1][c_len - 1] % 12 == tonic_cur2) {
 			ext_st.Format("Single key %s selected as last higher note", NoteName[tonic_cur2]);
 			return 450 - key_count;
 		}
@@ -148,7 +148,7 @@ int CGenCA1::GetCPKey2(int &tonic_cur2, CString &ext_st, int minor_cur2)
 			ext_st.Format("Single key %s selected as first lower note", NoteName[tonic_cur2]);
 			return 400 - key_count;
 		}
-		else if (acc[1][0] % 12 == tonic_cur2) {
+		else if (acc.size() > 1 && acc[1][0] % 12 == tonic_cur2) {
 			ext_st.Format("Single key %s selected as first higher note", NoteName[tonic_cur2]);
 			return 350 - key_count;
 		}
@@ -174,7 +174,7 @@ int CGenCA1::GetCPKey2(int &tonic_cur2, CString &ext_st, int minor_cur2)
 			}
 		}
 		// Find accepted tonic same as last note
-		for (int i = 0; i < keys.size(); i++) {
+		if (acc.size() > 1) for (int i = 0; i < keys.size(); i++) {
 			if (acc[1][c_len - 1] % 12 == keys[i]) {
 				tonic_cur2 = keys[i];
 				ext_st.Format("Ambiguous %zu keys (%s) resolved to %s as last higher note", keys.size(), kst, NoteName[tonic_cur2]);
@@ -190,7 +190,7 @@ int CGenCA1::GetCPKey2(int &tonic_cur2, CString &ext_st, int minor_cur2)
 			}
 		}
 		// Find accepted tonic same as first note
-		for (int i = 0; i < keys.size(); i++) {
+		if (acc.size() > 1) for (int i = 0; i < keys.size(); i++) {
 			if (acc[1][0] % 12 == keys[i]) {
 				tonic_cur2 = keys[i];
 				ext_st.Format("Ambiguous %zu keys (%s) resolved to %s as first higher note", keys.size(), kst, NoteName[tonic_cur2]);
