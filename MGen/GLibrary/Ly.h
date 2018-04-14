@@ -236,7 +236,7 @@ public:
 	void InitLyITest();
 	void InitLyI();
 	void SaveLySegment(ofstream & fs, int mel, int step1, int step2);
-	void SendLySkips(int count);
+	CString SendLySkips(int count);
 	void SendLyMistakes();
 	void SendLyHarm();
 	void SendLyIntervals();

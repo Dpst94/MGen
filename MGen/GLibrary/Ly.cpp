@@ -948,10 +948,12 @@ void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	//fs << "\\markup \\wordwrap \\italic {\n  \\vspace #2\n  " << st2 << "\n}\n";
 }
 
-void CLy::SendLySkips(int count) {
+CString CLy::SendLySkips(int count) {
+	CString lst;
 	for (int x = 0; x < count; ++x) {
-		ly_ly_st += " \\skip 8 ";
+		lst += " \\skip 8 ";
 	}
+	return lst;
 }
 
 void CLy::SendLyMistakes() {
@@ -964,7 +966,7 @@ void CLy::SendLyMistakes() {
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
 		if (!lyi[ly_s2].nflags.size()) {
-			SendLySkips(ly_mul);
+			ly_ly_st += SendLySkips(ly_mul);
 			continue;
 		}
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) { \\dir-column {\n";
@@ -983,25 +985,27 @@ void CLy::SendLyMistakes() {
 			ly_ly_st += st;
 		}
 		ly_ly_st += "      } } }8\n";
-		SendLySkips(ly_mul - 1);
+		ly_ly_st += SendLySkips(ly_mul - 1);
 	}
 	ly_ly_st += "    }\n";
 	ly_ly_st += "  }\n";
 }
 
 void CLy::SendLyHarm() {
-	CString st;
-	if (!ly_flags) return;
+	CString st, lst;
+	int hcount = 0;
+	//if (!ly_flags) return;
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", ly_vlow);
-	ly_ly_st += st;
-	ly_ly_st += "    \\lyricmode {\n";
-	ly_ly_st += "      \\set stanza = #\" Harmony:\"\n";
+	lst += st;
+	lst += "    \\lyricmode {\n";
+	lst += "      \\set stanza = #\" Harmony:\"\n";
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
 		CString st = mark[ly_s][ly_v2];
 		st.Replace("\n", "");
 		if (!st.IsEmpty() && st != "PD" && st != "CA" && st != "DN") {
-			ly_ly_st += "  \\markup{ ";
+			++hcount;
+			lst += "  \\markup{ ";
 			int found = 0;
 			// Replace dominant symbol
 			st.Replace("#", " \"#\" ");
@@ -1019,23 +1023,24 @@ void CLy::SendLyHarm() {
 			st.Replace("6", " \\raise #0.7 6");
 			//if (found) st = ", " + st;
 			found = 1;
-			ly_ly_st += "\\teeny ";
+			lst += "\\teeny ";
 			if (lyi[ly_s2].shs[vHarm] || lyi[ly_s2].shf[vHarm]) {
 				DWORD col = flag_color[lyi[ly_s2].shse[vHarm]];
 				if (col && col != color_noflag) {
-					ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor2(col) + ") ";
+					lst += " \\on-color #(rgb-color " + GetLyMarkColor2(col) + ") ";
 				}
 			}
-			ly_ly_st += "\\pad-markup #0.4 " + st + " ";
-			ly_ly_st += "}8\n";
-			SendLySkips(ly_mul - 1);
+			lst += "\\pad-markup #0.4 " + st + " ";
+			lst += "}8\n";
+			lst += SendLySkips(ly_mul - 1);
 		}
 		else {
-			SendLySkips(ly_mul);
+			lst += SendLySkips(ly_mul);
 		}
 	}
-	ly_ly_st += "    }\n";
-	ly_ly_st += "  }\n";
+	lst += "    }\n";
+	lst += "  }\n";
+	if (hcount) ly_ly_st += lst;
 }
 
 void CLy::SendLyIntervals() {
@@ -1049,7 +1054,7 @@ void CLy::SendLyIntervals() {
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
 		if (!lyi[ly_s2].shs[vInterval] && !lyi[ly_s2].shf[vInterval]) {
-			SendLySkips(ly_mul);
+			ly_ly_st += SendLySkips(ly_mul);
 			continue;
 		}
 		//int in = note[ly_s][ly_vhigh] - note[ly_s][ly_vlow];
@@ -1066,7 +1071,7 @@ void CLy::SendLyIntervals() {
 		}
 		ly_ly_st += " \\pad-markup #0.4 \\concat { " + st + " ";
 		ly_ly_st += "} }\n";
-		SendLySkips(ly_mul - 1);
+		ly_ly_st += SendLySkips(ly_mul - 1);
 	}
 	ly_ly_st += "    }\n";
 	ly_ly_st += "  }\n";
@@ -1082,7 +1087,7 @@ void CLy::SendLyNoteNames() {
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
 		if (!lyi[ly_s2].shs[vNoteName] && !lyi[ly_s2].shf[vNoteName]) {
-			SendLySkips(ly_mul);
+			ly_ly_st += SendLySkips(ly_mul);
 			continue;
 		}
 		CString st = GetLyNoteVisual(ly_s, ly_v, "\\raise #0.3 \\magnify #0.5 ");
@@ -1095,7 +1100,7 @@ void CLy::SendLyNoteNames() {
 		}
 		ly_ly_st += " \\pad-markup #0.4 \\concat { " + st + " } ";
 		ly_ly_st += "}\n";
-		SendLySkips(ly_mul - 1);
+		ly_ly_st += SendLySkips(ly_mul - 1);
 	}
 	ly_ly_st += "    }\n";
 	ly_ly_st += "  }\n";
