@@ -657,15 +657,19 @@ void CGenCF1::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	SET_READY_PERSIST(DP_Config);
 	CheckVar(sN, sV, "reduce_between", &reduce_between, 0, 100);
 	CheckVar(sN, sV, "confirm_mode", &confirm_mode, 0, 2);
-	CheckVar(sN, sV, "ly_msh", &ly_msh, 0, 1); 
+	CheckVar(sN, sV, "ly_pagebreak", &ly_pagebreak, 0, 1);
+	CheckVar(sN, sV, "ly_subrules", &ly_subrules, 0, 1);
+	CheckVar(sN, sV, "ly_comments", &ly_comments, 0, 1);
+	CheckVar(sN, sV, "ly_rule_colon", &ly_rule_colon, 0, 1);
+	CheckVar(sN, sV, "ly_msh", &ly_msh, 0, 1);
+	CheckVar(sN, sV, "ly_flag_style", &ly_flag_style, 0, 2);
+	CheckVar(sN, sV, "ly_dominant_letter", &ly_dominant_letter, 0, 1);
 	CheckVar(sN, sV, "harm_notation", &harm_notation, 0, 5);
 	CheckVar(sN, sV, "show_harmony_bass", &show_harmony_bass, 0, 2);
 	CheckVar(sN, sV, "log_pmap", &log_pmap, 0, 1);
 	CheckVar(sN, sV, "show_correct_hatch", &show_correct_hatch, 0, 1);
 	CheckVar(sN, sV, "show_hatch", &show_hatch, 0, 2);
 	CheckVar(sN, sV, "show_min_severity", &show_min_severity, 0, 100);
-	CheckVar(sN, sV, "ly_flag_style", &ly_flag_style, 0, 2);
-	CheckVar(sN, sV, "ly_dominant_letter", &ly_dominant_letter, 0, 1);
 	CheckVar(sN, sV, "cor_ack", &cor_ack, 0, 1);
 	CheckVar(sN, sV, "show_ignored_flags", &show_ignored_flags, 0, 1);
 	CheckVar(sN, sV, "show_allowed_flags", &show_allowed_flags, 0, 1);
@@ -4223,32 +4227,34 @@ int CGenCF1::SendCantus() {
 			Adapt(step000, step - 1);
 		}
 		// If  window-scan
-		st.Format("#%d\nRule penalty: %.0f\nCantus: %s", 
-			cantus_sent, l_rpenalty_cur, cantus_high?"high":"low");
-		st2.Format("Flags penalty: %s\n%s", rpst, pmap);
+		st.Format("#%d\nCantus: %s", 
+			cantus_sent, cantus_high?"upper part":"lower part");
+		st2.Format("Rule penalty: %.0f\nFlags penalty: %s\n%s", l_rpenalty_cur, rpst, pmap);
 		AddMelody(step000, pos - 1, v, st, st2);
 		if (v) AddMelody(step000, pos - 1, 0, st);
 	}
 	else if (task == tEval) {
 		if (m_algo_id == 101) {
 			// If RSWA
-			st.Format("#%d\nRule penalty: %.0f\nCantus: %s", 
-				cantus_sent, l_rpenalty_cur, cantus_high ? "high" : "low");
-			st2.Format("Flags penalty: %s\n%s", rpst, pmap);
+			st.Format("#%d\nCantus: %s", 
+				cantus_sent, cantus_high ? "upper part" : "lower part");
+			st2.Format("Rule penalty: %.0f\nFlags penalty: %s\n%s", l_rpenalty_cur, rpst, pmap);
 		}
 		else {
 			if (key_eval.IsEmpty()) {
 				// If SWA
-				st.Format("#%d (from %s)\nRule penalty: %.0f => %.0f\nDistance penalty: %d\nCantus: %s", 
-					cantus_id+1, bname_from_path(midi_file), rpenalty_source, l_rpenalty_cur,
-					dpenalty_cur, cantus_high ? "high" : "low");
-				st2.Format("Flags penalty: %s => %s\n%s", fpenalty_source, rpst, pmap);
+				st.Format("#%d (from %s)\nDistance penalty: %d\nCantus: %s", 
+					cantus_id+1, bname_from_path(midi_file), 
+					dpenalty_cur, cantus_high ? "upper part" : "lower part");
+				st2.Format("Rule penalty: %.0f => %.0f\nFlags penalty: %s => %s\n%s", 
+					rpenalty_source, l_rpenalty_cur, fpenalty_source, rpst, pmap);
 			}
 			else {
 				// If evaluating
-				st.Format("#%d (from %s)\nRule penalty: %.0f\nCantus: %s", 
-					cantus_id + 1, bname_from_path(midi_file), l_rpenalty_cur, cantus_high ? "high" : "low");
-				st2.Format("Flags penalty: %s\nKey selection: %s\n%s", rpst, key_eval, pmap);
+				st.Format("#%d (from %s)\nCantus: %s", 
+					cantus_id + 1, bname_from_path(midi_file), cantus_high ? "upper part" : "lower part");
+				st2.Format("Rule penalty: %.0f\nFlags penalty: %s\nKey selection: %s\n%s", 
+					l_rpenalty_cur, rpst, key_eval, pmap);
 			}
 		}
 		AddMelody(step000, pos - 1, v, st, st2);

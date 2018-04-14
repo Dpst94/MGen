@@ -372,7 +372,7 @@ void CGenCA2::DetectSpecies() {
 		species_detected, 
 		species_pos[1] ? "yes" : "no", species_pos[2] ? "yes" : "no",
 		species_pos[3] ? "yes" : "no", species_pos[4] ? "yes" : "no",
-		species_pos[5] ? "yes" : "no", cantus_id + 1, cantus_high ? "high" : "low");
+		species_pos[5] ? "yes" : "no", cantus_id + 1, cantus_high ? "upper" : "lower");
 	WriteLog(0, est);
 	// Check wrong text
 	if (species) {
@@ -380,14 +380,14 @@ void CGenCA2::DetectSpecies() {
 			if (!species_detected) {
 				CString est;
 				est.Format("Counterpoint #%d (%s): unable to detect species. Species %d was specified, going with it",
-					cantus_id + 1, cantus_high ? "high" : "low", species);
+					cantus_id + 1, cantus_high ? "upper" : "lower", species);
 				WriteLog(1, est);
 			}
 			else {
 				CString est;
 				if (species_pos[species]) {
 					est.Format("Counterpoint #%d (%s) looks like species %d (possible 1=%s, 2=%s, 3=%s, 4=%s, 5=%s), but species %d was specified",
-						cantus_id + 1, cantus_high ? "high" : "low", species_detected,
+						cantus_id + 1, cantus_high ? "upper" : "lower", species_detected,
 						species_pos[1] ? "yes" : "no", species_pos[2] ? "yes" : "no",
 						species_pos[3] ? "yes" : "no", species_pos[4] ? "yes" : "no",
 						species_pos[5] ? "yes" : "no", species);
@@ -395,7 +395,7 @@ void CGenCA2::DetectSpecies() {
 				}
 				else {
 					est.Format("Counterpoint #%d (%s) looks like species %d (possible 1=%s, 2=%s, 3=%s, 4=%s, 5=%s), but species %d was specified. This is impossible. Switched to detected species",
-						cantus_id + 1, cantus_high ? "high" : "low", species_detected,
+						cantus_id + 1, cantus_high ? "upper" : "lower", species_detected,
 						species_pos[1] ? "yes" : "no", species_pos[2] ? "yes" : "no",
 						species_pos[3] ? "yes" : "no", species_pos[4] ? "yes" : "no",
 						species_pos[5] ? "yes" : "no", species);
@@ -506,7 +506,7 @@ void CGenCA2::ReduceBetween() {
 		if (move_oct > 0) {
 			CString est;
 			est.Format("In counterpoint #%d (cantus %s), counterpoint voice was moved closer to cantus by %d octaves, because it was too far. Reset reduce_between to disable this function",
-				cantus_id + 1, cantus_high ? "high" : "low", move_oct);
+				cantus_id + 1, cantus_high ? "upper" : "lower", move_oct);
 			WriteLog(0, est);
 			reduce_between_st.Format("Counterpoint voice was moved closer to cantus by %d octaves, because it was too far.",
 				move_oct);
@@ -644,13 +644,13 @@ void CGenCA2::Generate() {
 		if ((cantus_high && cpoint[i][1][0] == 0) || (!cantus_high && cpoint[i][0][0] == 0)) {
 			if (specified_high) {
 				st.Format("Cantus starts with a pause (%s cantus #%d). As it was specified in midi, moved pause to other voice",
-					cantus_high ? "high" : "low", cantus_id + 1);
+					cantus_high ? "upper" : "lower", cantus_id + 1);
 				WriteLog(0, st);
 				swap(cpoint[cantus_id][0][0], cpoint[cantus_id][1][0]);
 			}
 			else {
 				st.Format("Warning: Cantus starts with a pause (%s cantus #%d). Changed to %s",
-					cantus_high ? "high" : "low", cantus_id + 1, (!cantus_high) ? "high" : "low");
+					cantus_high ? "upper" : "lower", cantus_id + 1, (!cantus_high) ? "upper" : "lower");
 				WriteLog(0, st);
 				cantus_high = !cantus_high;
 			}
@@ -680,7 +680,7 @@ void CGenCA2::Generate() {
 		if (!species) {
 			CString est;
 			est.Format("Counterpoint #%d (%s): cannot detect species, also species not specified in MIDI file",
-				cantus_id + 1, cantus_high ? "high" : "low");
+				cantus_id + 1, cantus_high ? "upper" : "lower");
 			WriteLog(5, est);
 			continue;
 		}

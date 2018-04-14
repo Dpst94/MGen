@@ -534,9 +534,16 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 			if (!accept[fl]) st = "- ";
 			else if (accept[fl] == -1) st = "$ ";
 			else st = "+ ";
-			com = st + RuleName[rule_set][fl] + " (" + SubRuleName[rule_set][fl] + ")";
-			if (!RuleComment[fl].IsEmpty()) com += ". " + RuleComment[fl];
-			if (!SubRuleComment[rule_set][fl].IsEmpty()) com += " (" + SubRuleComment[rule_set][fl] + ")";
+			CString rule_name = RuleName[rule_set][fl];
+			if (!ly_rule_colon) {
+				if (rule_name.Find(":") != -1) {
+					rule_name = rule_name.Left(rule_name.Find(":"));
+				}
+			}
+			com = st + rule_name;
+			if (ly_subrules) com += " (" + SubRuleName[rule_set][fl] + ")";
+			if (ly_comments && !RuleComment[fl].IsEmpty()) com += ". " + RuleComment[fl];
+			if (ly_comments && !SubRuleComment[rule_set][fl].IsEmpty()) com += " (" + SubRuleComment[rule_set][fl] + ")";
 			com += " " + lyi[ly_s2].nfc[c];
 			// Send note number with first comment
 			if (!found) {
@@ -874,7 +881,7 @@ void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	st.Replace("->", " \\char ##x27F6 ");
 	fs << "\\markup \\wordwrap \\bold {\n  ";
 	fs << "    \\vspace #2\n";
-	fs << st << ", Key: " << key_visual << (minor[step1][0] ? "m" : "") << "\n}\n";
+	fs << st << ", Key: " << key_visual << (minor[step1][0] ? " minor" : " major") << "\n}\n";
 	// Save notes
 	fs << "<<\n";
 	for (int v = v_cnt - 1; v >= 0; --v) {
@@ -934,6 +941,7 @@ void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	fs << ">>\n";
 	if (st3 != "") fs << "\\markup { " << st3 << " }\n";
 	fs << ly_com_st;
+	if (ly_pagebreak) fs << "\\pageBreak\n";
 	// Second info
 	//st2.Replace("\n", "\n}\n\\markup \\wordwrap \\italic {\n  ");
 	//st2.Replace("#", "\"#\"");
@@ -1097,8 +1105,14 @@ void CLy::SaveLy(CString dir, CString fname) {
 	LoadLyShapes("configs\\ly\\shapes.csv");
 	vector<CString> sv;
 	CString title;
+	// Remove server config prefix
+	CString my_config;
+	my_config = m_config;
+	if (my_config.Left(3) == "sv_") {
+		my_config = my_config.Mid(3);
+	}
 	DeleteFile(dir + "\\lyi-" + fname + ".csv");
-	title = m_algo_folder + ": " + m_config + " (" +
+	title = m_algo_name + ": " + my_config + " (" +
 		CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M") + ")";
 	ly_fs.open(dir + "\\" + fname + ".ly");
 	read_file_sv("configs\\ly\\header.ly", sv);

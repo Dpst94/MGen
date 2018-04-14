@@ -260,12 +260,18 @@ public:
 	vector<vector <CString>> SubRuleComment; // Comments for flags
 	int rule_set = 0; // id of current rule set
 
-	// Lilypond
-	ofstream ly_fs;
-	float ly_mul = 1; // midifile_mul
+	// Lilypond parameters
 	int ly_flag_style = 1; // 0 - no flag visualisation, 1 - color note, 2 - x above note
 	int ly_dominant_letter = 0; // 0 - use normal D/d letters; 1 - use dashed D/d letters
 	int ly_msh = 1; // 0 - do not show msh, 1 - show msh
+	int ly_pagebreak = 1; // Page break after each analysis
+	int ly_subrules = 1; // Show subrule names in ly
+	int ly_comments = 1; // Show rule and subrule comments in ly
+	int ly_rule_colon = 1; // Show rule name after colon
+
+	// Lilypond other
+	ofstream ly_fs;
+	float ly_mul = 1; // midifile_mul
 	int ly_nnum = 0; // Note number
 	int ly_step1 = 0;
 	int ly_step2 = 0;

@@ -41,6 +41,7 @@ public:
 	CString m_current_config; // Current loading config
 	int m_algo_id = -1; // Current algorithm id
 	CString m_algo_folder; // Current algorithm folder
+	CString m_algo_name; // Current algorithm name
 	CString m_algo_insts; // Instruments of current algorithm from algorithms.txt
 	CString m_config;
 

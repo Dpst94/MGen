@@ -595,31 +595,36 @@ int CGenCP1::SendCP() {
 			Adapt(step000, step - 1);
 		}
 		// If  window-scan
-		st.Format("#%d (from %s) N%d\nCantus: %s\nSpecies: %d\nRule penalty: %.0f", 
-			cantus_id + 1, bname_from_path(midi_file), cantus_sent - 1, cantus_high?"high":"low", species, l_rpenalty_cur);
-		st2.Format("Flags penalty: %s\n%s", rpst, pmap);
+		st.Format("#%d (from %s) N%d\nCantus: %s\nSpecies: %d", 
+			cantus_id + 1, bname_from_path(midi_file), cantus_sent - 1, 
+			cantus_high?"upper part":"lower part", species);
+		st2.Format("Rule penalty: %.0f\nFlags penalty: %s\n%s", l_rpenalty_cur, rpst, pmap);
 		AddMelody(step000, pos - 1, svoice + cpv, st, st2);
 		AddMelody(step000, pos - 1, 0, st);
 	}
 	else if (task == tEval) {
 		if (m_algo_id == 121) {
 			// If RSWA
-			st.Format("#%d (from %s) N%d\nCantus: %s\nSpecies: %d\nRule penalty: %.0f", 
-				cantus_id + 1, bname_from_path(midi_file), cantus_sent - 1, cantus_high ? "high" : "low", species, l_rpenalty_cur);
-			st2.Format("Flags penalty: %s\n%s", rpst, pmap);
+			st.Format("#%d (from %s) N%d\nCantus: %s\nSpecies: %d", 
+				cantus_id + 1, bname_from_path(midi_file), cantus_sent - 1, cantus_high ? "upper part" : "lower part", 
+				species);
+			st2.Format("Rule penalty: %.0f\nFlags penalty: %s\n%s", l_rpenalty_cur, rpst, pmap);
 		}
 		else {
 			if (key_eval.IsEmpty()) {
 				// If SWA
-				st.Format("#%d (from %s)\nCantus: %s\nSpecies: %d\nRule penalty: %.0f => %.0f\nDistance penalty: %d", 
-					cantus_id+1, bname_from_path(midi_file), cantus_high ? "high" : "low", species, rpenalty_source, l_rpenalty_cur, dpenalty_cur);
-				st2.Format("Flags penalty: %s => %s\n%s", fpenalty_source, rpst, pmap);
+				st.Format("#%d (from %s)\nCantus: %s\nSpecies: %d\nDistance penalty: %d", 
+					cantus_id+1, bname_from_path(midi_file), cantus_high ? "upper part" : "lower part", species, 
+					dpenalty_cur);
+				st2.Format("Rule penalty: %.0f => %.0f\nFlags penalty: %s => %s\n%s", 
+					rpenalty_source, l_rpenalty_cur, fpenalty_source, rpst, pmap);
 			}
 			else {
 				// If evaluating
-				st.Format("#%d (from %s)\nCantus: %s\nSpecies: %d\nRule penalty: %.0f", 
-					cantus_id + 1, bname_from_path(midi_file), cantus_high ? "high" : "low", species, l_rpenalty_cur);
-				st2.Format("Flags penalty: %s\nKey selection: %s\n%s", rpst, key_eval, pmap);
+				st.Format("#%d (from %s)\nCantus: %s\nSpecies: %d", 
+					cantus_id + 1, bname_from_path(midi_file), cantus_high ? "upper part" : "lower part", species);
+				st2.Format("Rule penalty: %.0f\nFlags penalty: %s\nKey selection: %s\n%s", 
+					l_rpenalty_cur, rpst, key_eval, pmap);
 			}
 		}
 		AddMelody(step000, pos - 1, svoice + cpv, st, st2, reduce_between_st);
@@ -3881,13 +3886,13 @@ void CGenCP1::LoadCantusHigh() {
 			specified_high = 0;
 			// Use previous cantus_high (of previous cantus or from configuration if first cantus)
 			st.Format("Warning: no CF=high or CF=low lyrics for counterpoint #%d. Assuming %s",
-				cantus_id + 1, cantus_high ? "high" : "low");
+				cantus_id + 1, cantus_high ? "upper" : "lower");
 			WriteLog(0, st);
 		}
 	}
 	else {
 		st.Format("Warning: no CF=high or CF=low lyrics for counterpoint #%d. Assuming %s",
-			cantus_id + 1, cantus_high ? "high" : "low");
+			cantus_id + 1, cantus_high ? "upper" : "lower");
 		WriteLog(0, st);
 	}
 }
