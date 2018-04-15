@@ -4243,11 +4243,11 @@ int CGenCF1::SendCantus() {
 		else {
 			if (key_eval.IsEmpty()) {
 				// If SWA
-				st.Format("#%d (from %s)\nDistance penalty: %d\nCantus: %s", 
+				st.Format("#%d (from %s)\nRule penalty: %.0f => %.0f\nDistance penalty: %d\nCantus: %s", 
 					cantus_id+1, bname_from_path(midi_file), 
-					dpenalty_cur, cantus_high ? "upper part" : "lower part");
-				st2.Format("Rule penalty: %.0f => %.0f\nFlags penalty: %s => %s\n%s", 
-					rpenalty_source, l_rpenalty_cur, fpenalty_source, rpst, pmap);
+					rpenalty_source, l_rpenalty_cur, dpenalty_cur, cantus_high ? "upper part" : "lower part");
+				st2.Format("Flags penalty: %s => %s\n%s", 
+					fpenalty_source, rpst, pmap);
 			}
 			else {
 				// If evaluating

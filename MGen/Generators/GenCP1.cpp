@@ -613,11 +613,11 @@ int CGenCP1::SendCP() {
 		else {
 			if (key_eval.IsEmpty()) {
 				// If SWA
-				st.Format("#%d (from %s)\nCantus: %s\nSpecies: %d\nDistance penalty: %d", 
+				st.Format("#%d (from %s)\nCantus: %s\nSpecies: %d\nRule penalty: %.0f => %.0f\nDistance penalty: %d", 
 					cantus_id+1, bname_from_path(midi_file), cantus_high ? "upper part" : "lower part", species, 
-					dpenalty_cur);
-				st2.Format("Rule penalty: %.0f => %.0f\nFlags penalty: %s => %s\n%s", 
-					rpenalty_source, l_rpenalty_cur, fpenalty_source, rpst, pmap);
+					rpenalty_source, l_rpenalty_cur, dpenalty_cur);
+				st2.Format("Flags penalty: %s => %s\n%s", 
+					fpenalty_source, rpst, pmap);
 			}
 			else {
 				// If evaluating
