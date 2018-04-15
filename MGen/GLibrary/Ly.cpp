@@ -880,7 +880,7 @@ void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	st.Replace("=>", " \\char ##x27F9 ");
 	st.Replace("->", " \\char ##x27F6 ");
 	fs << "\\markup \\wordwrap \\bold {\n  ";
-	fs << "    \\vspace #2\n";
+	fs << "    \\vspace #3\n";
 	fs << st << ", Key: " << key_visual << (minor[step1][0] ? " minor" : " major") << "\n}\n";
 	// Save notes
 	fs << "<<\n";
@@ -1160,7 +1160,7 @@ void CLy::SaveLy(CString dir, CString fname) {
 		}
 	}
 	ly_fs << "\\header {tagline = \"This file was created by MGen ";
-	ly_fs << APP_VERSION << "\"}\n";
+	ly_fs << APP_VERSION << " at " << CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S") << "\"}\n";
 	read_file_sv("configs\\ly\\footer.ly", sv);
 	write_file_sv(ly_fs, sv);
 	ly_fs.close();
