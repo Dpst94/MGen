@@ -3985,6 +3985,8 @@ void CGenCP1::Generate() {
 	//test_cc.resize(41);
 	//StringToVector(&st, " ", test_cc);
 
+	// Swap voice instruments
+	swap(instr[0], instr[1]);
 	if (error) return;
 	if (InitCP()) return;
 	int fn0 = fn;

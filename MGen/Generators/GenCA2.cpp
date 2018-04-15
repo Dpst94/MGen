@@ -564,6 +564,8 @@ void CGenCA2::Generate() {
 	//test_cc.resize(65);
 	//StringToVector(&test_st, " ", test_cc);
 
+	// Swap voice instruments
+	swap(instr[0], instr[1]);
 	CString st;
 	int fn0 = fn;
 	int s_len2 = s_len;
