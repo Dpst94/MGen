@@ -388,7 +388,7 @@ protected:
 	int mea_per_sus = 5; // Maximum measures per suspension
 	int lclimax_notes = 12; // Number of adjacent notes to calculate local climax
 	int lclimax_mea = 6; // Number of adjacent measures to calculate local climax
-	int lclimax_mea2 = 4; // Number of adjacent measures to calculate local climax
+	int lclimax_mea5 = 4; // Number of adjacent measures to calculate local climax for 5ths and 8ves
 	int cantus_high = 0; // Set to 1 to consider cantus to be higher voice
 	int voice_high = 0; // Shows if currently processed voice is high
 	int specified_high = 0; // If cantus_high was specified in midi file
