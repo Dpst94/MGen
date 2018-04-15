@@ -281,6 +281,7 @@ public:
 	CString ly_com_st; // Comments
 	CString ly_ly_st; // Lyrics
 	vector<LY_Intermediate> lyi;
+	int ly_vcnt = 0; // Ly voice count
 	int ly_v = 0; // Current ly voice
 	int ly_v2 = 0; // Second voice for counterpoint analysis
 	int ly_s = 0; // Current ly step

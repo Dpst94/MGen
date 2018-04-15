@@ -518,7 +518,7 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 		note_st = "\\markup \\wordwrap \\bold {\n  ";
 		// Show voice number if more than 1 voice
 		if (ly_vm_cnt > 1) {
-			st.Format("VOICE %d, ", v + 1);
+			st.Format("PART %d, ", ly_vcnt - v);
 			note_st += st;
 		}
 		st.Format("NOTE %d at %d:%d - %s",
@@ -884,9 +884,11 @@ void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	fs << st << ", Key: " << key_visual << (minor[step1][0] ? " minor" : " major") << "\n}\n";
 	// Save notes
 	fs << "<<\n";
+	ly_vcnt = 0;
 	for (int v = v_cnt - 1; v >= 0; --v) {
 		// Do not show voice if no notes inside
 		if (!vm_max[v]) continue;
+		if (!ly_vcnt) ly_vcnt = v + 1;
 		ly_v = v;
 		InitLyI();
 		InitLyITest();
@@ -894,7 +896,7 @@ void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 		clef = DetectLyClef(vm_min[v], vm_max[v]);
 		st.Format("\\new Staff = \"staff%d\" {\n", ly_v);
 		fs << st;
-		st.Format("  \\set Staff.instrumentName = \"Voice %d\"\n", v + 1);
+		st.Format("  \\set Staff.instrumentName = \"Part %d\"\n", ly_vcnt - v);
 		fs << st;
 		fs << "  \\clef \"" << clef << "\" \\key " << key;
 		fs << " \\" << (minor[step1][0] ? "minor" : "major") << "\n";
