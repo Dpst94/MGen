@@ -1609,7 +1609,7 @@ int CGenCF1::FailLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, 
 	int fired4 = 0, fired5 = 0;
 	pm_leaps2 = 0;
 	pm_leaps3 = 0;
-	for (ls = 0; ls < fli_size - 2; ++ls) {
+	for (ls = 0; ls < fli_size - 1; ++ls) {
 		s = fli2[ls];
 		s1 = fli2[ls+1];
 		// Add new leap
@@ -1633,8 +1633,8 @@ int CGenCF1::FailLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, 
 		// Calculate penalty
 		if (leap_sum_corrected == csel) {
 			if (accept[flag3] > 0) ++fpenalty[flag3];
-			if (leap_sum_corrected > csel2 && accept[flag4] > 0) ++fpenalty[flag4];
 		}
+		if (leap_sum_corrected > csel2 && accept[flag4] > 0) ++fpenalty[flag4];
 		// Prohibit long smooth movement
 		if (smooth[s] != 0) {
 			++smooth_sum;
