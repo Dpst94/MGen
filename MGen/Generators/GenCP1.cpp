@@ -255,21 +255,10 @@ void CGenCP1::ScanCPInit() {
 	max_interval = max_interval_cp;
 	// Calculate last steps that are allowed to have C4P
 	c4p_last_steps = c4p_last_meas * npm;
-	// Set green leap limits
-	if (npm > 2) {
-		max_leaps5 = max_leaps3;
-		max_leaped5 = max_leaped3;
-		max_leaps6 = max_leaps4;
-		max_leaped6 = max_leaped4;
-	}
-	else {
-		max_leaps5 = max_leaps;
-		max_leaped5 = max_leaped;
-		max_leaps6 = max_leaps2;
-		max_leaped6 = max_leaped2;
-	}
 	// Set scan voices count
 	svoices = av_cnt;
+	// Set species
+	cspecies = species;
 }
 
 void CGenCP1::SendMsh(int pos, int i, int v, int av, int x) {
@@ -875,7 +864,7 @@ int CGenCP1::FailSus2() {
 			// Long start
 			if (sus[ls] - fli[ls] > npm / 2) FLAG2(333, s);
 			// Long finish
-			if (fli2[ls] - sus[ls] + 1 > npm) FLAG2(334, s);
+			if (fli2[ls] - sus[ls] + 1 > npm) FLAG2(334, sus[ls]);
 			// Mark anticipation start as non-harmonic always
 			mshb[ls] = pPass;
 			// Check if second part of anticipation is a discord
@@ -3756,15 +3745,14 @@ check:
 		else {
 			if (FailTritones(ac[cpv], acc[cpv], apc[cpv], apcc[cpv], aleap[cpv])) goto skip;
 		}
-		if (species == 5) {
-			if (FailManyLeaps(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_leaps, max_leaped, max_leaps, max_leaped, max_leap_steps, 3, 25, 3, 25)) goto skip;
-			if (FailManyLeaps(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_leaps2, max_leaped2, max_leaps2, max_leaped2, max_leap_steps2, 202, 203, 202, 203)) goto skip;
-		}
-		else {
-			if (FailManyLeaps(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_leaps, max_leaped, max_leaps5, max_leaped5, max_leap_steps, 3, 25, 311, 312)) goto skip;
-			if (FailManyLeaps(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_leaps2, max_leaped2, max_leaps6, max_leaped6, max_leap_steps2, 202, 203, 313, 314)) goto skip;
-		}
-		if (FailLeapSmooth(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_smooth2, max_smooth_direct2, 302, 303, 1)) goto skip;
+		if (FailManyLeaps(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_leaps[species], max_leaped[species],
+			max_leaps_r[species], max_leaped_r[species], max_leap_steps[species], 
+			493 + species, 499 + species, 505 + species, 511 + species)) goto skip;
+		if (FailManyLeaps(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_leaps2[species], max_leaped2[species],
+			max_leaps2_r[species], max_leaped2_r[species], max_leap_steps2[species], 
+			517 + species, 523 + species, 529 + species, 535 + species)) goto skip;
+		if (FailLeapSmooth(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_smooth2, max_smooth_direct2, 
+			cse_leaps[species], cse_leaps_r[species],	302, 303, 541 + species, 547 + species, 1)) goto skip;
 		if (FailOutstandingRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps2, 2, 76)) goto skip;
 		if (FailOutstandingRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps3, 3, 36)) goto skip;
 		if (FailLongRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps5, 5, 72)) goto skip;

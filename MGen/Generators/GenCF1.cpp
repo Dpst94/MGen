@@ -10,6 +10,20 @@
 CGenCF1::CGenCF1() {
 	// Init vector parameters
 	notes_lrange.resize(4, vector<int>(MAX_SPECIES, 19));
+	max_leap_steps.resize(MAX_SPECIES);
+	max_leaps.resize(MAX_SPECIES);
+	max_leaped.resize(MAX_SPECIES);
+	max_leap_steps2.resize(MAX_SPECIES);
+	max_leaps_r.resize(MAX_SPECIES);
+	max_leaped_r.resize(MAX_SPECIES);
+	max_leaps2.resize(MAX_SPECIES);
+	max_leaped2.resize(MAX_SPECIES);
+	max_leaps2_r.resize(MAX_SPECIES);
+	max_leaped2_r.resize(MAX_SPECIES);
+	cse_leaps.resize(MAX_SPECIES);
+	cse_leaps_r.resize(MAX_SPECIES);
+	thirds_ignored.resize(MAX_SPECIES);
+
 	progress.resize(MAX_PROGRESS);
 	av_cnt = 1;
 	v_cnt = 1;
@@ -353,7 +367,6 @@ void CGenCF1::SetRuleParams() {
 	cambiata_max_leap3 = Interval2Chromatic(GetRuleParam(rule_set, 264, rsSubComment, 1));
 	cambiata_max_leap4 = Interval2Chromatic(GetRuleParam(rule_set, 265, rsSubComment, 1));
 	pco_apart = GetRuleParam(rule_set, 248, rsName, 0);
-	thirds_ignored = GetRuleParam(rule_set, 70, rsName, 0);
 	c4p_last_meas = GetRuleParam(rule_set, 144, rsName, 1);
 	fill_pre3_notes = GetRuleParam(rule_set, 100, rsComment, 0);
 	fill_pre4_int = GetRuleParam(rule_set, 144, rsComment, 0) - 1;
@@ -364,18 +377,6 @@ void CGenCF1::SetRuleParams() {
 	max_smooth_direct = GetRuleParam(rule_set, 5, rsSubName, 0);
 	max_smooth2 = GetRuleParam(rule_set, 302, rsSubName, 0);
 	max_smooth_direct2 = GetRuleParam(rule_set, 303, rsSubName, 0);
-	max_leap_steps = GetRuleParam(rule_set, 3, rsName, 0);
-	max_leaps = GetRuleParam(rule_set, 3, rsSubName, 0);
-	max_leaped = GetRuleParam(rule_set, 25, rsSubName, 0);
-	max_leap_steps2 = GetRuleParam(rule_set, 202, rsName, 0);
-	max_leaps2 = GetRuleParam(rule_set, 202, rsSubName, 0);
-	max_leaped2 = GetRuleParam(rule_set, 203, rsSubName, 0);
-	max_leaps3 = GetRuleParam(rule_set, 311, rsSubName, 0);
-	max_leaped3 = GetRuleParam(rule_set, 312, rsSubName, 0);
-	max_leaps4 = GetRuleParam(rule_set, 313, rsSubName, 0);
-	max_leaped4 = GetRuleParam(rule_set, 314, rsSubName, 0);
-	cse_leaps = GetRuleParam(rule_set, 70, rsSubName, 0);
-	cse_leaps2 = GetRuleParam(rule_set, 71, rsSubName, 0);
 	stag_notes = GetRuleParam(rule_set, 10, rsSubName, 0);
 	stag_note_steps = GetRuleParam(rule_set, 10, rsSubName, 1);
 	stag_notes2 = GetRuleParam(rule_set, 39, rsSubName, 0);
@@ -412,6 +413,22 @@ void CGenCF1::SetRuleParams() {
 
 	for (int fl = 0; fl < 24; ++fl) {
 		notes_lrange[fl % 4][fl / 4] = GetRuleParam(rule_set, 434 + fl, rsSubName, 0);
+	}
+
+	for (int sp = 0; sp < MAX_SPECIES; ++sp) {
+		max_leap_steps[sp] = GetRuleParam(rule_set, 493 + sp, rsName, 0);
+		max_leaps[sp] = GetRuleParam(rule_set, 493 + sp, rsSubName, 0);
+		max_leaped[sp] = GetRuleParam(rule_set, 499 + sp, rsSubName, 0);
+		max_leap_steps2[sp] = GetRuleParam(rule_set, 517 + sp, rsName, 0);
+		max_leaps_r[sp] = GetRuleParam(rule_set, 505 + sp, rsSubName, 0);
+		max_leaped_r[sp] = GetRuleParam(rule_set, 511 + sp, rsSubName, 0);
+		max_leaps2[sp] = GetRuleParam(rule_set, 517 + sp, rsSubName, 0);
+		max_leaped2[sp] = GetRuleParam(rule_set, 523 + sp, rsSubName, 0);
+		max_leaps2_r[sp] = GetRuleParam(rule_set, 529 + sp, rsSubName, 0);
+		max_leaped2_r[sp] = GetRuleParam(rule_set, 535 + sp, rsSubName, 0);
+		cse_leaps[sp] = GetRuleParam(rule_set, 541 + sp, rsSubName, 0);
+		cse_leaps_r[sp] = GetRuleParam(rule_set, 547 + sp, rsSubName, 0);
+		thirds_ignored[sp] = GetRuleParam(rule_set, 541 + sp, rsComment, 0);
 	}
 
 	notes_arange = GetRuleParam(rule_set, 15, rsSubName, 0);
@@ -1492,8 +1509,12 @@ int CGenCF1::FailLongRepeat(vector<int> &c, vector<int> &cc, vector<int> &leap, 
 	return 0;
 }
 
-int CGenCF1::FailManyLeaps(vector<int> &c, vector<int> &cc, vector<int> &leap, vector<int> &smooth, vector<int> &slur, int mleaps, int mleaped, int mleaps2, int mleaped2, int mleapsteps, int flag1, int flag2, int flag3, int flag4) {
+int CGenCF1::FailManyLeaps(vector<int> &c, vector<int> &cc, vector<int> &leap, vector<int> &smooth, 
+	vector<int> &slur, int mleaps, int mleaped, int mleaps2, int mleaped2, int mleapsteps, 
+	int flag1, int flag2, int flag3, int flag4) {
 	CHECK_READY(DR_fli, DR_c);
+	// Do not test if flag disabled and not testing (warning, this disables parameter map calculation)
+	if (task != tEval && accept[flag3] == -1 && accept[flag4] == -1) return 0;
 	int leap_sum = 0;
 	int leaped_sum = 0;
 	pm_win_leaps = 0;
@@ -1573,7 +1594,9 @@ void CGenCF1::GetLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, 
 }
 
 // Check if too many leaps
-int CGenCF1::FailLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, vector<int> &smooth, vector<int> &slur, int l_max_smooth, int l_max_smooth_direct, int flag1, int flag2, int first_run) {
+int CGenCF1::FailLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, vector<int> &smooth, 
+	vector<int> &slur, int l_max_smooth, int l_max_smooth_direct, int csel, int csel2, 
+	int flag1, int flag2, int flag3, int flag4, int first_run) {
 	CHECK_READY(DR_leap, DR_c, DR_fli);
 	// Clear variables
 	int leap_sum2 = 0;
@@ -1602,15 +1625,15 @@ int CGenCF1::FailLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, 
 		if (leap_sum2 == 2) ++pm_leaps2;
 		else if (leap_sum2 == 3) ++pm_leaps3;
 		// Get maximum leap_sum
-		leap_sum_corrected = leap_sum2 - min(thirds_sum, thirds_ignored);
+		leap_sum_corrected = leap_sum2 - min(thirds_sum, thirds_ignored[cspecies]);
 		if (leap_sum_corrected > max_leap_sum2) {
 			max_leap_sum2 = leap_sum_corrected;
 			leap_sum_s2 = s;
 		}
 		// Calculate penalty
-		if (leap_sum_corrected == cse_leaps) {
-			if (accept[70] > 0) ++fpenalty[70];
-			if (leap_sum_corrected > cse_leaps2 && accept[71] > 0) ++fpenalty[71];
+		if (leap_sum_corrected == csel) {
+			if (accept[flag3] > 0) ++fpenalty[flag3];
+			if (leap_sum_corrected > csel2 && accept[flag4] > 0) ++fpenalty[flag4];
 		}
 		// Prohibit long smooth movement
 		if (smooth[s] != 0) {
@@ -1702,10 +1725,10 @@ int CGenCF1::FailLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, 
 			}
 		}
 	}
-	if (first_run && max_leap_sum2 >= cse_leaps) {
-		if (max_leap_sum2 > cse_leaps2) 
-			FLAG2L(71, fli[bli[leap_sum_s2] + 1], fli[max(0, bli[leap_sum_s2] - max_leap_sum2 + 1)]);
-		else FLAG2L(70, fli[bli[leap_sum_s2] + 1], fli[max(0, bli[leap_sum_s2] - max_leap_sum2 + 1)]);
+	if (first_run && max_leap_sum2 >= csel) {
+		if (max_leap_sum2 > csel2) 
+			FLAG2L(flag4, fli[bli[leap_sum_s2] + 1], fli[max(0, bli[leap_sum_s2] - max_leap_sum2 + 1)]);
+		else FLAG2L(flag3, fli[bli[leap_sum_s2] + 1], fli[max(0, bli[leap_sum_s2] - max_leap_sum2 + 1)]);
 	}
 	return 0;
 }
@@ -2079,6 +2102,11 @@ int CGenCF1::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_
 		// Check if leap is second third
 		if (fleap_start > 0 && abs(c[leap_end] - c[fli2[fleap_start-1]]) == 4 &&
 			abs(c[leap_start] - c[fli2[fleap_start - 1]]) == 2) {
+			// If there is one more third forward (3 x 3rds total)
+			if (fleap_end < fli_size - 1 && abs(c[fli2[fleap_end + 1]] - c[fli2[fleap_start - 1]]) == 6) {
+				FLAG2L(559 + species, fli[fleap_start], fli[fleap_start + 2]);
+			}
+			else FLAG2L(553 + species, fli[fleap_start], fli[fleap_start + 2]);
 			// Set middle leap note
 			leap_mid = leap_start;
 			// Set leap start to first note of first third
@@ -2086,12 +2114,6 @@ int CGenCF1::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_
 			leap_start = fli2[fleap_start];
 			// Set leap size to be compound
 			leap_size = 4;
-			// If 6/8 goes before 2 thirds (tight)
-			if ((fleap_start > 0) && ((leap[leap_start] * (c[leap_start] - c[fli2[fleap_start - 1]]) == -5) ||
-				(leap[leap_start] * (c[leap_start] - c[fli2[fleap_start - 1]]) == -7))) 
-				FLAG2L(28, fli[fleap_start], fli[fleap_start + 2]);
-				// Else mark simple 2x3rds
-			else FLAG2L(6, fli[fleap_start], fli[fleap_start + 2]);
 		}
 	}			
 	leap_id = min(leap_size - 2, 3);
@@ -2100,7 +2122,7 @@ int CGenCF1::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_
 		if (leap_next > 0) {
 			// Flag if greater than two thirds
 			if (abs(c[fli2[fleap_end + 1]] - c[leap_start]) > 4) 
-				FLAG2L(27, fli[fleap_start], fli[bli[leap_end] + 1]);
+				FLAG2L(565 + cspecies, fli[fleap_start], fli[bli[leap_end] + 1]);
 				// Allow if both thirds, without flags (will process next cycle)
 			else arpeg=1;
 		}
@@ -2660,13 +2682,10 @@ void CGenCF1::ScanCantusInit() {
 	max_interval = max_interval_cf;
 	// Calculate last steps that are allowed to have C4P
 	c4p_last_steps = c4p_last_meas;
-	// Set green leap limits
-	max_leaps5 = max_leaps;
-	max_leaped5 = max_leaped;
-	max_leaps6 = max_leaps2;
-	max_leaped6 = max_leaped2;
 	// Set scan voices count
 	svoices = 1;
+	// Set species to CF
+	cspecies = 0;
 }
 
 // Get minimum element in SWA window
@@ -4871,13 +4890,10 @@ check:
 		if (FailLastNoteRes(m_pc)) goto skip;
 		GetLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur);
 		if (FailTritones(m_c, m_cc, m_pc, m_pcc, m_leap)) goto skip;
-		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps, max_leaped, max_leaps, max_leaped, max_leap_steps, 3, 25, 3, 25)) goto skip;
-		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps2, max_leaped2, max_leaps2, max_leaped2, max_leap_steps2, 202, 203, 202, 203)) goto skip;
-		if (FailLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur, max_smooth2, max_smooth_direct2, 302, 303, 1)) goto skip;
-		// Run green tests only if orange did not fire
-		//if (skip_flags || (!flags[302] && flags[303])) {
-			if (FailLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur, max_smooth, max_smooth_direct, 4, 5, 0)) goto skip;
-		//}
+		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps[0], max_leaped[0], max_leaps_r[0], max_leaped_r[0], max_leap_steps[0], 493, 499, 505, 511)) goto skip;
+		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps2[0], max_leaped2[0], max_leaps2_r[0], max_leaped2_r[0], max_leap_steps2[0], 517, 523, 529, 535)) goto skip;
+		if (FailLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur, max_smooth2, max_smooth_direct2, cse_leaps[0], cse_leaps_r[0],
+			302, 303, 541, 547, 1)) goto skip;
 		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps2, repeat_notes2, 76)) goto skip;
 		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps3, repeat_notes3, 36)) goto skip;
 		if (FailLongRepeat(m_c, m_cc, m_leap, repeat_steps5, repeat_notes5, 72)) goto skip;
