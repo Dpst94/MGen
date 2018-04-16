@@ -2104,9 +2104,9 @@ int CGenCF1::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_
 			abs(c[leap_start] - c[fli2[fleap_start - 1]]) == 2) {
 			// If there is one more third forward (3 x 3rds total)
 			if (fleap_end < fli_size - 1 && abs(c[fli2[fleap_end + 1]] - c[fli2[fleap_start - 1]]) == 6) {
-				FLAG2L(559 + species, fli[fleap_start], fli[fleap_start + 2]);
+				FLAG2L(559 + species, fli[fleap_start - 1], fli[fleap_start + 1]);
 			}
-			else FLAG2L(553 + species, fli[fleap_start], fli[fleap_start + 2]);
+			else FLAG2L(553 + species, fli[fleap_start - 1], fli[fleap_start + 1]);
 			// Set middle leap note
 			leap_mid = leap_start;
 			// Set leap start to first note of first third
