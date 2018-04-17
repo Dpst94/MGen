@@ -180,7 +180,7 @@ void CGenCF1::LoadRules(CString fname)
 		st.Trim();
 		if (st.Find(";") != -1) {
 			Tokenize(st, ast, ";");
-			if (ast.size() != 23) {
+			if (ast.size() != 24) {
 				est.Format("Wrong column count at line %d in rules file %s: '%s'", i, fname, st);
 				WriteLog(5, est);
 				error = 1;
@@ -188,10 +188,10 @@ void CGenCF1::LoadRules(CString fname)
 			}
 			set = atoi(ast[0]);
 			rid = atoi(ast[1]);
-			sev = atoi(ast[2]);
-			rule = ast[5];
-			subrule = ast[6];
-			flag = atoi(ast[7]);
+			sev = atoi(ast[3]);
+			rule = ast[6];
+			subrule = ast[7];
+			flag = atoi(ast[8]);
 			if (sev < prohibit_min_severity && flag == 0) flag = 1;
 			// Find rule id
 			if (rid >= max_flags) {
@@ -213,37 +213,37 @@ void CGenCF1::LoadRules(CString fname)
 			}
 			RuleName[set][rid] = rule;
 			SubRuleName[set][rid] = subrule;
-			RuleGroup[rid] = ast[4];
-			RuleComment[rid] = ast[8];
-			SubRuleComment[set][rid] = ast[9];
+			RuleGroup[rid] = ast[5];
+			RuleComment[rid] = ast[9];
+			SubRuleComment[set][rid] = ast[10];
 			// If testing, enable all disabled rules so that expected violations can be confirmed
 			//if (m_testing && flag == -1) flag = 1;
 			accepts[set][rid] = flag;
 			severity[rid] = sev;
-			rule_viz[rid] = atoi(ast[10]);
-			rule_viz_int[rid] = atoi(ast[11]);
-			rule_viz_v2[rid] = atoi(ast[12]);
-			rule_viz_t[rid] = ast[13];
+			rule_viz[rid] = atoi(ast[11]);
+			rule_viz_int[rid] = atoi(ast[12]);
+			rule_viz_v2[rid] = atoi(ast[13]);
+			rule_viz_t[rid] = ast[14];
 			if (viz_space[rule_viz[rid]] && rule_viz_t[rid].IsEmpty()) rule_viz_t[rid] = " ";
 			rule_viz_t[rid].Replace("!rn!", RuleName[set][rid]);
 			rule_viz_t[rid].Replace("!srn!", SubRuleName[set][rid]);
 			rule_viz_t[rid].Replace("!rg!", RuleGroup[rid]);
 			rule_viz_t[rid].Replace("!rc!", RuleComment[rid]);
 			rule_viz_t[rid].Replace("!src!", SubRuleComment[set][rid]);
-			false_positives_global[rid] = atoi(ast[16]);
-			false_positives_ignore[rid] = atoi(ast[17]);
-			sas_emulator_max_delay[rid] = atoi(ast[18]);
-			sas_emulator_move_ignore[rid] = atoi(ast[19]);
-			if (!ast[20].IsEmpty()) {
-				Tokenize(ast[20], ast2, ",");
+			false_positives_global[rid] = atoi(ast[17]);
+			false_positives_ignore[rid] = atoi(ast[18]);
+			sas_emulator_max_delay[rid] = atoi(ast[19]);
+			sas_emulator_move_ignore[rid] = atoi(ast[20]);
+			if (!ast[21].IsEmpty()) {
+				Tokenize(ast[21], ast2, ",");
 				for (int x = 0; x < ast2.size(); ++x) {
 					int fl = atoi(ast2[x]);
 					if (fl) sas_emulator_replace[fl].push_back(rid);
 				}
 			}
-			sas_emulator_unstable[rid] = atoi(ast[21]);
-			if (!ast[22].IsEmpty()) {
-				Tokenize(ast[22], ast2, ",");
+			sas_emulator_unstable[rid] = atoi(ast[22]);
+			if (!ast[23].IsEmpty()) {
+				Tokenize(ast[23], ast2, ",");
 				for (int x = 0; x < ast2.size(); ++x) {
 					int fl = atoi(ast2[x]);
 					if (fl) flag_replace[fl].push_back(rid);
