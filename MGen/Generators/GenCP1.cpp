@@ -1341,6 +1341,7 @@ int CGenCP1::DetectPDD() {
 // Detect downbeat neighbour tone
 int CGenCP1::DetectDNT() {
 	if (!accept[258]) return 0;
+	// If pattern is needed to compensate for dissonance
 	int pattern_needed;
 	int max_ls = fli_size - 1;
 	if (ep2 == c_len) max_ls = fli_size - 3;
@@ -1376,6 +1377,11 @@ int CGenCP1::DetectDNT() {
 				if (pattern_needed) FLAG2(260, fli[ls]);
 				if (!accept[260]) continue;
 			}
+			// Leap in (before DNT)
+			if (ls > 0 && aleap[cpv][fli2[ls - 1]]) {
+				if (pattern_needed) FLAG2(571, fli[ls]);
+				if (!accept[571]) continue;
+			}
 			if (ls < fli_size - 3) {
 				// Note 3 is longer than 4
 				if (llen[ls + 2] > llen[ls + 3] && (ep2 == c_len || ls < fli_size - 4)) continue;
@@ -1405,10 +1411,9 @@ int CGenCP1::DetectDNT() {
 				}
 				if (ls < fli_size - 4) {
 					// Leap from note 4
-					if (aleap[cpv][fli2[ls + 3]] || 
-						asmooth[cpv][fli2[ls + 3]] * asmooth[cpv][fli2[ls]] < 1) {
+					if (aleap[cpv][fli2[ls + 3]]) {
 						if (pattern_needed) FLAG2(97, fli[ls]);
-						//if (!accept[97]) continue;
+						if (!accept[97]) continue;
 					}
 				}
 			}
