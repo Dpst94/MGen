@@ -408,18 +408,18 @@ protected:
 	int max_smooth = 7; // Maximum linear movement allowed (in steps)
 	int max_smooth_direct2 = 5; // Maximum linear movement in one direction allowed in cp (in steps)
 	int max_smooth2 = 7; // Maximum linear movement allowed in cp (in steps)
-	vector<int> max_leaps; // Maximum allowed leaps during max_leap_steps
-	vector<int> max_leaped; // Maximum allowed leaped-over-notes during max_leap_steps
-	vector<int> max_leap_steps;
-	vector<int> max_leaps_r; // Maximum allowed leaps during max_leap_steps2
-	vector<int> max_leaped_r; // Maximum allowed leaped-over-notes during max_leap_steps
-	vector<int> max_leap_steps2;
-	vector<int> max_leaps2; // Maximum allowed leaps during max_leap_steps
-	vector<int> max_leaped2; // Maximum allowed leaped-over-notes during max_leap_steps
-	vector<int> max_leaps2_r; // Maximum allowed leaps during max_leap_steps
-	vector<int> max_leaped2_r; // Maximum allowed leaped-over-notes during max_leap_steps
-	vector<int> cse_leaps; // Maximum allowed consecutive leaps for Consecutive leaps
-	vector<int> cse_leaps_r; // Maximum allowed consecutive leaps for Consecutive leaps+
+	int max_leaps; // Maximum allowed leaps during max_leap_steps
+	int max_leaped; // Maximum allowed leaped-over-notes during max_leap_steps
+	int max_leap_steps;
+	int max_leaps_r; // Maximum allowed leaps during max_leap_steps2
+	int max_leaped_r; // Maximum allowed leaped-over-notes during max_leap_steps
+	int max_leap_steps2;
+	int max_leaps2; // Maximum allowed leaps during max_leap_steps
+	int max_leaped2; // Maximum allowed leaped-over-notes during max_leap_steps
+	int max_leaps2_r; // Maximum allowed leaps during max_leap_steps
+	int max_leaped2_r; // Maximum allowed leaped-over-notes during max_leap_steps
+	int cse_leaps; // Maximum allowed consecutive leaps for Consecutive leaps
+	int cse_leaps_r; // Maximum allowed consecutive leaps for Consecutive leaps+
 	int hsp_leap = 5; // Maximum allowed leap before bad harmonic sequence
 	int early_culm = 3; // Early culmination step
 	int late_culm = 3; // Late culmination step
@@ -505,7 +505,7 @@ protected:
 	int tonic_wei_long = 30; // Weight of tonic longer than left neighbor
 	int tonic_wei_len = 20; // Tonic length decrease two times decreases weight by X
 
-	vector<int> thirds_ignored; // Number of thirds ignored for consecutive leaps rule
+	int thirds_ignored; // Number of thirds ignored for consecutive leaps rule
 	int fis_gis_max = 3; // Maximum allowed distance between F# and G#
 	int fis_g_max = 3; // Minimum distance from G to F# (+1 to allow)
 	int fis_g_max2 = 3; // Minimum distance from F# to G (+1 to allow)

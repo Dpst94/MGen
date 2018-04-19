@@ -10,20 +10,6 @@
 CGenCF1::CGenCF1() {
 	// Init vector parameters
 	notes_lrange.resize(4, vector<int>(MAX_SPECIES, 19));
-	max_leap_steps.resize(MAX_SPECIES);
-	max_leaps.resize(MAX_SPECIES);
-	max_leaped.resize(MAX_SPECIES);
-	max_leap_steps2.resize(MAX_SPECIES);
-	max_leaps_r.resize(MAX_SPECIES);
-	max_leaped_r.resize(MAX_SPECIES);
-	max_leaps2.resize(MAX_SPECIES);
-	max_leaped2.resize(MAX_SPECIES);
-	max_leaps2_r.resize(MAX_SPECIES);
-	max_leaped2_r.resize(MAX_SPECIES);
-	cse_leaps.resize(MAX_SPECIES);
-	cse_leaps_r.resize(MAX_SPECIES);
-	thirds_ignored.resize(MAX_SPECIES);
-
 	progress.resize(MAX_PROGRESS);
 	av_cnt = 1;
 	v_cnt = 1;
@@ -435,21 +421,19 @@ void CGenCF1::SetRuleParams() {
 		notes_lrange[fl % 4][fl / 4] = GetRuleParam(cspecies, 434 + fl, rsSubName, 0);
 	}
 
-	for (int sp = 0; sp < MAX_SPECIES; ++sp) {
-		max_leap_steps[sp] = GetRuleParam(cspecies, 493 + sp, rsName, 0);
-		max_leaps[sp] = GetRuleParam(cspecies, 493 + sp, rsSubName, 0);
-		max_leaped[sp] = GetRuleParam(cspecies, 499 + sp, rsSubName, 0);
-		max_leap_steps2[sp] = GetRuleParam(cspecies, 517 + sp, rsName, 0);
-		max_leaps_r[sp] = GetRuleParam(cspecies, 505 + sp, rsSubName, 0);
-		max_leaped_r[sp] = GetRuleParam(cspecies, 511 + sp, rsSubName, 0);
-		max_leaps2[sp] = GetRuleParam(cspecies, 517 + sp, rsSubName, 0);
-		max_leaped2[sp] = GetRuleParam(cspecies, 523 + sp, rsSubName, 0);
-		max_leaps2_r[sp] = GetRuleParam(cspecies, 529 + sp, rsSubName, 0);
-		max_leaped2_r[sp] = GetRuleParam(cspecies, 535 + sp, rsSubName, 0);
-		cse_leaps[sp] = GetRuleParam(cspecies, 541 + sp, rsSubName, 0);
-		cse_leaps_r[sp] = GetRuleParam(cspecies, 547 + sp, rsSubName, 0);
-		thirds_ignored[sp] = GetRuleParam(cspecies, 541 + sp, rsComment, 0);
-	}
+	max_leap_steps = GetRuleParam(cspecies, 493, rsName, 0);
+	max_leaps = GetRuleParam(cspecies, 493, rsSubName, 0);
+	max_leaped = GetRuleParam(cspecies, 494, rsSubName, 0);
+	max_leap_steps2 = GetRuleParam(cspecies, 497, rsName, 0);
+	max_leaps_r = GetRuleParam(cspecies, 495, rsSubName, 0);
+	max_leaped_r = GetRuleParam(cspecies, 496, rsSubName, 0);
+	max_leaps2 = GetRuleParam(cspecies, 497, rsSubName, 0);
+	max_leaped2 = GetRuleParam(cspecies, 498, rsSubName, 0);
+	max_leaps2_r = GetRuleParam(cspecies, 499, rsSubName, 0);
+	max_leaped2_r = GetRuleParam(cspecies, 500, rsSubName, 0);
+	cse_leaps = GetRuleParam(cspecies, 501, rsSubName, 0);
+	cse_leaps_r = GetRuleParam(cspecies, 502, rsSubName, 0);
+	thirds_ignored = GetRuleParam(cspecies, 501, rsComment, 0);
 
 	notes_arange = GetRuleParam(cspecies, 15, rsSubName, 0);
 	min_arange = GetRuleParam(cspecies, 15, rsSubName, 1) / 10.0;
@@ -1608,7 +1592,7 @@ int CGenCF1::FailLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, 
 		if (leap_sum2 == 2) ++pm_leaps2;
 		else if (leap_sum2 == 3) ++pm_leaps3;
 		// Get maximum leap_sum
-		leap_sum_corrected = leap_sum2 - min(thirds_sum, thirds_ignored[cspecies]);
+		leap_sum_corrected = leap_sum2 - min(thirds_sum, thirds_ignored);
 		if (leap_sum_corrected > max_leap_sum2) {
 			max_leap_sum2 = leap_sum_corrected;
 			leap_sum_s2 = s;
@@ -4887,9 +4871,9 @@ check:
 		if (FailLastNoteRes(m_pc)) goto skip;
 		GetLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur);
 		if (FailTritones(m_c, m_cc, m_pc, m_pcc, m_leap)) goto skip;
-		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps[0], max_leaped[0], max_leaps_r[0], max_leaped_r[0], max_leap_steps[0], 493, 499, 505, 511)) goto skip;
-		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps2[0], max_leaped2[0], max_leaps2_r[0], max_leaped2_r[0], max_leap_steps2[0], 517, 523, 529, 535)) goto skip;
-		if (FailLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur, max_smooth2, max_smooth_direct2, cse_leaps[0], cse_leaps_r[0],
+		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps, max_leaped, max_leaps_r, max_leaped_r, max_leap_steps, 493, 499, 505, 511)) goto skip;
+		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps2, max_leaped2, max_leaps2_r, max_leaped2_r, max_leap_steps2, 517, 523, 529, 535)) goto skip;
+		if (FailLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur, max_smooth2, max_smooth_direct2, cse_leaps, cse_leaps_r,
 			302, 303, 541, 547, 1)) goto skip;
 		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps2, repeat_notes2, 76)) goto skip;
 		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps3, repeat_notes3, 36)) goto skip;
