@@ -242,6 +242,7 @@ public:
 	void SendLyIntervals();
 	void SendLyNoteNames();
 	void SaveLy(CString dir, CString fname);
+	void SelectSpeciesRules();
 
 	// Shape scripts
 	vector <vector<unordered_map<int, CString>>> shsc;
@@ -259,6 +260,11 @@ public:
 	vector<vector <CString>> RuleComment; // [sp][rid] Comments for flag groups
 	vector<vector <CString>> SubRuleComment; // [sp][rid] Comments for flags
 	int cspecies = 0; // Counterpoint species (current). For example, in CA2 can be zero when evaluating CF
+	int cspecies0 = -1; // Last saved species, for which rules and parameters are loaded
+	int flags_need2 = 0; // Number of second level flags set
+	vector <vector<int>> accepts; // [sp][rid] Each 1 allows showing canti with specific properties
+	vector <vector<int>> severities; // [sp][rid] 
+	int max_flags = 0; // Maximum number of rules
 
 	// Lilypond parameters
 	int ly_flag_style = 1; // 0 - no flag visualisation, 1 - color note, 2 - x above note

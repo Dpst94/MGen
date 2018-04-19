@@ -234,7 +234,6 @@ protected:
 	void SetRuleParams();
 	inline void ProcessSpecies();
 	void CheckConfig();
-	void SelectSpeciesRules();
 	void LoadHarmNotation();
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void LogCantus(CString st3, int x, int size, vector<int>& c);
@@ -375,11 +374,8 @@ protected:
 	void FillCantusMap(vector<int>& c, vector<int>& smap, int step1, int step2, int value);
 	
 	// Rules
-	vector <vector<int>> accepts; // [sp][rid] Each 1 allows showing canti with specific properties
-	vector <vector<int>> severities; // [sp][rid] 
 	vector<vector<vector<vector<int>>>> RuleParam; // Parsed rule parameters
 	vector <CString> RuleGroup; // Groups for flag groups
-	int max_flags = 82; // Maximum number of rules
 
 	// Parameters
 	int sus_last_measures = 3; // Last measures in which sus is allowed in species 2 and 3
@@ -607,7 +603,6 @@ protected:
 	long cantus_sent = 0; // How many cantus have been sent
 	int step = 0; // Global step
 	long long accepted = 0; // Number of accepted canti
-	int flags_need2 = 0; // Number of second level flags set
 	vector<int> cpos; // [s] Position of cc step in output vectors
 	vector<int> m_c; // [s] Cantus diatonic
 	vector<int> m_cc; // [s] Cantus chromatic
@@ -803,7 +798,6 @@ protected:
 	vector<vector<int>> aslur; // [v][s] Slurs
 	vector<int> retrigger; // [s] Equals 1 if note should be retriggered
 	int species = 0; // Counterpoint species
-	int cspecies0 = -1; // Last saved species, for which rules and parameters are loaded
 	int species_detected = 0; // Counterpoint species detected in CA2
 	vector<int> species_pos; // Possible species
 	int sus_count = 0; // Number of suspensions detected in ExplodeCP

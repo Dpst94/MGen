@@ -601,31 +601,6 @@ void CGenCF1::CheckConfig() {
 	}
 }
 
-// Select rules
-void CGenCF1::SelectSpeciesRules() {
-	CHECK_READY_PERSIST(DP_Rules);
-	if (cspecies == cspecies0) return;
-	cspecies0 = cspecies;
-	// Load rules
-	for (int i = 0; i < max_flags; ++i) {
-		accept[i] = accepts[cspecies][i];
-		severity[i] = severities[cspecies][i];
-	}
-	// Check that at least one rule is accepted
-	for (int i = 0; i < max_flags; ++i) {
-		if (accept[i]) break;
-		if (i == max_flags - 1) {
-			WriteLog(5, "Warning: all rules are rejected (0) in configuration file");
-			error = 1;
-		}
-	}
-	// Calculate second level flags count
-	flags_need2 = 0;
-	for (int i = 0; i < max_flags; ++i) {
-		if (accept[i] == 2) ++flags_need2;
-	}
-}
-
 void CGenCF1::LoadHarmNotation() {
 	CString fname = "configs\\harm\\harm-notation.csv";
 	if (!CGLib::fileExists(fname)) {
@@ -3880,7 +3855,7 @@ void CGenCF1::SendComment(int pos, int v, int av, int x, int i) {
 				//com += ". ";
 				comment[pos][v].push_back(com);
 				ccolor[pos][v].push_back(flag_color[severity[fl]]);
-				nlink[pos][v][fl] = anfl[av][x][f] - x;
+				nlink[pos][v][fl * 10 + cspecies] = anfl[av][x][f] - x;
 			}
 			// Set note color if this is maximum flag severity
 			if (severity[fl] > current_severity && severity[fl] >= show_min_severity

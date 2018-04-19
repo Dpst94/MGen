@@ -485,7 +485,8 @@ CString CLy::GetIntName(int iv) {
 }
 
 void CLy::AddNLink(int i, int i2, int v, CString st, int fl, int ln, int foreign) {
-	lyi[i2 - ly_step1].nflags.push_back(fl);
+	lyi[i2 - ly_step1].nflags.push_back(fl / 10);
+	cspecies = fl % 10;
 	if (foreign) {
 		lyi[i2 - ly_step1].nfl.push_back(i + ln - coff[i + ln][ly_v] - i2);
 	}
@@ -504,7 +505,7 @@ void CLy::ParseNLinks(int i, int i2, int v, int foreign) {
 	CString com;
 	int x = 0;
 	for (auto const& it : nlink[i][v]) {
-		if (foreign && !rule_viz_v2[it.first]) continue;
+		if (foreign && !rule_viz_v2[it.first / 10]) continue;
 		AddNLink(i, i2, v, comment[i][v][x], it.first, it.second, foreign);
 		++x;
 	}
@@ -758,6 +759,7 @@ void CLy::InitLyI() {
 				WriteLog(5, est);
 			}
 		}
+		SelectSpeciesRules();
 	}
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
@@ -1165,5 +1167,29 @@ void CLy::SaveLy(CString dir, CString fname) {
 	write_file_sv(ly_fs, sv);
 	ly_fs.close();
 	ly_saved = 1;
+}
+
+// Select rules
+void CLy::SelectSpeciesRules() {
+	if (cspecies == cspecies0) return;
+	cspecies0 = cspecies;
+	// Load rules
+	for (int i = 0; i < max_flags; ++i) {
+		accept[i] = accepts[cspecies][i];
+		severity[i] = severities[cspecies][i];
+	}
+	// Check that at least one rule is accepted
+	for (int i = 0; i < max_flags; ++i) {
+		if (accept[i]) break;
+		if (i == max_flags - 1) {
+			WriteLog(5, "Warning: all rules are rejected (0) in configuration file");
+			error = 1;
+		}
+	}
+	// Calculate second level flags count
+	flags_need2 = 0;
+	for (int i = 0; i < max_flags; ++i) {
+		if (accept[i] == 2) ++flags_need2;
+	}
 }
 
