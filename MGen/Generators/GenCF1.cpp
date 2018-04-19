@@ -2071,9 +2071,9 @@ int CGenCF1::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_
 			abs(c[leap_start] - c[fli2[fleap_start - 1]]) == 2) {
 			// If there is one more third forward (3 x 3rds total)
 			if (fleap_end < fli_size - 1 && abs(c[fli2[fleap_end + 1]] - c[fli2[fleap_start - 1]]) == 6) {
-				FLAG2L(559 + species, fli[fleap_start - 1], fli[fleap_start + 1]);
+				FLAG2L(504, fli[fleap_start - 1], fli[fleap_start + 1]);
 			}
-			else FLAG2L(553 + species, fli[fleap_start - 1], fli[fleap_start + 1]);
+			else FLAG2L(503, fli[fleap_start - 1], fli[fleap_start + 1]);
 			// Set middle leap note
 			leap_mid = leap_start;
 			// Set leap start to first note of first third
@@ -2089,7 +2089,7 @@ int CGenCF1::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_
 		if (leap_next > 0) {
 			// Flag if greater than two thirds
 			if (abs(c[fli2[fleap_end + 1]] - c[leap_start]) > 4) 
-				FLAG2L(565 + cspecies, fli[fleap_start], fli[bli[leap_end] + 1]);
+				FLAG2L(505, fli[fleap_start], fli[bli[leap_end] + 1]);
 				// Allow if both thirds, without flags (will process next cycle)
 			else arpeg=1;
 		}
@@ -4871,10 +4871,10 @@ check:
 		if (FailLastNoteRes(m_pc)) goto skip;
 		GetLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur);
 		if (FailTritones(m_c, m_cc, m_pc, m_pcc, m_leap)) goto skip;
-		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps, max_leaped, max_leaps_r, max_leaped_r, max_leap_steps, 493, 499, 505, 511)) goto skip;
-		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps2, max_leaped2, max_leaps2_r, max_leaped2_r, max_leap_steps2, 517, 523, 529, 535)) goto skip;
+		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps, max_leaped, max_leaps_r, max_leaped_r, max_leap_steps, 493, 494, 495, 496)) goto skip;
+		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps2, max_leaped2, max_leaps2_r, max_leaped2_r, max_leap_steps2, 497, 498, 499, 500)) goto skip;
 		if (FailLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur, max_smooth2, max_smooth_direct2, cse_leaps, cse_leaps_r,
-			302, 303, 541, 547, 1)) goto skip;
+			302, 303, 501, 502, 1)) goto skip;
 		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps2, repeat_notes2, 76)) goto skip;
 		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps3, repeat_notes3, 36)) goto skip;
 		if (FailLongRepeat(m_c, m_cc, m_leap, repeat_steps5, repeat_notes5, 72)) goto skip;

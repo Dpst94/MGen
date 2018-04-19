@@ -3754,12 +3754,12 @@ check:
 		}
 		if (FailManyLeaps(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_leaps, max_leaped,
 			max_leaps_r, max_leaped_r, max_leap_steps, 
-			493 + species, 499 + species, 505 + species, 511 + species)) goto skip;
+			493, 499, 505, 511)) goto skip;
 		if (FailManyLeaps(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_leaps2, max_leaped2,
 			max_leaps2_r, max_leaped2_r, max_leap_steps2, 
-			517 + species, 523 + species, 529 + species, 535 + species)) goto skip;
+			517, 523, 529, 535)) goto skip;
 		if (FailLeapSmooth(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_smooth2, max_smooth_direct2, 
-			cse_leaps, cse_leaps_r,	302, 303, 541 + species, 547 + species, 1)) goto skip;
+			cse_leaps, cse_leaps_r,	302, 303, 541, 547, 1)) goto skip;
 		if (FailOutstandingRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps2, 2, 76)) goto skip;
 		if (FailOutstandingRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps3, 3, 36)) goto skip;
 		if (FailLongRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps5, 5, 72)) goto skip;
