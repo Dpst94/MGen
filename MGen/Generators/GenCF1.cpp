@@ -173,6 +173,8 @@ void CGenCF1::LoadRules(CString fname) {
 	SET_READY_PERSIST(DP_Rules);
 	CString st, est, rule, subrule;
 	vector<CString> ast, ast2;
+	vector<map<int, int>> rid_unique; // [rid][sp]
+	rid_unique.resize(MAX_RULES);
 	int i = 0;
 	int sev = 0;
 	CString spec;
@@ -257,7 +259,14 @@ void CGenCF1::LoadRules(CString fname) {
 					SaveSpecRule(sp, rid, -1, sev, rule, subrule, ast[9], ast[10]);
 				}
 			for (int x = 0; x < spec.GetLength(); ++x) {
-				SaveSpecRule(atoi(spec.Mid(x, 1)), rid, flag, sev, rule, subrule, ast[9], ast[10]);
+				int sp = atoi(spec.Mid(x, 1));
+				if (rid_unique[rid][sp]) {
+					est.Format("Duplicate rule %d species %d: '%s (%s)' overwrites '%s (%s)' with species filter %s",
+						rid, sp, rule, subrule, RuleName[sp][rid], SubRuleName[sp][rid], spec);
+					WriteLog(5, est);
+				}
+				else rid_unique[rid][sp] = 1;
+				SaveSpecRule(sp, rid, flag, sev, rule, subrule, ast[9], ast[10]);
 			}
 			rule_viz_t[rid].Replace("!rg!", RuleGroup[rid]);
 		}
@@ -1692,11 +1701,11 @@ int CGenCF1::FailLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, 
 						// Same rhythm in first notes of repeat?
 						if (llen[ls - 1] == llen[ls + 1]) {
 							if (llen[ls - 1] == llen[ls]) {
-								FLAG2L(408, fli[ls - 1], fli[ls + 2]);
+								FLAG2L(402, fli[ls - 1], fli[ls + 2]);
 							}
-							else FLAG2L(409, fli[ls - 1], fli[ls + 2]);
+							else FLAG2L(403, fli[ls - 1], fli[ls + 2]);
 						}
-						else FLAG2L(410, fli[ls - 1], fli[ls + 2]);
+						else FLAG2L(404, fli[ls - 1], fli[ls + 2]);
 					}
 				}
 				else if (species == 5) {
@@ -1704,21 +1713,21 @@ int CGenCF1::FailLeapSmooth(vector<int> &c, vector<int> &cc, vector<int> &leap, 
 						// Same rhythm in first notes of repeat?
 						if (llen[ls - 1] == llen[ls + 1]) {
 							if (llen[ls - 1] == llen[ls]) {
-								FLAG2L(405, fli[ls - 1], fli[ls + 2]);
+								FLAG2L(411, fli[ls - 1], fli[ls + 2]);
 							}
-							else FLAG2L(406, fli[ls - 1], fli[ls + 2]);
+							else FLAG2L(412, fli[ls - 1], fli[ls + 2]);
 						}
-						else FLAG2L(407, fli[ls - 1], fli[ls + 2]);
+						else FLAG2L(413, fli[ls - 1], fli[ls + 2]);
 					}
 					else {
 						// Same rhythm in first notes of repeat?
 						if (llen[ls - 1] == llen[ls + 1]) {
 							if (llen[ls - 1] == llen[ls]) {
-								FLAG2L(9, fli[ls - 1], fli[ls + 2]);
+								FLAG2L(402, fli[ls - 1], fli[ls + 2]);
 							}
-							else FLAG2L(320, fli[ls - 1], fli[ls + 2]);
+							else FLAG2L(403, fli[ls - 1], fli[ls + 2]);
 						}
-						else FLAG2L(319, fli[ls - 1], fli[ls + 2]);
+						else FLAG2L(404, fli[ls - 1], fli[ls + 2]);
 					}
 				}
 			}
