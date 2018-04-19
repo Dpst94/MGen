@@ -709,7 +709,6 @@ void CGenCA2::Generate() {
 		cpv = cfv;
 		fn = 0;
 		show_note_scan_range = 0;
-		SelectRuleSet(cf_rule_set);
 		ScanCantus(tEval, cfv, &(m_cc));
 		ApplyMidiOutSpecies();
 		// Go forward
@@ -737,7 +736,6 @@ void CGenCA2::Generate() {
 		else {
 			cpv = 1;
 		}
-		SelectRuleSet(cp_rule_set);
 		// Get cantus interval
 		GetMelodyInterval(cpoint[i][cfv], 0, cpoint[i][cfv].size(), cf_nmin, cf_nmax);
 		GetSourceRange(cpoint[i][cpv]);

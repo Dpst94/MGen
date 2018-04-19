@@ -47,16 +47,17 @@ CGenCF1::CGenCF1() {
 	sas_emulator_unstable.resize(MAX_RULES);
 	flag_delay.resize(MAX_RULES);
 	flag_delay_st.resize(MAX_RULES);
-	RuleParam.resize(MAX_RULESETS);
-	SubRuleName.resize(MAX_RULESETS);
-	RuleName.resize(MAX_RULESETS);
-	SubRuleComment.resize(MAX_RULESETS);
-	RuleComment.resize(MAX_RULES);
+	RuleParam.resize(MAX_SPECIES);
+	SubRuleName.resize(MAX_SPECIES, vector<CString>(MAX_RULES));
+	RuleName.resize(MAX_SPECIES, vector<CString>(MAX_RULES));
+	SubRuleComment.resize(MAX_SPECIES, vector<CString>(MAX_RULES));
+	RuleComment.resize(MAX_SPECIES, vector<CString>(MAX_RULES));
+	severities.resize(MAX_SPECIES, vector<int>(MAX_RULES));
+	accepts.resize(MAX_SPECIES, vector<int>(MAX_RULES));
 	RuleGroup.resize(MAX_RULES);
 	ssf.resize(MAX_RULES);
 	severity.resize(MAX_RULES);
 	flag_color.resize(MAX_SEVERITY);
-	accepts.resize(MAX_RULESETS);
 	max_note_len.resize(6);
 	// Start severity
 	severity[0] = 0;
@@ -149,15 +150,32 @@ void CGenCF1::LoadHSP(CString fname)
 	WriteLog(0, est);
 }
 
+void CGenCF1::SaveSpecRule(int sp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com) {
+	if (!RuleName[sp][rid].IsEmpty()) {
+		//CString est;
+		//est.Format("Species %d rule '%d: %s (%s)' overwrite detected", sp, rid, rule, subrule);
+		//WriteLog(5, est);
+	}
+	RuleName[sp][rid] = rule;
+	SubRuleName[sp][rid] = subrule;
+	RuleComment[sp][rid] = rule_com;
+	SubRuleComment[sp][rid] = subrule_com;
+	accepts[sp][rid] = flag;
+	severities[sp][rid] = sev;
+	rule_viz_t[rid].Replace("!rn!", RuleName[sp][rid]);
+	rule_viz_t[rid].Replace("!srn!", SubRuleName[sp][rid]);
+	rule_viz_t[rid].Replace("!src!", SubRuleComment[sp][rid]);
+	rule_viz_t[rid].Replace("!rc!", RuleComment[sp][rid]);
+}
+
 // Load rules
-void CGenCF1::LoadRules(CString fname)
-{
+void CGenCF1::LoadRules(CString fname) {
 	SET_READY_PERSIST(DP_Rules);
 	CString st, est, rule, subrule;
 	vector<CString> ast, ast2;
 	int i = 0;
 	int sev = 0;
-	int set = 0;
+	CString spec;
 	int flag = 0;
 	int rid;
 	ifstream fs;
@@ -186,8 +204,8 @@ void CGenCF1::LoadRules(CString fname)
 				error = 1;
 				return;
 			}
-			set = atoi(ast[0]);
 			rid = atoi(ast[1]);
+			spec = ast[2];
 			sev = atoi(ast[3]);
 			rule = ast[6];
 			subrule = ast[7];
@@ -205,31 +223,14 @@ void CGenCF1::LoadRules(CString fname)
 			}
 			//est.Format("Found rule %s - %d", rule, rid);
 			//WriteLog(0, est);
-			if (accepts[set].size() < MAX_RULES) {
-				accepts[set].resize(MAX_RULES);
-				RuleName[set].resize(MAX_RULES);
-				SubRuleName[set].resize(MAX_RULES);
-				SubRuleComment[set].resize(MAX_RULES);
-			}
-			RuleName[set][rid] = rule;
-			SubRuleName[set][rid] = subrule;
+			if (spec == "") spec = "012345";
 			RuleGroup[rid] = ast[5];
-			RuleComment[rid] = ast[9];
-			SubRuleComment[set][rid] = ast[10];
 			// If testing, enable all disabled rules so that expected violations can be confirmed
 			//if (m_testing && flag == -1) flag = 1;
-			accepts[set][rid] = flag;
-			severity[rid] = sev;
 			rule_viz[rid] = atoi(ast[11]);
 			rule_viz_int[rid] = atoi(ast[12]);
 			rule_viz_v2[rid] = atoi(ast[13]);
 			rule_viz_t[rid] = ast[14];
-			if (viz_space[rule_viz[rid]] && rule_viz_t[rid].IsEmpty()) rule_viz_t[rid] = " ";
-			rule_viz_t[rid].Replace("!rn!", RuleName[set][rid]);
-			rule_viz_t[rid].Replace("!srn!", SubRuleName[set][rid]);
-			rule_viz_t[rid].Replace("!rg!", RuleGroup[rid]);
-			rule_viz_t[rid].Replace("!rc!", RuleComment[rid]);
-			rule_viz_t[rid].Replace("!src!", SubRuleComment[set][rid]);
 			false_positives_global[rid] = atoi(ast[17]);
 			false_positives_ignore[rid] = atoi(ast[18]);
 			sas_emulator_max_delay[rid] = atoi(ast[19]);
@@ -249,6 +250,16 @@ void CGenCF1::LoadRules(CString fname)
 					if (fl) flag_replace[fl].push_back(rid);
 				}
 			}
+			if (viz_space[rule_viz[rid]] && rule_viz_t[rid].IsEmpty()) rule_viz_t[rid] = " ";
+			// Disable all species
+			if (RuleName[0][rid].IsEmpty()) 
+				for (int sp = 0; sp < MAX_SPECIES; ++sp) {
+					SaveSpecRule(sp, rid, -1, sev, rule, subrule, ast[9], ast[10]);
+				}
+			for (int x = 0; x < spec.GetLength(); ++x) {
+				SaveSpecRule(atoi(spec.Mid(x, 1)), rid, flag, sev, rule, subrule, ast[9], ast[10]);
+			}
+			rule_viz_t[rid].Replace("!rg!", RuleGroup[rid]);
 		}
 	}
 	fs.close();
@@ -298,50 +309,50 @@ int CGenCF1::Interval2Chromatic(int iv) {
 }
 
 // Load rules
-void CGenCF1::ParseRule(int rset, int rid, int type) {
+void CGenCF1::ParseRule(int sp, int rid, int type) {
 	CString st;
-	if (type == rsName) st = RuleName[rset][rid];
-	if (type == rsSubName) st = SubRuleName[rset][rid];
-	if (type == rsComment) st = RuleComment[rid];
-	if (type == rsSubComment) st = SubRuleComment[rset][rid];
+	if (type == rsName) st = RuleName[sp][rid];
+	if (type == rsSubName) st = SubRuleName[sp][rid];
+	if (type == rsComment) st = RuleComment[sp][rid];
+	if (type == rsSubComment) st = SubRuleComment[sp][rid];
 	vector<int> v;
 	GetVint(st, v);
 	if (v.size()) {
 		// Create types
-		if (!RuleParam[rset][rid].size()) RuleParam[rset][rid].resize(4);
+		if (!RuleParam[sp][rid].size()) RuleParam[sp][rid].resize(4);
 		// Set params for type
-		RuleParam[rset][rid][type] = v;
+		RuleParam[sp][rid][type] = v;
 	}
 }
 
-int CGenCF1::GetRuleParam(int rset, int rid, int type, int id) {
-	if (!RuleParam[rset][rid].size() || id >= RuleParam[rset][rid][type].size()) {
+int CGenCF1::GetRuleParam(int sp, int rid, int type, int id) {
+	if (!RuleParam[sp][rid].size() || id >= RuleParam[sp][rid][type].size()) {
 		CString est, rs;
 		CString st;
-		if (type == rsName) st = RuleName[rset][rid];
-		if (type == rsSubName) st = SubRuleName[rset][rid];
-		if (type == rsComment) st = RuleComment[rid];
-		if (type == rsSubComment) st = SubRuleComment[rset][rid];
+		if (type == rsName) st = RuleName[sp][rid];
+		if (type == rsSubName) st = SubRuleName[sp][rid];
+		if (type == rsComment) st = RuleComment[sp][rid];
+		if (type == rsSubComment) st = SubRuleComment[sp][rid];
 		if (type == rsName) rs = "rule name";
 		if (type == rsSubName) rs = "subrule name";
 		if (type == rsComment) rs = "rule comment";
 		if (type == rsSubComment) rs = "subrule comment";
-		est.Format("Error parsing integer #%d from %s %d: '%s' (rule set %d)", id+1, rs, rid, st, rset);
+		est.Format("Error parsing integer #%d from %s %d: '%s' (species %d)", id+1, rs, rid, st, sp);
 		WriteLog(5, est);
 		error = 1;
 		return 0;
 	}
-	return RuleParam[rset][rid][type][id];
+	return RuleParam[sp][rid][type][id];
 }
 
 // Parse rules
 void CGenCF1::ParseRules() {
 	SET_READY_PERSIST(DP_RuleParam);
-	for (int rset = 0; rset < accepts.size(); ++rset) if (accepts[rset].size()) {
-		RuleParam[rset].resize(MAX_RULES);
+	for (int sp = 0; sp < MAX_SPECIES; ++sp) {
+		RuleParam[sp].resize(MAX_RULES);
 		for (int rid = 0; rid < MAX_RULES; ++rid) {
 			for (int rs = 0; rs < 4; ++rs) {
-				ParseRule(rset, rid, rs);
+				ParseRule(sp, rid, rs);
 			}
 		}
 	}
@@ -351,123 +362,130 @@ void CGenCF1::ParseRules() {
 void CGenCF1::SetRuleParams() {
 	CHECK_READY_PERSIST(DP_RuleParam);
 	SET_READY_PERSIST(DP_RuleSetParam);
-	lclimax_notes = GetRuleParam(rule_set, 32, rsSubComment, 0);
-	lclimax_mea = GetRuleParam(rule_set, 32, rsSubComment, 1);
-	lclimax_mea5 = GetRuleParam(rule_set, 325, rsComment, 0);
-	mea_per_sus = GetRuleParam(rule_set, 341, rsSubName, 0);
-	max_note_len[1] = GetRuleParam(rule_set, 336, rsSubName, 1);
-	max_note_len[2] = GetRuleParam(rule_set, 337, rsSubName, 1);
-	max_note_len[3] = GetRuleParam(rule_set, 338, rsSubName, 1);
-	max_note_len[4] = GetRuleParam(rule_set, 339, rsSubName, 1);
-	max_note_len[5] = GetRuleParam(rule_set, 340, rsSubName, 1);
-	tritone_res_quart = GetRuleParam(rule_set, 2, rsSubComment, 0);
-	sus_last_measures = GetRuleParam(rule_set, 139, rsSubName, 0);
-	sus_insert_max_leap = Interval2Chromatic(GetRuleParam(rule_set, 295, rsSubComment, 0));
-	dnt_max_leap = Interval2Chromatic(GetRuleParam(rule_set, 260, rsSubName, 0));
-	cambiata_max_leap3 = Interval2Chromatic(GetRuleParam(rule_set, 264, rsSubComment, 1));
-	cambiata_max_leap4 = Interval2Chromatic(GetRuleParam(rule_set, 265, rsSubComment, 1));
-	pco_apart = GetRuleParam(rule_set, 248, rsName, 0);
-	c4p_last_meas = GetRuleParam(rule_set, 144, rsName, 1);
-	fill_pre3_notes = GetRuleParam(rule_set, 100, rsComment, 0);
-	fill_pre4_int = GetRuleParam(rule_set, 144, rsComment, 0) - 1;
-	fill_pre4_notes = GetRuleParam(rule_set, 144, rsComment, 1);
-	c4p_last_notes = GetRuleParam(rule_set, 144, rsName, 2);
-	pre_last_leaps = GetRuleParam(rule_set, 204, rsName, 0);
-	max_smooth = GetRuleParam(rule_set, 4, rsSubName, 0);
-	max_smooth_direct = GetRuleParam(rule_set, 5, rsSubName, 0);
-	max_smooth2 = GetRuleParam(rule_set, 302, rsSubName, 0);
-	max_smooth_direct2 = GetRuleParam(rule_set, 303, rsSubName, 0);
-	stag_notes = GetRuleParam(rule_set, 10, rsSubName, 0);
-	stag_note_steps = GetRuleParam(rule_set, 10, rsSubName, 1);
-	stag_notes2 = GetRuleParam(rule_set, 39, rsSubName, 0);
-	stag_note_steps2 = GetRuleParam(rule_set, 39, rsSubName, 1);
-	repeat_steps2 = GetRuleParam(rule_set, 76, rsSubName, 1);
-	repeat_steps3 = GetRuleParam(rule_set, 36, rsSubName, 1);
-	repeat_steps5 = GetRuleParam(rule_set, 72, rsSubName, 1);
-	repeat_steps7 = GetRuleParam(rule_set, 73, rsSubName, 1);
-	repeat_notes2 = GetRuleParam(rule_set, 76, rsSubName, 0);
-	repeat_notes3 = GetRuleParam(rule_set, 36, rsSubName, 0);
-	repeat_notes5 = GetRuleParam(rule_set, 72, rsSubName, 0);
-	repeat_notes7 = GetRuleParam(rule_set, 73, rsSubName, 0);
-	min_interval = Interval2Chromatic(GetRuleParam(rule_set, 38, rsSubName, 0));
-	min_iv_minnotes = GetRuleParam(rule_set, 38, rsSubComment, 0);
-	min_iv_minmea = GetRuleParam(rule_set, 38, rsSubComment, 1);
-	min_interval = Interval2Chromatic(GetRuleParam(rule_set, 38, rsSubName, 0));
-	max_interval_cf = Interval2Chromatic(GetRuleParam(rule_set, 37, rsSubName, 0));
-	max_interval_cp = Interval2Chromatic(GetRuleParam(rule_set, 304, rsSubName, 0));
-	sum_interval = Interval2Chromatic(GetRuleParam(rule_set, 7, rsSubName, 0));
-	max_between = Interval2Chromatic(GetRuleParam(rule_set, 11, rsSubName, 0));
-	burst_between = Interval2Chromatic(GetRuleParam(rule_set, 11, rsSubComment, 0));
-	burst_steps = GetRuleParam(rule_set, 11, rsSubComment, 1);
-	slurs_window = GetRuleParam(rule_set, 93, rsName, 0);
-	miss_slurs_window = GetRuleParam(rule_set, 188, rsName, 0);
-	contrary_min = GetRuleParam(rule_set, 35, rsSubName, 0);
-	contrary_min2 = GetRuleParam(rule_set, 46, rsSubName, 0); 
+	lclimax_notes = GetRuleParam(cspecies, 32, rsSubComment, 0);
+	lclimax_mea = GetRuleParam(cspecies, 32, rsSubComment, 1);
+	lclimax_mea5 = GetRuleParam(cspecies, 325, rsComment, 0);
+	mea_per_sus = GetRuleParam(cspecies, 341, rsSubName, 0);
+	max_note_len[1] = GetRuleParam(cspecies, 336, rsSubName, 1);
+	max_note_len[2] = GetRuleParam(cspecies, 337, rsSubName, 1);
+	max_note_len[3] = GetRuleParam(cspecies, 338, rsSubName, 1);
+	max_note_len[4] = GetRuleParam(cspecies, 339, rsSubName, 1);
+	max_note_len[5] = GetRuleParam(cspecies, 340, rsSubName, 1);
+	tritone_res_quart = GetRuleParam(cspecies, 2, rsSubComment, 0);
+	sus_last_measures = GetRuleParam(cspecies, 139, rsSubName, 0);
+	sus_insert_max_leap = Interval2Chromatic(GetRuleParam(cspecies, 295, rsSubComment, 0));
+	dnt_max_leap = Interval2Chromatic(GetRuleParam(cspecies, 260, rsSubName, 0));
+	cambiata_max_leap3 = Interval2Chromatic(GetRuleParam(cspecies, 264, rsSubComment, 1));
+	cambiata_max_leap4 = Interval2Chromatic(GetRuleParam(cspecies, 265, rsSubComment, 1));
+	pco_apart = GetRuleParam(cspecies, 248, rsName, 0);
+	c4p_last_meas = GetRuleParam(cspecies, 144, rsName, 1);
+	fill_pre3_notes = GetRuleParam(cspecies, 100, rsComment, 0);
+	fill_pre4_int = GetRuleParam(cspecies, 144, rsComment, 0) - 1;
+	fill_pre4_notes = GetRuleParam(cspecies, 144, rsComment, 1);
+	c4p_last_notes = GetRuleParam(cspecies, 144, rsName, 2);
+	pre_last_leaps = GetRuleParam(cspecies, 204, rsName, 0);
+	max_smooth = GetRuleParam(cspecies, 4, rsSubName, 0);
+	max_smooth_direct = GetRuleParam(cspecies, 5, rsSubName, 0);
+	max_smooth2 = GetRuleParam(cspecies, 302, rsSubName, 0);
+	max_smooth_direct2 = GetRuleParam(cspecies, 303, rsSubName, 0);
+	stag_notes = GetRuleParam(cspecies, 10, rsSubName, 0);
+	stag_note_steps = GetRuleParam(cspecies, 10, rsSubName, 1);
+	stag_notes2 = GetRuleParam(cspecies, 39, rsSubName, 0);
+	stag_note_steps2 = GetRuleParam(cspecies, 39, rsSubName, 1);
+	repeat_steps2 = GetRuleParam(cspecies, 76, rsSubName, 1);
+	repeat_steps3 = GetRuleParam(cspecies, 36, rsSubName, 1);
+	repeat_steps5 = GetRuleParam(cspecies, 72, rsSubName, 1);
+	repeat_steps7 = GetRuleParam(cspecies, 73, rsSubName, 1);
+	repeat_notes2 = GetRuleParam(cspecies, 76, rsSubName, 0);
+	repeat_notes3 = GetRuleParam(cspecies, 36, rsSubName, 0);
+	repeat_notes5 = GetRuleParam(cspecies, 72, rsSubName, 0);
+	repeat_notes7 = GetRuleParam(cspecies, 73, rsSubName, 0);
+	min_interval = Interval2Chromatic(GetRuleParam(cspecies, 38, rsSubName, 0));
+	min_iv_minnotes = GetRuleParam(cspecies, 38, rsSubComment, 0);
+	min_iv_minmea = GetRuleParam(cspecies, 38, rsSubComment, 1);
+	min_interval = Interval2Chromatic(GetRuleParam(cspecies, 38, rsSubName, 0));
+	max_interval_cf = Interval2Chromatic(GetRuleParam(cspecies, 37, rsSubName, 0));
+	max_interval_cp = Interval2Chromatic(GetRuleParam(cspecies, 304, rsSubName, 0));
+	sum_interval = Interval2Chromatic(GetRuleParam(cspecies, 7, rsSubName, 0));
+	max_between = Interval2Chromatic(GetRuleParam(cspecies, 11, rsSubName, 0));
+	burst_between = Interval2Chromatic(GetRuleParam(cspecies, 11, rsSubComment, 0));
+	burst_steps = GetRuleParam(cspecies, 11, rsSubComment, 1);
+	slurs_window = GetRuleParam(cspecies, 93, rsName, 0);
+	miss_slurs_window = GetRuleParam(cspecies, 188, rsName, 0);
+	contrary_min = GetRuleParam(cspecies, 35, rsSubName, 0);
+	contrary_min2 = GetRuleParam(cspecies, 46, rsSubName, 0); 
 
-	notes_picount = GetRuleParam(rule_set, 344, rsSubName, 0);
-	min_picount = GetRuleParam(rule_set, 344, rsSubName, 1);
-	notes_picount2 = GetRuleParam(rule_set, 345, rsSubName, 0);
-	min_picount2 = GetRuleParam(rule_set, 345, rsSubName, 1);
-	notes_picount3 = GetRuleParam(rule_set, 346, rsSubName, 0);
-	min_picount3 = GetRuleParam(rule_set, 346, rsSubName, 1);
+	notes_picount = GetRuleParam(cspecies, 344, rsSubName, 0);
+	min_picount = GetRuleParam(cspecies, 344, rsSubName, 1);
+	notes_picount2 = GetRuleParam(cspecies, 345, rsSubName, 0);
+	min_picount2 = GetRuleParam(cspecies, 345, rsSubName, 1);
+	notes_picount3 = GetRuleParam(cspecies, 346, rsSubName, 0);
+	min_picount3 = GetRuleParam(cspecies, 346, rsSubName, 1);
 
 	for (int fl = 0; fl < 24; ++fl) {
-		notes_lrange[fl % 4][fl / 4] = GetRuleParam(rule_set, 434 + fl, rsSubName, 0);
+		notes_lrange[fl % 4][fl / 4] = GetRuleParam(cspecies, 434 + fl, rsSubName, 0);
 	}
 
 	for (int sp = 0; sp < MAX_SPECIES; ++sp) {
-		max_leap_steps[sp] = GetRuleParam(rule_set, 493 + sp, rsName, 0);
-		max_leaps[sp] = GetRuleParam(rule_set, 493 + sp, rsSubName, 0);
-		max_leaped[sp] = GetRuleParam(rule_set, 499 + sp, rsSubName, 0);
-		max_leap_steps2[sp] = GetRuleParam(rule_set, 517 + sp, rsName, 0);
-		max_leaps_r[sp] = GetRuleParam(rule_set, 505 + sp, rsSubName, 0);
-		max_leaped_r[sp] = GetRuleParam(rule_set, 511 + sp, rsSubName, 0);
-		max_leaps2[sp] = GetRuleParam(rule_set, 517 + sp, rsSubName, 0);
-		max_leaped2[sp] = GetRuleParam(rule_set, 523 + sp, rsSubName, 0);
-		max_leaps2_r[sp] = GetRuleParam(rule_set, 529 + sp, rsSubName, 0);
-		max_leaped2_r[sp] = GetRuleParam(rule_set, 535 + sp, rsSubName, 0);
-		cse_leaps[sp] = GetRuleParam(rule_set, 541 + sp, rsSubName, 0);
-		cse_leaps_r[sp] = GetRuleParam(rule_set, 547 + sp, rsSubName, 0);
-		thirds_ignored[sp] = GetRuleParam(rule_set, 541 + sp, rsComment, 0);
+		max_leap_steps[sp] = GetRuleParam(cspecies, 493 + sp, rsName, 0);
+		max_leaps[sp] = GetRuleParam(cspecies, 493 + sp, rsSubName, 0);
+		max_leaped[sp] = GetRuleParam(cspecies, 499 + sp, rsSubName, 0);
+		max_leap_steps2[sp] = GetRuleParam(cspecies, 517 + sp, rsName, 0);
+		max_leaps_r[sp] = GetRuleParam(cspecies, 505 + sp, rsSubName, 0);
+		max_leaped_r[sp] = GetRuleParam(cspecies, 511 + sp, rsSubName, 0);
+		max_leaps2[sp] = GetRuleParam(cspecies, 517 + sp, rsSubName, 0);
+		max_leaped2[sp] = GetRuleParam(cspecies, 523 + sp, rsSubName, 0);
+		max_leaps2_r[sp] = GetRuleParam(cspecies, 529 + sp, rsSubName, 0);
+		max_leaped2_r[sp] = GetRuleParam(cspecies, 535 + sp, rsSubName, 0);
+		cse_leaps[sp] = GetRuleParam(cspecies, 541 + sp, rsSubName, 0);
+		cse_leaps_r[sp] = GetRuleParam(cspecies, 547 + sp, rsSubName, 0);
+		thirds_ignored[sp] = GetRuleParam(cspecies, 541 + sp, rsComment, 0);
 	}
 
-	notes_arange = GetRuleParam(rule_set, 15, rsSubName, 0);
-	min_arange = GetRuleParam(rule_set, 15, rsSubName, 1) / 10.0;
-	notes_arange2 = GetRuleParam(rule_set, 16, rsSubName, 0);
-	min_arange2 = GetRuleParam(rule_set, 16, rsSubName, 1) / 10.0;
+	notes_arange = GetRuleParam(cspecies, 15, rsSubName, 0);
+	min_arange = GetRuleParam(cspecies, 15, rsSubName, 1) / 10.0;
+	notes_arange2 = GetRuleParam(cspecies, 16, rsSubName, 0);
+	min_arange2 = GetRuleParam(cspecies, 16, rsSubName, 1) / 10.0;
 
-	dev_late2 = GetRuleParam(rule_set, 191, rsSubName, 0);
-	dev_late3 = GetRuleParam(rule_set, 192, rsSubName, 0);
-	dev2_maxlen = GetRuleParam(rule_set, 386, rsSubComment, 0);
-	early_culm = GetRuleParam(rule_set, 78, rsSubName, 0);
-	early_culm2 = GetRuleParam(rule_set, 79, rsSubName, 0);
-	early_culm3 = GetRuleParam(rule_set, 193, rsSubName, 0);
-	late_culm = GetRuleParam(rule_set, 21, rsSubName, 0);
-	hsp_leap = Interval2Chromatic(GetRuleParam(rule_set, 194, rsSubName, 0));
-	repeat_letters_t = GetRuleParam(rule_set, 17, rsSubName, 0);
-	repeat_letters_d = GetRuleParam(rule_set, 428, rsSubName, 0);
-	repeat_letters_s = GetRuleParam(rule_set, 429, rsSubName, 0);
-	miss_letters_t = GetRuleParam(rule_set, 20, rsSubName, 0);
-	miss_letters_d = GetRuleParam(rule_set, 430, rsSubName, 0);
-	miss_letters_s = GetRuleParam(rule_set, 431, rsSubName, 0);
-	ico_chain = GetRuleParam(rule_set, 89, rsSubName, 0);
-	ico_chain2 = GetRuleParam(rule_set, 96, rsSubName, 0);
-	gis_trail_max = GetRuleParam(rule_set, 200, rsSubName, 0);
-	fis_leap = Interval2Chromatic(GetRuleParam(rule_set, 201, rsSubName, 0));
-	tonic_max = GetRuleParam(rule_set, 196, rsSubName, 0);
-	tonic_window = GetRuleParam(rule_set, 196, rsSubName, 1);
-	tonic_max_cp = GetRuleParam(rule_set, 310, rsSubName, 0);
-	tonic_window_cp = GetRuleParam(rule_set, 310, rsSubName, 1);
-	tonic_wei_inv = GetRuleParam(rule_set, 310, rsSubComment, 0);
-	tonic_leap = Interval2Chromatic(GetRuleParam(rule_set, 196, rsSubComment, 0));
-	tonic_wei_leap = GetRuleParam(rule_set, 196, rsSubComment, 1);
-	tonic_wei_len = GetRuleParam(rule_set, 196, rsSubComment, 2);
-	tonic_wei_beat = GetRuleParam(rule_set, 196, rsSubComment, 3);
-	tonic_wei_long = GetRuleParam(rule_set, 196, rsSubComment, 4);
-	tonic_wei_pco = GetRuleParam(rule_set, 196, rsSubComment, 5);
-	fis_gis_max = GetRuleParam(rule_set, 199, rsSubName, 0);
-	fis_g_max = GetRuleParam(rule_set, 349, rsSubName, 0);
-	fis_g_max2 = GetRuleParam(rule_set, 350, rsSubName, 0);
+	dev_late2 = GetRuleParam(cspecies, 191, rsSubName, 0);
+	dev_late3 = GetRuleParam(cspecies, 192, rsSubName, 0);
+	dev2_maxlen = GetRuleParam(cspecies, 386, rsSubComment, 0);
+	early_culm = GetRuleParam(cspecies, 78, rsSubName, 0);
+	early_culm2 = GetRuleParam(cspecies, 79, rsSubName, 0);
+	early_culm3 = GetRuleParam(cspecies, 193, rsSubName, 0);
+	late_culm = GetRuleParam(cspecies, 21, rsSubName, 0);
+	hsp_leap = Interval2Chromatic(GetRuleParam(cspecies, 194, rsSubName, 0));
+	repeat_letters_t = GetRuleParam(cspecies, 17, rsSubName, 0);
+	repeat_letters_d = GetRuleParam(cspecies, 428, rsSubName, 0);
+	repeat_letters_s = GetRuleParam(cspecies, 429, rsSubName, 0);
+	miss_letters_t = GetRuleParam(cspecies, 20, rsSubName, 0);
+	miss_letters_d = GetRuleParam(cspecies, 430, rsSubName, 0);
+	miss_letters_s = GetRuleParam(cspecies, 431, rsSubName, 0);
+	ico_chain = GetRuleParam(cspecies, 89, rsSubName, 0);
+	ico_chain2 = GetRuleParam(cspecies, 96, rsSubName, 0);
+	gis_trail_max = GetRuleParam(cspecies, 200, rsSubName, 0);
+	fis_leap = Interval2Chromatic(GetRuleParam(cspecies, 201, rsSubName, 0));
+	tonic_max = GetRuleParam(cspecies, 196, rsSubName, 0);
+	tonic_window = GetRuleParam(cspecies, 196, rsSubName, 1);
+	tonic_max_cp = GetRuleParam(cspecies, 310, rsSubName, 0);
+	tonic_window_cp = GetRuleParam(cspecies, 310, rsSubName, 1);
+	tonic_wei_inv = GetRuleParam(cspecies, 310, rsSubComment, 0);
+	tonic_leap = Interval2Chromatic(GetRuleParam(cspecies, 196, rsSubComment, 0));
+	tonic_wei_leap = GetRuleParam(cspecies, 196, rsSubComment, 1);
+	tonic_wei_len = GetRuleParam(cspecies, 196, rsSubComment, 2);
+	tonic_wei_beat = GetRuleParam(cspecies, 196, rsSubComment, 3);
+	tonic_wei_long = GetRuleParam(cspecies, 196, rsSubComment, 4);
+	tonic_wei_pco = GetRuleParam(cspecies, 196, rsSubComment, 5);
+	fis_gis_max = GetRuleParam(cspecies, 199, rsSubName, 0);
+	fis_g_max = GetRuleParam(cspecies, 349, rsSubName, 0);
+	fis_g_max2 = GetRuleParam(cspecies, 350, rsSubName, 0);
+	// Check rule parameters
+	if (burst_between <= max_between) {
+		WriteLog(5, "Warning: maximum burst interval should be greater than maximum interval between voices (check config)");
+	}
+	if (tonic_wei_len > 30) {
+		WriteLog(5, "Warning: tonic length decrease percent should be between 0 and 30");
+	}
 }
 
 void CGenCF1::ProcessSpecies() {
@@ -508,7 +526,7 @@ void CGenCF1::ProcessSpecies() {
 }
 
 void CGenCF1::CheckConfig() {
-	CHECK_READY_PERSIST(DP_Config, DP_RuleSet);
+	CHECK_READY_PERSIST(DP_Config);
 	SET_READY_PERSIST(DP_ConfigTest);
 	// GenCP1
 	if (m_algo_id == 121) {
@@ -572,46 +590,31 @@ void CGenCF1::CheckConfig() {
 	if (shuffle && random_seed) {
 		WriteLog(1, "Shuffling after random_seed will not add randomness (check config)");
 	}
-	// Check rule parameters
-	if (burst_between <= max_between) {
-		WriteLog(5, "Warning: maximum burst interval should be greater than maximum interval between voices (check config)");
-	}
-	if (tonic_wei_len > 30) {
-		WriteLog(5, "Warning: tonic length decrease percent should be between 0 and 30");
-	}
 }
 
 // Select rules
-int CGenCF1::SelectRuleSet(int rs) {
+void CGenCF1::SelectSpeciesRules() {
 	CHECK_READY_PERSIST(DP_Rules);
-	SET_READY_PERSIST(DP_RuleSet);
-	rule_set = rs;
-	if (!accepts[rule_set].size()) {
-		CString est;
-		est.Format("Cannot select rule set %d. It was not loaded from rules configuration file.", rule_set);
-		WriteLog(5, est);
-		error = 1;
+	if (cspecies == cspecies0) return;
+	cspecies0 = cspecies;
+	// Load rules
+	for (int i = 0; i < max_flags; ++i) {
+		accept[i] = accepts[cspecies][i];
+		severity[i] = severities[cspecies][i];
 	}
-	else {
-		// Load rule set
-		for (int i = 0; i < max_flags; ++i) {
-			accept[i] = accepts[rule_set][i];
-		}
-		// Check that at least one rule is accepted
-		for (int i = 0; i < max_flags; ++i) {
-			if (accept[i]) break;
-			if (i == max_flags - 1) {
-				WriteLog(5, "Warning: all rules are rejected (0) in configuration file");
-				error = 1;
-			}
-		}
-		// Calculate second level flags count
-		flags_need2 = 0;
-		for (int i = 0; i < max_flags; ++i) {
-			if (accept[i] == 2) ++flags_need2;
+	// Check that at least one rule is accepted
+	for (int i = 0; i < max_flags; ++i) {
+		if (accept[i]) break;
+		if (i == max_flags - 1) {
+			WriteLog(5, "Warning: all rules are rejected (0) in configuration file");
+			error = 1;
 		}
 	}
-	return error;
+	// Calculate second level flags count
+	flags_need2 = 0;
+	for (int i = 0; i < max_flags; ++i) {
+		if (accept[i] == 2) ++flags_need2;
+	}
 }
 
 void CGenCF1::LoadHarmNotation() {
@@ -727,8 +730,6 @@ void CGenCF1::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "correct_range", &correct_range, 1);
 	CheckVar(sN, sV, "correct_inrange", &correct_inrange, 0);
 	CheckVar(sN, sV, "optimize_dpenalty", &optimize_dpenalty, 0, 1);
-	CheckVar(sN, sV, "cf_rule_set", &cf_rule_set, 0);
-	CheckVar(sN, sV, "cp_rule_set", &cp_rule_set, 0);
 
 	// Load harmonic notation
 	if (*sN == "harm_notation") {
@@ -744,6 +745,10 @@ void CGenCF1::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 		++parameter_found;
 		LoadRules("configs\\rules\\" + *sV);
 		ParseRules();
+		// Load default parameters
+		cspecies = 0;
+		SelectSpeciesRules();
+		SetRuleParams();
 	}
 	// Load method
 	if (*sN == "method") {
@@ -765,12 +770,6 @@ void CGenCF1::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 			minor_cur = 1;
 		}
 		tonic_cur = GetPC(*sV);
-	}
-	// Load rule set
-	if (*sN == "rule_set") {
-		++parameter_found;
-		SelectRuleSet(atoi(*sV));
-		SetRuleParams();
 	}
 }
 
@@ -2698,6 +2697,8 @@ void CGenCF1::ScanCantusInit() {
 	svoices = 1;
 	// Set species to CF
 	cspecies = 0;
+	SelectSpeciesRules();
+	SetRuleParams();
 }
 
 // Get minimum element in SWA window
@@ -3618,9 +3619,9 @@ void CGenCF1::WriteFlagCor() {
 		for (int i = 0; i < max_flags; ++i) {
 			int f1 = i;
 			st2.Format("%s; %lld; ", 
-				RuleName[rule_set][f1] + " (" + SubRuleName[rule_set][f1] + ")", 
+				RuleName[cspecies][f1] + " (" + SubRuleName[cspecies][f1] + ")", 
 				fcor[f1][f1]);
-			st3 += RuleName[rule_set][f1] + " (" + SubRuleName[rule_set][f1] + "); ";
+			st3 += RuleName[cspecies][f1] + " (" + SubRuleName[cspecies][f1] + "); ";
 			for (int z = 0; z < max_flags; ++z) {
 				int f2 = i;
 				st.Format("%lld; ", fcor[f1][f2]);
@@ -3657,7 +3658,7 @@ void CGenCF1::ShowFlagStat() {
 					}
 				}
 				if (max_value < 1) break;
-				st.Format("\n%ld %s, ", max_value, RuleName[rule_set][max_flag] + " (" + SubRuleName[rule_set][max_flag] + ")");
+				st.Format("\n%ld %s, ", max_value, RuleName[cspecies][max_flag] + " (" + SubRuleName[cspecies][max_flag] + ")");
 				st2 += st;
 				++lines;
 				// Clear biggest value to search for next
@@ -3690,7 +3691,7 @@ void CGenCF1::ShowStuck() {
 				}
 			}
 			if (max_value < 1) break;
-			st.Format("\n%ld %s, ", max_value, RuleName[rule_set][max_flag] + " (" + SubRuleName[rule_set][max_flag] + ")");
+			st.Format("\n%ld %s, ", max_value, RuleName[cspecies][max_flag] + " (" + SubRuleName[cspecies][max_flag] + ")");
 			st2 += st;
 			// Clear biggest value to search for next
 			ssf[max_flag] = -1;
@@ -3715,7 +3716,7 @@ CString CGenCF1::GetStuck() {
 		}
 		if (max_value < 1) break;
 		if (!accept[max_flag]) {
-			st.Format("\n%ld %s, ", max_value, RuleName[rule_set][max_flag] + " (" + SubRuleName[rule_set][max_flag] + ")");
+			st.Format("\n%ld %s, ", max_value, RuleName[cspecies][max_flag] + " (" + SubRuleName[cspecies][max_flag] + ")");
 			st2 += st;
 		}
 		// Clear biggest value to search for next
@@ -3754,7 +3755,7 @@ void CGenCF1::ShowFlagBlock() {
 						}
 					}
 					if (max_value < 1) break;
-					st.Format("\n%ld %s, ", max_value, RuleName[rule_set][max_flag] + " (" + SubRuleName[rule_set][max_flag] + ")");
+					st.Format("\n%ld %s, ", max_value, RuleName[cspecies][max_flag] + " (" + SubRuleName[cspecies][max_flag] + ")");
 					st2 += st;
 					++lines;
 					// Clear biggest value to search for next
@@ -3858,15 +3859,15 @@ void CGenCF1::SendComment(int pos, int v, int av, int x, int i) {
 				if (!accept[fl]) st = "- ";
 				else if (accept[fl] == -1) st = "$ ";
 				else st = "+ ";
-				com = st + RuleName[rule_set][fl] + " (" + SubRuleName[rule_set][fl] + ")";
+				com = st + RuleName[cspecies][fl] + " (" + SubRuleName[cspecies][fl] + ")";
 				if (!comment2[pos][v].IsEmpty()) comment2[pos][v] += ", ";
-				comment2[pos][v] += RuleName[rule_set][fl] + " (" + SubRuleName[rule_set][fl] + ")";
+				comment2[pos][v] += RuleName[cspecies][fl] + " (" + SubRuleName[cspecies][fl] + ")";
 				if (show_severity) {
 					st.Format(" [%d/%d]", fl, severity[fl]);
 					com += st;
 				}
-				if (!RuleComment[fl].IsEmpty()) com += ". " + RuleComment[fl];
-				if (!SubRuleComment[rule_set][fl].IsEmpty()) com += " (" + SubRuleComment[rule_set][fl] + ")";
+				if (!RuleComment[cspecies][fl].IsEmpty()) com += ". " + RuleComment[cspecies][fl];
+				if (!SubRuleComment[cspecies][fl].IsEmpty()) com += " (" + SubRuleComment[cspecies][fl] + ")";
 				//com += ". ";
 				comment[pos][v].push_back(com);
 				ccolor[pos][v].push_back(flag_color[severity[fl]]);
@@ -4428,14 +4429,14 @@ void CGenCF1::CheckSASEmulatorFlags(vector<int> &cc) {
 			}
 			if (found) {
 				est.Format("+ Second scan at step %d replaced flag [%d] with: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-					ep2, fl2, fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+					ep2, fl2, fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 					cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 				WriteLog(7, est);
 				if (m_testing == 1) AppendLineToFile("autotest\\sas-emu.log", est + "\n");
 				continue;
 			}
 			est.Format("- Flag does not appear on second full evaluation: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-				fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+				fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 				cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 			WriteLog(5, est);
 			if (m_testing == 1) AppendLineToFile("autotest\\sas-emu.log", est + "\n");
@@ -4465,7 +4466,7 @@ void CGenCF1::CheckSASEmulatorFlags(vector<int> &cc) {
 			if (delay > flag_delay[fl]) {
 				CString est;
 				est.Format("SAS emulator at step %d has delay %d steps: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-					ep2, delay, fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+					ep2, delay, fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 					cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 				//WriteLog(1, est);
 				flag_delay[fl] = delay;
@@ -4499,21 +4500,21 @@ void CGenCF1::CheckSASEmulatorFlags(vector<int> &cc) {
 			}
 			if (found) {
 				est.Format("+ SAS emulator at step %d replaced flag [%d] with: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-					ep2, fl2, fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+					ep2, fl2, fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 					cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 				WriteLog(7, est);
 				if (m_testing == 1) AppendLineToFile("autotest\\sas-emu.log", est + "\n");
 				continue;
 			}
 			error_st.Format("- SAS emulator at step %d assigned wrong flag: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-				ep2, fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+				ep2, fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 				cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 			error_level = 5;
 			// Not found in same position: does it exist in any position?
 			if (flags_full[fl]) {
 				if (sas_emulator_move_ignore[fl]) {
 					est.Format("+ SAS emulator at step %d assigned moved flag: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-						ep2, fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+						ep2, fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 						cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 					WriteLog(7, est);
 					if (m_testing == 1) AppendLineToFile("autotest\\sas-emu.log", est + "\n");
@@ -4521,7 +4522,7 @@ void CGenCF1::CheckSASEmulatorFlags(vector<int> &cc) {
 				}
 				else {
 					error_st.Format("- SAS emulator at step %d assigned moved flag: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-						ep2, fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+						ep2, fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 						cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 					error_level = 5;
 				}
@@ -4547,7 +4548,7 @@ void CGenCF1::CheckSASEmulatorFlags(vector<int> &cc) {
 				if (found) {
 					CString est;
 					est.Format("+ SAS emulator at step %d replaced and moved flag %d with: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-						ep2, fl2, fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+						ep2, fl2, fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 						cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 					WriteLog(7, est);
 					if (m_testing == 1) AppendLineToFile("autotest\\sas-emu.log", est + "\n");

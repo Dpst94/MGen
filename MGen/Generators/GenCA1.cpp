@@ -361,7 +361,7 @@ void CGenCA1::ConfirmExpect() {
 			if (!found) {
 				CString est;
 				est.Format("Expected flag not confirmed: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-					fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl], 
+					fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl], 
 					cantus_id + 1, x + 1, cpos[x] / 8 + 1, cpos[x] % 8 + 1, midi_file);
 				WriteLog(5, est);
 				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
@@ -369,7 +369,7 @@ void CGenCA1::ConfirmExpect() {
 			else if (debug_level > 0) {
 				CString est;
 				est.Format("Expected flag confirmed: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-					fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl], 
+					fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl], 
 					cantus_id + 1, x + 1, cpos[x] / 8 + 1, cpos[x] % 8 + 1, midi_file);
 				WriteLog(6, est); 
 				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
@@ -385,7 +385,7 @@ void CGenCA1::ConfirmExpect() {
 					if (!enflags2[fl][s]) {
 						CString est;
 						est.Format("Local false positive flag: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-							fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+							fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 							cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 						WriteLog(5, est);
 						if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
@@ -400,7 +400,7 @@ void CGenCA1::ConfirmExpect() {
 				if (!enflags2[fl][s] && false_positives_global[fl]) {
 					CString est;
 					est.Format("Global false positive flag: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-						fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+						fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 						cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 					WriteLog(5, est);
 					if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
@@ -419,7 +419,7 @@ void CGenCA1::ConfirmExpect() {
 				if (!enflags2[fl][s]) {
 					CString est;
 					est.Format("False positive mistake: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-						fl, accept[fl] ? "+" : "-", RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+						fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 						cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 					WriteLog(1, est);
 					if (m_testing == 1) AppendLineToFile("autotest\\mistakes.log", est + "\n");
@@ -501,7 +501,7 @@ void CGenCA1::LogFlags() {
 			if (accept[fl] == 1) fst = "+";
 			if (accept[fl] == -1) fst = "$";
 			st.Format("Detected flag: [%d] %s %s (%s) at %d:%d %s",
-				fl, fst, RuleName[rule_set][fl], SubRuleName[rule_set][fl],
+				fl, fst, RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 				cantus_id + 1, s + 1, midi_file);
 			AppendLineToFile("autotest\\flags.log", st + "\n");
 			//if (fl == 98) WriteLog(1, st);

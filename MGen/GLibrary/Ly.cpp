@@ -534,16 +534,16 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 			if (!accept[fl]) st = "- ";
 			else if (accept[fl] == -1) st = "$ ";
 			else st = "+ ";
-			CString rule_name = RuleName[rule_set][fl];
+			CString rule_name = RuleName[cspecies][fl];
 			if (!ly_rule_colon) {
 				if (rule_name.Find(":") != -1) {
 					rule_name = rule_name.Left(rule_name.Find(":"));
 				}
 			}
 			com = st + rule_name;
-			if (ly_subrules) com += " (" + SubRuleName[rule_set][fl] + ")";
-			if (ly_comments && !RuleComment[fl].IsEmpty()) com += ". " + RuleComment[fl];
-			if (ly_comments && !SubRuleComment[rule_set][fl].IsEmpty()) com += " (" + SubRuleComment[rule_set][fl] + ")";
+			if (ly_subrules) com += " (" + SubRuleName[cspecies][fl] + ")";
+			if (ly_comments && !RuleComment[cspecies][fl].IsEmpty()) com += ". " + RuleComment[cspecies][fl];
+			if (ly_comments && !SubRuleComment[cspecies][fl].IsEmpty()) com += " (" + SubRuleComment[cspecies][fl] + ")";
 			com += " " + lyi[ly_s2].nfc[c];
 			// Send note number with first comment
 			if (!found) {
@@ -754,7 +754,7 @@ void CLy::InitLyI() {
 				CString est;
 				est.Format("Detected flag at hidden position %d/%d: [%d] %s %s (%s)",
 					ly_s, ly_s + link, fl, accept[fl] ? "+" : "-",
-					RuleName[rule_set][fl], SubRuleName[rule_set][fl]);
+					RuleName[cspecies][fl], SubRuleName[cspecies][fl]);
 				WriteLog(5, est);
 			}
 		}

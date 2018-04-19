@@ -259,6 +259,8 @@ void CGenCP1::ScanCPInit() {
 	svoices = av_cnt;
 	// Set species
 	cspecies = species;
+	SelectSpeciesRules();
+	SetRuleParams();
 }
 
 void CGenCP1::SendMsh(int pos, int i, int v, int av, int x) {
@@ -3117,7 +3119,7 @@ int CGenCP1::FailStartPause() {
 		if (task != tEval && !accept[273] && !warn_wrong_fn) {
 			CString est;
 			est.Format("Rule '%s - %s' prevents from generating any results in counterpoint species %d, because there is no starting pause",
-				RuleName[rule_set][273], SubRuleName[rule_set][273], species);
+				RuleName[cspecies][273], SubRuleName[cspecies][273], species);
 			WriteLog(5, est);
 			++warn_wrong_fn;
 			return 1;
@@ -4029,8 +4031,6 @@ void CGenCP1::Generate() {
 		// Create pause
 		FillPause(step, step + floor(real_len / 8 + 1) * 8, 0);
 		FillPause(step, step + floor(real_len / 8 + 1) * 8, 1);
-		// Select rule set
-		SelectRuleSet(cf_rule_set);
 		// Choose level
 		if (cantus_high) {
 			cpv = 0;
@@ -4088,7 +4088,6 @@ void CGenCP1::Generate() {
 		// Generate second voice
 		real_len = accumulate(cc_len.begin(), cc_len.end(), 0);
 		rpenalty_cur = MAX_PENALTY;
-		if (SelectRuleSet(cp_rule_set)) return;
 		if (method == mSWA) {
 			RandomSWACP();
 		}

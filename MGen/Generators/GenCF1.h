@@ -12,7 +12,6 @@
 #define DP_Config				1
 #define DP_ConfigTest		2
 #define DP_Rules				3
-#define DP_RuleSet			4
 #define DP_RuleParam		5
 #define DP_RuleSetParam 6
 #define DP_cc_old				7
@@ -59,7 +58,7 @@
 #define CHECK_READY_PERSIST(...) CheckReadyPersist(##__VA_ARGS__)
 
 // Check rule usage
-#define ASSERT_RULE(id) { if (SubRuleName[rule_set][id].IsEmpty() && warn_rule_undefined < 5) { ++warn_rule_undefined; CString est; est.Format("Detected undefined rule usage: %d", id); WriteLog(5, est); ASSERT(0); } }
+#define ASSERT_RULE(id) { if (SubRuleName[cspecies][id].IsEmpty() && warn_rule_undefined < 5) { ++warn_rule_undefined; CString est; est.Format("Detected undefined rule usage: %d", id); WriteLog(5, est); ASSERT(0); } }
 
 #else
 
@@ -162,7 +161,6 @@
 // Time to reserve for analysis for autotest
 #define ANALYZE_RESERVE 1
 
-#define MAX_RULESETS 100
 #define MAX_SEVERITY 101
 #define MAX_WIND 500
 #define MAX_NOTE 127
@@ -226,6 +224,7 @@ public:
 protected:
 	void LoadHarmVar();
 	void LoadHSP(CString fname);
+	void SaveSpecRule(int sp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com);
 	void LoadRules(CString fname);
 	void CheckRuleList(CString list_name, vector<vector<int>>& v);
 	int Interval2Chromatic(int iv);
@@ -235,7 +234,7 @@ protected:
 	void SetRuleParams();
 	inline void ProcessSpecies();
 	void CheckConfig();
-	int SelectRuleSet(int rs);
+	void SelectSpeciesRules();
 	void LoadHarmNotation();
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void LogCantus(CString st3, int x, int size, vector<int>& c);
@@ -376,9 +375,8 @@ protected:
 	void FillCantusMap(vector<int>& c, vector<int>& smap, int step1, int step2, int value);
 	
 	// Rules
-	vector <vector<int>> accepts; // Each 1 allows showing canti with specific properties
-	int cf_rule_set = 0; // id of current rule set for cantus
-	int cp_rule_set = 0; // id of current rule set for cpoint
+	vector <vector<int>> accepts; // [sp][rid] Each 1 allows showing canti with specific properties
+	vector <vector<int>> severities; // [sp][rid] 
 	vector<vector<vector<vector<int>>>> RuleParam; // Parsed rule parameters
 	vector <CString> RuleGroup; // Groups for flag groups
 	int max_flags = 82; // Maximum number of rules
@@ -805,7 +803,7 @@ protected:
 	vector<vector<int>> aslur; // [v][s] Slurs
 	vector<int> retrigger; // [s] Equals 1 if note should be retriggered
 	int species = 0; // Counterpoint species
-	int cspecies = 0; // Counterpoint species (current). For example, in CA2 can be zero when evaluating CF
+	int cspecies0 = -1; // Last saved species, for which rules and parameters are loaded
 	int species_detected = 0; // Counterpoint species detected in CA2
 	vector<int> species_pos; // Possible species
 	int sus_count = 0; // Number of suspensions detected in ExplodeCP

@@ -254,11 +254,11 @@ public:
 	vector<CString> rule_viz_t; // [r_id] Rule visualization text
 	vector <int> severity; // Get severity by flag id
 	vector<DWORD>  flag_color; // Flag colors
-	vector<vector <CString>> RuleName; // Names of all rules
-	vector<vector <CString>> SubRuleName; // Names of all rules
-	vector <CString> RuleComment; // Comments for flag groups
-	vector<vector <CString>> SubRuleComment; // Comments for flags
-	int rule_set = 0; // id of current rule set
+	vector<vector <CString>> RuleName; // [sp][rid] Names of all rules
+	vector<vector <CString>> SubRuleName; // [sp][rid] Names of all rules
+	vector<vector <CString>> RuleComment; // [sp][rid] Comments for flag groups
+	vector<vector <CString>> SubRuleComment; // [sp][rid] Comments for flags
+	int cspecies = 0; // Counterpoint species (current). For example, in CA2 can be zero when evaluating CF
 
 	// Lilypond parameters
 	int ly_flag_style = 1; // 0 - no flag visualisation, 1 - color note, 2 - x above note
