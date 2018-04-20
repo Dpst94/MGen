@@ -769,10 +769,22 @@ void CGLib::InitRandom()
 	for (i = 0; i < 256; ++i) rmm[i] = randrsl[i] = rand()*rand();
 	randinit(1);
 	//TestRandom();
+	TestCsvDb();
 }
 
-void CGLib::TestRandom()
-{
+void CGLib::TestCsvDb() {
+	/*
+	CCsvDb cdb;
+	map <CString, CString> row;
+	row["id"] = "1";
+	row["time"].Format("%d", randbw(1, 100));
+	row["text"] = "some text";
+	cdb.Create("test.csv", row);
+	//cdb.Insert(row);
+	*/
+}
+
+void CGLib::TestRandom() {
 	long long time_start = CGLib::time();
 	int n_buckets = 30;
 	int n_samples = 100000;

@@ -286,6 +286,7 @@ public:
 	static long long abstime();
 
 	void InitRandom();
+	void TestCsvDb();
 	void TestRandom(); // Tests random generator
 	void TestSmoothRandom(); // Tests smooth random generator
 	static void EscalateLog(CString st);

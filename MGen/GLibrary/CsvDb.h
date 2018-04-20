@@ -1,5 +1,4 @@
 #pragma once
-#include "../stdafx.h"
 
 class CCsvDb
 {
@@ -8,11 +7,23 @@ public:
 	~CCsvDb();
 
 	CString Open(CString pth);
-	CString Create(CString pth, map<CString, CString> hdr);
+	CString Create(CString pth, vector<CString>& hdr);
+	CString Insert(map<CString, CString>& row);
+	CString LoadHeader(ifstream & fs);
 
-	CString Select(map<short, CString> filter);
+	CString Select();
 
 	CString path;
+	CString sep_st;
+	map<CString, int> header;
+	map<CString, CString> filter;
+
+	//Parameters
+	CString separator = "\t";
+
+private:
+	ifstream ifs;
+	ofstream ofs;
 
 };
 
