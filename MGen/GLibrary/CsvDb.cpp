@@ -76,16 +76,24 @@ CString CCsvDb::LoadHeader(ifstream &ifs) {
 	char pch[2550];
 	// Get sep
 	if (!ifs.good()) {
-		return "Two header lines not found in file " + path;
+		return "Header line not found in file " + path;
 	}
+	// Load separator
 	ifs.getline(pch, 2550);
-	sep_st = pch;
-	// Get header
-	if (!ifs.good()) {
-		return "Two header lines not found in file " + path;
+	st = pch;
+	if (st.Left(4) == "sep=") {
+		sep_st = st;
+		separator = st[5];
+		// Get header
+		if (!ifs.good()) {
+			return "Header line after sep line not found in file " + path;
+		}
+		ifs.getline(pch, 2550);
 	}
-	ifs.getline(pch, 2550);
-	header_st = pch;
+	else {
+		sep_st = "";
+	}
+	header_st = st;
 	// Parse header
 	CGLib::Tokenize(header_st, ast, separator);
 	header.clear();
