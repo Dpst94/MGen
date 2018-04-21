@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../stdafx.h"
 #include "CsvDb.h"
+#include "GLib.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW 
@@ -15,13 +16,11 @@ CCsvDb::~CCsvDb() {
 
 CString CCsvDb::Open(CString pth) {
 	path = pth;
-	/*
 	if (!CGLib::fileExists(path)) {
 		CString est;
 		est.Format("Cannot find file %s", path);
 		return est;
 	}
-	*/
 	ifs.open(path);
 	CString est = LoadHeader(ifs);
 	if (est != "") {
@@ -73,7 +72,6 @@ CString CCsvDb::Insert(map<CString, CString> &row) {
 
 CString CCsvDb::LoadHeader(ifstream &ifs) {
 	CString st;
-	CString header_st;
 	vector<CString> ast;
 	char pch[2550];
 	// Get sep
@@ -89,15 +87,18 @@ CString CCsvDb::LoadHeader(ifstream &ifs) {
 	ifs.getline(pch, 2550);
 	header_st = pch;
 	// Parse header
-	//CGLib::Tokenize(header_st, ast, CSV_SEPARATOR);
+	CGLib::Tokenize(header_st, ast, separator);
 	header.clear();
 	for (int i = 0; i < ast.size(); ++i) {
 		header[ast[i]] = i;
 	}
+	return "";
 }
 
 CString CCsvDb::Select() {
 	CString st;
+	vector<CString> ast;
+	result.clear();
 	int pos, i;
 	char pch[2550];
 	// Load logs
@@ -107,13 +108,80 @@ CString CCsvDb::Select() {
 		ifs.close();
 		return est;
 	}
-	pos = 0;
-	i = 0;
 	while (ifs.good()) {
 		ifs.getline(pch, 2550);
 		st = pch;
+		CGLib::Tokenize(st, ast, separator);
+		// Finish on empty line
+		if (st == "") break;
+		// Check column count
+		if (ast.size() != header.size())
+			return "Wrong column count in file " + path + " at line " + st;
+		if (filter.size()) {
+			int found = 1;
+			for (auto const& it : filter) {
+				if (ast[header[it.first]] != it.second) {
+					found = 0;
+					break;
+				}
+			}
+			if (!found) continue;
+		}
+		// Save
+		result.resize(result.size() + 1);
+		for (auto const& it : header) {
+			result[result.size() - 1][it.first] = ast[it.second];
+		}
 	}
 	ifs.close();
+	return "";
+}
+
+CString CCsvDb::Delete() {
+	CString st;
+	vector<CString> ast, tsa;
+	result.clear();
+	int pos, i;
+	char pch[2550];
+	// Load logs
+	ifs.open(path);
+	CString est = LoadHeader(ifs);
+	if (est != "") {
+		ifs.close();
+		return est;
+	}
+	while (ifs.good()) {
+		ifs.getline(pch, 2550);
+		st = pch;
+		CGLib::Tokenize(st, ast, separator);
+		// Finish on empty line
+		if (st == "") break;
+		// Check column count
+		if (ast.size() != header.size())
+			return "Wrong column count in file " + path + " at line " + st;
+		if (filter.size()) {
+			int found = 1;
+			for (auto const& it : filter) {
+				if (ast[header[it.first]] != it.second) {
+					found = 0;
+					break;
+				}
+			}
+			if (found) continue;
+		}
+		// Save
+		tsa.push_back(st);
+	}
+	ifs.close();
+	// Write
+	DeleteFile(path);
+	ofs.open(path);
+	ofs << sep_st << "\n";
+	ofs << header_st << "\n";
+	for (int i = 0; i < tsa.size(); ++i) {
+		ofs << tsa[i] << "\n";
+	}
+	ofs.close();
 	return "";
 }
 

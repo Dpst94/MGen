@@ -13,13 +13,17 @@ public:
 
 	CString Select();
 
+	CString Delete();
+
 	CString path;
 	CString sep_st;
+	CString header_st;
 	map<CString, int> header;
 	map<CString, CString> filter;
+	vector<map<CString, CString>> result;
 
 	//Parameters
-	CString separator = "\t";
+	CString separator = ";";
 
 private:
 	ifstream ifs;
