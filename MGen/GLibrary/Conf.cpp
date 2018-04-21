@@ -760,7 +760,7 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	LoadCCName(&st2, &st3, "cc_name", i);
 	LoadKswGroup(&st2, &st3, "kswgroup", i);
 	LoadTechnique(&st2, &st3, "technique", i);
-	LoadInitCommand(&st2, &st3, "initcommand", i);
+	//LoadInitCommand(&st2, &st3, "initcommand", i);
 	LoadInitTechnique(&st2, &st3, "inittechnique", i);
 	LoadMapPitch(&st2, &st3, "mappitch", i);
 	CheckVar(&st2, &st3, "t_min", &icf[i].tmin);
