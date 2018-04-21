@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../stdafx.h"
 #include "GenCA1.h"
+#include "../GLibrary/CsvDb.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -345,9 +346,31 @@ void CGenCA1::ConfirmExpect() {
 	int found, fl;
 	int max_x = enflags.size();
 	if (!enflags_count) return;
+	// Prepare to insert expected flags
+	CCsvDb cdb;
+	map <CString, CString> row;
+	cdb.Open("db/expect.csv");
+	cdb.filter["File"] = midi_file;
+	cdb.Delete();
 	for (int x = 0; x < max_x; ++x) if (enflags[x].size()) {
 		for (int e = 0; e < enflags[x].size(); ++e) {
 			fl = enflags[x][e];
+			row["File"] = midi_file;
+			row["Cid"].Format("%d", cantus_id);
+			row["Step"].Format("%d", x);
+			row["Rid"].Format("%d", fl);
+			row["Rule"] = RuleName[cspecies][fl];
+			row["Subrule"] = SubRuleName[cspecies][fl];
+			row["Species"].Format("%d", cspecies);
+			row["High"] = cantus_high ? "High" : "Low";
+			row["Group"] = RuleGroup[fl];
+			row["Comment"] = RuleComment[cspecies][fl];
+			row["Subcomment"] = SubRuleComment[cspecies][fl];
+			row["Accept"].Format("%d", accepts[cspecies][fl]);
+			row["Severity"].Format("%d", severities[cspecies][fl]);
+			row["GFP"].Format("%d", false_positives_global[fl]);
+			row["IFP"].Format("%d", false_positives_ignore[fl]);
+			cdb.Insert(row);
 			// Do not confirm rule violation if rule checking is disabled
 			//if (accept[fl] == -1) continue;
 			found = 0;
