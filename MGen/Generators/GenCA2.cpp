@@ -578,6 +578,7 @@ void CGenCA2::Generate() {
 	if (error) return;
 	SetStatusText(8, "MIDI file: " + fname_from_path(midi_file));
 	LoadCP(midi_file);
+	SelectExpect();
 	//cantus_incom.clear();
 	//cantus_incom.resize(cpoint.size());
 	//LinkCpPauses();
@@ -744,7 +745,7 @@ void CGenCA2::Generate() {
 		fn = fn0;
 		ScanCP(tEval, 0);
 		LogFlags();
-		ParseExpect();
+		LoadExpect();
 		ConfirmExpect();
 		EmulateSASCP();
 		FixStartPause();

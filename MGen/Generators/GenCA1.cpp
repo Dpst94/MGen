@@ -2,7 +2,6 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../stdafx.h"
 #include "GenCA1.h"
-#include "../GLibrary/CsvDb.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -341,6 +340,41 @@ void CGenCA1::ParseExpect() {
 	}
 }
 
+void CGenCA1::SelectExpect() {
+	CString est;
+	int fl;
+	est = edb.Open("db/expect.csv");
+	if (est != "") WriteLog(5, est);
+	edb.filter["File"] = midi_file;
+	est = edb.Select();
+	if (est != "") WriteLog(5, est);
+}
+
+void CGenCA1::LoadExpect() {
+	// Clear expected flags
+	enflags.clear();
+	enflags2.clear();
+	enflags3.clear();
+	enflags_count = 0;
+	// Detect maximum lyrics
+	enflags.resize(c_len);
+	enflags2.resize(MAX_RULES);
+	enflags3.resize(MAX_RULES);
+	for (int f = 0; f < MAX_RULES; ++f) enflags2[f].resize(c_len);
+	// Load expected flags
+	for (int i = 0; i < edb.result.size(); ++i) {
+		if (atoi(edb.result[i]["Cid"]) != cantus_id) continue;
+		int fl = atoi(edb.result[i]["Rid"]);
+		s = atoi(edb.result[i]["Step"]);
+		if (fl) {
+			enflags[s].push_back(fl);
+			++enflags2[fl][s];
+			++enflags3[fl];
+			++enflags_count;
+		}
+	}
+}
+
 void CGenCA1::ExportExpectToDb() {
 	CString st, est;
 	int max_x = enflags.size();
@@ -563,6 +597,7 @@ void CGenCA1::Generate() {
 	if (error) return;
 	SetStatusText(8, "MIDI file: " + fname_from_path(midi_file));
 	LoadCantus(midi_file);
+	SelectExpect();
 	if (cantus.size() < 1) return;
 	// Saved t_generated
 	int t_generated2 = 0; 
@@ -599,7 +634,8 @@ void CGenCA1::Generate() {
 		ScanCantus(tEval, 0, &(cantus[i]));
 		LogFlags();
 		if (confirm_mode) {
-			ParseExpect();
+			LoadExpect();
+			//ParseExpect();
 			ConfirmExpect();
 		}
 		EmulateSAS();

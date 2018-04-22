@@ -1,6 +1,7 @@
 #pragma once
 #include "../GLibrary/GTemplate.h"
 #include "../GLibrary/VSet.h"
+#include "../GLibrary/CsvDb.h"
 
 // THESE MACROS CAN BE DISABLED TO IMPROVE PERFORMANCE
 
@@ -731,6 +732,7 @@ protected:
 	vector <long> cids; // []
 
 	// CA1 autotest
+	CCsvDb edb; // Expect flags database
 	vector<vector<int>> enflags; // [s][id] Expected note flags
 	vector<vector<int>> enflags2; // [r_id][s] Expected note flags
 	vector<int> enflags3; // [r_id] Expected flags
