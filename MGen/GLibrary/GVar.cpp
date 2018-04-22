@@ -78,6 +78,7 @@ void CGVar::ResizeVectors(int size, int vsize)
 	if (vsize == -1) vsize = v_cnt;
 	pause.resize(size);
 	note.resize(size);
+	color.resize(size);
 	note_muted.resize(size);
 	midifile_out_mul.resize(size, 1);
 	len.resize(size);
@@ -104,22 +105,7 @@ void CGVar::ResizeVectors(int size, int vsize)
 	adapt_comment.resize(size);
 	midi_ch.resize(size);
 
-	ngraph.resize(size, vector<vector<float> >(vsize, vector<float>(ngraph_size)));
-	graph.resize(size, vector<vector<float> >(vsize, vector<float>(graph_size)));
-	tonic.resize(size);
-	minor.resize(size);
-	lining.resize(size);
-	mel_id.resize(size);
-	mark.resize(size);
-	mark_color.resize(size);
-	linecolor.resize(size);
 	lyrics.resize(size);
-	comment.resize(size);
-	ccolor.resize(size);
-	comment2.resize(size);
-	nsr1.resize(size);
-	nsr2.resize(size);
-	color.resize(size);
 
 	int start = t_allocated;
 	// Start from zero if we are allocating first time
@@ -128,29 +114,20 @@ void CGVar::ResizeVectors(int size, int vsize)
 	for (int i = start; i < size; i++) {
 		pause[i].resize(vsize);
 		note[i].resize(vsize);
+		color[i].resize(vsize);
 		note_muted[i].resize(vsize);
-		ngraph[i].resize(vsize);
-		graph[i].resize(vsize);
 		len[i].resize(vsize);
 		coff[i].resize(vsize);
 		poff[i].resize(vsize);
 		noff[i].resize(vsize);
-		tonic[i].resize(vsize);
-		minor[i].resize(vsize);
 		dyn[i].resize(vsize);
 		vel[i].resize(vsize);
 		vib[i].resize(vsize);
 		vibf[i].resize(vsize);
 		artic[i].resize(vsize);
 		filter[i].resize(vsize);
-		lining[i].resize(vsize);
 		lengroup[i].resize(vsize);
 		lyrics[i].resize(vsize);
-		comment[i].resize(vsize);
-		ccolor[i].resize(vsize);
-		comment2[i].resize(vsize);
-		nsr1[i].resize(vsize);
-		nsr2[i].resize(vsize);
 		adapt_comment[i].resize(vsize);
 		midi_ch[i].resize(vsize);
 		dstime[i].resize(vsize);
@@ -159,15 +136,38 @@ void CGVar::ResizeVectors(int size, int vsize)
 		setime[i].resize(vsize);
 		smst[i].resize(vsize, -1);
 		smet[i].resize(vsize, -1);
-		color[i].resize(vsize);
-		mel_id[i].resize(vsize, -1);
-		mark[i].resize(vsize);
-		mark_color[i].resize(vsize);
 	}
 
 	if (m_algo_id != 2001) {
+		ngraph.resize(size, vector<vector<float> >(vsize, vector<float>(ngraph_size)));
+		graph.resize(size, vector<vector<float> >(vsize, vector<float>(graph_size)));
+		tonic.resize(size);
+		minor.resize(size);
+		lining.resize(size);
+		linecolor.resize(size);
+		mel_id.resize(size);
+		mark.resize(size);
+		mark_color.resize(size);
+		comment.resize(size);
+		ccolor.resize(size);
+		comment2.resize(size);
+		nsr1.resize(size);
+		nsr2.resize(size);
 		nlink.resize(size);
 		for (int i = start; i < size; i++) {
+			ngraph[i].resize(vsize);
+			graph[i].resize(vsize);
+			tonic[i].resize(vsize);
+			minor[i].resize(vsize);
+			lining[i].resize(vsize);
+			mel_id[i].resize(vsize, -1);
+			mark[i].resize(vsize);
+			mark_color[i].resize(vsize);
+			comment[i].resize(vsize);
+			ccolor[i].resize(vsize);
+			comment2[i].resize(vsize);
+			nsr1[i].resize(vsize);
+			nsr2[i].resize(vsize);
 			nlink[i].resize(vsize);
 		}
 	}
@@ -243,16 +243,16 @@ void CGVar::SaveResults(CString dir, CString fname)
 		}
 		SaveVector(fs, tempo);
 		// Added in version 1.6
-		for (size_t i = 0; i < t_generated; i++) {
+		if (lining.size()) for (size_t i = 0; i < t_generated; i++) {
 			SaveVector2C(fs, lining, i);
 		}
-		SaveVector(fs, linecolor);
+		if (linecolor.size()) SaveVector(fs, linecolor);
 		// Added in version 1.6.1
-		for (size_t i = 0; i < t_generated; i++) {
+		if (tonic.size()) for (size_t i = 0; i < t_generated; i++) {
 			SaveVector2C(fs, tonic, i);
 		}
 		// Added in MGR version 1.9
-		for (size_t i = 0; i < t_generated; i++) {
+		if (minor.size()) for (size_t i = 0; i < t_generated; i++) {
 			SaveVector2C(fs, minor, i);
 		}
 	}
@@ -677,13 +677,13 @@ void CGVar::ValidateVectors(int step1, int step2) {
 				warning_valid++;
 			}
 			// Check key is correct
-			if ((tonic[i][v]<0 || tonic[i][v]>11) && warning_valid < MAX_WARN_VALID) {
+			if (tonic.size() && (tonic[i][v]<0 || tonic[i][v]>11) && warning_valid < MAX_WARN_VALID) {
 				st.Format("Validation failed at step %d voice %d: tonic must be in range 0-11", i, v);
 				WriteLog(5, st);
 				warning_valid++;
 			}
 			// Check mode is correct
-			if ((minor[i][v]<0 || minor[i][v]>1) && warning_valid < MAX_WARN_VALID) {
+			if (minor.size() && (minor[i][v]<0 || minor[i][v]>1) && warning_valid < MAX_WARN_VALID) {
 				st.Format("Validation failed at step %d voice %d: minor must be in range 0-1", i, v);
 				WriteLog(5, st);
 				warning_valid++;
@@ -957,8 +957,12 @@ void CGVar::UpdateNoteMinMax(int step1, int step2, int final_run)
 			// Calculate range including note scan range
 			if (ng_min2 > note[i][v] + show_transpose[v]) ng_min2 = note[i][v] + show_transpose[v];
 			if (ng_max2 < note[i][v] + show_transpose[v]) ng_max2 = note[i][v] + show_transpose[v];
-			if (nsr1[i][v] && ng_min2 > nsr1[i][v] + show_transpose[v]) ng_min2 = nsr1[i][v] + show_transpose[v];
-			if (nsr2[i][v] && ng_max2 < nsr2[i][v] + show_transpose[v]) ng_max2 = nsr2[i][v] + show_transpose[v];
+			if (nsr1.size()) {
+				if (nsr1[i][v] && ng_min2 > nsr1[i][v] + show_transpose[v]) 
+					ng_min2 = nsr1[i][v] + show_transpose[v];
+				if (nsr2[i][v] && ng_max2 < nsr2[i][v] + show_transpose[v]) 
+					ng_max2 = nsr2[i][v] + show_transpose[v];
+			}
 			// Voice minimax does not include show_transpose, because it is used for Adaptation
 			if (ngv_min[v] > note[i][v]) ngv_min[v] = note[i][v];
 			if (ngv_max[v] < note[i][v]) ngv_max[v] = note[i][v];
@@ -966,8 +970,10 @@ void CGVar::UpdateNoteMinMax(int step1, int step2, int final_run)
 				// Count note frequency
 				++nfreq[note[i][v] + show_transpose[v]];
 				// Count graph maximum
-				for (int n = 0; n < graph_size; ++n) {
-					if (graph_max[n] < graph[i][v][n]) graph_max[n] = graph[i][v][n];
+				if (graph.size()) {
+					for (int n = 0; n < graph_size; ++n) {
+						if (graph_max[n] < graph[i][v][n]) graph_max[n] = graph[i][v][n];
+					}
 				}
 			}
 		}
@@ -1002,11 +1008,13 @@ void CGVar::FillPause(int start, int length, int v) {
 		len[x][v] = 1;
 		coff[x][v] = 0;
 		vel[x][v] = 0;
-		tonic[x][v] = tonic_cur;
-		minor[x][v] = minor_cur;
+		if (tonic.size()) {
+			tonic[x][v] = tonic_cur;
+			minor[x][v] = minor_cur;
+			comment[x][v].clear();
+			comment2[x][v].Empty();
+		}
 		midifile_out_mul[x] = midifile_out_mul0 * midifile_out_mul2;
-		comment[x][v].clear();
-		comment2[x][v].Empty();
 	}
 }
 

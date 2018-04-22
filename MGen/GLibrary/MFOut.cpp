@@ -187,12 +187,12 @@ void MFOut::SaveMidi(CString dir, CString fname) {
 			}
 			midifile.addNoteOn(track, pos, channel, note[i][v], dyn[i][v]);
 			midifile.addNoteOff(track, pos + tpc*midifile_out_mul[i] * (len[i][v]) - 1, channel, note[i][v], 0);
-			if (midifile_export_comments && !comment2[i][v].IsEmpty()) {
+			if (midifile_export_comments && comment2.size() && !comment2[i][v].IsEmpty()) {
 				string st;
 				st = comment2[i][v];
 				midifile.addLyric(track, pos, st);
 			}
-			if (midifile_export_marks && !mark[i][v].IsEmpty()) {
+			if (midifile_export_marks && mark.size() && !mark[i][v].IsEmpty()) {
 				string st;
 				st = mark[i][v];
 				midifile.addLyric(track, pos, st);
