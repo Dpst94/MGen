@@ -702,15 +702,17 @@ void CGenCA2::Generate() {
 		real_len = accumulate(cantus_len[i].begin(), cantus_len[i].end(), 0) + fn * cantus_len[i][0];
 		dpenalty_cur = 0;
 		midifile_out_mul2 = 8;
-		// Create pause
-		FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 0);
-		FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 1);
-		FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 2);
-		FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 3);
-		cpv = cfv;
-		fn = 0;
-		show_note_scan_range = 0;
-		ScanCantus(tEval, cfv, &(m_cc));
+		if (!ly_debugexpect) {
+			// Create pause
+			FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 0);
+			FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 1);
+			FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 2);
+			FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 3);
+			cpv = cfv;
+			fn = 0;
+			show_note_scan_range = 0;
+			ScanCantus(tEval, cfv, &(m_cc));
+		}
 		ApplyMidiOutSpecies();
 		// Go forward
 		show_note_scan_range = 1;
@@ -743,9 +745,9 @@ void CGenCA2::Generate() {
 		step0 = step;
 		step00 = step0;
 		fn = fn0;
+		LoadExpect();
 		ScanCP(tEval, 0);
 		LogFlags();
-		LoadExpect();
 		ConfirmExpect();
 		EmulateSASCP();
 		FixStartPause();

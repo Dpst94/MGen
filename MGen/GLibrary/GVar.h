@@ -37,6 +37,7 @@ public:
 	CString save_format_version; // Version of save format loaded
 
   // Main variables
+	int ly_debugexpect = 0; // Export unexpected and unconfirmed flags to LY
 	vector<int> progress; // Show progress
 	int progress_size = 0; // Effective progress size to use
 	float m_pspeed = 100; // Playback speed in percent

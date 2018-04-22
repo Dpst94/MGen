@@ -633,11 +633,12 @@ void CGenCA1::Generate() {
 		dpenalty_cur = 0;
 		c_len = cantus[i].size();
 		GetSourceRange(cantus[i]);
+		if (confirm_mode) {
+			LoadExpect();
+		}
 		ScanCantus(tEval, 0, &(cantus[i]));
 		LogFlags();
 		if (confirm_mode) {
-			LoadExpect();
-			//ParseExpect();
 			ConfirmExpect();
 		}
 		EmulateSAS();

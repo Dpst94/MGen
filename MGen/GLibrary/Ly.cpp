@@ -945,7 +945,11 @@ void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	fs << ">>\n";
 	if (st3 != "") fs << "\\markup { " << st3 << " }\n";
 	fs << ly_com_st;
-	if (ly_com_st == "") fs << "\\markup \\bold \\with-color #(rgb-color 0 0.8 0) { \\char ##x2705 Excellent }\n ";
+	if (ly_com_st == "") {
+		if (!ly_debugexpect) {
+			fs << "\\markup \\bold \\with-color #(rgb-color 0 0.8 0) { \\char ##x2705 Excellent }\n ";
+		}
+	}
 	if (ly_pagebreak) fs << "\\pageBreak\n";
 	// Second info
 	//st2.Replace("\n", "\n}\n\\markup \\wordwrap \\italic {\n  ");
@@ -1127,7 +1131,12 @@ void CLy::SaveLy(CString dir, CString fname) {
 	ly_fs.open(dir + "\\" + fname + ".ly");
 	read_file_sv("configs\\ly\\header.ly", sv);
 	for (int i = 0; i < sv.size(); ++i) {
-		sv[i].Replace("$TITLE$", title);
+		sv[i].Replace("$SUBTITLE$", title);
+		if (ly_debugexpect) {
+			sv[i].Replace("$TITLE$", "Debug expected confirmations");
+		}
+		else sv[i].Replace("$TITLE$", "");
+		sv[i].Replace("$DEDICATION$", "");
 		ly_fs << sv[i] << "\n";
 	}
 
