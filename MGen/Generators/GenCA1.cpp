@@ -341,11 +341,10 @@ void CGenCA1::ParseExpect() {
 	}
 }
 
-void CGenCA1::ConfirmExpect() {
+void CGenCA1::ExportExpectToDb() {
 	CString st, est;
-	int found, fl;
 	int max_x = enflags.size();
-	if (!enflags_count) return;
+	int fl;
 	// Prepare to insert expected flags
 	CCsvDb cdb;
 	map <CString, CString> row;
@@ -375,6 +374,18 @@ void CGenCA1::ConfirmExpect() {
 			row["IFP"].Format("%d", false_positives_ignore[fl]);
 			est = cdb.Insert(row);
 			if (est != "") WriteLog(5, est);
+		}
+	}
+}
+
+void CGenCA1::ConfirmExpect() {
+	CString st, est;
+	int found, fl;
+	int max_x = enflags.size();
+	if (!enflags_count) return;
+	for (int x = 0; x < max_x; ++x) if (enflags[x].size()) {
+		for (int e = 0; e < enflags[x].size(); ++e) {
+			fl = enflags[x][e];
 			// Do not confirm rule violation if rule checking is disabled
 			//if (accept[fl] == -1) continue;
 			found = 0;

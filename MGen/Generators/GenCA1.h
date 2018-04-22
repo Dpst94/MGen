@@ -19,6 +19,7 @@ protected:
 	void CreateScanMatrix(int i);
 	void SendCorrections(int i, long long time_start);
 	void ParseExpect();
+	void ExportExpectToDb();
 	void ConfirmExpect();
 	void InitCorAck();
 	void SaveCorAck();
