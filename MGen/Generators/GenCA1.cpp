@@ -308,6 +308,8 @@ void CGenCA1::SendCorrections(int i, long long time_start) {
 }
 
 void CGenCA1::ParseExpect() {
+	// Obsolete function
+	ASSERT(0);
 	int fl;
 	// Continue if there are lyrics
 	vector<CString> ast;
