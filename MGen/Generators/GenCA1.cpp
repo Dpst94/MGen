@@ -355,11 +355,13 @@ void CGenCA1::SelectExpect() {
 void CGenCA1::LoadExpect() {
 	// Clear expected flags
 	enflags.clear();
+	ef_log.clear();
 	enflags2.clear();
 	enflags3.clear();
 	enflags_count = 0;
 	// Detect maximum lyrics
 	enflags.resize(c_len);
+	ef_log.resize(c_len);
 	enflags2.resize(MAX_RULES);
 	enflags3.resize(MAX_RULES);
 	for (int f = 0; f < MAX_RULES; ++f) enflags2[f].resize(c_len);
@@ -370,6 +372,7 @@ void CGenCA1::LoadExpect() {
 		s = atoi(edb.result[i]["Step"]);
 		if (fl) {
 			enflags[s].push_back(fl);
+			ef_log[s].push_back(edb.result[i]["Log"]);
 			++enflags2[fl][s];
 			++enflags3[fl];
 			++enflags_count;
@@ -408,14 +411,41 @@ void CGenCA1::ExportExpectToDb() {
 			row["Severity"].Format("%d", severities[cspecies][fl]);
 			row["GFP"].Format("%d", false_positives_global[fl]);
 			row["IFP"].Format("%d", false_positives_ignore[fl]);
+			row["Log"] = CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M ") + "Import from midi lyrics";
 			est = cdb.Insert(row);
 			if (est != "") WriteLog(5, est);
 		}
 	}
 }
 
+void CGenCA1::CreateExpectDb(CString path, CCsvDb &cdb) {
+	CString est;
+	vector <CString> hdr;
+	hdr.push_back("File");
+	hdr.push_back("Cid");
+	hdr.push_back("Step");
+	hdr.push_back("Rid");
+	hdr.push_back("Rule");
+	hdr.push_back("Subrule");
+	hdr.push_back("Species");
+	hdr.push_back("High");
+	hdr.push_back("Group");
+	hdr.push_back("Comment");
+	hdr.push_back("Subcomment");
+	hdr.push_back("Accept");
+	hdr.push_back("Severity");
+	hdr.push_back("GFP");
+	hdr.push_back("IFP");
+	hdr.push_back("Log");
+	est = cdb.Create(path, hdr);
+	if (est != "") WriteLog(5, est);
+}
+
 void CGenCA1::ConfirmExpect() {
 	CString st, est;
+	map <CString, CString> row;
+	vector <short> flag_exported;
+	flag_exported.resize(MAX_RULES);
 	int found, fl;
 	int max_s = enflags.size();
 	if (!enflags_count) return;
@@ -438,9 +468,11 @@ void CGenCA1::ConfirmExpect() {
 					fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl], 
 					cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 				WriteLog(5, est);
+				// Test log
+				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
+				// Send to LY
 				nlink[cpos[s]][cpv][fl * 10 + cspecies] = 0;
 				fsev[cpos[s]][cpv][fl * 10 + cspecies] = 100;
-				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
 			}
 			else if (debug_level > 0) {
 				CString est;
@@ -448,29 +480,33 @@ void CGenCA1::ConfirmExpect() {
 					fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl], 
 					cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 				WriteLog(6, est); 
+				// Test log
 				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
+				if (!flag_exported[fl]) {
+					++flag_exported[fl];
+					row["File"] = midi_file;
+					row["Cid"].Format("%d", cantus_id);
+					row["Step"].Format("%d", s);
+					row["Rid"].Format("%d", fl);
+					row["Rule"] = RuleName[cspecies][fl];
+					row["Subrule"] = SubRuleName[cspecies][fl];
+					row["Species"].Format("%d", cspecies);
+					row["High"] = cantus_high ? "High" : "Low";
+					row["Group"] = RuleGroup[fl];
+					row["Comment"] = RuleComment[cspecies][fl];
+					row["Subcomment"] = SubRuleComment[cspecies][fl];
+					row["Accept"].Format("%d", accepts[cspecies][fl]);
+					row["Severity"].Format("%d", severities[cspecies][fl]);
+					row["GFP"].Format("%d", false_positives_global[fl]);
+					row["IFP"].Format("%d", false_positives_ignore[fl]);
+					row["Log"] = ef_log[s][e];
+					est = edb2.Insert(row);
+					if (est != "") WriteLog(5, est);
+				}
 			}
 		}
 	}
 	if (confirm_mode == 1) {
-		// Do not check local false positives if disabled
-		for (int fl = 0; fl < MAX_RULES; ++fl) {
-			if (!enflags3[fl] || false_positives_ignore[fl]) continue;
-			for (s = 0; s < c_len; ++s) {
-				for (int f = 0; f < anflags[cpv][s].size(); ++f) if (fl == anflags[cpv][s][f]) {
-					if (!enflags2[fl][s]) {
-						CString est;
-						est.Format("Local false positive flag: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-							fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
-							cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
-						WriteLog(5, est);
-						nlink[cpos[s]][cpv][fl * 10 + cspecies] = 0;
-						fsev[cpos[s]][cpv][fl * 10 + cspecies] = 100;
-						if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
-					}
-				}
-			}
-		}
 		// Check global false positives
 		for (s = 0; s < c_len; ++s) {
 			for (int f = 0; f < anflags[cpv][s].size(); ++f) {
@@ -486,6 +522,70 @@ void CGenCA1::ConfirmExpect() {
 					fsev[cpos[s]][cpv][fl * 10 + cspecies] = 0;
 					// Collect global false positives statistics
 					//if (m_testing == 1) AppendLineInFile("autotest\\global_false.txt", fl, " 0");
+					// Send to corrected CSV database
+					if (!flag_exported[fl]) {
+						++flag_exported[fl];
+						row["File"] = midi_file;
+						row["Cid"].Format("%d", cantus_id);
+						row["Step"].Format("%d", s);
+						row["Rid"].Format("%d", fl);
+						row["Rule"] = RuleName[cspecies][fl];
+						row["Subrule"] = SubRuleName[cspecies][fl];
+						row["Species"].Format("%d", cspecies);
+						row["High"] = cantus_high ? "High" : "Low";
+						row["Group"] = RuleGroup[fl];
+						row["Comment"] = RuleComment[cspecies][fl];
+						row["Subcomment"] = SubRuleComment[cspecies][fl];
+						row["Accept"].Format("%d", accepts[cspecies][fl]);
+						row["Severity"].Format("%d", severities[cspecies][fl]);
+						row["GFP"].Format("%d", false_positives_global[fl]);
+						row["IFP"].Format("%d", false_positives_ignore[fl]);
+						row["Log"] = CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M Global false positive");
+						est = edb2.Insert(row);
+						if (est != "") WriteLog(5, est);
+					}
+				}
+			}
+		}
+		// Do not check local false positives if disabled
+		for (int fl = 0; fl < MAX_RULES; ++fl) {
+			if (!enflags3[fl] || false_positives_ignore[fl]) continue;
+			for (s = 0; s < c_len; ++s) {
+				for (int f = 0; f < anflags[cpv][s].size(); ++f) if (fl == anflags[cpv][s][f]) {
+					if (!enflags2[fl][s]) {
+						CString est;
+						est.Format("Local false positive flag: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
+							fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
+							cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
+						WriteLog(5, est);
+						// Send to LY
+						nlink[cpos[s]][cpv][fl * 10 + cspecies] = 0;
+						fsev[cpos[s]][cpv][fl * 10 + cspecies] = 100;
+						// Test log
+						if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
+						// Send to corrected CSV database
+						if (!flag_exported[fl]) {
+							++flag_exported[fl];
+							row["File"] = midi_file;
+							row["Cid"].Format("%d", cantus_id);
+							row["Step"].Format("%d", s);
+							row["Rid"].Format("%d", fl);
+							row["Rule"] = RuleName[cspecies][fl];
+							row["Subrule"] = SubRuleName[cspecies][fl];
+							row["Species"].Format("%d", cspecies);
+							row["High"] = cantus_high ? "High" : "Low";
+							row["Group"] = RuleGroup[fl];
+							row["Comment"] = RuleComment[cspecies][fl];
+							row["Subcomment"] = SubRuleComment[cspecies][fl];
+							row["Accept"].Format("%d", accepts[cspecies][fl]);
+							row["Severity"].Format("%d", severities[cspecies][fl]);
+							row["GFP"].Format("%d", false_positives_global[fl]);
+							row["IFP"].Format("%d", false_positives_ignore[fl]);
+							row["Log"] = CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M Local false positive");
+							est = edb2.Insert(row);
+							if (est != "") WriteLog(5, est);
+						}
+					}
 				}
 			}
 		}
@@ -606,6 +706,7 @@ void CGenCA1::Generate() {
 	SetStatusText(8, "MIDI file: " + fname_from_path(midi_file));
 	LoadCantus(midi_file);
 	SelectExpect();
+	CreateExpectDb(as_dir + "\\edb-" + as_fname + ".csv", edb2);
 	if (cantus.size() < 1) return;
 	// Saved t_generated
 	int t_generated2 = 0; 

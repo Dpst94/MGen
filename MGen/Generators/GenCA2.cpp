@@ -579,6 +579,7 @@ void CGenCA2::Generate() {
 	SetStatusText(8, "MIDI file: " + fname_from_path(midi_file));
 	LoadCP(midi_file);
 	SelectExpect();
+	CreateExpectDb(as_dir + "\\edb-" + as_fname + ".csv", edb2);
 	//cantus_incom.clear();
 	//cantus_incom.resize(cpoint.size());
 	//LinkCpPauses();

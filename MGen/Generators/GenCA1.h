@@ -22,6 +22,7 @@ protected:
 	void SelectExpect();
 	void LoadExpect();
 	void ExportExpectToDb();
+	void CreateExpectDb(CString path, CCsvDb & cdb);
 	void ConfirmExpect();
 	void InitCorAck();
 	void SaveCorAck();
