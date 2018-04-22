@@ -154,6 +154,7 @@ void CGVar::ResizeVectors(int size, int vsize)
 		nsr1.resize(size);
 		nsr2.resize(size);
 		nlink.resize(size);
+		fsev.resize(size);
 		for (int i = start; i < size; i++) {
 			ngraph[i].resize(vsize);
 			graph[i].resize(vsize);
@@ -169,6 +170,7 @@ void CGVar::ResizeVectors(int size, int vsize)
 			nsr1[i].resize(vsize);
 			nsr2[i].resize(vsize);
 			nlink[i].resize(vsize);
+			fsev[i].resize(vsize);
 		}
 	}
 

@@ -191,6 +191,7 @@ struct LY_Intermediate {
 	vector<int> shse; // [shape_type] Highest severity of starting shape
 	vector<CString> sht; // [shape_type] Starting shape text
 	vector<int> nflags; // [] Current flags
+	vector<int> fsev; // [] Severity for each flag
 	vector<int> nfl; // [] Current flags links
 	vector<int> nfn; // Note flag number
 	vector<int> nff; // Note flag foreign
@@ -229,7 +230,7 @@ public:
 	void ParseNLinks(int i, int i2, int v, int foreign);
 	void SaveLyComments(int i, int v, int pos);
 	CString DetectLyClef(int vmin, int vmax);
-	void SetLyShape(int s1, int s2, int f, int fl, int vtype);
+	void SetLyShape(int s1, int s2, int f, int fl, int sev, int vtype);
 	void ClearLyShape(int s1, int s2, int vtype);
 	void ExportLyI();
 	void AddLyITest(int step1, int step2, int fl, int shape);

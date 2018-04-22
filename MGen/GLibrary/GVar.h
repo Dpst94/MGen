@@ -78,6 +78,7 @@ public:
 	vector< vector <unsigned char> > artic; // Articulations
 	vector< vector <unsigned char> > filter; // Sound filter
 	vector< vector <map<short, char>> > nlink; // [i][v] Link to other note for LY
+	vector< vector <map<short, char>> > fsev; // [i][v] Flag severity for LY
 	vector< vector <vector<float>> > ngraph; // [s][v][] Graph using chromatic scale
 	vector< vector <vector<float>> > graph; // [s][v][] Graph using arbitrary scale
 	vector<CString> graph_name; // [] Graph name

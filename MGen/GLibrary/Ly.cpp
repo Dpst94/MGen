@@ -486,6 +486,7 @@ CString CLy::GetIntName(int iv) {
 
 void CLy::AddNLink(int i, int i2, int v, CString st, int fl, int ln, int foreign) {
 	lyi[i2 - ly_step1].nflags.push_back(fl / 10);
+	lyi[i2 - ly_step1].fsev.push_back(fsev[i][v][fl]);
 	cspecies = fl % 10;
 	if (foreign) {
 		lyi[i2 - ly_step1].nfl.push_back(i + ln - coff[i + ln][ly_v] - i2);
@@ -532,6 +533,7 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 			// Do not process foreign flags
 			if (lyi[ly_s2].nff[c]) break;
 			int fl = lyi[ly_s2].nflags[c];
+			int sev = lyi[ly_s2].fsev[c];
 			if (!accept[fl]) st = "- ";
 			else if (accept[fl] == -1) st = "$ ";
 			else st = "+ ";
@@ -552,7 +554,7 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 				ly_com_st += note_st;
 			}
 			ly_com_st += "\\markup \\wordwrap \\with-color #(rgb-color " +
-				GetLyColor(flag_color[severity[fl]]) + ") {\n  ";
+				GetLyColor(flag_color[sev]) + ") {\n  ";
 			com.Replace("\"", "\\\"");
 			com.Replace(" ", "\" \"");
 			st.Format("\\teeny \\raise #0.2 \\circle %d \"", lyi[ly_s2].nfn[c]);
@@ -582,18 +584,18 @@ CString CLy::DetectLyClef(int vmin, int vmax) {
 	return LyClef[best_clef];
 }
 
-void CLy::SetLyShape(int s1, int s2, int f, int fl, int vtype) {
-	if (lyi[s1].shse[vtype] <= severity[fl]) {
+void CLy::SetLyShape(int s1, int s2, int f, int fl, int sev, int vtype) {
+	if (lyi[s1].shse[vtype] <= sev) {
 		// Start
 		lyi[s1].shs[vtype] = 1;
 		// Finish
 		lyi[s2].shf[vtype] = 1;
 		// Link to start
 		lyi[s2].shsl[vtype] = s1 - s2;
-		lyi[s1].shse[vtype] = severity[fl];
+		lyi[s1].shse[vtype] = sev;
 		if (vtype == vInterval || vtype == vNoteName || vtype == vHarm) {
-			if (lyi[s2].shse[vtype] <= severity[fl]) {
-				lyi[s2].shse[vtype] = severity[fl];
+			if (lyi[s2].shse[vtype] <= sev) {
+				lyi[s2].shse[vtype] = sev;
 			}
 			if (vtype == vNoteName) ++ly_notenames;
 		}
@@ -653,8 +655,7 @@ void CLy::AddLyITest(int step1, int step2, int fl, int shape) {
 	lyi[step1].nfs.push_back(0);
 	lyi[step1].nfc.push_back("");
 	lyi[step1].nfc[lyi[step1].nfc.size() - 1].Format("Type %d", shape);
-	severity[fl] = randbw(0, 100);
-	SetLyShape(step1, step2, lyi[step1].nfs.size() - 1, fl, shape);
+	SetLyShape(step1, step2, lyi[step1].nfs.size() - 1, fl, randbw(0, 100), shape);
 	++ly_flags;
 }
 
@@ -772,7 +773,7 @@ void CLy::InitLyI() {
 			int fl = lyi[ly_s2].nflags[f];
 			int link = lyi[ly_s2].nfl[f];
 			int vtype = rule_viz[fl];
-			int sev = severity[fl];
+			int sev = lyi[ly_s2].fsev[f];
 			int skip_shape = 0;
 			int prev_link_note = max(ly_step1, ly_s + link - poff[ly_s + link][ly_v]);
 			// Find link note position
@@ -797,13 +798,13 @@ void CLy::InitLyI() {
 			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step - ly_step1;
 			// Set interval
 			if (rule_viz_int[fl] == 1) {
-				SetLyShape(s1, s2, f, fl, vInterval);
+				SetLyShape(s1, s2, f, fl, sev, vInterval);
 			}
 			if (rule_viz_int[fl] == 2) {
-				SetLyShape(s1, s1, f, fl, vInterval);
+				SetLyShape(s1, s1, f, fl, sev, vInterval);
 			}
 			if (rule_viz_int[fl] == 3) {
-				SetLyShape(s2, s2, f, fl, vInterval);
+				SetLyShape(s2, s2, f, fl, sev, vInterval);
 			}
 			if (!viz_can_overlap[vtype]) {
 				// Check that flag overlaps
@@ -833,7 +834,7 @@ void CLy::InitLyI() {
 				}
 				if (skip_shape) continue;
 			}
-			SetLyShape(s1, s2, f, fl, vtype);
+			SetLyShape(s1, s2, f, fl, sev, vtype);
 		}
 	}
 #if defined(_DEBUG)
@@ -987,8 +988,9 @@ void CLy::SendLyMistakes() {
 		}
 		for (int f = max_mist; f >= 0; --f) {
 			int fl = lyi[ly_s2].nflags[f];
+			int sev = lyi[ly_s2].fsev[f];
 			st.Format("        \\with-color #(rgb-color " +
-				GetLyColor(flag_color[severity[fl]]) + ") %s \\circle %d\n",
+				GetLyColor(flag_color[sev]) + ") %s \\circle %d\n",
 				lyi[ly_s2].nfs[f] ? "\\underline" : "", lyi[ly_s2].nfn[f]);
 			// \override #'(offset . 5) \override #'(thickness . 2) 
 			ly_ly_st += st;

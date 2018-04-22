@@ -479,6 +479,7 @@ void CGenCA1::ConfirmExpect() {
 					WriteLog(5, est);
 					if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
 					nlink[cpos[s]][cpv][fl * 10 + cspecies] = anfl[cpv][s][f] - s;
+					fsev[cpos[s]][cpv][fl * 10 + cspecies] = 0;
 					// Collect global false positives statistics
 					//if (m_testing == 1) AppendLineInFile("autotest\\global_false.txt", fl, " 0");
 				}
