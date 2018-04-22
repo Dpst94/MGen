@@ -417,17 +417,17 @@ void CGenCA1::ExportExpectToDb() {
 void CGenCA1::ConfirmExpect() {
 	CString st, est;
 	int found, fl;
-	int max_x = enflags.size();
+	int max_s = enflags.size();
 	if (!enflags_count) return;
-	for (int x = 0; x < max_x; ++x) if (enflags[x].size()) {
-		for (int e = 0; e < enflags[x].size(); ++e) {
-			fl = enflags[x][e];
+	for (int s = 0; s < max_s; ++s) if (enflags[s].size()) {
+		for (int e = 0; e < enflags[s].size(); ++e) {
+			fl = enflags[s][e];
 			// Do not confirm rule violation if rule checking is disabled
 			//if (accept[fl] == -1) continue;
 			found = 0;
 			// Check if expected flag fires
-			for (int f = 0; f < anflags[cpv][x].size(); ++f) {
-				if (anflags[cpv][x][f] == fl) {
+			for (int f = 0; f < anflags[cpv][s].size(); ++f) {
+				if (anflags[cpv][s][f] == fl) {
 					found = 1;
 					break;
 				}
@@ -436,15 +436,17 @@ void CGenCA1::ConfirmExpect() {
 				CString est;
 				est.Format("Expected flag not confirmed: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
 					fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl], 
-					cantus_id + 1, x + 1, cpos[x] / 8 + 1, cpos[x] % 8 + 1, midi_file);
+					cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 				WriteLog(5, est);
+				nlink[cpos[s]][cpv][fl * 10 + cspecies] = 0;
+				fsev[cpos[s]][cpv][fl * 10 + cspecies] = 100;
 				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
 			}
 			else if (debug_level > 0) {
 				CString est;
 				est.Format("Expected flag confirmed: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
 					fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl], 
-					cantus_id + 1, x + 1, cpos[x] / 8 + 1, cpos[x] % 8 + 1, midi_file);
+					cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 				WriteLog(6, est); 
 				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
 			}
@@ -462,6 +464,8 @@ void CGenCA1::ConfirmExpect() {
 							fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
 							cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 						WriteLog(5, est);
+						nlink[cpos[s]][cpv][fl * 10 + cspecies] = 0;
+						fsev[cpos[s]][cpv][fl * 10 + cspecies] = 100;
 						if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
 					}
 				}

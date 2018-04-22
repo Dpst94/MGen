@@ -538,9 +538,15 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 			else if (accept[fl] == -1) st = "$ ";
 			else st = "+ ";
 			CString rule_name = RuleName[cspecies][fl];
-			if (!ly_rule_colon) {
-				if (rule_name.Find(":") != -1) {
-					rule_name = rule_name.Left(rule_name.Find(":"));
+			if (ly_debugexpect) {
+				rule_name.Format("[%d/%d] ", fl, sstep[ly_s] + 1);
+				rule_name += RuleName[cspecies][fl];
+			}
+			else {
+				if (!ly_rule_colon) {
+					if (rule_name.Find(":") != -1) {
+						rule_name = rule_name.Left(rule_name.Find(":"));
+					}
 				}
 			}
 			com = st + rule_name;

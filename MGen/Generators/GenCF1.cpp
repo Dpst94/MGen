@@ -4179,6 +4179,7 @@ int CGenCF1::SendCantus() {
 	if (step + real_len >= t_allocated) ResizeVectors(t_allocated * 2);
 	for (s = 0; s < ep2; ++s) {
 		cpos[s] = pos;
+		sstep[pos] = s;
 		if (chm.size() > bli[s] && chm[bli[s]] > -1) {
 			mark[pos][v] = GetHarmName(chm[bli[s]], m_cc[s] == 9 || m_cc[s] == 11);
 			SendHarmColor(pos, v);

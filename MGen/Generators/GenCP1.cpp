@@ -502,6 +502,7 @@ int CGenCP1::SendCP() {
 			mark[pos][v].Empty();
 			if (av == cpv) {
 				cpos[x] = pos;
+				sstep[pos] = x;
 				if (species != 1) {
 					if (x == fli[bli[x]]) {
 						if (pat[bli[x]] == pCam) mark[pos][v] = "C\nA";
