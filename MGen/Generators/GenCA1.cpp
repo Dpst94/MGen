@@ -342,16 +342,19 @@ void CGenCA1::ParseExpect() {
 }
 
 void CGenCA1::ConfirmExpect() {
-	CString st;
+	CString st, est;
 	int found, fl;
 	int max_x = enflags.size();
 	if (!enflags_count) return;
 	// Prepare to insert expected flags
 	CCsvDb cdb;
 	map <CString, CString> row;
-	cdb.Open("db/expect.csv");
+	est = cdb.Open("db/expect.csv");
+	if (est != "") WriteLog(5, est);
 	cdb.filter["File"] = midi_file;
-	cdb.Delete();
+	cdb.filter["Cid"].Format("%d", cantus_id);
+	est = cdb.Delete();
+	if (est != "") WriteLog(5, est);
 	for (int x = 0; x < max_x; ++x) if (enflags[x].size()) {
 		for (int e = 0; e < enflags[x].size(); ++e) {
 			fl = enflags[x][e];
@@ -370,7 +373,8 @@ void CGenCA1::ConfirmExpect() {
 			row["Severity"].Format("%d", severities[cspecies][fl]);
 			row["GFP"].Format("%d", false_positives_global[fl]);
 			row["IFP"].Format("%d", false_positives_ignore[fl]);
-			cdb.Insert(row);
+			est = cdb.Insert(row);
+			if (est != "") WriteLog(5, est);
 			// Do not confirm rule violation if rule checking is disabled
 			//if (accept[fl] == -1) continue;
 			found = 0;

@@ -83,7 +83,7 @@ CString CCsvDb::LoadHeader(ifstream &ifs) {
 	st = pch;
 	if (st.Left(4) == "sep=") {
 		sep_st = st;
-		separator = st[5];
+		separator = st[4];
 		// Get header
 		if (!ifs.good()) {
 			return "Header line after sep line not found in file " + path;
@@ -93,7 +93,7 @@ CString CCsvDb::LoadHeader(ifstream &ifs) {
 	else {
 		sep_st = "";
 	}
-	header_st = st;
+	header_st = pch;
 	// Parse header
 	CGLib::Tokenize(header_st, ast, separator);
 	header.clear();
