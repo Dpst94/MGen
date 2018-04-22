@@ -478,6 +478,7 @@ void CGenCA1::ConfirmExpect() {
 						cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 					WriteLog(5, est);
 					if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
+					nlink[cpos[s]][cpv][fl * 10 + cspecies] = anfl[cpv][s][f] - s;
 					// Collect global false positives statistics
 					//if (m_testing == 1) AppendLineInFile("autotest\\global_false.txt", fl, " 0");
 				}
