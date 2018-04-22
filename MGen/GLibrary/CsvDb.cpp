@@ -81,6 +81,7 @@ CString CCsvDb::InsertMultiple(vector<map<CString, CString>> &rows) {
 				return "Cannot find field '" + it.first + "' in file " + path;
 			ast[header[it.first]] = it.second;
 		}
+		st = "";
 		for (int i = 0; i < ast.size(); ++i) {
 			if (!st.IsEmpty()) st += separator;
 			st += ast[i];
@@ -112,7 +113,7 @@ CString CCsvDb::LoadHeader(ifstream &ifs) {
 		ifs.getline(pch, 2550);
 	}
 	else {
-		sep_st = "";
+		sep_st = "sep=" + separator;
 	}
 	header_st = pch;
 	// Parse header

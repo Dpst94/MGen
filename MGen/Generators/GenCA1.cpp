@@ -444,8 +444,8 @@ void CGenCA1::CreateExpectDb(CString path, CCsvDb &cdb) {
 void CGenCA1::ConfirmExpect() {
 	CString st, est;
 	map <CString, CString> row;
-	vector <short> flag_exported;
-	flag_exported.resize(MAX_RULES);
+	vector <vector<short>> flag_exported;
+	flag_exported.resize(MAX_RULES, vector<short>(c_len));
 	int found, fl;
 	int max_s = enflags.size();
 	if (!enflags_count) return;
@@ -482,8 +482,8 @@ void CGenCA1::ConfirmExpect() {
 				WriteLog(6, est); 
 				// Test log
 				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
-				if (!flag_exported[fl]) {
-					++flag_exported[fl];
+				if (!flag_exported[fl][s]) {
+					++flag_exported[fl][s];
 					row["File"] = midi_file;
 					row["Cid"].Format("%d", cantus_id);
 					row["Step"].Format("%d", s);
@@ -523,8 +523,8 @@ void CGenCA1::ConfirmExpect() {
 					// Collect global false positives statistics
 					//if (m_testing == 1) AppendLineInFile("autotest\\global_false.txt", fl, " 0");
 					// Send to corrected CSV database
-					if (!flag_exported[fl]) {
-						++flag_exported[fl];
+					if (!flag_exported[fl][s]) {
+						++flag_exported[fl][s];
 						row["File"] = midi_file;
 						row["Cid"].Format("%d", cantus_id);
 						row["Step"].Format("%d", s);
@@ -564,8 +564,8 @@ void CGenCA1::ConfirmExpect() {
 						// Test log
 						if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
 						// Send to corrected CSV database
-						if (!flag_exported[fl]) {
-							++flag_exported[fl];
+						if (!flag_exported[fl][s]) {
+							++flag_exported[fl][s];
 							row["File"] = midi_file;
 							row["Cid"].Format("%d", cantus_id);
 							row["Step"].Format("%d", s);

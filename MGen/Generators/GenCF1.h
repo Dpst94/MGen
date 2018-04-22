@@ -559,7 +559,6 @@ protected:
 	int svoice; // Voice to send cantus to
 
 	// CA1
-	CString midi_file;
 	int corrections = 1; // Number of corrections to show
 
 	// Parameter map

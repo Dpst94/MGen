@@ -121,6 +121,9 @@ public:
 	vector<int> itrack; // Instrument local track number for each track
 	int stages_calculated = 0;
 
+	// CA1
+	CString midi_file;
+
 protected:
 	void ValidateVectors(int step1, int step2);
 	void ValidateVectors2(int step1, int step2);
