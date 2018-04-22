@@ -70,6 +70,27 @@ CString CCsvDb::Insert(map<CString, CString> &row) {
 	return "";
 }
 
+CString CCsvDb::InsertMultiple(vector<map<CString, CString>> &rows) {
+	CString st;
+	vector <CString> ast;
+	ast.resize(header.size());
+	ofs.open(path, ios_base::app);
+	for (int r = 0; r < rows.size(); ++r) {
+		for (auto const& it : rows[r]) {
+			if (header.find(it.first) == header.end())
+				return "Cannot find field '" + it.first + "' in file " + path;
+			ast[header[it.first]] = it.second;
+		}
+		for (int i = 0; i < ast.size(); ++i) {
+			if (!st.IsEmpty()) st += separator;
+			st += ast[i];
+		}
+		ofs << st << "\n";
+	}
+	ofs.close();
+	return "";
+}
+
 CString CCsvDb::LoadHeader(ifstream &ifs) {
 	CString st;
 	vector<CString> ast;

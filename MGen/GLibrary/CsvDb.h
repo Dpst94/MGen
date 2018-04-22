@@ -9,6 +9,7 @@ public:
 	CString Open(CString pth);
 	CString Create(CString pth, vector<CString>& hdr);
 	CString Insert(map<CString, CString>& row);
+	CString InsertMultiple(vector<map<CString, CString>>& rows);
 	CString LoadHeader(ifstream & fs);
 
 	CString Select();
