@@ -350,6 +350,14 @@ void CGenCA1::SelectExpect() {
 	edb.filter["File"] = midi_file;
 	est = edb.Select();
 	if (est != "") WriteLog(5, est);
+	if (cantus_incom[0][0].Find("Expect") != -1) {
+		if (!edb.result.size())
+			WriteLog(5, "This midi file requires expected flags, but none found in database");
+	}
+	else {
+		if (edb.result.size())
+			WriteLog(5, "This midi file does not require expected flags, but they were found in database");
+	}
 }
 
 void CGenCA1::LoadExpect() {
