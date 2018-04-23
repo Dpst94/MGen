@@ -592,10 +592,18 @@ void CGenCA2::Generate() {
 	cantus_high_conf = cantus_high;
 	if (species_conf) WriteLog(1, "Warning: species and cantus_high in configuration file will override marks in imported music files");
 	if (error) return;
-	for (int i = 0; i < cpoint.size(); i++) {
+	if (cantus_id2) {
+		if (cantus_id2 > cpoint.size()) {
+			CString est;
+			est.Format("Warning: cantus_id in configuration file (%d) is greater than number of counterpoints loaded (%d). Selecting highest counterpoint.",
+				cantus_id2, cpoint.size());
+			WriteLog(1, est);
+			cantus_id2 = cpoint.size() - 1;
+		}
+	}
+	for (cantus_id = cantus_id2; cantus_id < cpoint.size(); cantus_id++) {
 		error = 0;
 		specified_high = 0;
-		++cantus_id;
 		if (cpoint[cantus_id].size() != av_cnt) {
 			st.Format("Error: need %d voices in counterpoint. Loaded only %d instead in counterpoint %d. Skipping this counterpoint.",
 				av_cnt, cpoint[cantus_id].size(), cantus_id+1);
@@ -629,13 +637,13 @@ void CGenCA2::Generate() {
 		GetVlen();
 		/*
 		// Fix shifted pause in longer voice
-		if (cpoint[i][1][0] == 0 && med_vlen[1] > med_vlen[0]) {
+		if (cpoint[cantus_id][1][0] == 0 && med_vlen[1] > med_vlen[0]) {
 			st.Format("Detected pause in voice 1 with longer notes (%s cantus #%d). Moved pause to other voice",
 				cantus_high ? "high" : "low", cantus_id + 1);
 			WriteLog(0, st);
 			swap(cpoint[cantus_id][0][0], cpoint[cantus_id][1][0]);
 		}
-		if (cpoint[i][0][0] == 0 && med_vlen[0] > med_vlen[1]) {
+		if (cpoint[cantus_id][0][0] == 0 && med_vlen[0] > med_vlen[1]) {
 			st.Format("Detected pause in voice 0 with longer notes (%s cantus #%d). Moved pause to other voice",
 				cantus_high ? "high" : "low", cantus_id + 1);
 			WriteLog(0, st);
@@ -645,7 +653,7 @@ void CGenCA2::Generate() {
 		FindBestPause();
 		if (!specified_high) cantus_high = DetectCantusHigh();
 		// Check level
-		if ((cantus_high && cpoint[i][1][0] == 0) || (!cantus_high && cpoint[i][0][0] == 0)) {
+		if ((cantus_high && cpoint[cantus_id][1][0] == 0) || (!cantus_high && cpoint[cantus_id][0][0] == 0)) {
 			if (specified_high) {
 				st.Format("Cantus starts with a pause (%s cantus #%d). As it was specified in midi, moved pause to other voice",
 					cantus_high ? "upper" : "lower", cantus_id + 1);
@@ -691,7 +699,7 @@ void CGenCA2::Generate() {
 		ReduceBetween(); 
 		fn0 = fn;
 		// Get key
-		acc = cpoint[i];
+		acc = cpoint[cantus_id];
 		GetCPKey();
 		if (tonic_cur == -1) continue;
 		CalcCcIncrement();
@@ -700,7 +708,7 @@ void CGenCA2::Generate() {
 		ShrinkCantus2();
 		if (error) continue;
 		//LogCantus("ca2", cantus_id, cpoint[cantus_id][cpv].size(), cpoint[cantus_id][cpv]);
-		real_len = accumulate(cantus_len[i].begin(), cantus_len[i].end(), 0) + fn * cantus_len[i][0];
+		real_len = accumulate(cantus_len[cantus_id].begin(), cantus_len[cantus_id].end(), 0) + fn * cantus_len[cantus_id][0];
 		dpenalty_cur = 0;
 		midifile_out_mul2 = 8;
 		if (!ly_debugexpect) {
@@ -722,8 +730,8 @@ void CGenCA2::Generate() {
 		t_sent = t_generated;
 		t_generated2 = t_generated;
 		// Load cantus voice
-		cc_len = cantus_len[i];
-		cc_tempo = cantus_tempo[i];
+		cc_len = cantus_len[cantus_id];
+		cc_tempo = cantus_tempo[cantus_id];
 		acc[cfv] = cpoint[cantus_id][cfv];
 		c_len = acc[cfv].size();
 		ac[cfv].resize(c_len);
@@ -732,7 +740,7 @@ void CGenCA2::Generate() {
 		FailDiatonic(ac[cfv], acc[cfv], 0, c_len, minor_cur);
 		GetPitchClass(ac[cfv], acc[cfv], apc[cfv], apcc[cfv], 0, c_len);
 		dpenalty_cur = 0;
-		scpoint = cpoint[i];
+		scpoint = cpoint[cantus_id];
 		// Choose level
 		if (cantus_high) {
 			cpv = 0;
@@ -741,8 +749,8 @@ void CGenCA2::Generate() {
 			cpv = 1;
 		}
 		// Get cantus interval
-		GetMelodyInterval(cpoint[i][cfv], 0, cpoint[i][cfv].size(), cf_nmin, cf_nmax);
-		GetSourceRange(cpoint[i][cpv]);
+		GetMelodyInterval(cpoint[cantus_id][cfv], 0, cpoint[cantus_id][cfv].size(), cf_nmin, cf_nmax);
+		GetSourceRange(cpoint[cantus_id][cpv]);
 		step0 = step;
 		step00 = step0;
 		fn = fn0;
@@ -764,7 +772,7 @@ void CGenCA2::Generate() {
 		CountTime(step0, step - 1);
 		UpdateNoteMinMax(step0, step - 1);
 		UpdateTempoMinMax(step0, step - 1);
-		CreateScanMatrix(i);
+		CreateScanMatrix(cantus_id);
 		// If no corrections needed
 		if (!corrections || !smatrixc || 
 			(m_testing && time() - gen_start_time > (m_test_sec - ANALYZE_RESERVE) * 1000)) {
@@ -784,10 +792,10 @@ void CGenCA2::Generate() {
 		InitCorAck();
 		if (method == mSWA) {
 			clib.clear();
-			SWACP(i, 1);
+			SWACP(cantus_id, 1);
 			// Check if we have results
 			if (clib.size()) {
-				SendCorrectionsCP(i, time_start);
+				SendCorrectionsCP(cantus_id, time_start);
 				SaveCorAck();
 			}
 			else {
@@ -810,13 +818,13 @@ void CGenCA2::Generate() {
 			dpenalty.clear();
 			rpenalty_min = 0;
 			dpenalty_min = MAX_PENALTY;
-			scpoint = cpoint[i];
+			scpoint = cpoint[cantus_id];
 			// Full scan marked notes
 			ScanCP(tCor, 0);
 			rpenalty_min = 0;
 			// Check if we have results
 			if (clib.size()) {
-				SendCorrectionsCP(i, time_start);
+				SendCorrectionsCP(cantus_id, time_start);
 				SaveCorAck();
 			}
 			else {
@@ -839,7 +847,7 @@ void CGenCA2::Generate() {
 		CorAck();
 		if (need_exit) break;
 	}
-	st.Format("Analyzed %d of %d", cantus_id+1, cpoint.size());
+	st.Format("Analyzed %d of %d", cantus_id, cpoint.size());
 	SetStatusText(3, st);
 	ShowStuck();
 	LogPerf();
