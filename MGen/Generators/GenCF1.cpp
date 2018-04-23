@@ -4872,8 +4872,10 @@ check:
 		if (FailLastNoteRes(m_pc)) goto skip;
 		GetLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur);
 		if (FailTritones(m_c, m_cc, m_pc, m_pcc, m_leap)) goto skip;
-		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps, max_leaped, max_leaps_r, max_leaped_r, max_leap_steps, 493, 494, 495, 496)) goto skip;
-		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps2, max_leaped2, max_leaps2_r, max_leaped2_r, max_leap_steps2, 497, 498, 499, 500)) goto skip;
+		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps, max_leaped, max_leaps_r, max_leaped_r, max_leap_steps, 
+			493, 494, 495, 496)) goto skip;
+		if (FailManyLeaps(m_c, m_cc, m_leap, m_smooth, m_slur, max_leaps2, max_leaped2, max_leaps2_r, max_leaped2_r, max_leap_steps2, 
+			497, 498, 499, 500)) goto skip;
 		if (FailLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur, max_smooth2, max_smooth_direct2, cse_leaps, cse_leaps_r,
 			302, 303, 501, 502, 1)) goto skip;
 		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps2, repeat_notes2, 76)) goto skip;
