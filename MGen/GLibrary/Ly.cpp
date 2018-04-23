@@ -160,12 +160,14 @@ void CLy::GetLyRange(int step1, int step2, vector<int> &vm_min, vector<int> &vm_
 	vm_max.clear();
 	vm_min.resize(v_cnt, 128);
 	vm_max.resize(v_cnt, 0);
+	ly_flags = 0;
 	for (int s = step1; s < step2; ++s) {
 		for (int v = v_cnt - 1; v >= 0; --v) {
 			if (!pause[s][v]) {
 				if (vm_min[v] > note[s][v]) vm_min[v] = note[s][v];
 				if (vm_max[v] < note[s][v]) vm_max[v] = note[s][v];
 			}
+			ly_flags += nlink[s][v].size();
 		}
 	}
 }
@@ -866,6 +868,8 @@ void CLy::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	ly_step2 = step2;
 	GetLyRange(step1, step2, vm_min, vm_max);
 	GetLyVcnt(step1, step2, vm_max);
+	// When debugging expected confirmations, do not show segments without flags
+	if (ly_debugexpect && !ly_flags) return;
 	ly_mul = midifile_out_mul[step1];
 	//if (ly_vm_cnt == 1 && (m_algo_id == 121 || m_algo_id == 112)) mul = 8;
 	// Key
