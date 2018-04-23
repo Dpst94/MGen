@@ -1167,8 +1167,7 @@ int CGenCP1::FailPcoSus() {
 		}
 		// Prohibit different
 		else if (tivl[s - 1] == iPco) {
-			if (civlc[s] == 7) FLAG2L(86, s - 1, s);
-			else FLAG2L(483, s - 1, s);
+			FLAG2L(86, s - 1, s);
 		}
 	}
 	return 0;
@@ -1222,8 +1221,7 @@ int CGenCP1::FailPco() {
 			}
 			// Prohibit different
 			else if (tivl[fli2[ls - 1]] == iPco) {
-				if (civlc[s] == 7) FLAG2L(86, isus[ls - 1], s);
-				else FLAG2L(483, isus[ls - 1], s);
+				FLAG2L(86, isus[ls - 1], s);
 			}
 			// All other cases if previous interval is not pco
 			// Direct movement to pco
