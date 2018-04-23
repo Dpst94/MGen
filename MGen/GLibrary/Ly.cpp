@@ -484,7 +484,7 @@ CString CLy::GetIntName(int iv) {
 	else return "8";
 }
 
-void CLy::AddNLink(int i, int i2, int v, CString st, int fl, int ln, int foreign) {
+void CLy::AddNLink(int i, int i2, int v, int fl, int ln, int foreign) {
 	lyi[i2 - ly_step1].nflags.push_back(fl / 10);
 	lyi[i2 - ly_step1].fsev.push_back(fsev[i][v][fl]);
 	cspecies = fl % 10;
@@ -507,7 +507,7 @@ void CLy::ParseNLinks(int i, int i2, int v, int foreign) {
 	int x = 0;
 	for (auto const& it : nlink[i][v]) {
 		if (foreign && !rule_viz_v2[it.first / 10]) continue;
-		AddNLink(i, i2, v, comment[i][v][x], it.first, it.second, foreign);
+		AddNLink(i, i2, v, it.first, it.second, foreign);
 		++x;
 	}
 }

@@ -226,7 +226,7 @@ public:
 	void SendLyNoteColor(ofstream & fs, DWORD col);
 	CString GetRealIntName(int s, int v1, int v2);
 	CString GetIntName(int iv);
-	void AddNLink(int i, int i2, int v, CString st, int fl, int ln, int foreign);
+	void AddNLink(int i, int i2, int v, int fl, int ln, int foreign);
 	void ParseNLinks(int i, int i2, int v, int foreign);
 	void SaveLyComments(int i, int v, int pos);
 	CString DetectLyClef(int vmin, int vmax);
