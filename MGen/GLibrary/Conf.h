@@ -26,6 +26,7 @@ public:
 	void LoadInitTechnique(CString * sName, CString * sValue, CString sSearch, int i);
 	void LoadMapPitch(CString * sName, CString * sValue, CString sSearch, int i);
 	void LoadInstrumentLine(CString st2, CString st3, int i);
+	static void ReplaceCsvDb(CString path1, CString path2, CString filter, CString value);
 	void LoadConfig(CString fname, int load_includes = 1);
 	void ProcessConfig();
 	void LoadConfigFiles(CString fname, int load_includes);

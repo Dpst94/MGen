@@ -5,6 +5,7 @@
 #include "SmRnd.h"
 #include "VSet.h"
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW 
 #endif

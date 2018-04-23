@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../stdafx.h"
 #include "Conf.h"
+#include "CsvDb.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW 
@@ -924,3 +925,35 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	}
 }
 
+void CConf::ReplaceCsvDb(CString path1, CString path2, CString filter, CString value) {
+	CCsvDb cdb, cdb2;
+	CString est;
+	// Load corrected table
+	est = cdb.Open(path1);
+	if (est != "") {
+		WriteLog(5, est);
+		return;
+	}
+	est = cdb.Select();
+	if (est != "") {
+		WriteLog(5, est);
+		return;
+	}
+	// Copy to main table
+	est = cdb2.Open(path2);
+	if (est != "") {
+		WriteLog(5, est);
+		return;
+	}
+	cdb2.filter[filter] = value;
+	est = cdb2.Delete();
+	if (est != "") {
+		WriteLog(5, est);
+		return;
+	}
+	est = cdb2.InsertMultiple(cdb.result);
+	if (est != "") {
+		WriteLog(5, est);
+		return;
+	}
+}
