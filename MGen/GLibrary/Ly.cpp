@@ -782,6 +782,7 @@ void CLy::InitLyI() {
 			int sev = lyi[ly_s2].fsev[f];
 			int skip_shape = 0;
 			int prev_link_note = max(ly_step1, ly_s + link - poff[ly_s + link][ly_v]);
+			if (ly_debugexpect && sev == 100) vtype = 0;
 			// Find link note position
 			int link_note_step = ly_s + link;
 			if (ly_s2 > 0) {
@@ -803,14 +804,16 @@ void CLy::InitLyI() {
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
 			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step - ly_step1;
 			// Set interval
-			if (rule_viz_int[fl] == 1) {
-				SetLyShape(s1, s2, f, fl, sev, vInterval);
-			}
-			if (rule_viz_int[fl] == 2) {
-				SetLyShape(s1, s1, f, fl, sev, vInterval);
-			}
-			if (rule_viz_int[fl] == 3) {
-				SetLyShape(s2, s2, f, fl, sev, vInterval);
+			if (!ly_debugexpect || sev != 100) {
+				if (rule_viz_int[fl] == 1) {
+					SetLyShape(s1, s2, f, fl, sev, vInterval);
+				}
+				if (rule_viz_int[fl] == 2) {
+					SetLyShape(s1, s1, f, fl, sev, vInterval);
+				}
+				if (rule_viz_int[fl] == 3) {
+					SetLyShape(s2, s2, f, fl, sev, vInterval);
+				}
 			}
 			if (!viz_can_overlap[vtype]) {
 				// Check that flag overlaps
