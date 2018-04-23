@@ -1752,7 +1752,7 @@ int CGenCF1::FailMultiCulm(vector<int> &cc, vector<int> &slur) {
 		if (culm_ls >= fli_size - late_culm) FLAG2(21, fli[culm_ls]);
 	}
 	// Prohibit synchronized culminations
-	if (av_cnt > 1 && fli[culm_ls] == cf_culm_s) FLAG2(26, fli[culm_ls]);
+	if (svoices > 1 && fli[culm_ls] == cf_culm_s) FLAG2(26, fli[culm_ls]);
 	return 0;
 }
 

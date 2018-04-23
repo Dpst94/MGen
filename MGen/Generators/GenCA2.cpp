@@ -711,15 +711,18 @@ void CGenCA2::Generate() {
 		real_len = accumulate(cantus_len[cantus_id].begin(), cantus_len[cantus_id].end(), 0) + fn * cantus_len[cantus_id][0];
 		dpenalty_cur = 0;
 		midifile_out_mul2 = 8;
-		if (!ly_debugexpect) {
+		cpv = cfv;
+		fn = 0;
+		show_note_scan_range = 0;
+		if (ly_debugexpect) {
+			ScanCantus(tEval, -1, &(m_cc));
+		}
+		else {
 			// Create pause
 			FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 0);
 			FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 1);
 			FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 2);
 			FillPause(step0, floor((real_len + 1) / 8 + 1) * 8, 3);
-			cpv = cfv;
-			fn = 0;
-			show_note_scan_range = 0;
 			ScanCantus(tEval, cfv, &(m_cc));
 		}
 		ApplyMidiOutSpecies();
