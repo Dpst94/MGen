@@ -350,7 +350,7 @@ void CGenCA1::SelectExpect() {
 	edb.filter["File"] = midi_file;
 	est = edb.Select();
 	if (est != "") WriteLog(5, est);
-	if (cantus_incom[0][0].Find("expect") != -1) {
+	if (cantus_incom.size() && cantus_incom[0].size() && cantus_incom[0][0].Find("expect") != -1) {
 		if (!edb.result.size())
 			WriteLog(5, "This midi file requires expected flags, but none found in database");
 	}
@@ -718,9 +718,16 @@ void CGenCA1::Generate() {
 	if (cantus.size() < 1) return;
 	// Saved t_generated
 	int t_generated2 = 0; 
-	cantus_id = -1;
-	for (int i = 0; i < cantus.size(); i++) {
-		++cantus_id;
+	if (cantus_id2) {
+		if (cantus_id2 > cantus.size()) {
+			CString est;
+			est.Format("Warning: cantus_id in configuration file (%d) is greater than number of canti loaded (%d). Selecting highest cantus.",
+				cantus_id2, cantus.size());
+			WriteLog(1, est);
+			cantus_id2 = cantus.size() - 1;
+		}
+	}
+	for (cantus_id = cantus_id2; cantus_id < cantus.size(); cantus_id++) {
 		// Check limit
 		if (t_generated >= t_cnt) {
 			WriteLog(3, "Reached t_cnt steps. Generation stopped");
@@ -737,21 +744,21 @@ void CGenCA1::Generate() {
 		linecolor[step] = MakeColor(255, 0, 0, 0);
 		// Get key
 		acc.resize(1);
-		acc[0] = cantus[i];
+		acc[0] = cantus[cantus_id];
 		GetCPKey();
 		if (tonic_cur == -1) continue;
 		CalcCcIncrement();
 		// Show imported melody
-		cc_len = cantus_len[i];
-		cc_tempo = cantus_tempo[i];
-		real_len = accumulate(cantus_len[i].begin(), cantus_len[i].end(), 0);
+		cc_len = cantus_len[cantus_id];
+		cc_tempo = cantus_tempo[cantus_id];
+		real_len = accumulate(cantus_len[cantus_id].begin(), cantus_len[cantus_id].end(), 0);
 		dpenalty_cur = 0;
-		c_len = cantus[i].size();
-		GetSourceRange(cantus[i]);
+		c_len = cantus[cantus_id].size();
+		GetSourceRange(cantus[cantus_id]);
 		if (confirm_mode) {
 			LoadExpect();
 		}
-		ScanCantus(tEval, 0, &(cantus[i]));
+		ScanCantus(tEval, 0, &(cantus[cantus_id]));
 		LogFlags();
 		if (confirm_mode) {
 			ConfirmExpect();
@@ -768,7 +775,7 @@ void CGenCA1::Generate() {
 		CountTime(step0, step - 1);
 		UpdateNoteMinMax(step0, step - 1);
 		UpdateTempoMinMax(step0, step - 1);
-		CreateScanMatrix(i);
+		CreateScanMatrix(cantus_id);
 		// If no corrections needed
 		if (!corrections || !smatrixc || 
 			(m_testing && time() - gen_start_time > (m_test_sec - ANALYZE_RESERVE) * 1000)) {
@@ -788,10 +795,10 @@ void CGenCA1::Generate() {
 		InitCorAck();
 		if (method == mSWA) {
 			clib.clear();
-			SWA(i, 1);
+			SWA(cantus_id, 1);
 			// Check if we have results
 			if (clib.size()) {
-				SendCorrections(i, time_start);
+				SendCorrections(cantus_id, time_start);
 				SaveCorAck();
 			}
 			else {
@@ -814,11 +821,11 @@ void CGenCA1::Generate() {
 			rpenalty_min = 0;
 			dpenalty_min = MAX_PENALTY;
 			// Full scan marked notes
-			ScanCantus(tCor, 0, &(cantus[i]));
+			ScanCantus(tCor, 0, &(cantus[cantus_id]));
 			rpenalty_min = 0;
 			// Check if we have results
 			if (clib.size()) {
-				SendCorrections(i, time_start);
+				SendCorrections(cantus_id, time_start);
 				SaveCorAck();
 			}
 			else {
@@ -831,7 +838,7 @@ void CGenCA1::Generate() {
 		CorAck();
 		if (need_exit) break;
 	}
-	st.Format("Analyzed %d of %zu", cantus_id+1, cantus.size());
+	st.Format("Analyzed %d of %zu", cantus_id, cantus.size());
 	SetStatusText(3, st);
 	ShowStuck();
 	LogPerf();
