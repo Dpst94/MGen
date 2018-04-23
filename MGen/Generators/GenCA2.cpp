@@ -598,10 +598,10 @@ void CGenCA2::Generate() {
 			est.Format("Warning: cantus_id in configuration file (%d) is greater than number of counterpoints loaded (%d). Selecting highest counterpoint.",
 				cantus_id2, cpoint.size());
 			WriteLog(1, est);
-			cantus_id2 = cpoint.size() - 1;
+			cantus_id2 = cpoint.size();
 		}
 	}
-	for (cantus_id = cantus_id2; cantus_id < cpoint.size(); cantus_id++) {
+	for (cantus_id = cantus_id2 - 1; cantus_id < cpoint.size(); cantus_id++) {
 		error = 0;
 		specified_high = 0;
 		if (cpoint[cantus_id].size() != av_cnt) {

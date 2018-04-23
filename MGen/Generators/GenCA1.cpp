@@ -727,7 +727,7 @@ void CGenCA1::Generate() {
 			cantus_id2 = cantus.size() - 1;
 		}
 	}
-	for (cantus_id = cantus_id2; cantus_id < cantus.size(); cantus_id++) {
+	for (cantus_id = cantus_id2 - 1; cantus_id < cantus.size(); cantus_id++) {
 		// Check limit
 		if (t_generated >= t_cnt) {
 			WriteLog(3, "Reached t_cnt steps. Generation stopped");
