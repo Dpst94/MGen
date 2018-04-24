@@ -1379,8 +1379,8 @@ int CGenCP1::DetectDNT() {
 			}
 			// Leap in (before DNT)
 			if (ls > 0 && aleap[cpv][fli2[ls - 1]]) {
-				if (pattern_needed) FLAG2(571, fli[ls]);
-				if (!accept[571]) continue;
+				if (pattern_needed) FLAG2(3, fli[ls]);
+				if (!accept[3]) continue;
 			}
 			if (ls < fli_size - 3) {
 				// Note 3 is longer than 4
