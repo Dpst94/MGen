@@ -552,6 +552,12 @@ void CGenCF1::CheckConfig() {
 			WriteLog(5, "Warning: Counterpoint species 5 should have notes_per_measure = 8 or just comment out notes_per_measure so that it is controlled by species parameter automatically (check config)");
 		}
 	}
+	if (m_algo_id == 111 || m_algo_id == 112) {
+		if (m_testing == 1 && cantus_id2 != 1) {
+			WriteLog(1, "Warning: cantus_id parameter should be 1 when testing, or you can get partial results. Reset to 1");
+			cantus_id2 = 1;
+		}
+	}
 	if (s_len != 1) {
 		WriteLog(5, "Warning: s_len should equal 1. Other values are not tested and usually do not have any advantages");
 	}
