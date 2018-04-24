@@ -3436,7 +3436,9 @@ int CGenCF1::FailMinor(vector<int> &pcc, vector<int> &cc) {
 			if (pcc[s_1] == 8) FLAG2L(154, s_1, s);
 			if (pcc[s_1] == 3) {
 				if (ls < fli_size - 1) {
-					if (pcc[fli[ls + 1]] == 0) FLAG2L(432, s_1, fli[ls + 1]);
+					// III-VII#-I downward
+					if (pcc[fli[ls + 1]] == 0 && cc[s] - cc[s_1] < 0) FLAG2L(432, s_1, fli[ls + 1]);
+					// III-VII#
 					else FLAG2L(157, s_1, s);
 				}
 				else {
