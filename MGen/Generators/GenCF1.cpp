@@ -3848,7 +3848,10 @@ void CGenCF1::SendComment(int pos, int v, int av, int x, int i) {
 				//com += ". ";
 				comment[pos][v].push_back(com);
 				ccolor[pos][v].push_back(flag_color[severity[fl]]);
-				if (!ly_debugexpect) nlink[pos][v][fl * 10 + cspecies] = anfl[av][x][f] - x;
+				if (!ly_debugexpect) {
+					nlink[pos][v][fl * 10 + cspecies] = anfl[av][x][f] - x;
+					fsev[pos][v][fl * 10 + cspecies] = severity[fl];
+				}
 			}
 			// Set note color if this is maximum flag severity
 			if (severity[fl] > current_severity && severity[fl] >= show_min_severity
