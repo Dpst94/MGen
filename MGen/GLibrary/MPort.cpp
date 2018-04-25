@@ -577,8 +577,8 @@ void MPort::SendPedalCC(int step1, int step2, int ii, int v) {
 	}
 }
 
-// First cc sent by this function is with i = step1 - 2, time = stime[i + 1] = stime[step1-1]
-// Last cc sent by this function is with i = step2 - 2, time = etime[i] = etime[step2-2] = stime[step2-1]
+// First cc sent by this function is with i = step1, time = stime[i + 1] = stime[step1+1]
+// Last cc sent by this function is with i = step2, time = etime[i] = etime[step2] = stime[step2+1]
 void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2, vector< vector <unsigned char> > & dv, int ii, int v)
 {
 	//CString st;
@@ -588,20 +588,31 @@ void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2,
 	CSmoothRandom sr(rnd_slow);
 	int steps;
 	float fsteps;
+	//CString est;
+	//est.Format("Interpolate CC%d from %d to %d steps", CC, step1, step2);
+	//WriteLog(1, est);
+	// Real borders
+	int step11 = step1;
+	int step21 = step2;
+	// Real borders +1 
+	int step12 = min(t_sent - 1, step11 + 1);
+	int step22 = min(t_sent - 1, step21 + 1);
 	// Linear interpolation
 	vector <float> cc_lin;
 	// Moving average
 	vector <float> cc_ma;
 	// Time of cc step
 	vector <float> cc_time;
+	// Step of cc step
+	vector <int> cc_step;
 	// Time of last cc sent here
-	float last_time = stime[step2 - 1];
+	float last_time = stime[step22];
 	int first_cc = 0;
 	int end_cc = 0;
 	// Find step that will give enough information for ma junction
 	int pre_cc = 0;
-	int first_step = step1 - 2;
-	for (int i = step1 - 3; i >= 0; --i) {
+	int first_step = step11;
+	for (int i = step11 - 1; i >= 0; --i) {
 		// Get CC steps count
 		fsteps = (float)(icf[ii].CC_steps) / 1000.0 * (etime[i] - stime[i]);
 		steps = max(1, fsteps);
@@ -611,7 +622,7 @@ void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2,
 			break;
 		}
 	}
-	for (int i = first_step; i < step2; i++) {
+	for (int i = first_step; i <= step22; i++) {
 		if (i < 0) continue;
 		midi_current_step = i;
 		// Get CC steps count
@@ -622,11 +633,12 @@ void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2,
 		steps = max(1, fsteps);
 		if (steps % 2 == 0) steps++;
 		// Calculate first and last ma positions to send
-		if (i == step1 - 1) first_cc = cc_lin.size();
-		if (i == step2 - 1) end_cc = cc_lin.size() - 1;
+		if (i == step11 + 1) first_cc = cc_lin.size();
+		if (i == step21 + 1) end_cc = cc_lin.size() - 1;
 		// Linear interpolation
 		for (int c = 0; c < steps; c++) {
-			cc_time.push_back(stime[i] * 100 / m_pspeed + (etime[i] - stime[i]) * 100 / m_pspeed*(float)c / (float)steps);
+			cc_time.push_back(stime[i] * 100 / m_pspeed + (etime[i] - stime[i]) * 100 / m_pspeed * (float)c / (float)steps);
+			cc_step.push_back(i);
 			// Left cc steps
 			if (c < steps / 2) {
 				if (i == 0) cc_lin.push_back(dv[i][v]);
@@ -703,6 +715,7 @@ void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2,
 	// Send ma CC
 	for (int c = first_cc; c <= end_cc; c++) {
 		float t = cc_time[c];
+		midi_current_step = cc_step[c];
 		if (is_first_cc) {
 			if (midi_first_run) AddCC(midi_sent_t - midi_start_time - midi_prepause,
 				CC, cc_ma[c]);
