@@ -278,8 +278,8 @@ protected:
 	inline int FailLeapFill(vector<int>& c, int late_leap, int leap_prev, int child_leap);
 	inline int FailLeapMDC(vector<int>& leap, vector<int>& cc);
 	inline void PrepareTonicWeight();
-	inline float GetTonicWeight(int l_ls, vector<int>& cc, vector<int>& pc);
-	inline int FailTonic(vector<int> &cc, vector<int>& pc);
+	inline float GetTonicWeight(int l_ls, vector<int>& c, vector<int>& cc, vector<int>& pc);
+	inline int FailTonic(vector<int>& c, vector<int>& cc, vector<int>& pc);
 	inline int FailLastNoteRes(vector<int>& pc);
 	inline int FailIntervals(vector<int>& c, vector<int>& cc, vector<int>& pc, vector<int>& pcc);
 	inline void GetTritoneResolution(int ta, int t1, int t2, int tb, int & res1, int & res2, vector<int>& c, vector<int>& cc, vector<int>& pc, vector<int>& pcc);
@@ -500,11 +500,17 @@ protected:
 	vector<int> max_note_len; // [sp] Maximum note real length in croches by species
 
 	int tonic_leap = 4; // Maximum allowed leap to tonic (chromatic) without weight change
-	int tonic_wei_leap = 50; // Weight of leap to tonic
-	int tonic_wei_pco = 30; // Weight of tonic perfect consonance
-	int tonic_wei_beat = 30; // Weight of downbeat tonic
-	int tonic_wei_long = 30; // Weight of tonic longer than left neighbor
-	int tonic_wei_len = 20; // Tonic length decrease two times decreases weight by X
+	int tonic_wei_leap = 150; // Weight of leap to tonic
+	int tonic_wei_pco = 130; // Weight of tonic perfect consonance
+	int tonic_wei_beat = 130; // Weight of downbeat tonic
+	int tonic_wei_long = 130; // Weight of tonic longer than left neighbor
+	int tonic_wei_len = 70; // Tonic length two times decreases weight by X
+	int tonic_wei_culm = 130; // If no higher note within 6 notes around - add X% to weight
+	int tonic_wei_culm_range = 6; // Number of notes around to scan to detect local culmination
+	int tonic_wei_start = 0; // Starting tonic weight
+	int tonic_wei_end = 0; // Ending tonic weight
+	int tonic_wei_first = 0; // First (not step 0) tonic weight
+	int tonic_wei_last = 0; // Last (not last step) tonic weight
 
 	int thirds_ignored; // Number of thirds ignored for consecutive leaps rule
 	int fis_gis_max = 3; // Maximum allowed distance between F# and G#
@@ -579,6 +585,8 @@ protected:
 	float pm_tw_max; // Maximum tonic weight
 
   // Local
+	int first_tonic = -1; // ls of first tonic note
+	int last_tonic = -1; // ls of last tonic note
 	int hrepeat_fired = 0; // Harmonic repeat in step
 	int hmiss_fired = 0; // Harmonic miss in step
 	// Queues for calculating scan speed and displaying in status

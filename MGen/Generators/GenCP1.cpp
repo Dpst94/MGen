@@ -3738,7 +3738,7 @@ check:
 		if (FailMultiCulm(acc[cpv], aslur[cpv])) goto skip;
 		if (FailVMotion()) goto skip;
 		if (FailVIntervals()) goto skip;
-		if (FailTonic(acc[cpv], apc[cpv])) goto skip;
+		if (FailTonic(ac[cpv], acc[cpv], apc[cpv])) goto skip;
 		if (FailLastIntervals()) goto skip;
 		//if (FailNoteSeq(apc[cpv])) goto skip;
 		if (FailLastNoteRes(apc[cpv])) goto skip;
