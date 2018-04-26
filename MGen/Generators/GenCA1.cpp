@@ -561,18 +561,18 @@ void CGenCA1::ConfirmExpect() {
 			for (s = 0; s < c_len; ++s) {
 				for (int f = 0; f < anflags[cpv][s].size(); ++f) if (fl == anflags[cpv][s][f]) {
 					if (!enflags2[fl][s]) {
-						CString est;
-						est.Format("Local false positive flag: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-							fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
-							cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
-						WriteLog(5, est);
-						// Send to LY
-						nlink[cpos[s]][cpv][fl * 10 + cspecies] = anfl[cpv][s][f] - s;
-						fsev[cpos[s]][cpv][fl * 10 + cspecies] = 0;
-						// Test log
-						if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
-						// Send to corrected CSV database
 						if (!flag_exported[fl][s]) {
+							CString est;
+							est.Format("Local false positive flag: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
+								fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
+								cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
+							WriteLog(5, est);
+							// Send to LY
+							nlink[cpos[s]][cpv][fl * 10 + cspecies] = anfl[cpv][s][f] - s;
+							fsev[cpos[s]][cpv][fl * 10 + cspecies] = 0;
+							// Test log
+							if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
+							// Send to corrected CSV database
 							++flag_exported[fl][s];
 							row["File"] = midi_file;
 							row["Cid"].Format("%d", cantus_id);
