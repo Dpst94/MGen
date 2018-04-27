@@ -12,6 +12,8 @@ public:
 	float MakeNext();
 	float MakeNextInter();
 
+	void SetInter(int inter_steps0);
+
 	// Variables
 	float acc2 = 0; // Second derivative of velocity
 	float acc = 0; // First derivative of velocity (acceleration)

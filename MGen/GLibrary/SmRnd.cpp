@@ -8,7 +8,7 @@
 #endif
 
 CSmoothRandom::CSmoothRandom(int inter_steps0) {
-	inter_steps = inter_steps0;
+	inter_steps = max(1, inter_steps0);
 	a2_range = 0.03;
 	a_range = 0.3;
 	v_range = 3;
@@ -79,13 +79,21 @@ float CSmoothRandom::MakeNext() {
 }
 
 float CSmoothRandom::MakeNextInter() {
-	int sr_i = step % inter_steps;
-	if (!sr_i) {
+	if (step >= inter_steps) {
+		step = 0;
 		prev_inter_sig = sig;
 		MakeNext();
 	}
-	inter_sig = prev_inter_sig * (inter_steps - sr_i) / inter_steps +
-		sig * (sr_i) / inter_steps;
+	inter_sig = prev_inter_sig * (inter_steps - step) / inter_steps +
+		sig * (step) / inter_steps;
 	++step;
 	return 0.0f;
+}
+
+void CSmoothRandom::SetInter(int inter_steps0) {
+	int inter_steps2 = max(1, inter_steps0);
+	// Do nothing if interpolation steps did not change
+	if (inter_steps2 == inter_steps) return;
+	step = step * inter_steps2 / 1.0 / inter_steps;
+	inter_steps = inter_steps2;
 }
