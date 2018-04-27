@@ -783,6 +783,7 @@ void CLy::InitLyI() {
 			int vtype = rule_viz[fl];
 			int sev = lyi[ly_s2].fsev[f];
 			int skip_shape = 0;
+			// Previous note before link
 			int prev_link_note = max(ly_step1, ly_s + link - poff[ly_s + link][ly_v]);
 			if (ly_debugexpect && sev == 100) vtype = 0;
 			// Find link note position
@@ -821,25 +822,28 @@ void CLy::InitLyI() {
 				// Check that flag overlaps
 				int overlap1 = -1;
 				int overlap2 = -1;
-				int overlap_limit = s1;
+				int overlap_border = 0;
 				// For groups check for collision between borders
 				if (viz_type[vtype] == vtGroup || viz_type[vtype] == vtVolta)
-					overlap_limit = s1 - 1;
+					overlap_border = 1;
 				// For vbrackets check for collision between notes
+				int overlap_limit = s1 - overlap_border;
 				if (viz_type[vtype] == vtVBracket)
 					overlap_limit = min(prev_note_step, prev_link_note) - ly_step1 - 1;
 				for (int x = ly_step2 - ly_step1 - 1; x > overlap_limit; --x) {
 					if (lyi[x].shf[vtype]) {
 						overlap2 = x;
 						overlap1 = x + lyi[x].shsl[vtype];
-						// Choose highest severity
-						if (sev > lyi[overlap1].shse[vtype]) {
-							ClearLyShape(overlap1, overlap2, vtype);
-						}
-						else {
-							// Skip shape
-							skip_shape = 1;
-							break;
+						if (overlap1 < s2 + overlap_border) {
+							// Choose highest severity
+							if (sev > lyi[overlap1].shse[vtype]) {
+								ClearLyShape(overlap1, overlap2, vtype);
+							}
+							else {
+								// Skip shape
+								skip_shape = 1;
+								break;
+							}
 						}
 					}
 				}
