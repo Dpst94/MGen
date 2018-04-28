@@ -622,7 +622,6 @@ void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2,
 			break;
 		}
 	}
-	if (CC == 11) DeleteFile("log\\InterpolateCC.csv");
 	for (int i = first_step; i <= step22; i++) {
 		if (i < 0) continue;
 		midi_current_step = i;
@@ -633,9 +632,6 @@ void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2,
 		//if (skip > 1 && i % skip && coff[i][v] && noff[i][v] != 1 && i != step1 - 2 && i != step2 - 2) continue;
 		steps = max(1, fsteps);
 		if (steps % 2 == 0) steps++;
-		CString est;
-		est.Format("CC%d step %d interpolating with %d substeps", CC, i, steps);
-		WriteLog(1, est);
 		// Calculate first and last ma positions to send
 		if (i == step11 + 1) first_cc = cc_lin.size();
 		if (i == step21 + 1) end_cc = cc_lin.size() - 1;
@@ -709,11 +705,7 @@ void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2,
 		if (last_time - CC_FADEOUT_RESERVE - t < CC_FADEOUT) fadeout = max(0, last_time - CC_FADEOUT_RESERVE - t) / CC_FADEOUT;
 		// Add random
 		sr.MakeNextInter();
-		//cc_ma[c] += sr.inter_sig / sr.s_range * (float)rnd * (float)cc_ma[c] / 200.0 * fadeout;
-		CString est;
-		est.Format("%d;%d;%.5f;%.5f;%.5f\n", cc_step[c], c, t, sr.inter_sig / sr.s_range, cc_ma[c]);
-		est.Replace(".", ",");
-		if (cc_step[c] < 91 && CC == 11) AppendLineToFile("log\\InterpolateCC.csv", est);
+		cc_ma[c] += sr.inter_sig / sr.s_range * (float)rnd * (float)cc_ma[c] / 200.0 * fadeout;
 		// Check limits
 		if (cc_ma[c] < 1) cc_ma[c] = 1;
 		if (cc_ma[c] > 127) cc_ma[c] = 127;
