@@ -419,6 +419,7 @@ void CConf::LoadInstrumentLayout()
 void CConf::LoadInstrumentLayoutLine(CString &st2, CString &st3) {
 	CheckVar(&st2, &st3, "rnd_tempo", &rnd_tempo);
 	CheckVar(&st2, &st3, "rnd_tempo_step", &rnd_tempo_step);
+	CheckVar(&st2, &st3, "rnd_tempo_slow", &rnd_tempo_slow);
 }
 
 void CConf::LoadInstruments() {

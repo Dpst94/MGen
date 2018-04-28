@@ -82,6 +82,7 @@ public:
 	// Global config
 	int rnd_tempo = 6; // Randomize tempo not greater than this percent
 	int rnd_tempo_step = 1; // Maximum difference in tempo between adjacent steps while randomizing
+	float rnd_tempo_slow = 1; // Maximum difference in tempo between adjacent steps while randomizing
 
 };
 

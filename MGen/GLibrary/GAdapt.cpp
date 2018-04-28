@@ -988,7 +988,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 		tempo_src[i] = tempo[i];
 		// Randomize tempo
 		if (i > 0) {
-			sr.SetInter(max(1, tempo_src[i] / 100));
+			sr.SetInter(max(1, tempo_src[i] / 100.0 * rnd_tempo_slow));
 			sr.MakeNextInter();
 			// Calculate fadeout
 			float fadeout = 1;
