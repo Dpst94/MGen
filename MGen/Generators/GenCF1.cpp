@@ -4229,7 +4229,7 @@ int CGenCF1::SendCantus() {
 		}
 		pos += cc_len[s];
 	}
-	MakeBellDyn(v, step, pos - 1, 40, 100, 20);
+	MakeBellDyn(v, step, pos - 1, 50, 110, 0);
 	if (tempo_bell) MakeBellTempo(step, pos - 1, tempo[step], tempo_bell * tempo[step]);
 	step = pos + SendPause(pos, v);
 	InterpolateNgraph(v, step000, step);

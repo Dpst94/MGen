@@ -551,7 +551,7 @@ int CGenCP1::SendCP() {
 		InterpolateNgraph(v, step, pos);
 		// Merge notes
 		MergeNotes(step, pos - 1, v);
-		MakeBellDyn(v, step, pos - 1, 40, 100, 20);
+		MakeBellDyn(v, step, pos - 1, 50, 110, 0);
 	}
 	if (tempo_bell) MakeBellTempo(step, pos - 1, tempo[step], tempo_bell * tempo[step]);
 	step = pos + pause_len;
