@@ -342,15 +342,20 @@ void CGenCA2::DetectSpecies() {
 	species_pos.resize(6);
 	if (max_vlen[cfv] != min_vlen[cfv]) return;
 	else if (min_vlen[cpv] == min_vlen[cfv]) {
-		species_detected = 1;
-		species_pos[1] = 1;
+		if (sus_count > cpoint[cantus_id][cpv].size() / 4 && min_vlen[cpv] * 2 == min_vlen[cfv]) {
+			species_detected = 4;
+			species_pos[4] = 1;
+		}
+		else {
+			species_detected = 1;
+			species_pos[1] = 1;
+		}
 	}
 	else if (min_vlen[cpv] * 2 == min_vlen[cfv]) {
 		species_pos[2] = 1;
 		species_pos[4] = 1;
 		species_pos[5] = 1;
-		species_pos[3] = 1;
-		if (sus_count > cpoint[cantus_id][cpv].size() / 4 && (min_vlen[cpv] == min_vlen[cfv] || min_vlen[cpv] * 2 == min_vlen[cfv])) species_detected = 4;
+		if (sus_count > cpoint[cantus_id][cpv].size() / 4) species_detected = 4;
 		else species_detected = 2;
 	}
 	else if (min_vlen[cpv] * 4 == min_vlen[cfv]) {
@@ -595,7 +600,7 @@ void CGenCA2::Generate() {
 	if (cantus_id2) {
 		if (cantus_id2 > cpoint.size()) {
 			CString est;
-			est.Format("Warning: cantus_id in configuration file (%d) is greater than number of counterpoints loaded (%d). Selecting highest counterpoint.",
+			est.Format("Warning: cantus_id in configuration file (%d) is greater than number of counterpoints loaded (%zu). Selecting highest counterpoint.",
 				cantus_id2, cpoint.size());
 			WriteLog(1, est);
 			cantus_id2 = cpoint.size();

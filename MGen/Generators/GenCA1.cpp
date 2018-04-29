@@ -457,7 +457,7 @@ void CGenCA1::ConfirmExpect() {
 	int found, fl;
 	int max_s = enflags.size();
 	if (!enflags_count) return;
-	for (int s = 0; s < max_s; ++s) if (enflags[s].size()) {
+	for (s = 0; s < max_s; ++s) if (enflags[s].size()) {
 		for (int e = 0; e < enflags[s].size(); ++e) {
 			fl = enflags[s][e];
 			// Do not confirm rule violation if rule checking is disabled
@@ -607,7 +607,7 @@ void CGenCA1::ConfirmExpect() {
 				if (!enflags2[fl][s]) {
 					CString est;
 					est.Format("False positive mistake: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-						fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl],
+						fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl], //-V547
 						cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 					WriteLog(1, est);
 					if (m_testing == 1) AppendLineToFile("autotest\\mistakes.log", est + "\n");
@@ -721,7 +721,7 @@ void CGenCA1::Generate() {
 	if (cantus_id2) {
 		if (cantus_id2 > cantus.size()) {
 			CString est;
-			est.Format("Warning: cantus_id in configuration file (%d) is greater than number of canti loaded (%d). Selecting highest cantus.",
+			est.Format("Warning: cantus_id in configuration file (%d) is greater than number of canti loaded (%zu). Selecting highest cantus.",
 				cantus_id2, cantus.size());
 			WriteLog(1, est);
 			cantus_id2 = cantus.size() - 1;

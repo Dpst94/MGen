@@ -844,6 +844,7 @@ int CGenCP1::GetAntici(int antici_load) {
 		// If sus second part is equal or longer than whole note
 		else if (s2 - sus[ls] >= npm - 1) return 1;
 	}
+	return 0;
 }
 
 int CGenCP1::FailSus2() {
@@ -1823,7 +1824,7 @@ void CGenCP1::SetMsh(int ls, vector<int> &l_msh, int val) {
 	if (l_msh[ls] * val < 0 && tivl[fli[ls]] < 0 ) {
 		CString est;
 		est.Format("Detected msh overwrite at note %d:%d (%s) with value %d (old value %d): %s", 
-			cantus_id + 1, ls + 1, tivl[fli[ls]] < 0?"Dis":"non-Dis", 
+			cantus_id + 1, ls + 1, tivl[fli[ls]] < 0?"Dis":"non-Dis",  //-V547
 			val, l_msh[ls], vint2st(ep2, acc[cpv]));
 		WriteLog(5, est);
 	}
@@ -4000,7 +4001,7 @@ void CGenCP1::Generate() {
 			}
 			else {
 				CString est;
-				est.Format("Warning: cantus_id in configuration file (%d) is greater than number of canti loaded (%d). Selecting highest cantus.",
+				est.Format("Warning: cantus_id in configuration file (%d) is greater than number of canti loaded (%zu). Selecting highest cantus.",
 					cantus_id2, cantus.size());
 				WriteLog(1, est);
 				cantus_id = cantus.size() - 1;

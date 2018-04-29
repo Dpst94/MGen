@@ -1228,7 +1228,7 @@ int CGenCF1::FailMelodyHarm(vector<int> &pc, vector<int> &pcc) {
 	CHECK_READY(DR_fli, DR_pc);
 	CHECK_READY_PERSIST(DP_hv, DP_hsp);
 	int h;
-	int first_tonic = 0;
+	int is_first_tonic = 0;
 	// Build hm vector
 	for (ls = 0; ls < fli_size; ++ls) {
 		s = fli2[ls];
@@ -1238,8 +1238,8 @@ int CGenCF1::FailMelodyHarm(vector<int> &pc, vector<int> &pcc) {
 			// Check tonic
 			if (!h) {
 				// Is this first or last tonic?
-				if (!first_tonic || s == c_len - 1) {
-					first_tonic = 1;
+				if (!is_first_tonic || s == c_len - 1) {
+					is_first_tonic = 1;
 					// Set only tonic for this step
 					hm[ls].clear();
 					hm[ls].push_back(h);
@@ -4585,7 +4585,7 @@ void CGenCF1::EmulateSAS() {
 	for (fixed_ep2 = 1; fixed_ep2 <= m_cc.size(); ++fixed_ep2) {
 		// Show emulator status
 		CString est;
-		est.Format("SAS emulator: %d of %d", fixed_ep2, m_cc.size());
+		est.Format("SAS emulator: %d of %zu", fixed_ep2, m_cc.size());
 		SetStatusText(7, est);
 		// Visible emulation
 		if (emulate_sas) {
