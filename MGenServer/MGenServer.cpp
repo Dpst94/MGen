@@ -781,6 +781,7 @@ int RunJobMGen() {
 	CGLib::CleanFolder(share + j_folder + "*.mp3");
 	CGLib::CleanFolder(share + j_folder + "*.pdf");
 	CGLib::CleanFolder(share + j_folder + "*.ly");
+	CGLib::CleanFolder(share + j_folder + "*.txt");
 	CGLib::CleanFolder(share + j_folder + "*.inf");
 	CGLib::CleanFolder(share + j_folder + "*.csv");
 	CGLib::CleanFolder(share + j_folder + "*.png");
@@ -814,8 +815,8 @@ int RunJobMGen() {
 	}
 	as_dir = sv[0];
 	as_fname = sv[1];
-	if (!CGLib::fileExists(as_dir + "\\" + as_fname + ".ly")) {
-		est = "Autosave file not found: " + as_dir + "\\" + as_fname + ".ly";
+	if (!CGLib::fileExists(as_dir + "\\" + as_fname + ".txt")) {
+		est = "Autosave file not found: " + as_dir + "\\" + as_fname + ".txt";
 		return FinishJob(1, est);
 	}
 	// Copy results
