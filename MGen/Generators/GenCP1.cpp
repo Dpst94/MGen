@@ -1971,7 +1971,9 @@ int CGenCP1::FailRhythm3() {
 			else FLAG2L(240, s, mli[bmli[s]]);
 		}
 		// Non-uniform starting rhythm
-		if (ls > 0 && bmli[s] == 0 && llen[ls] != llen[ls - 1] && ls < fli_size - 1) FLAG2L(254, s, 0);
+		if (ls > 0 && bmli[s] == 0 && llen[ls] != llen[ls - 1] && ls < fli_size - 1) {
+			FLAG2L(254, s, 0);
+		}
 	}
 	return 0;
 }
@@ -2133,8 +2135,12 @@ int CGenCP1::FailRhythm5() {
 			}
 			// Uneven starting rhythm
 			if (!ms && lp > 0 && l_len[lp] != l_len[lp - 1] && !uneven_start_fired) {
-				uneven_start_fired = 1;
-				FLAG2L(254, s2, 0);
+				// Check for exception: (pause + 1/4 + 1/2 slurred)
+				if (fn == 2 && lp == 2 && l_len[lp] >= 4 && l_len[lp - 1] == 2 && slur2) {}
+				else {
+					uneven_start_fired = 1;
+					FLAG2L(254, s2, 0);
+				}
 			}
 			pos += l_len[lp];
 		}

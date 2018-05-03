@@ -479,8 +479,10 @@ void CGenCA1::ConfirmExpect() {
 				// Test log
 				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
 				// Send to LY
-				nlink[cpos[s]][cpv][fl * 10 + cspecies] = 0;
-				fsev[cpos[s]][cpv][fl * 10 + cspecies] = 100;
+				if (ly_debugexpect) {
+					nlink[cpos[s]][cpv][fl * 10 + cspecies] = 0;
+					fsev[cpos[s]][cpv][fl * 10 + cspecies] = 100;
+				}
 			}
 			else if (debug_level > 0) {
 				CString est;
@@ -526,8 +528,10 @@ void CGenCA1::ConfirmExpect() {
 						cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 					WriteLog(5, est);
 					if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
-					nlink[cpos[s]][cpv][fl * 10 + cspecies] = anfl[cpv][s][f] - s;
-					fsev[cpos[s]][cpv][fl * 10 + cspecies] = 0;
+					if (ly_debugexpect) {
+						nlink[cpos[s]][cpv][fl * 10 + cspecies] = anfl[cpv][s][f] - s;
+						fsev[cpos[s]][cpv][fl * 10 + cspecies] = 0;
+					}
 					// Collect global false positives statistics
 					//if (m_testing == 1) AppendLineInFile("autotest\\global_false.txt", fl, " 0");
 					// Send to corrected CSV database
@@ -568,8 +572,10 @@ void CGenCA1::ConfirmExpect() {
 								cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
 							WriteLog(5, est);
 							// Send to LY
-							nlink[cpos[s]][cpv][fl * 10 + cspecies] = anfl[cpv][s][f] - s;
-							fsev[cpos[s]][cpv][fl * 10 + cspecies] = 0;
+							if (ly_debugexpect) {
+								nlink[cpos[s]][cpv][fl * 10 + cspecies] = anfl[cpv][s][f] - s;
+								fsev[cpos[s]][cpv][fl * 10 + cspecies] = 0;
+							}
 							// Test log
 							if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");
 							// Send to corrected CSV database
