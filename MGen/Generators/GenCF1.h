@@ -74,7 +74,7 @@
 
 #endif
 
-// Checks if we have leap or melody direction change here: needs to be not first and not last note
+// Checks if we have leap or melody direction change here: needs to be not last note
 #define MELODY_SEPARATION(s, s1) (!s || (leap[s - 1]) || ((c[s] - c[s - 1])*(c[s1] - c[s]) < 0))
 
 // This variant does not use SWA rpenalty optimization
@@ -258,6 +258,8 @@ protected:
 	void CalcCcIncrement();
 	inline void GetChromatic(vector<int>& c, vector<int>& cc, int step1, int step2, int minor_cur);
 	inline int FailDiatonic(vector<int>& c, vector<int>& cc, int step1, int step2, int minor_cur);
+	inline int IsRepeat(int ls1, int ls2, vector<int>& c, vector<int>& cc, vector<int>& leap, int rlen);
+	inline int FailAdSymRepeat(vector<int>& c, vector<int>& cc, vector<int>& leap, int rlen);
 	inline int FailOutstandingRepeat(vector<int>& c, vector<int>& cc, vector<int>& leap, int scan_len, int rlen, int fid);
 	inline int FailLongRepeat(vector<int>& c, vector<int>& cc, vector<int>& leap, int scan_len, int rlen, int fid);
 	inline int FailManyLeaps(vector<int>& c, vector<int>& cc, vector<int>& leap, vector<int>& smooth, vector<int>& slur, int mleaps, int mleaped, int mleaps2, int mleaped2, int mleapsteps, int flag1, int flag2, int flag3, int flag4);

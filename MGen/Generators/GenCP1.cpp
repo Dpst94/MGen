@@ -3765,10 +3765,14 @@ check:
 			497, 498, 499, 500)) goto skip;
 		if (FailLeapSmooth(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_smooth2, max_smooth_direct2,
 			cse_leaps, cse_leaps_r, 302, 303, 501, 502, 1)) goto skip;
+		if (FailAdSymRepeat(ac[cpv], acc[cpv], aleap[cpv], 3)) goto skip;
+		if (FailAdSymRepeat(ac[cpv], acc[cpv], aleap[cpv], 4)) goto skip;
+		/*
 		if (FailOutstandingRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps2, 2, 76)) goto skip;
 		if (FailOutstandingRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps3, 3, 36)) goto skip;
 		if (FailLongRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps5, 5, 72)) goto skip;
 		if (FailLongRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps7, 7, 73)) goto skip;
+		*/
 		// Calculate diatonic limits
 		nmind = CC_C(nmin, tonic_cur, minor_cur);
 		nmaxd = CC_C(nmax, tonic_cur, minor_cur);

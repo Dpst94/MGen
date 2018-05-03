@@ -387,14 +387,6 @@ void CGenCF1::SetRuleParams() {
 	stag_note_steps = GetRuleParam(cspecies, 10, rsSubName, 1);
 	stag_notes2 = GetRuleParam(cspecies, 39, rsSubName, 0);
 	stag_note_steps2 = GetRuleParam(cspecies, 39, rsSubName, 1);
-	repeat_steps2 = GetRuleParam(cspecies, 76, rsSubName, 1);
-	repeat_steps3 = GetRuleParam(cspecies, 36, rsSubName, 1);
-	repeat_steps5 = GetRuleParam(cspecies, 72, rsSubName, 1);
-	repeat_steps7 = GetRuleParam(cspecies, 73, rsSubName, 1);
-	repeat_notes2 = GetRuleParam(cspecies, 76, rsSubName, 0);
-	repeat_notes3 = GetRuleParam(cspecies, 36, rsSubName, 0);
-	repeat_notes5 = GetRuleParam(cspecies, 72, rsSubName, 0);
-	repeat_notes7 = GetRuleParam(cspecies, 73, rsSubName, 0);
 	min_interval = Interval2Chromatic(GetRuleParam(cspecies, 38, rsSubName, 0));
 	min_iv_minnotes = GetRuleParam(cspecies, 38, rsSubComment, 0);
 	min_iv_minmea = GetRuleParam(cspecies, 38, rsSubComment, 1);
@@ -1406,6 +1398,97 @@ int CGenCF1::FailDiatonic(vector<int> &c, vector<int> &cc, int step1, int step2,
 	else {
 		for (int i = step1; i < step2; ++i) {
 			c[i] = maj_CC_C(cc[i], tonic_cur);
+		}
+	}
+	return 0;
+}
+
+int CGenCF1::IsRepeat(int ls1, int ls2, vector<int> &c, vector<int> &cc, vector<int> &leap, int rlen) {
+	int found = 1;
+	for (int i = 0; i < rlen; ++i) {
+		if (c[fli[ls1 + i]] != c[fli[ls2 + i]]) {
+			found = 0;
+			break;
+		}
+		if (i < rlen - 1 && llen[ls1 + i] != llen[ls2 + i]) {
+			found = 0;
+			break;
+		}
+	}
+	return found;
+}
+
+// Search for adjacent or symmetric repeats
+int CGenCF1::FailAdSymRepeat(vector<int> &c, vector<int> &cc, vector<int> &leap, int rlen) {
+	CHECK_READY(DR_fli, DR_c);
+	// Do not test if flag disabled and not testing
+	//if (task != tEval && accept[flag] == -1) return 0;
+	// Cycle through all notes that can be repeated
+	for (int ls = 0; ls <= fli_size - rlen * 2; ++ls) {
+		int rpos1 = 0;
+		int rpos2 = 0;
+		// Check adjacent repeat
+		if (IsRepeat(ls, ls + rlen, c, cc, leap, rlen)) {
+			rpos1 = ls + rlen;
+		}
+		// If same beat is not adjacent, get same beat and check
+		else if (cspecies > 1 && ((fli[ls + rlen] - fli[ls]) % (npm / 2))) {
+			for (int x = 1; x < 4; ++x) {
+				if (ls + x <= fli_size - rlen * 2 && !((fli[ls + rlen + x] - fli[ls]) % (npm / 2))) {
+					if (IsRepeat(ls, ls + rlen + x, c, cc, leap, rlen)) {
+						rpos1 = ls + rlen + x;
+					}
+				}
+			}
+		}
+		// If any repeat is found, check one more repeat
+		if (rpos1 && rpos1 <= fli_size - rlen * 2) {
+			// Check adjacent repeat
+			if (IsRepeat(ls, rpos1 + rlen, c, cc, leap, rlen)) {
+				rpos2 = rpos1 + rlen;
+			}
+			// If same beat is not adjacent, get same beat and check
+			else if (cspecies > 1 && ((fli[rpos1 + rlen] - fli[rpos1]) % (npm / 2))) {
+				for (int x = 1; x < 4; ++x) {
+					if (rpos1 + x <= fli_size - rlen * 2 && !((fli[rpos1 + rlen + x] - fli[rpos1]) % (npm / 2))) {
+						if (IsRepeat(rpos1, rpos1 + rlen + x, c, cc, leap, rlen)) {
+							rpos2 = rpos1 + rlen + x;
+						}
+					}
+				}
+			}
+		}
+		if (rlen == 3) {
+			// Flag two repeats
+			if (rpos2) {
+				if (rpos2 == rpos1 + rlen)
+					FLAG2L(313, fli[ls], fli[ls + rlen - 1]);
+				else
+					FLAG2L(407, fli[ls], fli[ls + rlen - 1]);
+			}
+			// Flag one repeat
+			else if (rpos1) {
+				if (rpos1 == ls + rlen)
+					FLAG2L(311, fli[ls], fli[ls + rlen - 1]);
+				else
+					FLAG2L(405, fli[ls], fli[ls + rlen - 1]);
+			}
+		}
+		if (rlen == 4) {
+			// Flag two repeats
+			if (rpos2) {
+				if (rpos2 == rpos1 + rlen)
+					FLAG2L(314, fli[ls], fli[ls + rlen - 1]);
+				else
+					FLAG2L(408, fli[ls], fli[ls + rlen - 1]);
+			}
+			// Flag one repeat
+			else if (rpos1) {
+				if (rpos1 == ls + rlen)
+					FLAG2L(312, fli[ls], fli[ls + rlen - 1]);
+				else
+					FLAG2L(406, fli[ls], fli[ls + rlen - 1]);
+			}
 		}
 	}
 	return 0;
@@ -4912,10 +4995,14 @@ check:
 			497, 498, 499, 500)) goto skip;
 		if (FailLeapSmooth(m_c, m_cc, m_leap, m_smooth, m_slur, max_smooth2, max_smooth_direct2, cse_leaps, cse_leaps_r,
 			302, 303, 501, 502, 1)) goto skip;
+		if (FailAdSymRepeat(m_c, m_cc, m_leap, 3)) goto skip;
+		if (FailAdSymRepeat(m_c, m_cc, m_leap, 4)) goto skip;
+		/*
 		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps2, repeat_notes2, 76)) goto skip;
 		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps3, repeat_notes3, 36)) goto skip;
 		if (FailLongRepeat(m_c, m_cc, m_leap, repeat_steps5, repeat_notes5, 72)) goto skip;
 		if (FailLongRepeat(m_c, m_cc, m_leap, repeat_steps7, repeat_notes7, 73)) goto skip;
+		*/
 		if (FailGlobalFill(m_c, nstat2)) goto skip;
 		for (int iv = 0; iv < 4; ++iv) {
 			if (FailLocalRange(m_c, notes_lrange[iv][0], iv + 2, 434 + iv)) goto skip;
