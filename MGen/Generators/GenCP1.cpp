@@ -1184,7 +1184,12 @@ int CGenCP1::FailPco() {
 				FLAG2(324, sus[ls]);
 			// Prohibit parallel pco on suspension
 			if (civl[sus[ls]] == civl[fli2[ls - 1]]) {
-				if (civlc[sus[ls]] == 7) FLAG2L(385, sus[ls], isus[ls - 1]);
+				if (civlc[sus[ls]] == 7) {
+					if (ivlc[fli[ls]] == 5)
+						FLAG2L(330, sus[ls], isus[ls - 1]);
+					else
+						FLAG2L(385, sus[ls], isus[ls - 1]);
+				}
 				else FLAG2L(491, sus[ls], isus[ls - 1]);
 			}
 		}
@@ -2244,7 +2249,18 @@ int CGenCP1::FailPcoApartStep2(int iv, int &pco_last, int &mli_last, int &pco_la
 				}
 				// Suspension
 				else if (sus[ls] == s) {
-					if (iv == 7) FLAG2L(385, s, pco_last);
+					if (iv == 7) {
+						// In case of 6-5 resolution, allow parallel 5th
+						if (bmli[sus[ls_1]] == bmli[fli[ls]] && sus[ls_1] &&
+							((ivlc[sus[ls_1]] == 5 && ivlc[fli[ls]] == 4) ||
+							(ivlc[sus[ls_1]] == 4 && ivlc[fli[ls]] == 5)) &&
+							abs(ac[cpv][fli[ls]] - ac[cpv][pco_last]) < 2)
+							FLAG2L(330, s, pco_last);
+						// Other
+						else {
+							FLAG2L(385, s, pco_last);
+						}
+					}
 					else FLAG2L(491, s, pco_last);
 				}
 				// Downbeat
@@ -2294,7 +2310,8 @@ int CGenCP1::FailPcoApartStep2(int iv, int &pco_last, int &mli_last, int &pco_la
 					if (iv == 7) {
 						// In case of 6-5 resolution, allow parallel 5th
 						if (bmli[sus[ls_1]] == bmli[s] && sus[ls_1] &&
-							ivlc[sus[ls_1]] == 5 && ivlc[s] == 4 &&
+							((ivlc[sus[ls_1]] == 5 && ivlc[s] == 4) ||
+							(ivlc[sus[ls_1]] == 4 && ivlc[s] == 5)) &&
 							abs(ac[cpv][s] - ac[cpv][pco_last]) < 2)
 							FLAG2L(330, s, pco_last);
 						// Other
