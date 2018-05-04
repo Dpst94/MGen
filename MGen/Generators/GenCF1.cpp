@@ -5010,12 +5010,6 @@ check:
 			302, 303, 501, 502, 1)) goto skip;
 		if (FailAdSymRepeat(m_c, m_cc, m_leap, 3)) goto skip;
 		if (FailAdSymRepeat(m_c, m_cc, m_leap, 4)) goto skip;
-		/*
-		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps2, repeat_notes2, 76)) goto skip;
-		if (FailOutstandingRepeat(m_c, m_cc, m_leap, repeat_steps3, repeat_notes3, 36)) goto skip;
-		if (FailLongRepeat(m_c, m_cc, m_leap, repeat_steps5, repeat_notes5, 72)) goto skip;
-		if (FailLongRepeat(m_c, m_cc, m_leap, repeat_steps7, repeat_notes7, 73)) goto skip;
-		*/
 		if (FailGlobalFill(m_c, nstat2)) goto skip;
 		for (int iv = 0; iv < 4; ++iv) {
 			if (FailLocalRange(m_c, notes_lrange[iv][0], iv + 2, 434 + iv)) goto skip;

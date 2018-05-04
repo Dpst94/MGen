@@ -3472,9 +3472,9 @@ int CGenCP1::FailHarm() {
 					else {
 						// Stepwize resolution of 5th to 6th or 6th to 5th with two harmonies in measure
 						if (sus[ls1] && (
-							(ivlc[mli[ms]] == 4 && ivlc[mli[ms] + npm / 2] == 5) ||
-							(ivlc[mli[ms]] == 5 && ivlc[mli[ms] + npm / 2] == 4)) &&
-							abs(ac[cpv][mli[ms]] - ac[cpv][mli[ms] + npm / 2]) < 2)
+							(ivlc[mli[ms]] == 4 && ivlc[s] == 5) ||
+							(ivlc[mli[ms]] == 5 && ivlc[s] == 4)) &&
+							abs(ac[cpv][mli[ms]] - ac[cpv][s]) < 2)
 							FLAG2L(329, s, mli[ms]);
 						else FLAG2L(307, s, mli[ms]);
 					}
@@ -3768,12 +3768,6 @@ check:
 			cse_leaps, cse_leaps_r, 302, 303, 501, 502, 1)) goto skip;
 		if (FailAdSymRepeat(ac[cpv], acc[cpv], aleap[cpv], 3)) goto skip;
 		if (FailAdSymRepeat(ac[cpv], acc[cpv], aleap[cpv], 4)) goto skip;
-		/*
-		if (FailOutstandingRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps2, 2, 76)) goto skip;
-		if (FailOutstandingRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps3, 3, 36)) goto skip;
-		if (FailLongRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps5, 5, 72)) goto skip;
-		if (FailLongRepeat(ac[cpv], acc[cpv], aleap[cpv], repeat_steps7, 7, 73)) goto skip;
-		*/
 		// Calculate diatonic limits
 		nmind = CC_C(nmin, tonic_cur, minor_cur);
 		nmaxd = CC_C(nmax, tonic_cur, minor_cur);
