@@ -9,6 +9,19 @@
 
 CGenCF1::CGenCF1() {
 	// Init vector parameters
+	tonic_max.resize(2);
+	tonic_window.resize(2);
+	tonic_leap.resize(2);
+	tonic_wei_leap.resize(2);
+	tonic_wei_len.resize(2);
+	tonic_wei_beat.resize(2);
+	tonic_wei_long.resize(2);
+	tonic_wei_pco.resize(2);
+	tonic_wei_culm.resize(2);
+	tonic_wei_start.resize(2);
+	tonic_wei_end.resize(2);
+	tonic_wei_first.resize(2);
+	tonic_wei_last.resize(2);
 	notes_lrange.resize(4, vector<int>(MAX_SPECIES, 19));
 	progress.resize(MAX_PROGRESS);
 	av_cnt = 1;
@@ -450,22 +463,26 @@ void CGenCF1::SetRuleParams() {
 	ico_chain2 = GetRuleParam(cspecies, 96, rsSubName, 0);
 	gis_trail_max = GetRuleParam(cspecies, 200, rsSubName, 0);
 	fis_leap = Interval2Chromatic(GetRuleParam(cspecies, 201, rsSubName, 0));
-	tonic_max = GetRuleParam(cspecies, 196, rsSubName, 0);
-	tonic_window = GetRuleParam(cspecies, 196, rsSubName, 1);
 	tonic_max_cp = GetRuleParam(cspecies, 310, rsSubName, 0);
 	tonic_window_cp = GetRuleParam(cspecies, 310, rsSubName, 1);
 	tonic_wei_inv = GetRuleParam(cspecies, 310, rsSubComment, 0);
-	tonic_leap = Interval2Chromatic(GetRuleParam(cspecies, 196, rsSubComment, 0));
-	tonic_wei_leap = GetRuleParam(cspecies, 196, rsSubComment, 1);
-	tonic_wei_len = GetRuleParam(cspecies, 196, rsSubComment, 2);
-	tonic_wei_beat = GetRuleParam(cspecies, 196, rsSubComment, 3);
-	tonic_wei_long = GetRuleParam(cspecies, 196, rsSubComment, 4);
-	tonic_wei_pco = GetRuleParam(cspecies, 196, rsSubComment, 5);
-	tonic_wei_culm = GetRuleParam(cspecies, 196, rsSubComment, 6);
-	tonic_wei_start = GetRuleParam(cspecies, 196, rsSubComment, 7);
-	tonic_wei_end = GetRuleParam(cspecies, 196, rsSubComment, 8);
-	tonic_wei_first = GetRuleParam(cspecies, 196, rsSubComment, 9);
-	tonic_wei_last = GetRuleParam(cspecies, 196, rsSubComment, 10);
+
+	for (int tt = 0; tt < 2; ++tt) {
+		tonic_max[tt] = GetRuleParam(cspecies, 70 + tt, rsSubName, 0);
+		tonic_window[tt] = GetRuleParam(cspecies, 70 + tt, rsSubName, 1);
+		tonic_leap[tt] = Interval2Chromatic(GetRuleParam(cspecies, 70 + tt, rsSubComment, 0));
+		tonic_wei_leap[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 1);
+		tonic_wei_len[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 2);
+		tonic_wei_beat[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 3);
+		tonic_wei_long[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 4);
+		tonic_wei_pco[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 5);
+		tonic_wei_culm[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 6);
+		tonic_wei_start[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 7);
+		tonic_wei_end[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 8);
+		tonic_wei_first[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 9);
+		tonic_wei_last[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 10);
+	}
+
 	fis_gis_max = GetRuleParam(cspecies, 199, rsSubName, 0);
 	fis_g_max = GetRuleParam(cspecies, 349, rsSubName, 0);
 	fis_g_max2 = GetRuleParam(cspecies, 350, rsSubName, 0);
@@ -473,7 +490,10 @@ void CGenCF1::SetRuleParams() {
 	if (burst_between <= max_between) {
 		WriteLog(5, "Warning: maximum burst interval should be greater than maximum interval between voices (check config)");
 	}
-	if (tonic_wei_len < 70 || tonic_wei_len > 100) {
+	if (tonic_wei_len[0] < 70 || tonic_wei_len[0] > 100) {
+		WriteLog(5, "Warning: tonic length decrease weight should be between 70 and 100");
+	}
+	if (tonic_wei_len[1] < 70 || tonic_wei_len[1] > 100) {
 		WriteLog(5, "Warning: tonic length decrease weight should be between 70 and 100");
 	}
 }
@@ -2389,41 +2409,34 @@ int CGenCF1::FailLeapMDC(vector<int> &leap, vector<int> &cc) {
 	return 0;
 }
 
-void CGenCF1::PrepareTonicWeight() {
-	tonic_weight.resize(9);
-	for (int i = 1; i <= 8; ++i) {
-		tonic_weight[i] = 1.0 - (100 - tonic_wei_len) / 100.0 * (3.0 - log2(i));
-	}
-}
-
-float CGenCF1::GetTonicWeight(int l_ls, vector<int> &c, vector<int> &cc, vector<int> &pc) {
+float CGenCF1::GetTonicWeight(int l_ls, vector<int> &c, vector<int> &cc, vector<int> &pc, int tt) {
 	int l_s = fli[l_ls];
 	// Get note length
 	float len2 = rlen[l_ls];
 	// If suspension, decrease note length
 	if (svoices > 1 && sus[l_ls]) len2 /= 2;
 	// Get initial weight based on length
-	float tw = tonic_weight[min(8, len2)];
+	float tw = 1.0 - (100 - tonic_wei_len[tt]) / 100.0 * (3.0 - log2(min(8, len2)));
 	// Correct weight for border notes
 	if (l_ls == first_tonic) {
-		if (l_ls == 0) tw *= tonic_wei_start / 100.0;
-		else tw *= tonic_wei_first / 100.0;
+		if (l_ls == 0) tw *= tonic_wei_start[tt] / 100.0;
+		else tw *= tonic_wei_first[tt] / 100.0;
 	}
 	if (l_ls == last_tonic) {
-		if (l_ls == fli_size - 1) tw *= tonic_wei_end / 100.0;
-		else tw *= tonic_wei_last / 100.0;
+		if (l_ls == fli_size - 1) tw *= tonic_wei_end[tt] / 100.0;
+		else tw *= tonic_wei_last[tt] / 100.0;
 	}
 	// Correct weight based on leap
-	if (l_ls > 0 && abs(cc[l_s] - cc[fli[l_ls] - 1]) > tonic_leap)
-		tw *= tonic_wei_leap / 100.0;
+	if (l_ls > 0 && abs(cc[l_s] - cc[fli[l_ls] - 1]) > tonic_leap[tt])
+		tw *= tonic_wei_leap[tt] / 100.0;
 	// Correct weight based on culmination
 	if (c[l_s] >= lclimax[l_s])
-		tw *= tonic_wei_culm / 100.0;
+		tw *= tonic_wei_culm[tt] / 100.0;
 	if (svoices > 1) {
-		if (npm > 1 && !beat[l_ls]) tw *= tonic_wei_beat / 100.0;
+		if (npm > 1 && !beat[l_ls]) tw *= tonic_wei_beat[tt] / 100.0;
 		if (l_ls > 0 && llen[l_ls] > llen[l_ls - 1]) 
-			tw *= tonic_wei_long / 100.0;
-		if (tivl[l_s] == iPco) tw *= tonic_wei_pco / 100.0;
+			tw *= tonic_wei_long[tt] / 100.0;
+		if (tivl[l_s] == iPco) tw *= tonic_wei_pco[tt] / 100.0;
 	}
 	//CString est;
 	//est.Format("Tonic weight at note %d, step %d (from note %d, step %d): %.3f", l_ls, l_s, ls, s, tw);
@@ -2431,7 +2444,7 @@ float CGenCF1::GetTonicWeight(int l_ls, vector<int> &c, vector<int> &cc, vector<
 	return tw;
 }
 
-int CGenCF1::FailTonic(vector<int> &c, vector<int> &cc, vector<int> &pc) {
+int CGenCF1::FailTonic(vector<int> &c, vector<int> &cc, vector<int> &pc, int tt) {
 	vector<float> tcount;
 	int s9;
 	pm_tw_max = 0;
@@ -2457,22 +2470,22 @@ int CGenCF1::FailTonic(vector<int> &c, vector<int> &cc, vector<int> &pc) {
 	for (ls = 0; ls < fli_size; ++ls) {
 		s = fli[ls];
 		// Decrement for previous tonic note
-		if (ls >= tonic_window) {
-			s9 = fli[ls - tonic_window];
+		if (ls >= tonic_window[tt]) {
+			s9 = fli[ls - tonic_window[tt]];
 			if (!pc[s9]) 
-				tcount[cc[s9] / 12] -= GetTonicWeight(ls - tonic_window, c, cc, pc);
+				tcount[cc[s9] / 12] -= GetTonicWeight(ls - tonic_window[tt], c, cc, pc, tt);
 		}
 		if (!pc[s]) {
 			// Increment for current tonic note
-			tcount[cc[s] / 12] += GetTonicWeight(ls, c, cc, pc);
+			tcount[cc[s] / 12] += GetTonicWeight(ls, c, cc, pc, tt);
 			if (tcount[cc[s] / 12] > pm_tw_max) pm_tw_max = tcount[cc[s] / 12];
 			// Check count of tonic notes
-			if (tcount[cc[s] / 12] > tonic_max) {
+			if (tcount[cc[s] / 12] >= tonic_max[tt]) {
 				if (fired) {
-					fpenalty[196] += severity[196] + 1;
+					fpenalty[70 + tt] += severity[70 + tt] + 1;
 				}
 				else {
-					FLAG2L(196, s, fli[max(0, ls - tonic_window)]);
+					FLAG2L(70 + tt, s, fli[max(0, ls - tonic_window[tt])]);
 					fired = 1;
 				}
 			}
@@ -2679,7 +2692,6 @@ void CGenCF1::ScanInit() {
 	if (!is_animating) {
 		progress_size = c_len;
 		fill(progress.begin(), progress.end(), 0);
-		PrepareTonicWeight();
 		if (task != tEval) scan_full = 0;
 		scan_start_time = time();
 		anflags.resize(av_cnt);
@@ -4982,7 +4994,8 @@ check:
 			if (FailFisTrail(m_pcc)) goto skip;
 		}
 		GetMovingMax(m_cc, max(lclimax_notes, lclimax_mea*npm), lclimax);
-		if (FailTonic(m_c, m_cc, m_pc)) goto skip;
+		if (FailTonic(m_c, m_cc, m_pc, 0)) goto skip;
+		if (FailTonic(m_c, m_cc, m_pc, 1)) goto skip;
 		if (FailLastNotes(m_pc, m_pcc)) goto skip;
 		//if (FailNoteSeq(m_pc)) goto skip;
 		if (FailIntervals(m_c, m_cc, m_pc, m_pcc)) goto skip;

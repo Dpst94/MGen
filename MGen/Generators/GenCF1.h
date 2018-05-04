@@ -279,9 +279,8 @@ protected:
 	inline int FailLeap(vector<int>& c, vector<int>& cc, vector<int>& leap, vector<int>& smooth, vector<int>& nstat2, vector<int>& nstat3);
 	inline int FailLeapFill(vector<int>& c, int late_leap, int leap_prev, int child_leap);
 	inline int FailLeapMDC(vector<int>& leap, vector<int>& cc);
-	inline void PrepareTonicWeight();
-	inline float GetTonicWeight(int l_ls, vector<int>& c, vector<int>& cc, vector<int>& pc);
-	inline int FailTonic(vector<int>& c, vector<int>& cc, vector<int>& pc);
+	inline float GetTonicWeight(int l_ls, vector<int>& c, vector<int>& cc, vector<int>& pc, int tt);
+	inline int FailTonic(vector<int>& c, vector<int>& cc, vector<int>& pc, int tt);
 	inline int FailLastNoteRes(vector<int>& pc);
 	inline int FailIntervals(vector<int>& c, vector<int>& cc, vector<int>& pc, vector<int>& pcc);
 	inline void GetTritoneResolution(int ta, int t1, int t2, int tb, int & res1, int & res2, vector<int>& c, vector<int>& cc, vector<int>& pc, vector<int>& pcc);
@@ -494,25 +493,25 @@ protected:
 	int repeat_steps3 = 8; // Prohibit repeating of 3 notes closer than repeat_steps between first notes (if beats are same)
 	int repeat_steps5 = 15; // Prohibit repeating of 5 notes closer than repeat_steps between first notes
 	int repeat_steps7 = 100; // Prohibit repeating of 7 notes closer than repeat_steps between first notes
-	int tonic_window = 9; // Number of notes that are searched for number of tonic notes
-	int tonic_max = 1; // Maximum number of tonic notes that can be contained in tonic window
 	int tonic_window_cp = 9; // Number of harmonies that are searched for number of tonic chords
 	int tonic_max_cp = 1; // Maximum number of tonic chords that can be contained in tonic window
 	int tonic_wei_inv = 50; // Percent of weight for inverted tonic chord
 	vector<int> max_note_len; // [sp] Maximum note real length in croches by species
 
-	int tonic_leap = 4; // Maximum allowed leap to tonic (chromatic) without weight change
-	int tonic_wei_leap = 150; // Weight of leap to tonic
-	int tonic_wei_pco = 130; // Weight of tonic perfect consonance
-	int tonic_wei_beat = 130; // Weight of downbeat tonic
-	int tonic_wei_long = 130; // Weight of tonic longer than left neighbor
-	int tonic_wei_len = 70; // Tonic length two times decreases weight by X
-	int tonic_wei_culm = 130; // If no higher note within 6 notes around - add X% to weight
-	int tonic_wei_culm_range = 6; // Number of notes around to scan to detect local culmination
-	int tonic_wei_start = 0; // Starting tonic weight
-	int tonic_wei_end = 0; // Ending tonic weight
-	int tonic_wei_first = 0; // First (not step 0) tonic weight
-	int tonic_wei_last = 0; // Last (not last step) tonic weight
+	vector<int> tonic_window; // Number of notes that are searched for number of tonic notes
+	vector<int> tonic_max; // Maximum number of tonic notes that can be contained in tonic window
+	vector<int> tonic_leap; // Maximum allowed leap to tonic (chromatic) without weight change
+	vector<int> tonic_wei_leap; // Weight of leap to tonic
+	vector<int> tonic_wei_pco; // Weight of tonic perfect consonance
+	vector<int> tonic_wei_beat; // Weight of downbeat tonic
+	vector<int> tonic_wei_long; // Weight of tonic longer than left neighbor
+	vector<int> tonic_wei_len; // Tonic length two times decreases weight by X
+	vector<int> tonic_wei_culm; // If no higher note within 6 notes around - add X% to weight
+	vector<int> tonic_wei_culm_range; // Number of notes around to scan to detect local culmination
+	vector<int> tonic_wei_start; // Starting tonic weight
+	vector<int> tonic_wei_end; // Ending tonic weight
+	vector<int> tonic_wei_first; // First (not step 0) tonic weight
+	vector<int> tonic_wei_last; // Last (not last step) tonic weight
 
 	int thirds_ignored; // Number of thirds ignored for consecutive leaps rule
 	int fis_gis_max = 3; // Maximum allowed distance between F# and G#
