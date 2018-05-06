@@ -633,8 +633,8 @@ void MPort::InterpolateCC(int CC, float rnd, int rnd_slow, int step1, int step2,
 		steps = max(1, fsteps);
 		if (steps % 2 == 0) steps++;
 		// Calculate first and last ma positions to send
-		if (i == step11 + 1) first_cc = cc_lin.size();
-		if (i == step21 + 1) end_cc = cc_lin.size() - 1;
+		if (i == step12) first_cc = cc_lin.size();
+		if (i == step22) end_cc = cc_lin.size() - 1;
 		// Linear interpolation
 		for (int c = 0; c < steps; c++) {
 			cc_time.push_back(stime[i] * 100 / m_pspeed + (etime[i] - stime[i]) * 100 / m_pspeed * (float)c / (float)steps);
