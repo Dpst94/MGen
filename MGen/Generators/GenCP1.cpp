@@ -3005,8 +3005,8 @@ int CGenCP1::FailLastIntervals() {
 		}
 		else if (apc[1][c_len - 1] == 0) {
 			if (apc[0][c_len - 1] == 2) FLAG2(357, fs);
-			if (apc[0][c_len - 1] == 3) FLAG2(424, fs);
-			if (apc[0][c_len - 1] == 5) FLAG2(426, fs);
+			else if (apc[0][c_len - 1] == 3) FLAG2(424, fs);
+			else if (apc[0][c_len - 1] == 5) FLAG2(426, fs);
 			else FLAG2(358, fs);
 		}
 		else FLAG2(358, fs);
