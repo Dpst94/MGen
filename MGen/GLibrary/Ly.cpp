@@ -830,6 +830,23 @@ void CLy::InitLyI() {
 				int overlap_limit = s1 - overlap_border;
 				if (viz_type[vtype] == vtVBracket)
 					overlap_limit = min(prev_note_step, prev_link_note) - ly_step1 - 1;
+				// Check if shape can be blocked
+				for (int x = ly_step2 - ly_step1 - 1; x > overlap_limit; --x) {
+					if (lyi[x].shf[vtype]) {
+						overlap2 = x;
+						overlap1 = x + lyi[x].shsl[vtype];
+						if (overlap1 < s2 + overlap_border) {
+							// Choose highest severity
+							if (sev <= lyi[overlap1].shse[vtype]) {
+								// Skip shape
+								skip_shape = 1;
+								break;
+							}
+						}
+					}
+				}
+				if (skip_shape) continue;
+				// Check if shape can block other shapes
 				for (int x = ly_step2 - ly_step1 - 1; x > overlap_limit; --x) {
 					if (lyi[x].shf[vtype]) {
 						overlap2 = x;
@@ -839,15 +856,9 @@ void CLy::InitLyI() {
 							if (sev > lyi[overlap1].shse[vtype]) {
 								ClearLyShape(overlap1, overlap2, vtype);
 							}
-							else {
-								// Skip shape
-								skip_shape = 1;
-								break;
-							}
 						}
 					}
 				}
-				if (skip_shape) continue;
 			}
 			SetLyShape(s1, s2, f, fl, sev, vtype);
 		}
