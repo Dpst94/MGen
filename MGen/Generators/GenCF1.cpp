@@ -462,7 +462,6 @@ void CGenCF1::SetRuleParams() {
 	ico_chain = GetRuleParam(cspecies, 89, rsSubName, 0);
 	ico_chain2 = GetRuleParam(cspecies, 96, rsSubName, 0);
 	gis_trail_max = GetRuleParam(cspecies, 200, rsSubName, 0);
-	fis_leap = Interval2Chromatic(GetRuleParam(cspecies, 201, rsSubName, 0));
 	tonic_max_cp = GetRuleParam(cspecies, 310, rsSubName, 0);
 	tonic_window_cp = GetRuleParam(cspecies, 310, rsSubName, 1);
 	tonic_wei_inv = GetRuleParam(cspecies, 310, rsSubComment, 0);
@@ -3538,13 +3537,30 @@ void CGenCF1::SaveBestRejected(vector<int> &cc) {
 	}
 }
 
+int CGenCF1::FailMinorStepwise(vector<int> &pcc, vector<int> &cc, vector<int> &c) {
+	CHECK_READY(DR_pc, DR_fli);
+	// For non-border notes only, because border notes have their own rules
+	for (ls = 1; ls < fli_size - 1; ++ls) {
+		s = fli[ls];
+		s_1 = fli[ls - 1];
+		s1 = fli[ls + 1];
+		// Prohibit harmonic VI# not stepwize ascending
+		if ((cspecies < 2 || msh[ls] > 0) && pcc[s] == 9 &&
+			(c[s] - c[s_1] != 1 || c[s1] - c[s] != 1))
+			FLAG2L(201, s_1, s1);
+		// Prohibit harmonic VII natural not stepwize descending
+		if ((cspecies < 2 || msh[ls] > 0) && pcc[s] == 10 &&
+			(c[s] - c[s_1] != -1 || c[s1] - c[s] != -1))
+			FLAG2L(202, s_1, s1);
+	}
+	return 0;
+}
+
 int CGenCF1::FailMinor(vector<int> &pcc, vector<int> &cc) {
 	CHECK_READY(DR_pc, DR_fli);
 	for (ls = 1; ls < fli_size; ++ls) {
 		s = fli[ls];
 		s_1 = fli[ls - 1];
-		// Prohibit leap to VI#
-		if (pcc[s] == 9 && abs(cc[s] - cc[s_1]) > fis_leap) FLAG2L(201, s_1, s);
 		// Prohibit minor second up before VII - absorbed
 		// Prohibit augmented second up before VII - absorbed
 		// Prohibit unaltered VI or VII two steps from altered VI or VII
@@ -4990,6 +5006,7 @@ check:
 		CreateLinks(m_cc, 0);
 		if (minor_cur) {
 			if (FailMinor(m_pcc, m_cc)) goto skip;
+			if (FailMinorStepwise(m_pcc, m_cc, m_c)) goto skip;
 			if (FailGisTrail(m_pcc)) goto skip;
 			if (FailFisTrail(m_pcc)) goto skip;
 		}

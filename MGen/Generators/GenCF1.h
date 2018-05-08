@@ -312,6 +312,7 @@ protected:
 	inline void CalcStepDpenalty(vector<int> &cc1, vector<int> &cc2, int i);
 	inline int NextSWA(vector<int>& cc, vector<int>& cc_old);
 	inline void SaveBestRejected(vector<int>& cc);
+	inline int FailMinorStepwise(vector<int>& pcc, vector<int>& cc, vector<int>& c);
 	inline int FailMinor(vector<int>& pcc, vector<int>& cc);
 	inline void ShowScanSpeed();
 	inline char GetScanVisualCode(int i);
@@ -479,7 +480,6 @@ protected:
 	int miss_letters_d = 3; // Maximum steps with missed letters in a row of harmonies
 	int miss_letters_s = 3; // Maximum steps with missed letters in a row of harmonies
 	int gis_trail_max = 7; // Minimum notes between G# and next G note in Am
-	int fis_leap = 5; // Maximum allowed chromatic leap size before F#
 	int c4p_last_meas = 3; // Last measures that can have leap c4p compensated
 	int c4p_last_steps = 3; // Last steps that can have leap c4p compensated (converted from measures)
 	int c4p_last_notes = 3; // Last notes that can have leap c4p compensated

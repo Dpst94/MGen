@@ -3759,6 +3759,9 @@ check:
 		if (FailSus()) goto skip;
 		if (DetectPatterns()) goto skip;
 		ApplyFixedPat();
+		if (minor_cur) {
+			if (FailMinorStepwise(apcc[cpv], acc[cpv], ac[cpv])) goto skip;
+		}
 		if (FailMultiCulm(acc[cpv], aslur[cpv])) goto skip;
 		if (FailVMotion()) goto skip;
 		if (FailVIntervals()) goto skip;
