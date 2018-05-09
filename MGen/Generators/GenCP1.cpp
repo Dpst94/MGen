@@ -3529,10 +3529,16 @@ int CGenCP1::FailHarm() {
 				else if (chn[5]) chm[hs] = (r + 5) % 7;
 				else chm[hs] = r;
 			}
-			// Detect altered chord
-			if (minor_cur && (cchn[11] || cchn[9])) chm_alter[hs] = 1;
-			// Detect unaltered chord
-			if (minor_cur && (cchn[10] || cchn[8])) chm_alter[hs] = -1;
+			// Detect altered chord if note is part of chord
+			if (minor_cur && 
+				((cchn[11] && chm[hs] && chm[hs] % 2 == 0) || 
+				(cchn[9] && chm[hs] % 2))) 
+				chm_alter[hs] = 1;
+			// Detect unaltered chord if note is part of chord
+			if (minor_cur && 
+				((cchn[10] && chm[hs] && chm[hs] % 2 == 0) ||
+				(cchn[8] && chm[hs] % 2))) 
+				chm_alter[hs] = -1;
 		}
 		RemoveHarmDuplicate();
 		// If penultimate measure
