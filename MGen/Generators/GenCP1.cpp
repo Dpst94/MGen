@@ -1689,7 +1689,7 @@ int CGenCP1::FailAdjacentTritone2(int ta, int t1, int t2, int tb) {
 int CGenCP1::FailAdjacentTritones() {
 	// Find adjacent notes
 	CHECK_READY(DR_pc, DR_c, DR_fli);
-	CHECK_READY(DR_leap);
+	CHECK_READY(DR_leap, DR_lclimax);
 	for (ls = 0; ls < fli_size - 1; ++ls) {
 		s = fli2[ls];
 		s2 = fli[ls + 1];
@@ -1707,7 +1707,7 @@ int CGenCP1::FailAdjacentTritones() {
 // This function is for species 2-5
 int CGenCP1::FailTritones2() {
 	CHECK_READY(DR_pc, DR_c, DR_fli);
-	CHECK_READY(DR_leap);
+	CHECK_READY(DR_leap, DR_lclimax);
 	// Find both tritone notes in measure (non-adjacent)
 	int mea_end, ls1, ls2, lpcc, cch, ccl, exceed, found, res1, res2, last_repeat;
 	for (ms = 0; ms < mli.size(); ++ms) {
@@ -3725,8 +3725,7 @@ check:
 				c_len >= min_iv_minnotes && c_len / npm >= min_iv_minmea) FLAG(38, 0);
 		}
 		CreateLinks(acc[cpv], 1);
-		GetMovingMax(acc[cpv], max(lclimax_notes, lclimax_mea*npm), lclimax);
-		GetMovingMax(acc[cpv], lclimax_mea5*npm, lclimax2);
+		GetLClimax();
 		if (FailMaxNoteLen()) goto skip;
 		if (FailMissSlurs()) goto skip;
 		if (FailSlurs()) goto skip;

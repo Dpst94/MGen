@@ -48,6 +48,7 @@
 #define DR_retrigger    22
 #define DR_hbc			    23
 #define DR_hli			    24
+#define DR_lclimax			25
 
 #ifdef CF_DEBUG
 
@@ -321,6 +322,7 @@ protected:
 	inline void ReseedCantus();
 	inline void TimeBestRejected();
 	inline void SaveCantusIfRp();
+	inline void GetLClimax();
 	void ScanCantus(int t, int v, vector<int>* pcantus);
 	inline void ScanRight(vector<int>& cc);
 	void WriteFlagCor();

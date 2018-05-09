@@ -2232,6 +2232,9 @@ int CGenCF1::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_
 
 int CGenCF1::FailLeap(vector<int> &c, vector<int>& cc, vector<int> &leap, vector<int> &smooth, vector<int> &nstat2, vector<int> &nstat3) {
 	CHECK_READY(DR_leap, DR_c, DR_fli);
+	if (cspecies > 1) {
+		CHECK_READY(DR_beat);
+	}
 	// Get leap size, start, end
 	// Check if leap is compensated (without violating compensation rules)
 	// If leap is not compensated, check uncompensated rules
@@ -2444,6 +2447,11 @@ float CGenCF1::GetTonicWeight(int l_ls, vector<int> &c, vector<int> &cc, vector<
 }
 
 int CGenCF1::FailTonic(vector<int> &c, vector<int> &cc, vector<int> &pc, int tt) {
+	CHECK_READY(DR_pc, DR_fli);
+	CHECK_READY(DR_lclimax);
+	if (cspecies) {
+		CHECK_READY(DR_beat);
+	}
 	vector<float> tcount;
 	int s9;
 	pm_tw_max = 0;
@@ -2640,7 +2648,7 @@ int CGenCF1::FailTritone(int ta, int t1, int t2, int tb, vector<int> &c, vector<
 
 int CGenCF1::FailTritones(vector<int> &c, vector<int> &cc, vector<int> &pc, vector<int> &pcc, vector<int> &leap) {
 	CHECK_READY(DR_pc, DR_c, DR_fli);
-	CHECK_READY(DR_leap);
+	CHECK_READY(DR_leap, DR_lclimax);
 	for (ls = 0; ls < fli_size - 1; ++ls) {
 		s0 = fli[ls];
 		s = fli2[ls];
@@ -3538,7 +3546,7 @@ void CGenCF1::SaveBestRejected(vector<int> &cc) {
 }
 
 int CGenCF1::FailMinorStepwise(vector<int> &pcc, vector<int> &cc, vector<int> &c) {
-	CHECK_READY(DR_pc, DR_fli);
+	CHECK_READY(DR_pc, DR_fli, DR_msh);
 	// For non-border notes only, because border notes have their own rules
 	for (ls = 1; ls < fli_size - 1; ++ls) {
 		s = fli[ls];
@@ -4944,6 +4952,17 @@ void CGenCF1::SaveCantusIfRp() {
 	}
 }
 
+void CGenCF1::GetLClimax() {
+	SET_READY(DR_lclimax);
+	if (cspecies) {
+		GetMovingMax(acc[cpv], max(lclimax_notes, lclimax_mea*npm), lclimax);
+		GetMovingMax(acc[cpv], lclimax_mea5*npm, lclimax2);
+	}
+	else {
+		GetMovingMax(m_cc, max(lclimax_notes, lclimax_mea*npm), lclimax);
+	}
+}
+
 void CGenCF1::ScanCantus(int t, int v, vector<int>* pcantus) {
 	int finished = 0;
 	int scycle = 0;
@@ -5010,7 +5029,7 @@ check:
 			if (FailGisTrail(m_pcc)) goto skip;
 			if (FailFisTrail(m_pcc)) goto skip;
 		}
-		GetMovingMax(m_cc, max(lclimax_notes, lclimax_mea*npm), lclimax);
+		GetLClimax(m_cc);
 		if (FailTonic(m_c, m_cc, m_pc, 0)) goto skip;
 		if (FailTonic(m_c, m_cc, m_pc, 1)) goto skip;
 		if (FailLastNotes(m_pc, m_pcc)) goto skip;
