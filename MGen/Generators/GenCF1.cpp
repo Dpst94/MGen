@@ -3546,7 +3546,10 @@ void CGenCF1::SaveBestRejected(vector<int> &cc) {
 }
 
 int CGenCF1::FailMinorStepwise(vector<int> &pcc, vector<int> &cc, vector<int> &c) {
-	CHECK_READY(DR_pc, DR_fli, DR_msh);
+	CHECK_READY(DR_pc, DR_fli);
+	if (cspecies) {
+		CHECK_READY(DR_msh);
+	}
 	// For non-border notes only, because border notes have their own rules
 	for (ls = 1; ls < fli_size - 1; ++ls) {
 		s = fli[ls];
