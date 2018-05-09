@@ -1234,7 +1234,7 @@ int CGenCP1::FailPco() {
 			if (motion[fli2[ls - 1]] == mDirect) {
 				// Stepwize
 				if (abs(acc[1][s] - acc[1][s - 1]) < 3) {
-					if (s2 == c_len - 1 && cfli[cfli.size()-1] == s) {
+					if (bmli[s] >= mli.size() - 2 && s > 0 && bmli[s - 1] != bmli[s]) {
 						if (civlc[s] == 0) FLAG2L(209, isus[ls - 1], s);
 						else FLAG2L(208, isus[ls - 1], s);
 					}
@@ -1245,7 +1245,7 @@ int CGenCP1::FailPco() {
 				}
 				// Non-stepwize
 				else {
-					if (s2 == c_len - 1 && cfli[cfli.size() - 1] == s) {
+					if (bmli[s] >= mli.size() - 2 && s > 0 && bmli[s - 1] != bmli[s]) {
 						if (civlc[s] == 0) FLAG2L(213, isus[ls - 1], s);
 						else FLAG2L(212, isus[ls - 1], s);
 					}
