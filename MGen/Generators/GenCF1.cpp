@@ -5029,7 +5029,7 @@ check:
 			if (FailGisTrail(m_pcc)) goto skip;
 			if (FailFisTrail(m_pcc)) goto skip;
 		}
-		GetLClimax(m_cc);
+		GetLClimax();
 		if (FailTonic(m_c, m_cc, m_pc, 0)) goto skip;
 		if (FailTonic(m_c, m_cc, m_pc, 1)) goto skip;
 		if (FailLastNotes(m_pc, m_pcc)) goto skip;
