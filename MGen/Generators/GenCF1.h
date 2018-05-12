@@ -514,6 +514,7 @@ protected:
 	vector<int> tonic_wei_end; // Ending tonic weight
 	vector<int> tonic_wei_first; // First (not step 0) tonic weight
 	vector<int> tonic_wei_last; // Last (not last step) tonic weight
+	vector<int> tonic_wei_max; // Last (not last step) tonic weight
 
 	int thirds_ignored; // Number of thirds ignored for consecutive leaps rule
 	int fis_gis_max = 3; // Maximum allowed distance between F# and G#

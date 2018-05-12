@@ -22,6 +22,7 @@ CGenCF1::CGenCF1() {
 	tonic_wei_end.resize(2);
 	tonic_wei_first.resize(2);
 	tonic_wei_last.resize(2);
+	tonic_wei_max.resize(2);
 	notes_lrange.resize(4, vector<int>(MAX_SPECIES, 19));
 	progress.resize(MAX_PROGRESS);
 	av_cnt = 1;
@@ -469,17 +470,18 @@ void CGenCF1::SetRuleParams() {
 	for (int tt = 0; tt < 2; ++tt) {
 		tonic_max[tt] = GetRuleParam(cspecies, 70 + tt, rsSubName, 0);
 		tonic_window[tt] = GetRuleParam(cspecies, 70 + tt, rsSubName, 1);
-		tonic_leap[tt] = Interval2Chromatic(GetRuleParam(cspecies, 70 + tt, rsSubComment, 0));
-		tonic_wei_leap[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 1);
-		tonic_wei_len[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 2);
-		tonic_wei_beat[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 3);
-		tonic_wei_long[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 4);
-		tonic_wei_pco[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 5);
-		tonic_wei_culm[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 6);
-		tonic_wei_start[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 7);
-		tonic_wei_end[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 8);
-		tonic_wei_first[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 9);
-		tonic_wei_last[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 10);
+		tonic_wei_max[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 0);
+		tonic_leap[tt] = Interval2Chromatic(GetRuleParam(cspecies, 70 + tt, rsSubComment, 1));
+		tonic_wei_leap[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 2);
+		tonic_wei_len[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 3);
+		tonic_wei_beat[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 4);
+		tonic_wei_long[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 5);
+		tonic_wei_pco[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 6);
+		tonic_wei_culm[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 7);
+		tonic_wei_start[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 8);
+		tonic_wei_end[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 9);
+		tonic_wei_first[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 10);
+		tonic_wei_last[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 11);
 	}
 
 	fis_gis_max = GetRuleParam(cspecies, 199, rsSubName, 0);
@@ -2440,6 +2442,8 @@ float CGenCF1::GetTonicWeight(int l_ls, vector<int> &c, vector<int> &cc, vector<
 			tw *= tonic_wei_long[tt] / 100.0;
 		if (tivl[l_s] == iPco) tw *= tonic_wei_pco[tt] / 100.0;
 	}
+	// Weight upper limit
+	tw = min(tonic_wei_max[tt] / 100.0, tw);
 	//CString est;
 	//est.Format("Tonic weight at note %d, step %d (from note %d, step %d): %.3f", l_ls, l_s, ls, s, tw);
 	//WriteLog(1, est);
