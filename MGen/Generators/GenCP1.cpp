@@ -2197,7 +2197,7 @@ int CGenCP1::FailRhythm5() {
 
 int CGenCP1::FailPcoApart() {
 	CHECK_READY(DR_fli, DR_ivl, DR_beat);
-	CHECK_READY(DR_sus);
+	CHECK_READY(DR_sus); 
 	CHECK_READY(DR_msh);
 	// Step index of last perfect consonance
 	pco5_last = -1000;
