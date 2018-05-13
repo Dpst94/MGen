@@ -1840,6 +1840,7 @@ int CGenCF1::FailMultiCulm(vector<int> &cc, vector<int> &slur) {
 	SET_READY(DR_culm_ls);
 	pm_culm_count = 0;
 	culm_ls = -1;
+	int multi_culm_fired = 0;
 	// Do not find culminations if too early
 	if (ep2 < c_len) return 0;
 	for (ls = 0; ls < fli_size; ++ls) {
@@ -1847,8 +1848,20 @@ int CGenCF1::FailMultiCulm(vector<int> &cc, vector<int> &slur) {
 			++pm_culm_count;
 			culm_ls = ls;
 			if (pm_culm_count > 1) {
-				if (voice_high) FLAG2(12, fli[culm_ls]);
-				else FLAG2(305, fli[culm_ls]);
+				if (voice_high) {
+					if (multi_culm_fired) fpenalty[12] += severity[12] + 1;
+					else {
+						multi_culm_fired = 1;
+						FLAG2(12, fli[culm_ls]);
+					}
+				}
+				else {
+					if (multi_culm_fired) fpenalty[305] += severity[305] + 1;
+					else {
+						multi_culm_fired = 1;
+						FLAG2(305, fli[culm_ls]);
+					}
+				}
 			}
 		}
 	}
