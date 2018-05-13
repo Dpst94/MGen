@@ -502,19 +502,6 @@ protected:
 
 	vector<int> tonic_window; // Number of notes that are searched for number of tonic notes
 	vector<int> tonic_max; // Maximum number of tonic notes that can be contained in tonic window
-	vector<int> tonic_leap; // Maximum allowed leap to tonic (chromatic) without weight change
-	vector<int> tonic_wei_leap; // Weight of leap to tonic
-	vector<int> tonic_wei_pco; // Weight of tonic perfect consonance
-	vector<int> tonic_wei_beat; // Weight of downbeat tonic
-	vector<int> tonic_wei_long; // Weight of tonic longer than left neighbor
-	vector<int> tonic_wei_len; // Tonic length two times decreases weight by X
-	vector<int> tonic_wei_culm; // If no higher note within 6 notes around - add X% to weight
-	vector<int> tonic_wei_culm_range; // Number of notes around to scan to detect local culmination
-	vector<int> tonic_wei_start; // Starting tonic weight
-	vector<int> tonic_wei_end; // Ending tonic weight
-	vector<int> tonic_wei_first; // First (not step 0) tonic weight
-	vector<int> tonic_wei_last; // Last (not last step) tonic weight
-	vector<int> tonic_wei_max; // Last (not last step) tonic weight
 
 	int thirds_ignored; // Number of thirds ignored for consecutive leaps rule
 	int fis_gis_max = 3; // Maximum allowed distance between F# and G#

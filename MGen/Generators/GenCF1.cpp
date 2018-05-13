@@ -11,18 +11,6 @@ CGenCF1::CGenCF1() {
 	// Init vector parameters
 	tonic_max.resize(2);
 	tonic_window.resize(2);
-	tonic_leap.resize(2);
-	tonic_wei_leap.resize(2);
-	tonic_wei_len.resize(2);
-	tonic_wei_beat.resize(2);
-	tonic_wei_long.resize(2);
-	tonic_wei_pco.resize(2);
-	tonic_wei_culm.resize(2);
-	tonic_wei_start.resize(2);
-	tonic_wei_end.resize(2);
-	tonic_wei_first.resize(2);
-	tonic_wei_last.resize(2);
-	tonic_wei_max.resize(2);
 	notes_lrange.resize(4, vector<int>(MAX_SPECIES, 19));
 	progress.resize(MAX_PROGRESS);
 	av_cnt = 1;
@@ -470,18 +458,6 @@ void CGenCF1::SetRuleParams() {
 	for (int tt = 0; tt < 2; ++tt) {
 		tonic_max[tt] = GetRuleParam(cspecies, 70 + tt, rsSubName, 0);
 		tonic_window[tt] = GetRuleParam(cspecies, 70 + tt, rsSubName, 1);
-		tonic_wei_max[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 0);
-		tonic_leap[tt] = Interval2Chromatic(GetRuleParam(cspecies, 70 + tt, rsSubComment, 1));
-		tonic_wei_leap[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 2);
-		tonic_wei_len[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 3);
-		tonic_wei_beat[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 4);
-		tonic_wei_long[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 5);
-		tonic_wei_pco[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 6);
-		tonic_wei_culm[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 7);
-		tonic_wei_start[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 8);
-		tonic_wei_end[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 9);
-		tonic_wei_first[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 10);
-		tonic_wei_last[tt] = GetRuleParam(cspecies, 70 + tt, rsSubComment, 11);
 	}
 
 	fis_gis_max = GetRuleParam(cspecies, 199, rsSubName, 0);
@@ -490,12 +466,6 @@ void CGenCF1::SetRuleParams() {
 	// Check rule parameters
 	if (burst_between <= max_between) {
 		WriteLog(5, "Warning: maximum burst interval should be greater than maximum interval between voices (check config)");
-	}
-	if (tonic_wei_len[0] < 70 || tonic_wei_len[0] > 100) {
-		WriteLog(5, "Warning: tonic length decrease weight should be between 70 and 100");
-	}
-	if (tonic_wei_len[1] < 70 || tonic_wei_len[1] > 100) {
-		WriteLog(5, "Warning: tonic length decrease weight should be between 70 and 100");
 	}
 }
 
@@ -2428,39 +2398,19 @@ int CGenCF1::FailLeapMDC(vector<int> &leap, vector<int> &cc) {
 
 float CGenCF1::GetTonicWeight(int l_ls, vector<int> &c, vector<int> &cc, vector<int> &pc, int tt) {
 	int l_s = fli[l_ls];
-	// Get note length
-	float len2 = rlen[l_ls];
-	// If suspension, decrease note length
-	if (svoices > 1 && sus[l_ls]) len2 /= 2;
-	// Get initial weight based on length
-	float tw = 1.0 - (100 - tonic_wei_len[tt]) / 100.0 * (3.0 - log2(min(8, len2)));
-	// Correct weight for border notes
-	if (l_ls == first_tonic) {
-		if (l_ls == 0) tw *= tonic_wei_start[tt] / 100.0;
-		else tw *= tonic_wei_first[tt] / 100.0;
-	}
-	if (l_ls == last_tonic) {
-		if (l_ls == fli_size - 1) tw *= tonic_wei_end[tt] / 100.0;
-		else tw *= tonic_wei_last[tt] / 100.0;
-	}
-	// Correct weight based on leap
-	if (l_ls > 0 && abs(cc[l_s] - cc[fli[l_ls] - 1]) > tonic_leap[tt])
-		tw *= tonic_wei_leap[tt] / 100.0;
-	// Correct weight based on culmination
-	if (c[l_s] >= lclimax[l_s])
-		tw *= tonic_wei_culm[tt] / 100.0;
-	if (svoices > 1) {
-		if (npm > 1 && !beat[l_ls]) tw *= tonic_wei_beat[tt] / 100.0;
-		if (l_ls > 0 && llen[l_ls] > llen[l_ls - 1]) 
-			tw *= tonic_wei_long[tt] / 100.0;
-		if (tivl[l_s] == iPco) tw *= tonic_wei_pco[tt] / 100.0;
-	}
-	// Weight upper limit
-	tw = min(tonic_wei_max[tt] / 100.0, tw);
-	//CString est;
-	//est.Format("Tonic weight at note %d, step %d (from note %d, step %d): %.3f", l_ls, l_s, ls, s, tw);
-	//WriteLog(1, est);
-	return tw;
+	// Not species 3 or 5?
+	if (cspecies != 3 && cspecies != 5) return 1.0;
+	// Tonic downbeat?
+	if (!beat[l_ls]) return 1.0;
+	// Length is above quarter (for species 5)?
+	if (rlen[l_ls] > 2) return 1.0;
+	// Length of tonic note is greater than previous note?
+	if (l_ls > 0 && llen[l_ls] > llen[l_ls - 1]) return 1.0;
+	// Leap to tonic?
+	if (l_ls > 0 && abs(cc[l_s] - cc[fli[l_ls] - 1]) > 4) return 1.0;
+	// Local climax?
+	if (c[l_s] >= lclimax[l_s]) return 1.0;
+	return 0.9;
 }
 
 int CGenCF1::FailTonic(vector<int> &c, vector<int> &cc, vector<int> &pc, int tt) {
