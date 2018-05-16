@@ -32,6 +32,7 @@ long long time_job0;
 CString j_basefile;
 
 // Parameters
+int clean_every_minutes = 1;
 CString reaperbuf;
 CString share;
 CString db_driver, db_server, db_port, db_login, db_pass, db_name;
@@ -373,6 +374,7 @@ void LoadConfig()
 				CGLib::LoadVar(&st2, &st3, "childpath", &fChild[cur_child]);
 				CGLib::LoadVar(&st2, &st3, "childparams", &pChild[cur_child]);
 			}
+			CGLib::CheckVar(&st2, &st3, "clean_every_minutes", &clean_every_minutes);
 			CGLib::LoadVar(&st2, &st3, "reaperbuf", &reaperbuf);
 			CGLib::LoadVar(&st2, &st3, "db_driver", &db_driver);
 			CGLib::CheckVar(&st2, &st3, "daw_wait", &daw_wait, 0, 6000);
@@ -1032,6 +1034,9 @@ int main() {
 	InitErrorMessages();
 	BOOL ret = SetConsoleCtrlHandler(ConsoleHandlerRoutine, TRUE);
 	LoadConfig();
+	if (nRetCode) {
+		return PauseClose();
+	}
 	CheckChildrenPath();
 	if (Connect()) return PauseClose();
 	if (nRetCode) {
