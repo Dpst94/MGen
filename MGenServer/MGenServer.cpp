@@ -228,6 +228,7 @@ void CheckChildren(int restart) {
 			if (cn == "Reaper.exe") continue;
 			if (cn == "AutoHotkey.exe") continue;
 		}
+		if (cn == "MGenClean.exe" && CGLib::time() - server_start_time < 10000) continue;
 		HANDLE hProcess = GetProcessHandle(cn);
 		if (hProcess == NULL) {
 			rChild[cn] = 0;
@@ -421,8 +422,8 @@ int FinishJob(int res, CString st) {
 	int state = 3;
 	if (j_autorestart && !res) state = 1;
 	CString q;
-	q.Format("UPDATE jobs SET j_updated=NOW(), j_duration=TIMESTAMPDIFF(SECOND, j_started, NOW()), j_finished=NOW(), j_state='%d', j_result='%d', j_progress='%s' WHERE j_id='%ld'",
-		state, res, db.Escape(st), CDb::j_id);
+	q.Format("UPDATE jobs SET j_updated=NOW(), j_duration=TIMESTAMPDIFF(SECOND, j_started, NOW()), j_finished=NOW(), j_state='%d', j_result='%d', j_progress='%s', j_cleaned=0, j_size='%llu' WHERE j_id='%ld'",
+		state, res, db.Escape(st), CGLib::FolderSize(share + j_folder), CDb::j_id);
 	db.Query(q);
 	WriteLog(st);
 	return res;
@@ -958,6 +959,7 @@ void TakeJob() {
 }
 
 void Init() {
+	db.log_fname = "server\\server.log";
 	// On start, reset all jobs that did not finish correctly
 	CString q;
 	q.Format("SELECT COUNT(*) as cnt FROM jobs WHERE s_id='%d' AND j_state=2", CDb::server_id);

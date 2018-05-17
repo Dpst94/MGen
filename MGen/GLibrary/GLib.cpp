@@ -1135,6 +1135,45 @@ void CGLib::CleanFolder(CString Wildcard) {
 	finder.Close();
 }
 
+void CGLib::RmDir(CString pth, CString exclude_ending) {
+	CFileFind finder;
+	BOOL bWorking = finder.FindFile(pth + "*.*");
+	while (bWorking) {
+		bWorking = finder.FindNextFile();
+		if (finder.IsDots()) continue;
+		CString pth2 = finder.GetFilePath();
+		if (!exclude_ending.IsEmpty() && 
+			pth2.Right(exclude_ending.GetLength()) == exclude_ending) continue;
+		if (finder.IsDirectory()) {
+			RmDir(finder.GetFilePath() + "\\", exclude_ending);
+			RemoveDirectory(finder.GetFilePath());
+		}
+		else {
+			DeleteFile(finder.GetFilePath());
+		}
+	}
+	finder.Close();
+	RemoveDirectory(pth);
+}
+
+__int64 CGLib::FolderSize(CString pth) {
+	CFileFind finder;
+	BOOL bWorking = finder.FindFile(pth + "*.*");
+	__int64 sz = 0;
+	while (bWorking) {
+		bWorking = finder.FindNextFile();
+		if (finder.IsDots()) continue;
+		if (finder.IsDirectory())	{
+			sz += FolderSize(finder.GetFilePath() + "\\");
+		}
+		else {
+			sz += FileSize(finder.GetFilePath());
+		}
+	}
+	finder.Close();
+	return sz;
+}
+
 void CGLib::CheckMemoryUsage() {
 	if (warn_memory_usage) return;
 	PROCESS_MEMORY_COUNTERS_EX pmc;

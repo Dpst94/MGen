@@ -263,6 +263,8 @@ public:
 
 
 	static void CleanFolder(CString Wildcard);
+	static void RmDir(CString pth, CString exclude_ending = "");
+	static __int64 FolderSize(CString pth);
 	static void CheckMemoryUsage();
 	static void SetBit(unsigned char & ch, int bit);
 	static void ClearBit(unsigned char & ch, int bit);
