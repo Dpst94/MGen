@@ -1394,14 +1394,14 @@ int CGenCF1::FailDiatonic(vector<int> &c, vector<int> &cc, int step1, int step2,
 	return 0;
 }
 
-int CGenCF1::IsRepeat(int ls1, int ls2, vector<int> &c, vector<int> &cc, vector<int> &leap, int rlen) {
+int CGenCF1::IsRepeat(int ls1, int ls2, vector<int> &c, vector<int> &cc, vector<int> &leap, int relen) {
 	int found = 1;
-	for (int i = 0; i < rlen; ++i) {
+	for (int i = 0; i < relen; ++i) {
 		if (c[fli[ls1 + i]] != c[fli[ls2 + i]]) {
 			found = 0;
 			break;
 		}
-		if (i < rlen - 1 && llen[ls1 + i] != llen[ls2 + i]) {
+		if (i < relen - 1 && llen[ls1 + i] != llen[ls2 + i]) {
 			found = 0;
 			break;
 		}
@@ -1410,75 +1410,75 @@ int CGenCF1::IsRepeat(int ls1, int ls2, vector<int> &c, vector<int> &cc, vector<
 }
 
 // Search for adjacent or symmetric repeats
-int CGenCF1::FailAdSymRepeat(vector<int> &c, vector<int> &cc, vector<int> &leap, int rlen) {
+int CGenCF1::FailAdSymRepeat(vector<int> &c, vector<int> &cc, vector<int> &leap, int relen) {
 	CHECK_READY(DR_fli, DR_c);
 	// Do not test if flag disabled and not testing
 	//if (task != tEval && accept[flag] == -1) return 0;
 	// Cycle through all notes that can be repeated
-	for (int ls = 0; ls <= fli_size - rlen * 2; ++ls) {
+	for (ls = 0; ls <= fli_size - relen * 2; ++ls) {
 		int rpos1 = 0;
 		int rpos2 = 0;
 		// Check adjacent repeat
-		if (IsRepeat(ls, ls + rlen, c, cc, leap, rlen)) {
-			rpos1 = ls + rlen;
+		if (IsRepeat(ls, ls + relen, c, cc, leap, relen)) {
+			rpos1 = ls + relen;
 		}
 		// If same beat is not adjacent, get same beat and check
-		else if (cspecies > 1 && ((fli[ls + rlen] - fli[ls]) % (npm / 2))) {
+		else if (cspecies > 1 && ((fli[ls + relen] - fli[ls]) % (npm / 2))) {
 			for (int x = 1; x < 4; ++x) {
-				if (ls + x <= fli_size - rlen * 2 && !((fli[ls + rlen + x] - fli[ls]) % (npm / 2))) {
-					if (IsRepeat(ls, ls + rlen + x, c, cc, leap, rlen)) {
-						rpos1 = ls + rlen + x;
+				if (ls + x <= fli_size - relen * 2 && !((fli[ls + relen + x] - fli[ls]) % (npm / 2))) {
+					if (IsRepeat(ls, ls + relen + x, c, cc, leap, relen)) {
+						rpos1 = ls + relen + x;
 					}
 				}
 			}
 		}
 		// If any repeat is found, check one more repeat
-		if (rpos1 && rpos1 <= fli_size - rlen * 2) {
+		if (rpos1 && rpos1 <= fli_size - relen * 2) {
 			// Check adjacent repeat
-			if (IsRepeat(ls, rpos1 + rlen, c, cc, leap, rlen)) {
-				rpos2 = rpos1 + rlen;
+			if (IsRepeat(ls, rpos1 + relen, c, cc, leap, relen)) {
+				rpos2 = rpos1 + relen;
 			}
 			// If same beat is not adjacent, get same beat and check
-			else if (cspecies > 1 && ((fli[rpos1 + rlen] - fli[rpos1]) % (npm / 2))) {
+			else if (cspecies > 1 && ((fli[rpos1 + relen] - fli[rpos1]) % (npm / 2))) {
 				for (int x = 1; x < 4; ++x) {
-					if (rpos1 + x <= fli_size - rlen * 2 && !((fli[rpos1 + rlen + x] - fli[rpos1]) % (npm / 2))) {
-						if (IsRepeat(rpos1, rpos1 + rlen + x, c, cc, leap, rlen)) {
-							rpos2 = rpos1 + rlen + x;
+					if (rpos1 + x <= fli_size - relen * 2 && !((fli[rpos1 + relen + x] - fli[rpos1]) % (npm / 2))) {
+						if (IsRepeat(rpos1, rpos1 + relen + x, c, cc, leap, relen)) {
+							rpos2 = rpos1 + relen + x;
 						}
 					}
 				}
 			}
 		}
-		if (rlen == 3) {
+		if (relen == 3) {
 			// Flag two repeats
 			if (rpos2) {
-				if (rpos2 == rpos1 + rlen)
-					FLAG2L(313, fli[ls], fli[ls + rlen - 1]);
+				if (rpos2 == rpos1 + relen)
+					FLAG2L(313, fli[ls], fli[ls + relen - 1]);
 				else
-					FLAG2L(407, fli[ls], fli[ls + rlen - 1]);
+					FLAG2L(407, fli[ls], fli[ls + relen - 1]);
 			}
 			// Flag one repeat
 			else if (rpos1) {
-				if (rpos1 == ls + rlen)
-					FLAG2L(311, fli[ls], fli[ls + rlen - 1]);
+				if (rpos1 == ls + relen)
+					FLAG2L(311, fli[ls], fli[ls + relen - 1]);
 				else
-					FLAG2L(405, fli[ls], fli[ls + rlen - 1]);
+					FLAG2L(405, fli[ls], fli[ls + relen - 1]);
 			}
 		}
-		if (rlen == 4) {
+		if (relen == 4) {
 			// Flag two repeats
 			if (rpos2) {
-				if (rpos2 == rpos1 + rlen)
-					FLAG2L(314, fli[ls], fli[ls + rlen - 1]);
+				if (rpos2 == rpos1 + relen)
+					FLAG2L(314, fli[ls], fli[ls + relen - 1]);
 				else
-					FLAG2L(408, fli[ls], fli[ls + rlen - 1]);
+					FLAG2L(408, fli[ls], fli[ls + relen - 1]);
 			}
 			// Flag one repeat
 			else if (rpos1) {
-				if (rpos1 == ls + rlen)
-					FLAG2L(312, fli[ls], fli[ls + rlen - 1]);
+				if (rpos1 == ls + relen)
+					FLAG2L(312, fli[ls], fli[ls + relen - 1]);
 				else
-					FLAG2L(406, fli[ls], fli[ls + rlen - 1]);
+					FLAG2L(406, fli[ls], fli[ls + relen - 1]);
 			}
 		}
 	}
