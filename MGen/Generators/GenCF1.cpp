@@ -1850,7 +1850,7 @@ int CGenCF1::FailMultiCulm(vector<int> &cc, vector<int> &slur) {
 		if (culm_ls >= fli_size - late_culm) FLAG2(21, fli[culm_ls]);
 	}
 	// Prohibit synchronized culminations
-	if (svoices > 1 && fli[culm_ls] == cf_culm_s) FLAG2(26, fli[culm_ls]);
+	if (svoices > 1 && fli[culm_ls] == cf_culm_s) FLAG2(6, fli[culm_ls]);
 	return 0;
 }
 
@@ -2370,9 +2370,15 @@ int CGenCF1::FailLeapMDC(vector<int> &leap, vector<int> &cc) {
 		// Close + no
 	else if (!mdc1 && mdc2 == 3) FLAG2(108 + leap_id, fli[fleap_start]);
 		// Far + close
-	else if (mdc1 == 1 && !mdc2) FLAG2(59 + leap_id, fli[fleap_start]);
+	else if (mdc1 == 1 && !mdc2) {
+		if (cspecies < 2 || beat[fleap_end]) FLAG2(59 + leap_id, fli[fleap_start]);
+		else FLAG2(476 + leap_id, fli[fleap_start]);
+	}
 		// Far + close
-	else if (mdc1 == 2 && !mdc2) FLAG2(132 + leap_id, fli[fleap_start]);
+	else if (mdc1 == 2 && !mdc2) {
+		if (cspecies < 2 || beat[fleap_end]) FLAG2(132 + leap_id, fli[fleap_start]);
+		else FLAG2(25 + leap_id, fli[fleap_start]);
+	}
 		// Next + next
 	else if (mdc1 == 1 && mdc2 == 1) {
 		if (cspecies < 2 || beat[fleap_end]) FLAG2(63 + leap_id, fli[fleap_start]);
