@@ -654,7 +654,7 @@ void CGenCA1::InitCorAck() {
 	method = mSWA;
 }
 
-void CGenCA1::SaveCorAck() {
+void CGenCA1::SaveCorAck(CString st) {
 	if (!cor_ack) return;
 	// Do not check if scan was aborted
 	if (!scan_full) return;
@@ -662,7 +662,7 @@ void CGenCA1::SaveCorAck() {
 	if (method == mSWA && !swa_full) return;
 	cor_ack_dp.push_back(dpenalty_min);
 	cor_ack_rp.push_back(rpenalty_min);
-	cor_ack_st.push_back(cor_log);
+	cor_ack_st.push_back(st + " " + cor_log);
 }
 
 void CGenCA1::CorAck() {
@@ -807,7 +807,7 @@ void CGenCA1::Generate() {
 			// Check if we have results
 			if (clib.size()) {
 				SendCorrections(cantus_id, time_start);
-				SaveCorAck();
+				SaveCorAck("SWA");
 			}
 			else {
 				// Go forward
@@ -834,7 +834,7 @@ void CGenCA1::Generate() {
 			// Check if we have results
 			if (clib.size()) {
 				SendCorrections(cantus_id, time_start);
-				SaveCorAck();
+				SaveCorAck("SAS");
 			}
 			else {
 				// Go forward

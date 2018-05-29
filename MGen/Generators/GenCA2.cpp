@@ -804,7 +804,7 @@ void CGenCA2::Generate() {
 			// Check if we have results
 			if (clib.size()) {
 				SendCorrectionsCP(cantus_id, time_start);
-				SaveCorAck();
+				SaveCorAck("SWA");
 			}
 			else {
 				// Go forward
@@ -833,7 +833,7 @@ void CGenCA2::Generate() {
 			// Check if we have results
 			if (clib.size()) {
 				SendCorrectionsCP(cantus_id, time_start);
-				SaveCorAck();
+				SaveCorAck("SAS");
 			}
 			else {
 				CString est;

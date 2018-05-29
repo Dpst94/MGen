@@ -25,7 +25,7 @@ protected:
 	void CreateExpectDb(CString path, CCsvDb & cdb);
 	void ConfirmExpect();
 	void InitCorAck();
-	void SaveCorAck();
+	void SaveCorAck(CString st);
 	void CorAck();
 
 	void LogFlags();
