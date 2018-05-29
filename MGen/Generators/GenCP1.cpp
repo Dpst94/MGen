@@ -3017,6 +3017,8 @@ int CGenCP1::FailLastIntervals() {
 		if (mli.size() > 1) {
 			int start = mli[mli.size() - 2];
 			int end = mli[mli.size() - 1] - 1;
+			// Flag measure start with 8va / unison
+			if (!civlc[start]) FLAG2(9, start);
 			if (end < ep2) {
 				int b_found = 0;
 				int bb_found = 0;
