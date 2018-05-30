@@ -451,6 +451,7 @@ void CGenCP1::SendHarmColorCP(int pos, int v, int chm_id) {
 }
 
 int CGenCP1::SendCP() {
+	//LogCantus("debug-send", cantus_id, c_len, acc[cpv]);
 	int step000 = step;
 	int pause_len = 0;
 	float l_rpenalty_cur;
@@ -2960,7 +2961,8 @@ void CGenCP1::SWACP(int i, int dp) {
 	// For successful rpenalty_cur == 0, show last flag that was fixed. For unsuccessful, show best variant
 	CString sst = GetStuck();
 	est.Format("Finished SWA%d #%d: rp %.0f from %.0f, dp %d, cnum %ld (in %lld ms): %s",
-		swa_len, a+1, rpenalty_min, rpenalty_source, dpenalty_min, cnum, time_stop - time_start, sst);
+		swa_len, a+1, rpenalty_min, rpenalty_source, dpenalty_min, cnum, 
+		time_stop - time_start, sst);
 	WriteLog(0, est);
 	TestBestRpenalty();
 }
@@ -3681,10 +3683,12 @@ check:
 		OptimizeLastMeasure();
 		CLEAR_READY();
 		//LogCantus("sp2-swa2-ep2", ep2 + swa2 * 1000 + sp2 * 1000000, acc[cpv]);
-		//if (ep2 > 56 && MatchVectors(acc[cpv], test_cc, 2, ep2 - 1)) {
-			//CString est;
-			//est.Format("Found ep2 %d", ep2);
-			//WriteLog(1, est);
+		//if (swa2 == c_len && swa1 == 0) {
+			//if (method == mSWA && ep2 > 2 && MatchVectors(acc[cpv], test_cc, 0, ep2 - 1)) {
+				//CString est;
+				//est.Format("Found ep2 %d", ep2);
+				//WriteLog(1, est);
+			//}
 		//}
 		// Check if dpenalty is already too high
 		if (task == tCor && !rpenalty_min) {

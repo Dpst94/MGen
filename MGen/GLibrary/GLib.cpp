@@ -170,13 +170,8 @@ void CGLib::StringToVector(CString *sValue, CString stDelim, vector<int> & Dest,
 		st = sValue->Tokenize(stDelim, pos);
 		st.Trim();
 		if (st.IsEmpty()) break;
-		if (i >= Dest.size()) {
-			CString est;
-			est.Format("Cannot load more than %d values into vector. String: '%s'.", Dest.size(), *sValue);
-			WriteLog(5, est);
-			continue;
-		}
-		Dest[i] = atoi(st);
+		if (i >= Dest.size()) Dest.push_back(atoi(st));
+		else Dest[i] = atoi(st);
 		CheckLimits(sValue, &(Dest[i]), lmin, lmax);
 	}
 }

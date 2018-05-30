@@ -565,8 +565,7 @@ void CGenCA2::FindBestPause() {
 }
 
 void CGenCA2::Generate() {
-	//CString test_st = "62 62 62 62 69 69 66 66 67 67 67 67 66 66 64 64 66 66 66 66 66 66 67 67 66 66 66 66 69 69 69 69 71 71 69 69 67 67 76 76 73 73 73 73 71 71 69 69 74 74 73 73 71 71 69 69 67 67 71 71 73 73 73 73 74";
-	//test_cc.resize(65);
+	//CString test_st = "43 45 43 51 46 48 50 57 55";
 	//StringToVector(&test_st, " ", test_cc);
 
 	// Swap voice instruments
