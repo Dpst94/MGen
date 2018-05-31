@@ -161,6 +161,7 @@ void CLy::GetLyRange(int step1, int step2, vector<int> &vm_min, vector<int> &vm_
 	vm_min.resize(v_cnt, 128);
 	vm_max.resize(v_cnt, 0);
 	ly_flags = 0;
+	ly_has_lining = 0;
 	for (int s = step1; s < step2; ++s) {
 		for (int v = v_cnt - 1; v >= 0; --v) {
 			if (!pause[s][v]) {
@@ -168,6 +169,12 @@ void CLy::GetLyRange(int step1, int step2, vector<int> &vm_min, vector<int> &vm_
 				if (vm_max[v] < note[s][v]) vm_max[v] = note[s][v];
 			}
 			ly_flags += nlink[s][v].size();
+			if (lining[s][v]) {
+				CString est;
+				est.Format("Detected lining at step %d voice %d", s, v);
+				WriteLog(1, est);
+				ly_has_lining = 1;
+			}
 		}
 	}
 }
@@ -337,7 +344,7 @@ void CLy::SendLyEvent(ofstream &fs, int pos, CString ev, int le, int i, int v) {
 		ly_s2 = ly_s - ly_step1;
 		SaveLyComments(i, v, pos);
 		SendLyViz(fs, pos, ev, le, i, v, 1);
-		if (show_lining && ev != "r") {
+		if (show_lining && ly_has_lining && ev != "r") {
 			if (la[lc] == 8) {
 				if (lining[i][v] == HatchStyleNarrowHorizontal) fs << " \\speakOff \\override NoteHead.style = #'xcircle ";
 				else if (lining[i][v] == HatchStyleLargeConfetti) fs << " \\speakOff \\override NoteHead.style = #'petrucci ";

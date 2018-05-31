@@ -285,6 +285,7 @@ public:
 	int ly_vlow = 0; // Show harmony under this voice
 	int ly_vhigh = 0; // Show mistakes above this voice
 	int ly_vm_cnt = 0; // Number of voices in segment to display
+	int ly_has_lining = 0; // If there is lining in melody
 	CString ly_com_st; // Comments
 	CString ly_ly_st; // Lyrics
 	vector<LY_Intermediate> lyi;
