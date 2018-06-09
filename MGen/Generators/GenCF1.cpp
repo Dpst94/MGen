@@ -2241,18 +2241,6 @@ int CGenCF1::FailLeap(vector<int> &c, vector<int>& cc, vector<int> &leap, vector
 	return 0;
 }
 
-int CGenCF1::LateLeapIsCompensated(vector<int> &c) {
-	if (c_len > ep2) return 1;
-	int dir = c[leap_end] - c[leap_start];
-	int found = 0;
-	for (ls = fleap_end + 1; ls < fli_size; ++ls) {
-		s = fli[ls];
-		if (dir > 0 && c[s] < c[leap_end]) return 1;
-		if (dir < 0 && c[s] > c[leap_end]) return 1;
-	}
-	return 0;
-}
-
 int CGenCF1::FailLeapFill(vector<int> &c, int late_leap, int leap_prev, int child_leap) {
 	// Prefill parameters
 	int ptail_len, pfill_to, pfill_to_pre, pfill_from_pre, pfill_from, pdeviates, pfill_end, pdev_count;
@@ -2278,29 +2266,15 @@ int CGenCF1::FailLeapFill(vector<int> &c, int late_leap, int leap_prev, int chil
 		// Check fill only if enough length (checked second time in case of slurs)
 		CountFill(c, tail_len, nstat2, nstat3, skips, fill_to, 0, fill_to_pre, fill_from_pre,
 			fill_from, deviates, dev_count, leap_prev, fill_end);
-		// Never allow too many skips (limit is already corrected for late leaps)
 		if (skips > allowed_skips) filled = 0;
-		// If leap is filled to 4th or 5th, prohibit if this is not late leap, if late leap rule is prohibited, or if leap is not prepared
-		else if (fill_to >= 3 && fill_to <= fill_pre4_int && (fill_to_pre == fill_to || 
-			late_leap > c4p_last_notes2 + 1 || !accept[144 + leap_id] || 
-			!LateLeapIsCompensated(c))) filled = 0;
-		// If leap is filled to 5th or more, prohibit if not late leap
+		else if (fill_to >= 3 && fill_to <= fill_pre4_int && (fill_to_pre == fill_to || late_leap > c4p_last_notes2 + 1 || !accept[144 + leap_id])) filled = 0;
 		else if (fill_to > 3 && late_leap > c4p_last_notes2 + 1) filled = 0;
-		// If leap is filled to 6th or more, prohibit if late leap
 		else if (fill_to > fill_pre4_int && late_leap <= c4p_last_notes2 + 1) filled = 0;
-		// If leap is filled to 3rd
 		else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start) && !accept[100 + leap_id]) filled = 0;
-		// If leap is filled to 3rd
 		else if (fill_to == 2 && fill_to_pre > 1 && fleap_start && !accept[104 + leap_id]) filled = 0;
-		// If leap is filled from 4th or 5th
-		else if (fill_from >= 3 && fill_from <= fill_pre4_int && (!fill_from_pre || 
-			late_leap > c4p_last_notes2 + 1 || !accept[144 + leap_id] ||
-			!LateLeapIsCompensated(c))) filled = 0;
-		// If leap is filled from 5th or more
+		else if (fill_from >= 3 && fill_from <= fill_pre4_int && (!fill_from_pre || late_leap > c4p_last_notes2 + 1 || !accept[144 + leap_id])) filled = 0;
 		else if (fill_from > 3 && late_leap > c4p_last_notes2 + 1) filled = 0;
-		// If leap is filled from 6th or more and this is a late leap
 		else if (fill_from > fill_pre4_int && late_leap <= c4p_last_notes2 + 1) filled = 0;
-		// If leap is filled from 3rd
 		else if (fill_from == 2 && !accept[53 + leap_id]) filled = 0;
 		else if (deviates > 2) filled = 0;
 		else if (deviates == 1 && !accept[42 + leap_id]) filled = 0;
