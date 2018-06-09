@@ -2530,7 +2530,7 @@ void CGenCF1::GetTritoneResolution(int ta, int t1, int t2, int tb, int &res1, in
 	}
 	// Get resolution window
 	int rwin = 1;
-	if (svoices > 1) rwin = max(1, (npm * tritone_res_quart) / 4);
+	if (svoices > 1 && bmli[leap_start] >= mli.size() - 2) rwin = max(1, (npm * tritone_res_quart) / 4);
 	// Scan preparation
 	if (fleap_start > 0) {
 		int pos1 = max(0, fli[fleap_start] - rwin);
