@@ -298,5 +298,8 @@ public:
 	int ly_flags = 0; // Number of flags in current melody
 	int ly_notenames = 0; // Number of note names in current melody
 	int ly_saved = 0;
+
+	// Config
+	int emulate_sas = 0; // 0 = disable emulator, 1 = Enables SAS algorithm emulator in CA2
 };
 

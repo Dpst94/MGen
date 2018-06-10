@@ -1153,6 +1153,7 @@ void CLy::SendLyNoteNames() {
 }
 
 void CLy::SaveLy(CString dir, CString fname) {
+	if (emulate_sas) return;
 	LoadLyShapes("configs\\ly\\shapes.csv");
 	vector<CString> sv;
 	CString title;
