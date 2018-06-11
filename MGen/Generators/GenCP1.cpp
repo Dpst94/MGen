@@ -3492,7 +3492,8 @@ int CGenCP1::FailHarm() {
 					if (ms == mli.size() - 2) FLAG2L(306, s, mli[ms]);
 					else {
 						// Stepwize resolution of 5th to 6th or 6th to 5th with two harmonies in measure
-						if (sus[ls1] && (
+						if ((cspecies == 4 || 
+							(cspecies == 5 && sus[ls1] && fli2[ls1] - sus[ls1] == 3 && rlen[ls1 + 1] >= 4)) && (
 							(ivlc[mli[ms]] == 4 && ivlc[s] == 5) ||
 							(ivlc[mli[ms]] == 5 && ivlc[s] == 4)) &&
 							abs(ac[cpv][mli[ms]] - ac[cpv][s]) < 2)
