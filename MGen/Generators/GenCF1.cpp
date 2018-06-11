@@ -1991,7 +1991,7 @@ void CGenCF1::CountFill(vector<int> &c, int tail_len, vector<int> &nstat2, vecto
 	int dev_state = 0;
 	int max_deviation = 0;
 	if (accept[42 + leap_id]) max_deviation = 1;
-	if (accept[120 + leap_id]) max_deviation = 2;
+	if (accept[120 + leap_id] && !pre) max_deviation = 2;
 	CountFillInit(c, tail_len, pre, t1, t2, fill_end);
 	// Detect fill_end
 	deviates = 0;
