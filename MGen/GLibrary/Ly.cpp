@@ -325,7 +325,7 @@ void CLy::SendLyViz(ofstream &fs, int pos, CString &ev, int le, int i, int v, in
 				text2 = "\\markup{ \\raise #0.6 \\teeny \"" + lyi[ly_s2].sht[shape] + "\" }\n ";
 			}
 			script.Replace("$n$", "\n");
-			script.Replace("$COLOR$", GetLyColor(flag_color[sev]));
+			script.Replace("$COLOR$", GetLyColor(sev));
 			script.Replace("$TEXT$", lyi[ly_s2].sht[shape]);
 			script.Replace("$TEXT2$", text2);
 			fs << script << "\n";
@@ -385,13 +385,26 @@ void CLy::SendLyEvent(ofstream &fs, int pos, CString ev, int le, int i, int v) {
 	}
 }
 
-CString CLy::GetLyColor(DWORD col) {
+CString CLy::GetLyColor(int sev) {
 	float coef = 1.5;
-	if (col == color_noflag) return "0 0 0";
 	CString st;
-	if (GetGreen(col) == GetRed(col) && GetRed(col) == GetBlue(col)) coef = 1;
-	st.Format("%.3f %.3f %.3f",
-		GetRed(col) / 255.0, GetGreen(col) / coef / 255.0, GetBlue(col) / 255.0);
+	DWORD green = MakeColor(0, 0, 180, 0);
+	DWORD yellow = MakeColor(0, 200, 200, 0);
+	DWORD red = MakeColor(0, 255, 0, 0);
+	if (sev <= 50) {
+		st.Format("%.3f %.3f %.3f",
+			(GetRed(yellow) * sev + GetRed(green) * (50 - sev)) / 50.0 / 255.0, 
+			(GetGreen(yellow) * sev + GetGreen(green) * (50 - sev)) / 50.0 / 255.0,
+			(GetBlue(yellow) * sev + GetBlue(green) * (50 - sev)) / 50.0 / 255.0
+		);
+	}
+	else {
+		st.Format("%.3f %.3f %.3f",
+			(GetRed(red) * (sev - 50) + GetRed(yellow) * (100 - sev)) / 50.0 / 255.0,
+			(GetGreen(red) * (sev - 50) + GetGreen(yellow) * (100 - sev)) / 50.0 / 255.0,
+			(GetBlue(red) * (sev - 50) + GetBlue(yellow) * (100 - sev)) / 50.0 / 255.0
+		);
+	}
 	return st;
 }
 
@@ -418,8 +431,8 @@ CString CLy::GetLyMarkColor2(DWORD col) {
 }
 
 void CLy::SendLyNoteColor(ofstream &fs, DWORD col) {
-	fs << "\n    \\override NoteHead.color = #(rgb-color " << GetLyColor(col) << ") ";
-	fs << "\n    \\override Stem.color = #(rgb-color " << GetLyColor(col) << ") ";
+	//fs << "\n    \\override NoteHead.color = #(rgb-color " << GetLyColor(col) << ") ";
+	//fs << "\n    \\override Stem.color = #(rgb-color " << GetLyColor(col) << ") ";
 }
 
 CString CLy::GetRealIntName(int s, int v1, int v2) {
@@ -569,7 +582,7 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 				ly_com_st += note_st;
 			}
 			ly_com_st += "\\markup \\wordwrap \\with-color #(rgb-color " +
-				GetLyColor(flag_color[sev]) + ") {\n  ";
+				GetLyColor(sev) + ") {\n  ";
 			com.Replace("\"", "\\\"");
 			com.Replace(" ", "\" \"");
 			st.Format("\\teeny \\raise #0.2 \\circle %d \"", lyi[ly_s2].nfn[c]);
@@ -1025,7 +1038,7 @@ void CLy::SendLyMistakes() {
 			int fl = lyi[ly_s2].nflags[f];
 			int sev = lyi[ly_s2].fsev[f];
 			st.Format("        \\with-color #(rgb-color " +
-				GetLyColor(flag_color[sev]) + ") %s \\circle %d\n",
+				GetLyColor(sev) + ") %s \\circle %d\n",
 				lyi[ly_s2].nfs[f] ? "\\underline" : "", lyi[ly_s2].nfn[f]);
 			// \override #'(offset . 5) \override #'(thickness . 2) 
 			ly_ly_st += st;
@@ -1178,6 +1191,15 @@ void CLy::SaveLy(CString dir, CString fname) {
 		ly_fs << sv[i] << "\n";
 	}
 
+	if (m_config == "test-ly-viz") {
+		for (int i = 0; i <= 100; ++i) {
+			CString est;
+			est.Format("\\markup \\with-color #(rgb-color " + GetLyColor(i) + ") { Test color for severity %d }\n",
+				i);
+			ly_fs << est;
+			i += 9;
+		}
+	}
 	if (!mel_info.size()) {
 		CString st;
 		st = "Whole piece";

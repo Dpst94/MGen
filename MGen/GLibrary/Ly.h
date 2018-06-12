@@ -220,7 +220,7 @@ public:
 	void SplitLyNote(int pos, int le, vector<int>& la);
 	void SendLyViz(ofstream & fs, int pos, CString & ev, int le, int i, int v, int phase);
 	void SendLyEvent(ofstream & fs, int pos, CString ev, int le, int i, int v);
-	CString GetLyColor(DWORD col);
+	CString GetLyColor(int sev);
 	CString GetLyMarkColor(DWORD col);
 	CString GetLyMarkColor2(DWORD col);
 	void SendLyNoteColor(ofstream & fs, DWORD col);
