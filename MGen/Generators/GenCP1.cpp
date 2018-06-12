@@ -3565,7 +3565,7 @@ int CGenCP1::FailHarm() {
 			last_b = -1;
 			int min_ls = bli[mli[mli.size() - 2]];
 			for (ls = fli_size - 1; ls >= min_ls; --ls) {
-				s = fli[ls];
+				s = isus[ls];
 				if (apcc[cpv][s] == 11) {
 					last_b = s;
 					break;
