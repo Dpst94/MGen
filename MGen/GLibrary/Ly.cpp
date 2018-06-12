@@ -386,10 +386,9 @@ void CLy::SendLyEvent(ofstream &fs, int pos, CString ev, int le, int i, int v) {
 }
 
 CString CLy::GetLyColor(int sev) {
-	float coef = 1.5;
 	CString st;
 	DWORD green = MakeColor(0, 0, 180, 0);
-	DWORD yellow = MakeColor(0, 200, 200, 0);
+	DWORD yellow = MakeColor(0, 180, 180, 0);
 	DWORD red = MakeColor(0, 255, 0, 0);
 	if (sev <= 50) {
 		st.Format("%.3f %.3f %.3f",
@@ -408,25 +407,25 @@ CString CLy::GetLyColor(int sev) {
 	return st;
 }
 
-CString CLy::GetLyMarkColor(DWORD col) {
-	if (col == color_noflag) return "1 1 1";
+CString CLy::GetLyMarkColor(int sev) {
 	CString st;
-	if (GetGreen(col) == GetRed(col) && GetRed(col) == GetBlue(col)) return "1 1 1";
-	st.Format("%.3f %.3f %.3f",
-		Lighten(GetRed(col), 2) / 255.0,
-		Lighten(GetGreen(col) * 1.5, 2) / 255.0,
-		Lighten(GetBlue(col), 2) / 255.0);
-	return st;
-}
-
-CString CLy::GetLyMarkColor2(DWORD col) {
-	if (col == color_noflag) return "1 1 1";
-	CString st;
-	if (GetGreen(col) == GetRed(col) && GetRed(col) == GetBlue(col)) return "1 1 1";
-	st.Format("%.3f %.3f %.3f",
-		Lighten(GetRed(col), 2) / 255.0,
-		Lighten(GetGreen(col), 2) / 255.0,
-		Lighten(GetBlue(col), 2) / 255.0);
+	DWORD green = MakeColor(0, 130, 255, 130);
+	DWORD yellow = MakeColor(0, 230, 230, 0);
+	DWORD red = MakeColor(0, 255, 180, 180);
+	if (sev <= 50) {
+		st.Format("%.3f %.3f %.3f",
+			(GetRed(yellow) * sev + GetRed(green) * (50 - sev)) / 50.0 / 255.0,
+			(GetGreen(yellow) * sev + GetGreen(green) * (50 - sev)) / 50.0 / 255.0,
+			(GetBlue(yellow) * sev + GetBlue(green) * (50 - sev)) / 50.0 / 255.0
+		);
+	}
+	else {
+		st.Format("%.3f %.3f %.3f",
+			(GetRed(red) * (sev - 50) + GetRed(yellow) * (100 - sev)) / 50.0 / 255.0,
+			(GetGreen(red) * (sev - 50) + GetGreen(yellow) * (100 - sev)) / 50.0 / 255.0,
+			(GetBlue(red) * (sev - 50) + GetBlue(yellow) * (100 - sev)) / 50.0 / 255.0
+		);
+	}
 	return st;
 }
 
@@ -1084,10 +1083,7 @@ void CLy::SendLyHarm() {
 			found = 1;
 			lst += "\\teeny ";
 			if (lyi[ly_s2].shs[vHarm] || lyi[ly_s2].shf[vHarm]) {
-				DWORD col = flag_color[lyi[ly_s2].shse[vHarm]];
-				if (col && col != color_noflag) {
-					lst += " \\on-color #(rgb-color " + GetLyMarkColor2(col) + ") ";
-				}
+				lst += " \\on-color #(rgb-color " + GetLyMarkColor(lyi[ly_s2].shse[vHarm]) + ") ";
 			}
 			lst += "\\pad-markup #0.4 " + st + " ";
 			lst += "}8\n";
@@ -1124,9 +1120,7 @@ void CLy::SendLyIntervals() {
 		ly_ly_st += "\\markup{ ";
 		ly_ly_st += "\\teeny ";
 		if (lyi[ly_s2].shse[vInterval] > -1) {
-			DWORD col = flag_color[lyi[ly_s2].shse[vInterval]];
-			if (col && col != color_noflag)
-				ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor2(col) + ") ";
+			ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor(lyi[ly_s2].shse[vInterval]) + ") ";
 		}
 		ly_ly_st += " \\pad-markup #0.4 \\concat { " + st + " ";
 		ly_ly_st += "} }\n";
@@ -1153,9 +1147,7 @@ void CLy::SendLyNoteNames() {
 		ly_ly_st += "\\markup{ ";
 		ly_ly_st += "\\teeny ";
 		if (lyi[ly_s2].shse[vNoteName] > -1) {
-			DWORD col = flag_color[lyi[ly_s2].shse[vNoteName]];
-			if (col && col != color_noflag)
-				ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor2(col) + ") ";
+			ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor(lyi[ly_s2].shse[vNoteName]) + ") ";
 		}
 		ly_ly_st += " \\pad-markup #0.4 \\concat { " + st + " } ";
 		ly_ly_st += "}\n";
@@ -1195,6 +1187,13 @@ void CLy::SaveLy(CString dir, CString fname) {
 		for (int i = 0; i <= 100; ++i) {
 			CString est;
 			est.Format("\\markup \\with-color #(rgb-color " + GetLyColor(i) + ") { Test color for severity %d }\n",
+				i);
+			ly_fs << est;
+			i += 9;
+		}
+		for (int i = 0; i <= 100; ++i) {
+			CString est;
+			est.Format("\\markup \\on-color #(rgb-color " + GetLyMarkColor(i) + ") { Test color for severity %d }\n",
 				i);
 			ly_fs << est;
 			i += 9;

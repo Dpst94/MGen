@@ -221,8 +221,7 @@ public:
 	void SendLyViz(ofstream & fs, int pos, CString & ev, int le, int i, int v, int phase);
 	void SendLyEvent(ofstream & fs, int pos, CString ev, int le, int i, int v);
 	CString GetLyColor(int sev);
-	CString GetLyMarkColor(DWORD col);
-	CString GetLyMarkColor2(DWORD col);
+	CString GetLyMarkColor(int sev);
 	void SendLyNoteColor(ofstream & fs, DWORD col);
 	CString GetRealIntName(int s, int v1, int v2);
 	CString GetIntName(int iv);
