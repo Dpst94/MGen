@@ -410,8 +410,8 @@ CString CLy::GetLyColor(int sev) {
 CString CLy::GetLyMarkColor(int sev) {
 	CString st;
 	DWORD green = MakeColor(0, 130, 255, 130);
-	DWORD yellow = MakeColor(0, 230, 230, 0);
-	DWORD red = MakeColor(0, 255, 180, 180);
+	DWORD yellow = MakeColor(0, 240, 240, 0);
+	DWORD red = MakeColor(0, 255, 160, 160);
 	if (sev <= 50) {
 		st.Format("%.3f %.3f %.3f",
 			(GetRed(yellow) * sev + GetRed(green) * (50 - sev)) / 50.0 / 255.0,
