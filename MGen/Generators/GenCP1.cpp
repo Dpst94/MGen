@@ -2365,8 +2365,7 @@ int CGenCP1::FailVIntervals() {
 	int fired = 0;
 	// Check first step
 	if (tivl[0] == iDis) {
-		if (fn) FLAG2(359, 0);
-		else FLAG2(83, 0);
+		if (!fn) FLAG2(83, 0);
 	}
 	for (ls = 1; ls < fli_size; ++ls) {
 		s = fli[ls];
