@@ -1251,22 +1251,34 @@ int CGenCP1::FailPco() {
 				// Stepwize
 				if (abs(acc[1][s] - acc[1][s - 1]) < 3) {
 					if (bmli[s] >= mli.size() - 2 && s > 0 && bmli[s - 1] != bmli[s]) {
-						if (civlc[s] == 0) FLAG2L(209, isus[ls - 1], s);
+						if (civlc[s] == 0) {
+							if (civl[s] == 0) FLAG2L(72, isus[ls - 1], s);
+							else FLAG2L(209, isus[ls - 1], s);
+						}
 						else FLAG2L(208, isus[ls - 1], s);
 					}
 					else if (ls < fli_size - 1 || ep2 == c_len) {
-						if (civlc[s] == 0) FLAG2L(211, isus[ls - 1], s);
+						if (civlc[s] == 0) {
+							if (civl[s] == 0) FLAG2L(76, isus[ls - 1], s);
+							else FLAG2L(211, isus[ls - 1], s);
+						}
 						else FLAG2L(210, isus[ls - 1], s);
 					}
 				}
 				// Non-stepwize
 				else {
 					if (bmli[s] >= mli.size() - 2 && s > 0 && bmli[s - 1] != bmli[s]) {
-						if (civlc[s] == 0) FLAG2L(213, isus[ls - 1], s);
+						if (civlc[s] == 0) {
+							if (civl[s] == 0) FLAG2L(73, isus[ls - 1], s);
+							else FLAG2L(213, isus[ls - 1], s);
+						}
 						else FLAG2L(212, isus[ls - 1], s);
 					}
 					else if (ls < fli_size - 1 || ep2 == c_len) {
-						if (civlc[s] == 0) FLAG2L(215, isus[ls - 1], s);
+						if (civlc[s] == 0) {
+							if (civl[s] == 0) FLAG2L(98, isus[ls - 1], s);
+							else FLAG2L(215, isus[ls - 1], s);
+						}
 						else FLAG2L(214, isus[ls - 1], s);
 					}
 				}
@@ -2588,7 +2600,7 @@ int CGenCP1::FailSlurs() {
 		if (acc[cpv][i] == acc[cpv][i + 1]) {
 			// Check simultaneous slurs
 			//if (acc[cfv][i] == acc[cfv][i + 1]) {
-			//FLAG2(98, i);
+			//FLAG2(XX, i);
 			//}
 			// Check slurs sequence
 			++scount;
