@@ -920,8 +920,29 @@ int CGenCP1::FailSus2() {
 			if (sus[ls] - fli[ls] > npm / 2) FLAG2(274, s);
 			// Long finish
 			if (fli2[ls] - sus[ls] + 1 > 3 * npm / 4) FLAG2(332, s);
+			// If full measure is not generated, allow non-harmonic insertion
+			// Second insertion note is not marked, because it should always be pAux
+			if (ls < fli_size - 1) {
+				if (sus[ls] + npm >= ep2) {
+					mshb[ls + 1] = pAux;
+					// Also mark successful resolution
+					susres[ls] = 1;
+				}
+			}
 			// Allow if not discord
-			if (tivl[s2] > 0) continue;
+			if (tivl[s2] > 0) {
+				// Is there a leap to dissonance?
+				s3 = fli2[ls + 1];
+				s4 = fli2[ls + 2];
+				if (ls < fli_size && aleap[cpv][s2] && tivl[s3] < 0 && tivl[s4] > 0) {
+					// Allow leap to dissonance only if downward stepwise resolution
+					if (!aleap[cpv][s3] && ac[cpv][s2] - ac[cpv][s4] == 1) {
+						susres[ls] = 1;
+						mshb[ls + 1] = pAux;
+					}
+				}
+				continue;
+			}
 			// If sus is not last note
 			if (ls < fli_size - 1) {
 				// Full measure should be generated
@@ -1039,13 +1060,6 @@ int CGenCP1::FailSus2() {
 						mshb[ls5] = pSusRes;
 						susres[ls] = 1;
 					}
-				}
-				// If full measure is not generated, allow non-harmonic insertion
-				// Second insertion note is not marked, because it should always be pAux
-				else {
-					mshb[ls + 1] = pAux;
-					// Also mark successful resolution
-					susres[ls] = 1;
 				}
 			}
 			else if (ep2 == c_len) {
@@ -3461,14 +3475,14 @@ int CGenCP1::FailHarm() {
 		}
 		// Loop inside measure
 		for (ls = ls1; ls <= ls2; ++ls) {
-			// For first suspension in measure, evaluate last note. In other cases - first note
+			// For first suspension in measure, evaluate last step. In other cases - first step
 			if (ls == ls1 && sus[ls1]) s9 = fli2[ls];
 			else s9 = fli[ls];
 			// Do not process non-harmonic notes if they are not consonant ending of first sus
 			// Sus ending 4th is also not processed
 			// For first suspended dissonance resolved note do not check msh
 			if (ls == ls1 && sus[ls]) {
-				if (tivl[s9] < 0 && susres[ls]) continue;
+				if (susres[ls]) continue;
 			}
 			// For all other notes, check msh and iHarm4
 			else {
