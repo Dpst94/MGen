@@ -1141,8 +1141,9 @@ int CGenCP1::FailDis() {
 		// Do not flag discord if suspension, because anticipation will flag it
 		// Do not flag discord if last note, because it can become suspension
 		if (sus[ls] || ls == fli_size - 1) return 0;
-		if (msh[ls] == pLeap) FLAG2(187, s);
-			// pLastLT cannot be dissonance, because it is set only if it is not dissonance
+		if (msh[ls] == pLeapTo) FLAG2(36, s);
+		else if (msh[ls] == pLeapFrom) FLAG2(187, s);
+		// pLastLT cannot be dissonance, because it is set only if it is not dissonance
 			// pSusStart does not have separate flag, because it is marked as interbar
 			// Here pSusStart will never fire flag, because pSusStart is set only if sus start is not a dissonance
 		else if (msh[ls] == pSusStart) FLAG2(224, s);
@@ -1606,8 +1607,8 @@ void CGenCP1::GetBasicMsh() {
 		s = fli[ls];
 		s2 = fli2[ls];
 		if ((s + fn) % npm == 0) mshb[ls] = pDownbeat;
-		else if (s > 0 && aleap[cpv][s - 1]) mshb[ls] = pLeap;
-		else if (s2 < ep2 - 1 && aleap[cpv][s2]) mshb[ls] = pLeap;
+		else if (s > 0 && aleap[cpv][s - 1]) mshb[ls] = pLeapTo;
+		else if (s2 < ep2 - 1 && aleap[cpv][s2]) mshb[ls] = pLeapFrom;
 		else {
 			if (s > 0 && s2 < ep2 - 1 && ac[cpv][s - 1] == ac[cpv][s2 + 1]) mshb[ls] = pAux;
 			else mshb[ls] = pPass;
