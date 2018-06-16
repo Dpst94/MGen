@@ -1406,8 +1406,8 @@ int CGenCP1::DetectDNT() {
 			// Maximum leap
 			int lp = abs(acc[cpv][fli[ls + 2]] - acc[cpv][fli[ls + 1]]);
 			if (lp < 3) continue;
-			if (lp > 4) {
-				if (lp > dnt_max_leap) continue;
+			if (lp > 5) continue;
+			if (lp == 4) {
 				if (pattern_needed) FLAG2(260, fli[ls]);
 				if (!accept[260]) continue;
 			}

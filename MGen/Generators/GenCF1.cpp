@@ -371,7 +371,6 @@ void CGenCF1::SetRuleParams() {
 	tritone_res_quart = GetRuleParam(cspecies, 2, rsSubComment, 0);
 	sus_last_measures = GetRuleParam(cspecies, 139, rsSubName, 0);
 	sus_insert_max_leap = Interval2Chromatic(GetRuleParam(cspecies, 295, rsSubComment, 0));
-	dnt_max_leap = Interval2Chromatic(GetRuleParam(cspecies, 260, rsSubName, 0));
 	cambiata_max_leap3 = Interval2Chromatic(GetRuleParam(cspecies, 264, rsSubComment, 1));
 	cambiata_max_leap4 = Interval2Chromatic(GetRuleParam(cspecies, 265, rsSubComment, 1));
 	pco_apart = GetRuleParam(cspecies, 248, rsName, 0);
