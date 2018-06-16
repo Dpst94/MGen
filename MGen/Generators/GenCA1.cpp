@@ -366,12 +366,16 @@ void CGenCA1::LoadExpect() {
 	// Clear expected flags
 	enflags.clear();
 	ef_log.clear();
+	ef_name.clear();
+	ef_subname.clear();
 	enflags2.clear();
 	enflags3.clear();
 	enflags_count = 0;
 	// Detect maximum lyrics
 	enflags.resize(c_len);
 	ef_log.resize(c_len);
+	ef_name.resize(c_len);
+	ef_subname.resize(c_len);
 	enflags2.resize(MAX_RULES);
 	enflags3.resize(MAX_RULES);
 	for (int f = 0; f < MAX_RULES; ++f) enflags2[f].resize(c_len);
@@ -382,6 +386,8 @@ void CGenCA1::LoadExpect() {
 		s = atoi(edb.result[i]["Step"]);
 		if (fl) {
 			enflags[s].push_back(fl);
+			ef_name[s].push_back(edb.result[i]["Rule"]);
+			ef_subname[s].push_back(edb.result[i]["Subrule"]);
 			ef_log[s].push_back(edb.result[i]["Log"]);
 			++enflags2[fl][s];
 			++enflags3[fl];
@@ -475,8 +481,8 @@ void CGenCA1::ConfirmExpect() {
 			if (!found) {
 				CString est;
 				est.Format("Expected flag not confirmed: [%d] %s %s (%s) at %d:%d (beat %d:%d) %s",
-					fl, accept[fl] ? "+" : "-", RuleName[cspecies][fl], SubRuleName[cspecies][fl], 
-					cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file);
+					fl, accept[fl] ? "+" : "-", ef_name[s][e], ef_subname[s][e], 
+					cantus_id + 1, s + 1, cpos[s] / 8 + 1, cpos[s] % 8 + 1, midi_file); // RuleName[cspecies][fl] SubRuleName[cspecies][fl]
 				WriteLog(5, est);
 				// Test log
 				if (m_testing == 1) AppendLineToFile("autotest\\expect.log", est + "\n");

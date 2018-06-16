@@ -735,6 +735,8 @@ protected:
 	vector<vector<int>> enflags; // [s][id] Expected note flags
 	vector<vector<int>> enflags2; // [r_id][s] Expected note flags
 	vector<vector<CString>> ef_log; // [s][id] Expected flag log
+	vector<vector<CString>> ef_name; // [s][id] Expected flag name
+	vector<vector<CString>> ef_subname; // [s][id] Expected flag subname
 	vector<int> enflags3; // [r_id] Expected flags
 	int enflags_count = 0; // Number of expected flags for melody
 	vector<int> false_positives_ignore; // [r_id] Ignore false positives for these flags
