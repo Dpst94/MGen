@@ -931,14 +931,19 @@ int CGenCP1::FailSus2() {
 			}
 			// Allow if not discord
 			if (tivl[s2] > 0) {
-				// Is there a leap to dissonance?
-				s3 = fli2[ls + 1];
-				s4 = fli2[ls + 2];
-				if (ls < fli_size && aleap[cpv][s2] && tivl[s3] < 0 && tivl[s4] > 0) {
-					// Allow leap to dissonance only if downward stepwise resolution
-					if (!aleap[cpv][s3] && ac[cpv][s2] - ac[cpv][s4] == 1) {
-						susres[ls] = 1;
-						mshb[ls + 1] = pAux;
+				// Are there enough notes for resolution ornament?
+				if (ls < fli_size - 2) {
+					s3 = fli2[ls + 1];
+					s4 = fli2[ls + 2];
+					// Is there a dissonance between two consonances, forming stepwise descending movement?
+					if (tivl[s3] < 0 && tivl[s4] > 0 && ac[cpv][s2] - ac[cpv][s4] == 1 &&
+						llen[ls + 2] >= npm / 4 && beat[ls + 2] < 6) {
+						// Detect stepwise+leap or leap+stepwise
+						if ((ac[cpv][s3] - ac[cpv][s2] == 1 && ac[cpv][s3] - ac[cpv][s4] == 2) ||
+							(ac[cpv][s2] - ac[cpv][s3] == 2 && ac[cpv][s4] - ac[cpv][s3] == 1)) {
+							susres[ls] = 1;
+							mshb[ls + 1] = pAux;
+						}
 					}
 				}
 				continue;
@@ -3634,7 +3639,8 @@ void CGenCP1::GetHarmBass() {
 		// 5th for 6/4 count
 		int q_prev = -1;
 		// Loop inside harmony
-		for (ls = bli[hli[hs]]; ls <= bli[hli2[hs]]; ++ls) if (msh[ls] > 0 || (sus[ls] && tivl[sus[ls]] > 0)) {
+		for (ls = bli[hli[hs]]; ls <= bli[hli2[hs]]; ++ls) 
+			if (msh[ls] > 0 || (sus[ls] && tivl[sus[ls]] > 0)) {
 			s = fli[ls];
 			nt = ac[cpv][s] % 7;
 			// Do not process notes that are not harmonic
