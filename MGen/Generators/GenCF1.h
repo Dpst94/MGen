@@ -759,7 +759,7 @@ protected:
 	VSet<int> clib_vs; // Unique clib set
 
 	// CP1 parameters
-	int sus_insert_max_leap = 9; // Maximum leap in sus resolution insertion
+	int sus_insert_max_leap = 4; // Maximum leap to sus resolution insertion
 	int cambiata_max_leap3 = 5; // Maximum allowed leap from third note in cambiata
 	int cambiata_max_leap4 = 5; // Maximum allowed leap from fourth note in cambiata
 	int show_correct_hatch = 1; // Set to 1 to mark corrected notes with hatch
