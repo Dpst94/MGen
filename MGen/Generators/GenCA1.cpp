@@ -79,9 +79,9 @@ void CGenCA1::GetCPKey3(vector <int> &key_miss, int &min_miss, int &min_key, int
 					if (!diatonic[(acc[v][x] - i) % 12]) key_miss[i]++;
 				}
 				// Check if diatonic repeats
-				if (diatonic_repeat_check) {
-					if (x && CC_C(acc[v][x], i, minor_cur2) == CC_C(acc[v][x - 1], i, minor_cur2) && abs(acc[v][x] - acc[v][x - 1]) == 1) key_miss[i]++;
-				}
+				//if (diatonic_repeat_check) {
+					//if (x && CC_C(acc[v][x], i, minor_cur2) == CC_C(acc[v][x - 1], i, minor_cur2) && abs(acc[v][x] - acc[v][x - 1]) == 1) key_miss[i]++;
+				//}
 			}
 		}
 	}
@@ -110,9 +110,9 @@ int CGenCA1::GetCPKey2(int &tonic_cur2, CString &ext_st, int minor_cur2)
 	}
 	GetCPKey3(key_miss, min_miss, min_key, minor_cur2, 1);
 	// If no key selected run again without checking for repeating diatonic steps
-	if (min_miss > 0) {
-		GetCPKey3(key_miss, min_miss, min_key, minor_cur2, 0);
-	}
+	//if (min_miss > 0) {
+		//GetCPKey3(key_miss, min_miss, min_key, minor_cur2, 0);
+	//}
 	// If no key selected
 	if (min_miss > 0) {
 		ext_st.Format("Cannot detect key due to chromatic alterations");
