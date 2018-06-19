@@ -373,7 +373,7 @@ void CGenCF1::SetRuleParams() {
 	sus_insert_max_leap = Interval2Chromatic(GetRuleParam(cspecies, 295, rsSubComment, 0));
 	cambiata_max_leap3 = Interval2Chromatic(GetRuleParam(cspecies, 264, rsSubComment, 1));
 	cambiata_max_leap4 = Interval2Chromatic(GetRuleParam(cspecies, 265, rsSubComment, 1));
-	pco_apart = GetRuleParam(cspecies, 248, rsName, 0);
+	pco_apart = GetRuleParam(cspecies, 248, rsName, 1);
 	c4p_last_meas = GetRuleParam(cspecies, 144, rsName, 1);
 	fill_pre3_notes = GetRuleParam(cspecies, 100, rsComment, 0);
 	fill_pre4_int = GetRuleParam(cspecies, 144, rsComment, 0) - 1;
