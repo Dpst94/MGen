@@ -1125,14 +1125,11 @@ int CGenCP1::FailDisSus() {
 int CGenCP1::FailUnison() {
 	// Unison
 	if (!civl[s]) {
-		// 2nd -> unison
-		if (s > 0 && ivl[s - 1] == 1) 
-			FLAG2L(275, s, isus[ls - 1]);
-		// Unison near m2 in same measure
-		if (ls < fli_size - 1 && civl[fli[ls + 1]] == 1 && bmli[s] == bmli[fli[ls + 1]]) 
-			FLAG2L(277, s, fli[ls + 1]);
-		else if (s > 0 && civl[s - 1] == 1 && bmli[s] == bmli[s - 1]) 
-			FLAG2L(275, s, isus[ls - 1]);
+		// 2nd -> unison in same measure
+		if (s > 0 && bmli[s] == bmli[s - 1]) {
+			if (civl[s - 1] == 1) FLAG2L(275, s, isus[ls - 1]);
+			else if (civl[s - 1] == 2) FLAG2L(277, s, isus[ls - 1]);
+		}
 		// Inside downbeat without suspension
 		if (!beat[ls] && ls > 0 && ls < fli_size - 1 && !sus[ls]) 
 			FLAG2(91, s);
