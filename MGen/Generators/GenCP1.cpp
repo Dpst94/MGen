@@ -1333,7 +1333,7 @@ int CGenCP1::SkipSus(int notes) {
 
 // Detect passing downbeat dissonance
 int CGenCP1::DetectPDD() {
-	if (!accept[282]) return 0;
+	//if (!accept[282]) return 0;
 	int pattern_needed;
 	// Do not detect PDD in lower voice
 	if (!cpv) return 0;
@@ -1359,15 +1359,18 @@ int CGenCP1::DetectPDD() {
 		}
 		pattern_needed = 0;
 		if (tivl[fli[ls + 1]] < 0) pattern_needed = 1;
-		// Parallel motion - flag but allow (this will make dissonance legal, but will add flag with problem)
-		if (ac[cfv][fli[ls + 1]] - ac[cfv][s] == -1) {
-			if (pattern_needed) FLAG2(298, fli[ls + 1]);
-			//if (!accept[298]) continue;
-		}
-		// Direct motion - flag but allow (this will make dissonance legal, but will add flag with problem)
-		else if (ac[cfv][fli[ls + 1]] - ac[cfv][s] < 0) {
-			if (pattern_needed) FLAG2(297, fli[ls + 1]);
-			//if (!accept[297]) continue;
+		if (pattern_needed) {
+			// Parallel motion - flag but allow (this will make dissonance legal, but will add flag with problem)
+			if (ac[cfv][fli[ls + 1]] - ac[cfv][s] == -1) {
+				FLAG2(298, fli[ls + 1]);
+				//if (!accept[298]) continue;
+			}
+			// Direct motion - flag but allow (this will make dissonance legal, but will add flag with problem)
+			else if (ac[cfv][fli[ls + 1]] - ac[cfv][s] < 0) {
+				FLAG2(297, fli[ls + 1]);
+				//if (!accept[297]) continue;
+			}
+			else FLAG2(282, fli[ls + 1]);
 		}
 		SavePattern(pPDD);
 	}
