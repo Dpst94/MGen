@@ -170,9 +170,9 @@ void CLy::GetLyRange(int step1, int step2, vector<int> &vm_min, vector<int> &vm_
 			}
 			ly_flags += nlink[s][v].size();
 			if (lining[s][v]) {
-				CString est;
-				est.Format("Detected lining at step %d voice %d", s, v);
-				WriteLog(1, est);
+				//CString est;
+				//est.Format("Detected lining at step %d voice %d", s, v);
+				//WriteLog(1, est);
 				ly_has_lining = 1;
 			}
 		}
