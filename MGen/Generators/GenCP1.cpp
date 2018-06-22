@@ -1929,10 +1929,8 @@ void CGenCP1::ApplyFixedPat() {
 			}
 		}
 		else if (pat[ls] == pCam) {
-			if (tivl[fli[ls + 2]] == iDis)
+			if (tivl[fli[ls + 2]] == iDis || tivl[fli[ls + 1]] == iDis)
 				ApplyCam2(ls, mshf, 1);
-			else if (tivl[fli[ls + 1]] == iDis)
-				ApplyCam(ls, mshf, 1);
 		}
 	}
 	// Set mshf for empty
