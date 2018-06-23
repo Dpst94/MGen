@@ -42,6 +42,7 @@ CGenCF1::CGenCF1() {
 	RuleComment.resize(MAX_SPECIES, vector<CString>(MAX_RULES));
 	severities.resize(MAX_SPECIES, vector<int>(MAX_RULES));
 	accepts.resize(MAX_SPECIES, vector<int>(MAX_RULES));
+	RuleClass.resize(MAX_RULES);
 	RuleGroup.resize(MAX_RULES);
 	ssf.resize(MAX_RULES);
 	severity.resize(MAX_RULES);
@@ -214,6 +215,7 @@ void CGenCF1::LoadRules(CString fname) {
 			//est.Format("Found rule %s - %d", rule, rid);
 			//WriteLog(0, est);
 			if (spec == "") spec = "012345";
+			RuleClass[rid] = ast[4];
 			RuleGroup[rid] = ast[5];
 			// If testing, enable all disabled rules so that expected violations can be confirmed
 			//if (m_testing && flag == -1) flag = 1;
@@ -256,6 +258,7 @@ void CGenCF1::LoadRules(CString fname) {
 				else rid_unique[rid][sp] = 1;
 				SaveSpecRule(sp, rid, flag, sev, rule, subrule, ast[9], ast[10]);
 			}
+			rule_viz_t[rid].Replace("!rc!", RuleClass[rid]);
 			rule_viz_t[rid].Replace("!rg!", RuleGroup[rid]);
 		}
 	}
@@ -640,9 +643,7 @@ void CGenCF1::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "reduce_between", &reduce_between, 0, 100);
 	CheckVar(sN, sV, "confirm_mode", &confirm_mode, 0, 2);
 	CheckVar(sN, sV, "ly_pagebreak", &ly_pagebreak, 0, 1);
-	CheckVar(sN, sV, "ly_subrules", &ly_subrules, 0, 1);
-	CheckVar(sN, sV, "ly_comments", &ly_comments, 0, 1);
-	CheckVar(sN, sV, "ly_rule_colon", &ly_rule_colon, 0, 1);
+	CheckVar(sN, sV, "ly_rule_verbose", &ly_rule_verbose, 0, 1);
 	CheckVar(sN, sV, "ly_msh", &ly_msh, 0, 1);
 	CheckVar(sN, sV, "ly_flag_style", &ly_flag_style, 0, 2);
 	CheckVar(sN, sV, "ly_dominant_letter", &ly_dominant_letter, 0, 1);

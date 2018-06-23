@@ -380,7 +380,6 @@ protected:
 	
 	// Rules
 	vector<vector<vector<vector<int>>>> RuleParam; // Parsed rule parameters
-	vector <CString> RuleGroup; // Groups for flag groups
 
 	// Parameters
 	int sus_last_measures = 3; // Last measures in which sus is allowed in species 2 and 3

@@ -248,6 +248,8 @@ public:
 	vector <vector<unordered_map<int, CString>>> shsc;
 
 	// Rules
+	vector <CString> RuleClass; // Groups for flag groups
+	vector <CString> RuleGroup; // Groups for flag groups
 	vector <int> accept; // Each 1 allows showing canti with specific properties
 	vector<int> rule_viz; // [r_id] Rule visualization type
 	vector<int> rule_viz_v2; // [r_id] Rule visualization type for second voice
@@ -271,9 +273,7 @@ public:
 	int ly_dominant_letter = 0; // 0 - use normal D/d letters; 1 - use dashed D/d letters
 	int ly_msh = 1; // 0 - do not show msh, 1 - show msh
 	int ly_pagebreak = 1; // Page break after each analysis
-	int ly_subrules = 1; // Show subrule names in ly
-	int ly_comments = 1; // Show rule and subrule comments in ly
-	int ly_rule_colon = 1; // Show rule name after colon
+	int ly_rule_verbose = 0; // How verbose rule display format is
 
 	// Lilypond other
 	ofstream ly_fs;

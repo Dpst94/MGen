@@ -564,16 +564,25 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 				rule_name += RuleName[cspecies][fl];
 			}
 			else {
-				if (!ly_rule_colon) {
+				if (!ly_rule_verbose) {
 					if (rule_name.Find(":") != -1) {
 						rule_name = rule_name.Left(rule_name.Find(":"));
 					}
 				}
 			}
 			com = st + rule_name;
-			if (ly_subrules) com += " (" + SubRuleName[cspecies][fl] + ")";
-			if (ly_comments && !RuleComment[cspecies][fl].IsEmpty()) com += ". " + RuleComment[cspecies][fl];
-			if (ly_comments && !SubRuleComment[cspecies][fl].IsEmpty()) com += " (" + SubRuleComment[cspecies][fl] + ")";
+			CString subrule_name = SubRuleName[cspecies][fl];
+			if (!ly_rule_verbose) {
+				if (subrule_name.Left(1) != ":") subrule_name.Empty();
+			}
+			if (!subrule_name.IsEmpty()) {
+				if (subrule_name.Left(1) == ":") {
+					subrule_name = subrule_name.Mid(1);
+				}
+				com += " (" + subrule_name + ")";
+			}
+			if (ly_rule_verbose > 1 && !RuleComment[cspecies][fl].IsEmpty()) com += ". " + RuleComment[cspecies][fl];
+			if (ly_rule_verbose > 1 && !SubRuleComment[cspecies][fl].IsEmpty()) com += " (" + SubRuleComment[cspecies][fl] + ")";
 			com += " " + lyi[ly_s2].nfc[c];
 			// Send note number with first comment
 			if (!found) {
