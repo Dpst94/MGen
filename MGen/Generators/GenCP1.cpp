@@ -3311,9 +3311,10 @@ int CGenCP1::EvalHarm() {
 				s > 0 && apc[0][s - 1] == 4) FLAG2(48, s);
 			// Prohibit 64 chord
 			if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
-				if (hsev[i]) FLAG2(433, s);
-				else FLAG2(383, s);
+				FLAG2(433, s);
 			}
+			// Prohibit audible 64 chord
+			else if (ha64[i]) FLAG2(383, s);
 			if (minor_cur) {
 				// Prohibit VI<->VI# containing progression
 				if (chm[i] % 2 && chm[i - 1] % 2 && chm_alter[i] * chm_alter[i - 1] == -1) {
@@ -3429,7 +3430,7 @@ void CGenCP1::RemoveHarmDuplicate() {
 	chm_alter.resize(chm_id);
 	hbc.resize(chm_id);
 	hbcc.resize(chm_id);
-	hsev.resize(chm_id);
+	ha64.resize(chm_id);
 }
 
 int CGenCP1::FailHarm() {
@@ -3446,7 +3447,7 @@ int CGenCP1::FailHarm() {
 	cchn.resize(12);
 	hli.clear();
 	hli2.clear();
-	hsev.clear();
+	ha64.clear();
 	chm.clear();
 	hbcc.clear();
 	hbc.clear();
@@ -3474,7 +3475,8 @@ int CGenCP1::FailHarm() {
 		hli2.push_back(0);
 		hs = hli.size() - 1;
 		if (hli2.size() > 1) hli2[hli2.size() - 2] = hli[hli.size() - 1] - 1;
-		hsev.push_back(1);
+		ha64.push_back(0);
+		// Set harmony bass initially to cantus. For lower cantus it is ideal. For higher cantus it is usually wrong and will be replaced in GetHarmBass
 		hbcc.push_back(acc[cfv][mli[ms]]);
 		hbc.push_back(ac[cfv][mli[ms]]);
 		chm.push_back(r);
@@ -3540,7 +3542,7 @@ int CGenCP1::FailHarm() {
 				hs = hli.size() - 1;
 				if (hli2.size() > 1) hli2[hli2.size() - 2] = hli[hli.size() - 1] - 1;
 				chm.push_back(r);
-				hsev.push_back(1);
+				ha64.push_back(0);
 				hbcc.push_back(acc[cfv][mli[ms]]);
 				hbc.push_back(ac[cfv][mli[ms]]);
 				chm_alter.push_back(0);
@@ -3626,7 +3628,7 @@ void CGenCP1::GetBhli() {
 
 void CGenCP1::GetHarmBass() {
 	SET_READY(DR_hbc);
-	// Do not process for lower cantus, because in this case lowest note is cantus
+	// Do not process for lower cantus, because in this case lowest note is always cantus and it is already set
 	if (!cantus_high) return;
 	int ls1, ls2;
 	int harm_end, nt;
@@ -3640,28 +3642,29 @@ void CGenCP1::GetHarmBass() {
 		int q_prev = -1;
 		// Loop inside harmony
 		for (ls = bli[hli[hs]]; ls <= bli[hli2[hs]]; ++ls) 
+			// Process all notes except for aux and pass (also second parts of suspensions)
 			if (msh[ls] > 0 || (sus[ls] && tivl[sus[ls]] > 0)) {
-			s = fli[ls];
-			nt = ac[cpv][s] % 7;
-			// Do not process notes that are not harmonic
-			if (nt != de1 && nt != de2 && nt != de3) continue;
-			if (hbcc[hs] > acc[0][s]) {
-				// Set lower severity for 6/4 with non-repeating 5th on upbeat
-				if (nt == de3 && beat[ls] > 1) {
-					int found = 0;
-					for (int ls2 = bli[hli[hs]]; ls2 <= bli[hli2[hs]]; ++ls2) if (ls2 != ls) {
-						if (acc[0][s] == acc[0][fli[ls2]]) found = 1;
+				s = fli[ls];
+				nt = ac[cpv][s] % 7;
+				// Do not process notes that are not harmonic
+				if (nt != de1 && nt != de2 && nt != de3) continue;
+				if (hbcc[hs] > acc[0][s]) {
+					// Set lower severity for 6/4 with non-repeating 5th on upbeat
+					if (nt == de3 && beat[ls] > 1) {
+						int found = 0;
+						for (int ls2 = bli[hli[hs]]; ls2 <= bli[hli2[hs]]; ++ls2) if (ls2 != ls) {
+							if (acc[0][s] == acc[0][fli[ls2]]) found = 1;
+						}
+						if (found) ha64[hs] = 1;
+						else {
+							ha64[hs] = 0;
+						}
 					}
-					if (found) hsev[hs] = 1;
-					else {
-						hsev[hs] = 0;
-					}
-				} 
-				else hsev[hs] = 1;
-				hbcc[hs] = acc[0][s];
-				hbc[hs] = ac[0][s];
+					else ha64[hs] = 1;
+					hbcc[hs] = acc[0][s];
+					hbc[hs] = ac[0][s];
+				}
 			}
-		}
 	}
 }
 
