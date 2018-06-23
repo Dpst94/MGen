@@ -3313,8 +3313,10 @@ int CGenCP1::EvalHarm() {
 			if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
 				FLAG2(433, s);
 			}
+			// Prohibit suggestive 64 chord
+			else if (ha64[i] == 1) FLAG2(196, s);
 			// Prohibit audible 64 chord
-			else if (ha64[i]) FLAG2(383, s);
+			else if (ha64[i] == 2) FLAG2(383, s);
 			if (minor_cur) {
 				// Prohibit VI<->VI# containing progression
 				if (chm[i] % 2 && chm[i - 1] % 2 && chm_alter[i] * chm_alter[i - 1] == -1) {
@@ -3640,6 +3642,8 @@ void CGenCP1::GetHarmBass() {
 		de3 = (de1 + 4) % 7;
 		// 5th for 6/4 count
 		int q_prev = -1;
+		// Init habcc - lowest harmonic note, including audible or suggested
+		int habcc = hbcc[hs];
 		// Loop inside harmony
 		for (ls = bli[hli[hs]]; ls <= bli[hli2[hs]]; ++ls) 
 			// Process all notes except for aux and pass (also second parts of suspensions)
@@ -3657,19 +3661,21 @@ void CGenCP1::GetHarmBass() {
 						ha64[hs] = 0;
 					}
 					else {
-						// Set audible 6/4 for non-repeating 5th on upbeat
 						int found = 0;
 						for (int ls2 = bli[hli[hs]]; ls2 <= bli[hli2[hs]]; ++ls2) if (ls2 != ls) {
 							if (acc[0][s] == acc[0][fli[ls2]]) found = 1;
 						}
+						// Set audible 6/4 for repeating 5th on upbeat
 						if (found) {
-							hbcc[hs] = acc[0][s];
-							hbc[hs] = ac[0][s];
-							ha64[hs] = 0;
+							// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
+							ha64[hs] = 2;
+							habcc = acc[0][s];
 						}
+						// Set suggestive 6/4 for non-repeating 5th on upbeat
 						else {
 							// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
-							ha64[hs] = acc[0][s];
+							ha64[hs] = 1;
+							habcc = acc[0][s];
 						}
 					}
 				}
@@ -3677,7 +3683,7 @@ void CGenCP1::GetHarmBass() {
 					hbcc[hs] = acc[0][s];
 					hbc[hs] = ac[0][s];
 					// Clear audible 64 if current note is lower than it
-					if (ha64[hs] && acc[0][s] < ha64[hs])	ha64[hs] = 0;
+					if (ha64[hs] && acc[0][s] < habcc) ha64[hs] = 0;
 				}
 			}
 	}
