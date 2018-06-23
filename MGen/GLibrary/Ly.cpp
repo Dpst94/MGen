@@ -559,9 +559,11 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 			else if (accept[fl] == -1) st = "$ ";
 			else st = "+ ";
 			CString rule_name = RuleName[cspecies][fl];
+			rule_name.SetAt(0, rule_name.Left(1).MakeLower().GetAt(0));
 			if (ly_debugexpect) {
-				rule_name.Format("[%d/%d] ", fl, sstep[ly_s] + 1);
-				rule_name += RuleName[cspecies][fl];
+				CString st2;
+				st2.Format("[%d/%d] ", fl, sstep[ly_s] + 1);
+				rule_name = st2 + rule_name;
 			}
 			else {
 				if (!ly_rule_verbose) {
@@ -570,7 +572,7 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 					}
 				}
 			}
-			com = st + rule_name;
+			com = st + RuleClass[fl] + ": " + rule_name;
 			CString subrule_name = SubRuleName[cspecies][fl];
 			if (!ly_rule_verbose) {
 				if (subrule_name.Left(1) != ":") subrule_name.Empty();
