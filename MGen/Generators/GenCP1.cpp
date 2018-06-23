@@ -3648,21 +3648,36 @@ void CGenCP1::GetHarmBass() {
 				nt = ac[cpv][s] % 7;
 				// Do not process notes that are not harmonic
 				if (nt != de1 && nt != de2 && nt != de3) continue;
-				if (hbcc[hs] > acc[0][s]) {
-					// Set lower severity for 6/4 with non-repeating 5th on upbeat
-					if (nt == de3 && beat[ls] > 1) {
+				if (hbcc[hs] <= acc[0][s]) continue;
+				if (nt == de3) {
+					if (beat[ls] <= 1) {
+						hbcc[hs] = acc[0][s];
+						hbc[hs] = ac[0][s];
+						// Clear audible 64, because we have real 64 now
+						ha64[hs] = 0;
+					}
+					else {
+						// Set audible 6/4 for non-repeating 5th on upbeat
 						int found = 0;
 						for (int ls2 = bli[hli[hs]]; ls2 <= bli[hli2[hs]]; ++ls2) if (ls2 != ls) {
 							if (acc[0][s] == acc[0][fli[ls2]]) found = 1;
 						}
-						if (found) ha64[hs] = 1;
-						else {
+						if (found) {
+							hbcc[hs] = acc[0][s];
+							hbc[hs] = ac[0][s];
 							ha64[hs] = 0;
 						}
+						else {
+							// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
+							ha64[hs] = acc[0][s];
+						}
 					}
-					else ha64[hs] = 1;
+				}
+				else {
 					hbcc[hs] = acc[0][s];
 					hbc[hs] = ac[0][s];
+					// Clear audible 64 if current note is lower than it
+					if (ha64[hs] && acc[0][s] < ha64[hs])	ha64[hs] = 0;
 				}
 			}
 	}

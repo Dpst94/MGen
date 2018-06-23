@@ -8,7 +8,7 @@
 #define mOblique 3
 #define mContrary 4
 
-// Rhythm position types
+// Melody shape types
 #define pDownbeat 1
 #define pLeapTo 2
 #define pLeapFrom 3
