@@ -1524,6 +1524,8 @@ int CGenCP1::DetectCambiata() {
 						if (!accept[259]) continue;
 					}
 				}
+				// Fourth note should not be dissonance
+				if (tivl[fli[ls + 3]] < 0) continue;
 				// Third diss or harmonic 4th
 				if (tivl[fli[ls + 2]] < 0) {
 					if (pattern_needed) FLAG2(261, fli[ls]);
@@ -1535,8 +1537,6 @@ int CGenCP1::DetectCambiata() {
 					// Non-harmonic note is not longer than harmonic
 					if (llen[ls + 2] > llen[ls]) continue;
 					if (llen[ls + 2] > llen[ls + 3] && (ep2 == c_len || ls < fli_size - 4)) continue;
-					// Fourth note should not be dissonance
-					if (tivl[fli[ls + 3]] < 0) continue;
 				}
 				// Leap from note 3
 				if (aleap[cpv][fli2[ls + 2]]) {
@@ -1861,9 +1861,10 @@ void CGenCP1::SetMsh(int ls, vector<int> &l_msh, int val) {
 	// Detect changing sign for dissonance
 	if (l_msh[ls] * val < 0 && tivl[fli[ls]] < 0 ) {
 		CString est;
-		est.Format("Detected msh overwrite at note %d:%d (%s) with value %d (old value %d): %s", 
+		est.Format("Detected msh overwrite at note %s %d:%d (%s) with value %d (old value %d) (ep2 %d, c_len %d): %s", 
+			NoteName[acc[cpv][fli[ls]] % 12],
 			cantus_id + 1, ls + 1, tivl[fli[ls]] < 0?"Dis":"non-Dis",  //-V547
-			val, l_msh[ls], vint2st(ep2, acc[cpv]));
+			val, l_msh[ls], ep2, c_len, vint2st(ep2, acc[cpv]));
 		WriteLog(5, est);
 	}
 	l_msh[ls] = val;
