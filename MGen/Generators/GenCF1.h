@@ -846,7 +846,7 @@ protected:
 	vector<int> bmli; // [s] Backward links to measures from steps
 	vector<int> cfli; // [cfs] Forward links to each cf note
 	vector<int> hli; // [hs] Forward links to first notes of each harmony
-	vector<int> hsev; // [hs] Severity of current chord. Currently used for 6/4 only
+	vector<int> ha64; // [hs] Audible 6/4 chord, while hbc will show root position or sixth chord
 	vector<int> hli2; // [hs] Forward links to last notes of each harmony
 	vector<int> hbcc; // [hs] Bass note of each harmony (chromatic)
 	vector<int> hbc; // [hs] Bass note of each harmony (diatonic)
