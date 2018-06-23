@@ -3351,7 +3351,7 @@ int CGenCP1::EvalHarm() {
 				p2c = 0;
 			}
 			// Harmonic repeats
-			if (pen1 == 3 && chm_alter[i] == chm_alter[i - 1]) {
+			if (pen1 == 3) {
 				++p3c;
 				if (p3c == 1) {
 					if (hbc[i] % 7 == hbc[i - 1] % 7) FLAG2L(99, s, hli[i - 1]);
