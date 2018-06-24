@@ -2346,11 +2346,10 @@ int CGenCF1::FailLeapMDC(vector<int> &leap, vector<int> &cc) {
 	if (mdc1 == 0 && mdc2 == 0) return 0;
 	// Do not flag last 3rd in SAS, because it can be later converted to 5th
 	if (fleap_end == fli_size - 1 && ep2 < c_len && !leap_id) return 0;
-	// SP5 1skip
-	if (mdc1 <= 1 && mdc2 <= 1 && cspecies == 5) FLAG2(414 + leap_id, fli[fleap_start]);
 	// Close + next
-	else if (!mdc1 && mdc2 == 1) {
-		if ((cspecies == 3) && (
+	if (!mdc1 && mdc2 == 1) {
+		// Close + aux
+		if ((cspecies == 3 || cspecies == 5) && (
 			(fleap_end >= fli_size - 3 && ep2 < c_len) || (fleap_end < fli_size - 3 && cc[fli[fleap_end + 2]] == cc[leap_end] &&
 			(cc[fli[fleap_end + 3]] - cc[fli[fleap_end + 2]]) * leap[leap_start] < 0)))
 			FLAG2(510 + leap_id, fli[fleap_start]);
@@ -2363,7 +2362,8 @@ int CGenCF1::FailLeapMDC(vector<int> &leap, vector<int> &cc) {
 		// next + close
 	else if (mdc1 == 1 && !mdc2) {
 		if (cspecies < 2 || bmli[fli[fleap_end]] == bmli[leap_start]) {
-			if ((cspecies == 3) && fleap_start > 2 && cc[fli[fleap_start - 2]] == cc[leap_start] && 
+			// Aux + close
+			if ((cspecies == 3 || cspecies == 5) && fleap_start > 2 && cc[fli[fleap_start - 2]] == cc[leap_start] && 
 				(cc[fli[fleap_start - 2]] - cc[fli[fleap_start - 3]]) * leap[leap_start] < 0)
 				FLAG2(506 + leap_id, fli[fleap_start]);
 			else FLAG2(59 + leap_id, fli[fleap_start]);
@@ -2377,7 +2377,16 @@ int CGenCF1::FailLeapMDC(vector<int> &leap, vector<int> &cc) {
 	}
 		// Next + next
 	else if (mdc1 == 1 && mdc2 == 1) {
-		if (cspecies < 2 || bmli[fli[fleap_end]] == bmli[leap_start]) FLAG2(63 + leap_id, fli[fleap_start]);
+		if (cspecies < 2 || bmli[fli[fleap_end]] == bmli[leap_start]) {
+			// Aux + aux
+			if ((cspecies == 3 || cspecies == 5) && (
+				(fleap_end >= fli_size - 3 && ep2 < c_len) || (fleap_end < fli_size - 3 && cc[fli[fleap_end + 2]] == cc[leap_end] &&
+				(cc[fli[fleap_end + 3]] - cc[fli[fleap_end + 2]]) * leap[leap_start] < 0)) && 
+				fleap_start > 2 && cc[fli[fleap_start - 2]] == cc[leap_start] &&
+				(cc[fli[fleap_start - 2]] - cc[fli[fleap_start - 3]]) * leap[leap_start] < 0)
+				FLAG2(414 + leap_id, fli[fleap_start]);
+			else FLAG2(63 + leap_id, fli[fleap_start]);
+		}
 		else FLAG2(460 + leap_id, fli[fleap_start]);
 	}
 	// Next + far
