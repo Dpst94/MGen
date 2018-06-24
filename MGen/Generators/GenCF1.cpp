@@ -2349,14 +2349,25 @@ int CGenCF1::FailLeapMDC(vector<int> &leap, vector<int> &cc) {
 	// SP5 1skip
 	if (mdc1 <= 1 && mdc2 <= 1 && cspecies == 5) FLAG2(414 + leap_id, fli[fleap_start]);
 	// Close + next
-	else if (!mdc1 && mdc2 == 1) FLAG2(128 + leap_id, fli[fleap_start]);
+	else if (!mdc1 && mdc2 == 1) {
+		if ((cspecies == 3) && (
+			(fleap_end >= fli_size - 3 && ep2 < c_len) || (fleap_end < fli_size - 3 && cc[fli[fleap_end + 2]] == cc[leap_end] &&
+			(cc[fli[fleap_end + 3]] - cc[fli[fleap_end + 2]]) * leap[leap_start] < 0)))
+			FLAG2(510 + leap_id, fli[fleap_start]);
+		else FLAG2(128 + leap_id, fli[fleap_start]);
+	}
 		// Close + far
 	else if (!mdc1 && mdc2 == 2) FLAG2(140 + leap_id, fli[fleap_start]);
 		// Close + no
 	else if (!mdc1 && mdc2 == 3) FLAG2(108 + leap_id, fli[fleap_start]);
-		// Far + close
+		// next + close
 	else if (mdc1 == 1 && !mdc2) {
-		if (cspecies < 2 || bmli[fli[fleap_end]] == bmli[leap_start]) FLAG2(59 + leap_id, fli[fleap_start]);
+		if (cspecies < 2 || bmli[fli[fleap_end]] == bmli[leap_start]) {
+			if ((cspecies == 3) && fleap_start > 2 && cc[fli[fleap_start - 2]] == cc[leap_start] && 
+				(cc[fli[fleap_start - 2]] - cc[fli[fleap_start - 3]]) * leap[leap_start] < 0)
+				FLAG2(506 + leap_id, fli[fleap_start]);
+			else FLAG2(59 + leap_id, fli[fleap_start]);
+		}
 		else FLAG2(476 + leap_id, fli[fleap_start]);
 	}
 		// Far + close
