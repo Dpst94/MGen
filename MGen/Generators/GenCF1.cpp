@@ -643,7 +643,7 @@ void CGenCF1::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "reduce_between", &reduce_between, 0, 100);
 	CheckVar(sN, sV, "confirm_mode", &confirm_mode, 0, 2);
 	CheckVar(sN, sV, "ly_pagebreak", &ly_pagebreak, 0, 1);
-	CheckVar(sN, sV, "ly_rule_verbose", &ly_rule_verbose, 0, 1);
+	CheckVar(sN, sV, "ly_rule_verbose", &ly_rule_verbose, 0, 2);
 	CheckVar(sN, sV, "ly_msh", &ly_msh, 0, 1);
 	CheckVar(sN, sV, "ly_flag_style", &ly_flag_style, 0, 2);
 	CheckVar(sN, sV, "ly_dominant_letter", &ly_dominant_letter, 0, 1);
