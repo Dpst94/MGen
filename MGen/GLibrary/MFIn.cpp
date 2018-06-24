@@ -875,6 +875,12 @@ void MFIn::LoadCP(CString path)
 	vector <int> cl; // length
 	vector <int> cp; // position
 	vector <float> ct; // tempo
+	// Cross check
+	map <int, unsigned char> crch_pitch;
+	map <int, unsigned char> crch_track;
+	int crch_upper_v = -1;
+	int upper_v;
+
 	vector <int> min_len, max_len;
 	int bad = 0;
 	for (int track = 0; track < midifile.getTrackCount(); track++) {
@@ -885,6 +891,30 @@ void MFIn::LoadCP(CString path)
 			float pos2 = mev->tick;
 			int pos = round(mev->tick / (float)tpc);
 			if (mev->isNoteOn()) {
+				// Cross check
+				if (crch_track[mev->tick]) {
+					if (mev->getKeyNumber() != crch_pitch[mev->tick]) {
+						if (mev->getKeyNumber() > crch_pitch[mev->tick]) {
+							upper_v = mev->track + 1;
+						}
+						else {
+							upper_v = crch_track[mev->tick];
+						}
+						if (crch_upper_v != -1 && crch_upper_v != upper_v) {
+							CString st;
+							st.Format("Detected voice crossing in counterpoint #%d: tick %d, track %d, chan %d, tpc %d (mul %.03f) in file %s", 
+								cpoint.size(), mev->tick, track, mev->getChannel(), tpc, midifile_in_mul, path);
+							WriteLog(5, st);
+						}
+						else {
+							crch_upper_v = upper_v;
+						}
+					}
+				}
+				else {
+					crch_track[mev->tick] = mev->track + 1;
+					crch_pitch[mev->tick] = mev->getKeyNumber();
+				}
 				int tick_dur = mev->getTickDuration();
 				float nlen2 = tick_dur;
 				int nlen = round((mev->tick + tick_dur) / (float)tpc) - pos;

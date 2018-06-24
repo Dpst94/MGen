@@ -124,8 +124,8 @@ void CGenCA2::MergeCantus() {
 		if (cc_len[i] != cc_len[0]) {
 			// Send log
 			CString est;
-			est.Format("Warning: cantus notes usually are all of same length. Cantus #%d has non-uniform length at note %d", cantus_id+1, i);
-			WriteLog(1, est);
+			est.Format("Warning: cantus notes usually are all of same length. Cantus #%d has non-uniform length at note %d. Probably, there is a voice crossing", cantus_id+1, i);
+			WriteLog(5, est);
 			error = 1;
 		}
 	}
@@ -686,7 +686,7 @@ void CGenCA2::Generate() {
 		}
 		// Check if starting pause is greater or equal to cantus note length
 		if (!cpoint[cantus_id][cpv][0] && cpoint[cantus_id][cfv][1] != cpoint[cantus_id][cfv][0]) {
-			st.Format("Warning: Starting pause in counterpoint is greater or equal to cantus note length (%s cpoint #%d). Skipping counterpoint",
+			st.Format("Probably there is a voice crossing in counterpoint. Starting pause in counterpoint is greater or equal to cantus note length (%s cpoint #%d). Skipping counterpoint",
 				cantus_high ? "high" : "low", cantus_id + 1);
 			WriteLog(5, st);
 			continue;
@@ -700,7 +700,7 @@ void CGenCA2::Generate() {
 		ShrinkCP();
 		if (!species) {
 			CString est;
-			est.Format("Counterpoint #%d (%s): cannot detect species, also species not specified in MIDI file",
+			est.Format("Counterpoint #%d (%s): cannot detect species. Probably, there is a voice crossing. Also species not specified in MIDI file",
 				cantus_id + 1, cantus_high ? "upper" : "lower");
 			WriteLog(5, est);
 			continue;
