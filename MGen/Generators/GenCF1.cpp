@@ -662,7 +662,7 @@ void CGenCF1::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "prohibit_min_severity", &prohibit_min_severity, 0, 101);
 	CheckVar(sN, sV, "animate_delay", &animate_delay, 0);
 	CheckVar(sN, sV, "tempo_bell", &tempo_bell, 0, 100);
-	CheckVar(sN, sV, "cantus_high", &cantus_high, 0, 1);
+	CheckVar(sN, sV, "cantus_high", &cantus_high, 0, 2);
 	CheckVar(sN, sV, "rpenalty_accepted", &rpenalty_accepted, 0);
 	CheckVar(sN, sV, "c_len", &c_len, 1);
 	CheckVar(sN, sV, "s_len", &s_len, 1);

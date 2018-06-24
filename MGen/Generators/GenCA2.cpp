@@ -594,8 +594,8 @@ void CGenCA2::Generate() {
 	species_conf = species;
 	npm_conf = npm;
 	cantus_high_conf = cantus_high;
-	if (cantus_high_conf) WriteLog(1, "Warning: cantus_high in configuration file will override marks in imported music files");
-	if (species_conf) WriteLog(1, "Warning: species in configuration file will override marks in imported music files");
+	if (cantus_high_conf) WriteLog(1, "Warning: cantus_high in configuration file will override lyrics in imported music files");
+	if (species_conf) WriteLog(1, "Warning: species in configuration file will override lyrics in imported music files");
 	if (error) return;
 	if (cantus_id2) {
 		if (cantus_id2 > cpoint.size()) {
