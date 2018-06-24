@@ -594,7 +594,8 @@ void CGenCA2::Generate() {
 	species_conf = species;
 	npm_conf = npm;
 	cantus_high_conf = cantus_high;
-	if (species_conf) WriteLog(1, "Warning: species and cantus_high in configuration file will override marks in imported music files");
+	if (cantus_high_conf) WriteLog(1, "Warning: cantus_high in configuration file will override marks in imported music files");
+	if (species_conf) WriteLog(1, "Warning: species in configuration file will override marks in imported music files");
 	if (error) return;
 	if (cantus_id2) {
 		if (cantus_id2 > cpoint.size()) {
@@ -611,7 +612,7 @@ void CGenCA2::Generate() {
 		if (cpoint[cantus_id].size() != av_cnt) {
 			st.Format("Error: need %d voices in counterpoint. Loaded only %d instead in counterpoint %d. Skipping this counterpoint.",
 				av_cnt, cpoint[cantus_id].size(), cantus_id+1);
-			WriteLog(5, st);
+			WriteLog(1, st);
 			continue;
 		}
 		step0 = step;
@@ -628,14 +629,18 @@ void CGenCA2::Generate() {
 		// Add line
 		linecolor[step] = MakeColor(255, 0, 0, 0);
 		//FixUnisonPause();
-		if (species_conf) {
-			species = species_conf;
-			cantus_high = cantus_high_conf;
-			npm = npm_conf;
+		if (cantus_high_conf) {
+			cantus_high = cantus_high_conf - 1;
 			specified_high = 1;
 		}
 		else {
 			LoadCantusHigh();
+		}
+		if (species_conf) {
+			species = species_conf;
+			npm = npm_conf;
+		}
+		else {
 			LoadSpecies();
 		}
 		GetVlen();
