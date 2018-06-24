@@ -541,11 +541,12 @@ void CLy::SaveLyComments(int i, int v, int pos) {
 		note_st = "\\markup \\wordwrap \\bold {\n  ";
 		// Show voice number if more than 1 voice
 		if (ly_vm_cnt > 1) {
-			st.Format("PART %d, ", ly_vcnt - v);
+			st.Format("PART %d ", ly_vcnt - v);
 			note_st += st;
 		}
-		st.Format("NOTE %d at %d:%d - %s",
-			ly_nnum, pos / 8 + 1, pos % 8 + 1, GetLyNoteVisual(i, v, "\\raise #0.3 \\magnify #0.7 "));
+		st.Format("[bar %d, beat %d] note %s", // ly_nnum
+			pos / 8 + 1, (pos % 8) / 2 + 1, 
+			GetLyNoteVisual(i, v, "\\raise #0.3 \\magnify #0.7 "));
 		if (coff[i][v])
 			st += " (slur)";
 		note_st += st + "\n}\n";

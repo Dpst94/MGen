@@ -3313,7 +3313,7 @@ int CGenCP1::EvalHarm() {
 			if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
 				FLAG2(433, s);
 			}
-			// Prohibit suggestive 64 chord
+			// Prohibit audible 64 chord
 			else if (ha64[i] == 1) FLAG2(196, s);
 			// Prohibit audible 64 chord
 			else if (ha64[i] == 2) FLAG2(383, s);
