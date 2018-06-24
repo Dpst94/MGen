@@ -802,7 +802,7 @@ int RunJobMGen() {
 	par.Format("-job=%d %s", j_timeout, fname_pl2);
 	tChild["MGen.exe"] = CGLib::time();
 	//WriteLog("Starting MGen.exe " + par);
-	int ret = RunTimeout(fChild["MGen.exe"] + "MGen.exe", par, j_timeout2 * 1000);
+	int mgen_ret = RunTimeout(fChild["MGen.exe"] + "MGen.exe", par, j_timeout2 * 1000);
 	SendProgress("Analysing algorithm run results");
 	// Get autosave
 	CString as_fname, as_dir;
@@ -839,14 +839,6 @@ int RunJobMGen() {
 		CGLib::copy_file(as_dir + "\\" + as_fname + "_" + sta2 + ".midi", 
 			share + j_folder + j_basefile + "_" + sta2 + ".midi");
 	}
-	if (ret) {
-		est.Format("Error during algorithm run: %d - %s", ret, GetErrorMessage(ret));
-		return FinishJob(1, est);
-	}
-	if (!CGLib::fileExists("autotest\\exit.log")) {
-		est.Format("Algorithm process did not exit correctly - possible crash");
-		return FinishJob(1, est);
-	}
 	long long time_job1 = CGLib::time();
 	// Run lilypond
 	if (j_engrave) {
@@ -868,6 +860,14 @@ int RunJobMGen() {
 			est.Format("File not found: " + share + j_folder + j_basefile + ".pdf");
 			return FinishJob(1, est);
 		}
+	}
+	if (mgen_ret) {
+		est.Format("Error during algorithm run: %d - %s", mgen_ret, GetErrorMessage(mgen_ret));
+		return FinishJob(1, est);
+	}
+	if (!CGLib::fileExists("autotest\\exit.log")) {
+		est.Format("Algorithm process did not exit correctly - possible crash");
+		return FinishJob(1, est);
 	}
 	if (RunRender()) return 1;
 	est.Format("Success in %lld seconds", 
