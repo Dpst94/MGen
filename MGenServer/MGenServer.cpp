@@ -850,7 +850,7 @@ int RunJobMGen() {
 			share + j_folder + j_basefile + ".ly";
 		tChild["lilypond-windows.exe"] = CGLib::time();
 		progress_fname = share + j_folder + j_basefile + ".log";
-		ret = RunTimeout(fChild["lilypond-windows.exe"] + "lilypond-windows.exe",
+		int ret = RunTimeout(fChild["lilypond-windows.exe"] + "lilypond-windows.exe",
 			par, j_engrave * 1000);
 		if (ret) {
 			est.Format("Error during running engraver: %d", ret);
