@@ -1033,6 +1033,7 @@ void CLy::SendLyMistakes() {
 	st.Format("  \\new Lyrics \\with { alignAboveContext = \"staff%d\" } {\n", ly_vhigh);
 	ly_ly_st += st;
 	ly_ly_st += "    \\lyricmode {\n";
+	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
 	ly_ly_st += "      \\set stanza = #\" Flags:\"\n";
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
@@ -1070,7 +1071,12 @@ void CLy::SendLyHarm() {
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", ly_vlow);
 	lst += st;
 	lst += "    \\lyricmode {\n";
+	lst += "      \\override StanzaNumber.font-size = #-2\n";
 	lst += "      \\set stanza = #\" Harmony:\"\n";
+	lst += "      \\override InstrumentName #'X-offset = #1\n";
+	lst += "      \\override InstrumentName #'font-series = #'bold\n";
+	lst += "      \\override InstrumentName.font-size = #-2\n";
+	lst += "      \\set shortVocalName = \"H:\"\n";
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
 		CString st = mark[ly_s][ly_v2];
@@ -1119,7 +1125,12 @@ void CLy::SendLyIntervals() {
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", ly_vlow);
 	ly_ly_st += st;
 	ly_ly_st += "    \\lyricmode {\n";
+	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
 	ly_ly_st += "      \\set stanza = #\" Interval:\"\n";
+	ly_ly_st += "      \\override InstrumentName #'X-offset = #1\n";
+	ly_ly_st += "      \\override InstrumentName #'font-series = #'bold\n";
+	ly_ly_st += "      \\override InstrumentName.font-size = #-2\n";
+	ly_ly_st += "      \\set shortVocalName = \"I:\"\n";
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
 		if (!lyi[ly_s2].shs[vInterval] && !lyi[ly_s2].shf[vInterval]) {
@@ -1150,7 +1161,12 @@ void CLy::SendLyNoteNames() {
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", ly_v);
 	ly_ly_st += st;
 	ly_ly_st += "    \\lyricmode {\n";
+	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
 	ly_ly_st += "      \\set stanza = #\" Note:\"\n";
+	ly_ly_st += "      \\override InstrumentName #'X-offset = #1\n";
+	ly_ly_st += "      \\override InstrumentName #'font-series = #'bold\n";
+	ly_ly_st += "      \\override InstrumentName.font-size = #-2\n";
+	ly_ly_st += "      \\set shortVocalName = \"N:\"\n";
 	for (ly_s = ly_step1; ly_s < ly_step2; ++ly_s) {
 		ly_s2 = ly_s - ly_step1;
 		if (!lyi[ly_s2].shs[vNoteName] && !lyi[ly_s2].shf[vNoteName]) {
