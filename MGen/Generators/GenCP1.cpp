@@ -2846,16 +2846,21 @@ void CGenCP1::RandomSWACP() {
 void CGenCP1::ShowLiningCP(vector<int> &cc) {
 	if (!show_correct_hatch) return;
 	// Add lining
-	int pos = step0 + fn;
 	int lni;
+	// Reset cc_len back after extending first cf note
+	cc_len[0] = cc_len[1];
+	int pos = step0 + cc_len[0] * fn;
 	for (int z = 0; z < c_len; z++) {
-		if (cpoint[cantus_id][cpv][z] != cc[z]) lni = HatchStyleLightUpwardDiagonal;
+		if (cpoint[cantus_id][cpv][z] != cc[z]) {
+			lni = HatchStyleLightUpwardDiagonal;
+		}
 		else lni = 0;
 		for (int g = 0; g < cc_len[z]; g++) {
 			lining[pos + g][cpv] = lni;
 		}
 		pos += cc_len[z];
 	}
+	cc_len[0] = cc_len[1] * (fn + 1);
 }
 
 // Do not calculate dpenalty (dp = 0). Calculate dpenalty (dp = 1).

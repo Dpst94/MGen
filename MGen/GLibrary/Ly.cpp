@@ -355,7 +355,9 @@ void CLy::SendLyEvent(ofstream &fs, int pos, CString ev, int le, int i, int v) {
 				else if (lining[i][v] == HatchStyleLargeConfetti) fs << " \\speakOff \\override NoteHead.style = #'petrucci ";
 				else fs << " \\speakOff \\revert NoteHead.style ";
 			}
-			if (lining[i][v] == HatchStyleLightUpwardDiagonal) fs << " \\circle ";
+			if (lining[i][v] == HatchStyleLightUpwardDiagonal) {
+				fs << " \\circle ";
+			}
 		}
 		fs << ev + GetLyLen(la[lc]);
 		if (lc < la.size() - 1 && ev != "r") fs << "~";
