@@ -270,7 +270,6 @@ public:
 
 	// Lilypond parameters
 	int ly_flag_style = 1; // 0 - no flag visualisation, 1 - color note, 2 - x above note
-	int ly_dominant_letter = 0; // 0 - use normal D/d letters; 1 - use dashed D/d letters
 	int ly_msh = 1; // 0 - do not show msh, 1 - show msh
 	int ly_pagebreak = 1; // Page break after each analysis
 	int ly_rule_verbose = 0; // How verbose rule display format is

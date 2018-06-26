@@ -1084,29 +1084,33 @@ void CLy::SendLyHarm() {
 		if (!st.IsEmpty() && st != "PD" && st != "CA" && st != "DN") {
 			++hcount;
 			lst += "  \\markup{ ";
+			lst += "  \\teeny \n";
+			if (lyi[ly_s2].shs[vHarm] || lyi[ly_s2].shf[vHarm]) {
+				lst += "  \\on-color #(rgb-color " + GetLyMarkColor(lyi[ly_s2].shse[vHarm]) + ") ";
+			}
+			lst += "  \\pad-markup #0.4 \n";
 			int found = 0;
 			// Replace dominant symbol
 			st.Replace("#", " \"#\" ");
 			st.Replace("b", " \\raise #0.3 \\magnify #0.5 \\flat ");
-			if (ly_dominant_letter) {
-				if (st[0] == 'D') {
-					st = "\\concat { \\char ##x00D0 " + st.Right(st.GetLength() - 1) + " } ";
-				}
-				else if (st[0] == 'd') {
-					st = "\\concat { \\char ##x0111 " + st.Right(st.GetLength() - 1) + " } ";
-				}
-				else st = "\\concat { " + st + " } ";
+			if (st.Right(1) == "6") {
+				st.Replace("6", " \\raise #0.7 6");
+				lst += "\\concat { " + st + " } ";
 			}
-			else st = "\\concat { " + st + " } ";
-			st.Replace("6", " \\raise #0.7 6");
-			//if (found) st = ", " + st;
+			else if (st.Right(3) == "6/4") {
+				lst += "  \\concat { \n";
+				lst += "    \\general-align #Y #0.5 \"" + st.Left(st.GetLength() - 3) + "\"\n";
+				lst += "    \\teeny\n";
+				lst += "    \\override #'(baseline-skip . 1.5) \n";
+				lst += "    \\override #'(line-width . 100)  \n";
+				lst += "    \\center-column{ 6 4 } \n";
+				lst += "  }\n";
+			}
+			else {
+				lst += "\\concat { " + st + " } ";
+			}
+			lst += "}\n";
 			found = 1;
-			lst += "\\teeny ";
-			if (lyi[ly_s2].shs[vHarm] || lyi[ly_s2].shf[vHarm]) {
-				lst += " \\on-color #(rgb-color " + GetLyMarkColor(lyi[ly_s2].shse[vHarm]) + ") ";
-			}
-			lst += "\\pad-markup #0.4 " + st + " ";
-			lst += "}8\n";
 			lst += SendLySkips(ly_mul - 1);
 		}
 		else {
