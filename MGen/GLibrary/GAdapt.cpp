@@ -672,16 +672,32 @@ void CGAdapt::AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei)
 			}
 		}
 		if (ok) {
+			// Calculate average dynamics
+			float mdyn = 0;
+			for (int z = i; z <= ei; z++) {
+				mdyn += dyn[z][v];
+			}
+			mdyn /= ei - i + 1;
 			// Calculate allowed maximum
+			float vb0 = icf[ii].vib_bell1 + (mdyn - icf[ii].vib_dyn1) *
+				(icf[ii].vib_bell2 - icf[ii].vib_bell1) / (icf[ii].vib_dyn2 - icf[ii].vib_dyn1 + 0.0001);
+			vb0 = max(min(vb0, icf[ii].vib_bell2), icf[ii].vib_bell1);
+			float vbf0 = icf[ii].vibf_bell1 + (mdyn - icf[ii].vib_dyn1) *
+				(icf[ii].vibf_bell2 - icf[ii].vibf_bell1) / (icf[ii].vib_dyn2 - icf[ii].vib_dyn1 + 0.0001);
+			// Prohibit slow vib freq for short notes
+			if (ndur < 600) vbf0 = max(25 * 600 / (ndur + 0.001), vbf0);
+			vbf0 = max(min(vbf0, icf[ii].vibf_bell2), icf[ii].vibf_bell1);
+			/*
 			float vb0 = icf[ii].vib_bell1 + (ndur - icf[ii].vib_bell_mindur) *
 				(icf[ii].vib_bell2 - icf[ii].vib_bell1) / (icf[ii].vib_bell_dur - icf[ii].vib_bell_mindur + 0.0001);
 			vb0 = max(min(vb0, icf[ii].vib_bell2), icf[ii].vib_bell1);
 			float vbf0 = icf[ii].vibf_bell1 + (ndur - icf[ii].vib_bell_mindur) *
 				(icf[ii].vibf_bell2 - icf[ii].vibf_bell1) / (icf[ii].vib_bell_dur - icf[ii].vib_bell_mindur + 0.0001);
 			vbf0 = max(min(vbf0, icf[ii].vib_bell2), icf[ii].vib_bell1);
+			*/
 			// Calculate random maximum
-			float vb = randbw(5, max(5, vb0));
-			float vbf = randbw(5, max(5, vbf0));
+			float vb = randbw(80, 100) / 100.0 * vb0;
+			float vbf = randbw(80, 100) / 100.0 * vbf0;
 			// Left part
 			for (int z = pos1; z < pos; z++) { 
 				vib[z][v] = vb * (float)pow(z - pos1, icf[ii].vib_bell_exp) / (float)pow(pos - pos1, icf[ii].vib_bell_exp);

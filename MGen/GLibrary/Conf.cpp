@@ -780,6 +780,7 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckRange(&st2, &st3, "vib_bell_dur", &icf[i].vib_bell_mindur, &icf[i].vib_bell_dur);
 	CheckRange(&st2, &st3, "dyn_range", &icf[i].dyn_range1, &icf[i].dyn_range2, 0, 100);
 	CheckRange(&st2, &st3, "acc_range", &icf[i].acc_range1, &icf[i].acc_range2, 1, 127);
+	CheckRange(&st2, &st3, "vib_dyn", &icf[i].vib_dyn1, &icf[i].vib_dyn2, 0, 127);
 	CheckVar(&st2, &st3, "unison_mute", &icf[i].unis_mute, 0, 1);
 	CheckVar(&st2, &st3, "unison_dyn_mul", &icf[i].unis_dyn_mul, 0);
 	CheckVar(&st2, &st3, "vib_bell_freq", &icf[i].vib_bell_freq);

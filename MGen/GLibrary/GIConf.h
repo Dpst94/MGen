@@ -80,6 +80,8 @@ struct IConf {
 	float vibf_bell2 = 0; // Max vibrato frequency in vibrato bell
 	float vib_bell_exp = 0; // Exponent to create non - linear bell shape
 	float vibf_bell_exp = 0; // Exponent to create non - linear bell shape
+	float vib_dyn1 = 0;
+	float vib_dyn2 = 100;
 	float rnd_vib = 0; // Randomize vibrato intensity not greater than this percent
 	int rnd_vib_slow = 1; // Slow down random vibrato function by this value. Can be only integer: 1 and above
 	float rnd_vibf = 0; // Randomize vibrato speed not greater than this percent
