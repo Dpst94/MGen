@@ -1413,12 +1413,12 @@ int CGenCP1::DetectDNT() {
 			if (lp < 3) continue;
 			if (lp > 5) continue;
 			if (lp == 5) {
-				if (pattern_needed) FLAG2(260, fli[ls]);
+				//if (pattern_needed) FLAG2(260, fli[ls]);
 				if (!accept[260]) continue;
 			}
 			// Leap in (before DNT)
 			if (ls > 0 && aleap[cpv][fli2[ls - 1]]) {
-				if (pattern_needed) FLAG2(3, fli[ls]);
+				//if (pattern_needed) FLAG2(3, fli[ls]);
 				if (!accept[3]) continue;
 			}
 			if (ls < fli_size - 3) {
