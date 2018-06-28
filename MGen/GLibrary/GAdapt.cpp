@@ -702,24 +702,24 @@ void CGAdapt::AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei)
 			float bell_exp = icf[ii].vib_bell_exp;
 			float fbell_exp = icf[ii].vibf_bell_exp;
 			if (ndur < 600) {
-				bell_exp = 1;
-				fbell_exp = 1;
+				bell_exp = 0.25;
+				fbell_exp = 0.25;
 			}
 			// Left part
 			for (int z = pos1; z < pos; z++) { 
-				vib[z][v] = vb * (float)pow(z - pos1, bell_exp) / (float)pow(pos - pos1, bell_exp);
+				vib[z][v] = min(127, vb * (float)pow(z - pos1, bell_exp) / (float)pow(pos - pos1, bell_exp));
 			}
 			// Right part
 			for (int z = pos; z < pos2; z++) {
-				vib[z][v] = vb * (float)pow(pos2 - z, bell_exp) / (float)pow(pos2 - pos, bell_exp);
+				vib[z][v] = min(127, vb * (float)pow(pos2 - z - 1, bell_exp) / (float)pow(pos2 - pos - 1, bell_exp));
 			}
 			// Left part speed
 			for (int z = pos1; z < posf; z++) {
-				vibf[z][v] = vbf * (float)pow(z - pos1, fbell_exp) / (float)pow(posf - pos1, fbell_exp);
+				vibf[z][v] = min(127, vbf * (float)pow(z - pos1, fbell_exp) / (float)pow(posf - pos1, fbell_exp));
 			}
 			// Right part speed
 			for (int z = posf; z < pos2; z++) {
-				vibf[z][v] = vbf * (float)pow(pos2 - z, fbell_exp) / (float)pow(pos2 - posf, fbell_exp);
+				vibf[z][v] = min(127, vbf * (float)pow(pos2 - z - 1, fbell_exp) / (float)pow(pos2 - posf - 1, fbell_exp));
 			}
 			if (comment_adapt) adapt_comment[i][v] += "Vibrato bell. ";
 		}
