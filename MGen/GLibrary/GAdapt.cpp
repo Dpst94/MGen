@@ -675,9 +675,10 @@ void CGAdapt::AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei)
 			// Calculate average dynamics
 			float mdyn = 0;
 			for (int z = i; z <= ei; z++) {
-				mdyn += dyn[z][v];
+				//mdyn += dyn[z][v];
+				if (dyn[z][v] > mdyn) mdyn = dyn[z][v];
 			}
-			mdyn /= ei - i + 1;
+			//mdyn /= ei - i + 1;
 			// Calculate allowed maximum
 			float vb0 = icf[ii].vib_bell1 + (mdyn - icf[ii].vib_dyn1) *
 				(icf[ii].vib_bell2 - icf[ii].vib_bell1) / (icf[ii].vib_dyn2 - icf[ii].vib_dyn1 + 0.0001);
@@ -698,21 +699,27 @@ void CGAdapt::AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei)
 			// Calculate random maximum
 			float vb = randbw(80, 100) / 100.0 * vb0;
 			float vbf = randbw(80, 100) / 100.0 * vbf0;
+			float bell_exp = icf[ii].vib_bell_exp;
+			float fbell_exp = icf[ii].vibf_bell_exp;
+			if (ndur < 600) {
+				bell_exp = 1;
+				fbell_exp = 1;
+			}
 			// Left part
 			for (int z = pos1; z < pos; z++) { 
-				vib[z][v] = vb * (float)pow(z - pos1, icf[ii].vib_bell_exp) / (float)pow(pos - pos1, icf[ii].vib_bell_exp);
+				vib[z][v] = vb * (float)pow(z - pos1, bell_exp) / (float)pow(pos - pos1, bell_exp);
 			}
 			// Right part
 			for (int z = pos; z < pos2; z++) {
-				vib[z][v] = vb * (float)pow(pos2 - z, icf[ii].vib_bell_exp) / (float)pow(pos2 - pos, icf[ii].vib_bell_exp);
+				vib[z][v] = vb * (float)pow(pos2 - z, bell_exp) / (float)pow(pos2 - pos, bell_exp);
 			}
 			// Left part speed
 			for (int z = pos1; z < posf; z++) {
-				vibf[z][v] = vbf * (float)pow(z - pos1, icf[ii].vibf_bell_exp) / (float)pow(posf - pos1, icf[ii].vibf_bell_exp);
+				vibf[z][v] = vbf * (float)pow(z - pos1, fbell_exp) / (float)pow(posf - pos1, fbell_exp);
 			}
 			// Right part speed
 			for (int z = posf; z < pos2; z++) {
-				vibf[z][v] = vbf * (float)pow(pos2 - z, icf[ii].vibf_bell_exp) / (float)pow(pos2 - posf, icf[ii].vibf_bell_exp);
+				vibf[z][v] = vbf * (float)pow(pos2 - z, fbell_exp) / (float)pow(pos2 - posf, fbell_exp);
 			}
 			if (comment_adapt) adapt_comment[i][v] += "Vibrato bell. ";
 		}
