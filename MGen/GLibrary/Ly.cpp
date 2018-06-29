@@ -1109,7 +1109,7 @@ void CLy::SendLyHarm() {
 			else {
 				lst += "\\concat { " + st + " } ";
 			}
-			lst += "}\n";
+			lst += "}8\n";
 			found = 1;
 			lst += SendLySkips(ly_mul - 1);
 		}
