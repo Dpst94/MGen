@@ -384,6 +384,13 @@ void CGenCA1::LoadExpect() {
 		if (atoi(edb.result[i]["Cid"]) != cantus_id) continue;
 		int fl = atoi(edb.result[i]["Rid"]);
 		s = atoi(edb.result[i]["Step"]);
+		if (s >= c_len) {
+			CString est;
+			est.Format("Melody #%d length in database does not match real length (%d)",
+				cantus_id + 1, c_len);
+			WriteLog(5, est);
+			return;
+		}
 		if (fl) {
 			enflags[s].push_back(fl);
 			ef_name[s].push_back(edb.result[i]["Rule"]);

@@ -923,7 +923,7 @@ int CGenCP1::FailSus2() {
 			// If full measure is not generated, allow non-harmonic insertion
 			// Second insertion note is not marked, because it should always be pAux
 			if (ls < fli_size - 1) {
-				if (sus[ls] + npm >= ep2) {
+				if (sus[ls] + npm >= ep2 && ep2 < c_len) {
 					mshb[ls + 1] = pAux;
 					// Also mark successful resolution
 					susres[ls] = 1;
@@ -951,14 +951,11 @@ int CGenCP1::FailSus2() {
 			// If sus is not last note
 			if (ls < fli_size - 1) {
 				// Full measure should be generated
-				if (sus[ls] + npm < ep2) {
+				if (sus[ls] + npm < ep2 || ep2 == c_len) {
 					// Available beats
 					s3 = sus[ls] + npm / 4;
 					s4 = sus[ls] + npm / 2;
 					s5 = sus[ls] + npm * 3 / 4;
-					ls3 = bli[s3];
-					ls4 = bli[s4];
-					ls5 = bli[s5];
 					// For species 2 and 4 check only 3rd beat
 					if (species == 2 || species == 4) {
 						s3 = 0;
@@ -967,6 +964,9 @@ int CGenCP1::FailSus2() {
 					// Check which beats are allowed by rules
 					if (!accept[419]) s3 = 0;
 					if (!accept[420]) s5 = 0;
+					if (s3) ls3 = bli[s3];
+					if (s4) ls4 = bli[s4];
+					if (s5) ls5 = bli[s5];
 					// Notes not on beat? 
 					if (!accept[286]) {
 						if (s3 && acc[cpv][s3] == acc[cpv][s3 - 1]) s3 = 0;
