@@ -1011,9 +1011,9 @@ int CGenCP1::FailSus2() {
 					}
 					// 9th to 8va
 					if (!accept[216]) {
-						if (s3 && ivlc[s2] == 1 && ivlc[s3] == 0 && ivl[s2] > 7 && !cantus_high) s3 = 0;
-						if (s4 && ivlc[s2] == 1 && ivlc[s4] == 0 && ivl[s2] > 7 && !cantus_high) s4 = 0;
-						if (s5 && ivlc[s2] == 1 && ivlc[s5] == 0 && ivl[s2] > 7 && !cantus_high) s5 = 0;
+						if (s3 && ivlc[s2] == 1 && ivlc[s3] == 0 && ivl[s2] > 7 && cantus_high) s3 = 0;
+						if (s4 && ivlc[s2] == 1 && ivlc[s4] == 0 && ivl[s2] > 7 && cantus_high) s4 = 0;
+						if (s5 && ivlc[s2] == 1 && ivlc[s5] == 0 && ivl[s2] > 7 && cantus_high) s5 = 0;
 						FLAG2C(216);
 					}
 					// 2nd to unison
