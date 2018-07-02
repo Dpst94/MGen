@@ -2643,7 +2643,7 @@ int CGenCP1::FailMissSlurs() {
 	int scount = 0;
 	int miss, max_miss=0;
 	int max_i=0;
-	for (int i = 0; i < ep2-1; ++i) if ((i + fn) % 2) { 
+	for (int i = 0; i < ep2-3; ++i) if ((i + fn) % 2) { 
 		if (i < miss_slurs_window * npm) ++wsize;
 		// Subtract old slur
 		if ((i >= miss_slurs_window * npm) && 
