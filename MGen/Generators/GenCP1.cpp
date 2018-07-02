@@ -931,6 +931,14 @@ int CGenCP1::FailSus2() {
 			}
 			// Allow if not discord
 			if (tivl[s2] > 0) {
+				// Detect 5th-6th
+				if (accept[329] && ls < fli_size - 1 && (cspecies == 4 ||
+					(cspecies == 5 && sus[ls] && fli2[ls] - sus[ls] == 3 && rlen[ls + 1] >= 4)) && (
+					(ivlc[s2] == 4 && ivlc[s2 + 1] == 5) ||
+						(ivlc[s2] == 5 && ivlc[s2 + 1] == 4)) &&
+					abs(ac[cpv][s2] - ac[cpv][s2 + 1]) < 2) {
+					susres[ls] = 1;
+				}
 				// Are there enough notes for resolution ornament?
 				if (ls < fli_size - 2) {
 					s3 = fli2[ls + 1];
@@ -3530,7 +3538,7 @@ int CGenCP1::FailHarm() {
 				else {
 					// Two harmonies penultimate
 					if (ms == mli.size() - 2) FLAG2L(306, s, mli[ms]);
-					else {
+					else { 
 						// Stepwize resolution of 5th to 6th or 6th to 5th with two harmonies in measure
 						if ((cspecies == 4 || 
 							(cspecies == 5 && sus[ls1] && fli2[ls1] - sus[ls1] == 3 && rlen[ls1 + 1] >= 4)) && (
