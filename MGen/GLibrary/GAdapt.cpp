@@ -656,13 +656,22 @@ void CGAdapt::AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei)
 	float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
 	int ni = i + noff[i][v];
 	// Create rbell if long length and no pauses
-	if ((ndur > icf[ii].vib_bell_mindur) && (len[i][v] > 2) && (randbw(0, 100) < icf[ii].vib_bell_freq)) {
+	if ((ndur > icf[ii].vib_bell_mindur) && (len[i][v] > 2)) {
 		// Steps range
 		int pos1 = i;
 		int pos2 = ei + 1;
 		// Center positions
-		int pos = pos1 + (pos2 - pos1) * randbw(icf[ii].vib_bell_top1, icf[ii].vib_bell_top2) / 100.0;
-		int posf = pos1 + (pos2 - pos1) * randbw(icf[ii].vibf_bell_top1, icf[ii].vibf_bell_top2) / 100.0;
+		int pos, posf;
+		if (ndur < icf[ii].vib_bell_dur) {
+			if (randbw(0, 100) >= icf[ii].vib_sbell_freq) return;
+			pos = pos1 + (pos2 - pos1) * randbw(icf[ii].vib_sbell_top1, icf[ii].vib_sbell_top2) / 100.0;
+			posf = pos1 + (pos2 - pos1) * randbw(icf[ii].vibf_sbell_top1, icf[ii].vibf_sbell_top2) / 100.0;
+		}
+		else {
+			if (randbw(0, 100) >= icf[ii].vib_bell_freq) return;
+			pos = pos1 + (pos2 - pos1) * randbw(icf[ii].vib_bell_top1, icf[ii].vib_bell_top2) / 100.0;
+			posf = pos1 + (pos2 - pos1) * randbw(icf[ii].vibf_bell_top1, icf[ii].vibf_bell_top2) / 100.0;
+		}
 		int ok = 1;
 		// Check if vib and vibf are zero
 		for (int z = i; z <= ei; z++) {
@@ -680,30 +689,38 @@ void CGAdapt::AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei)
 			}
 			//mdyn /= ei - i + 1;
 			// Calculate allowed maximum
-			float vb0 = icf[ii].vib_bell1 + (mdyn - icf[ii].vib_dyn1) *
-				(icf[ii].vib_bell2 - icf[ii].vib_bell1) / (icf[ii].vib_dyn2 - icf[ii].vib_dyn1 + 0.0001);
-			vb0 = max(min(vb0, icf[ii].vib_bell2), icf[ii].vib_bell1);
-			float vbf0 = icf[ii].vibf_bell1 + (mdyn - icf[ii].vib_dyn1) *
-				(icf[ii].vibf_bell2 - icf[ii].vibf_bell1) / (icf[ii].vib_dyn2 - icf[ii].vib_dyn1 + 0.0001);
-			// Prohibit slow vib freq for short notes
-			if (ndur < 600) vbf0 = max(25 * 600 / (ndur + 0.001), vbf0);
-			vbf0 = max(min(vbf0, icf[ii].vibf_bell2), icf[ii].vibf_bell1);
-			/*
-			float vb0 = icf[ii].vib_bell1 + (ndur - icf[ii].vib_bell_mindur) *
-				(icf[ii].vib_bell2 - icf[ii].vib_bell1) / (icf[ii].vib_bell_dur - icf[ii].vib_bell_mindur + 0.0001);
-			vb0 = max(min(vb0, icf[ii].vib_bell2), icf[ii].vib_bell1);
-			float vbf0 = icf[ii].vibf_bell1 + (ndur - icf[ii].vib_bell_mindur) *
-				(icf[ii].vibf_bell2 - icf[ii].vibf_bell1) / (icf[ii].vib_bell_dur - icf[ii].vib_bell_mindur + 0.0001);
-			vbf0 = max(min(vbf0, icf[ii].vib_bell2), icf[ii].vib_bell1);
-			*/
+			float vb0, vbf0;
+			if (ndur < icf[ii].vib_bell_dur) {
+				vb0 = icf[ii].vib_sbell1 + (mdyn - icf[ii].vib_sdyn1) *
+					(icf[ii].vib_sbell2 - icf[ii].vib_sbell1) / (icf[ii].vib_sdyn2 - icf[ii].vib_sdyn1 + 0.0001);
+				vb0 = max(min(vb0, icf[ii].vib_sbell2), icf[ii].vib_sbell1);
+				vbf0 = icf[ii].vibf_sbell1 + (mdyn - icf[ii].vib_sdyn1) *
+					(icf[ii].vibf_sbell2 - icf[ii].vibf_sbell1) / (icf[ii].vib_sdyn2 - icf[ii].vib_sdyn1 + 0.0001);
+				vbf0 = max(min(vbf0, icf[ii].vibf_sbell2), icf[ii].vibf_sbell1);
+			}
+			else {
+				vb0 = icf[ii].vib_bell1 + (mdyn - icf[ii].vib_dyn1) *
+					(icf[ii].vib_bell2 - icf[ii].vib_bell1) / (icf[ii].vib_dyn2 - icf[ii].vib_dyn1 + 0.0001);
+				vb0 = max(min(vb0, icf[ii].vib_bell2), icf[ii].vib_bell1);
+				vbf0 = icf[ii].vibf_bell1 + (mdyn - icf[ii].vib_dyn1) *
+					(icf[ii].vibf_bell2 - icf[ii].vibf_bell1) / (icf[ii].vib_dyn2 - icf[ii].vib_dyn1 + 0.0001);
+				vbf0 = max(min(vbf0, icf[ii].vibf_bell2), icf[ii].vibf_bell1);
+			}
 			// Calculate random maximum
 			float vb = randbw(80, 100) / 100.0 * vb0;
 			float vbf = randbw(80, 100) / 100.0 * vbf0;
-			float bell_exp = icf[ii].vib_bell_exp;
-			float fbell_exp = icf[ii].vibf_bell_exp;
-			if (ndur < 600) {
-				bell_exp = 0.25;
-				fbell_exp = 0.25;
+			float bell_exp, fbell_exp, bell_rexp, fbell_rexp;
+			if (ndur < icf[ii].vib_bell_dur) {
+				bell_exp = icf[ii].vib_sbell_exp;
+				bell_rexp = icf[ii].vib_sbell_rexp;
+				fbell_exp = icf[ii].vibf_sbell_exp;
+				fbell_rexp = icf[ii].vibf_sbell_rexp;
+			}
+			else {
+				bell_exp = icf[ii].vib_bell_exp;
+				bell_rexp = icf[ii].vib_bell_rexp;
+				fbell_exp = icf[ii].vibf_bell_exp;
+				fbell_rexp = icf[ii].vibf_bell_rexp;
 			}
 			// Left part
 			for (int z = pos1; z < pos; z++) { 
@@ -711,7 +728,7 @@ void CGAdapt::AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei)
 			}
 			// Right part
 			for (int z = pos; z < pos2; z++) {
-				vib[z][v] = min(127, vb * (float)pow(pos2 - z - 1, bell_exp) / (float)pow(pos2 - pos - 1, bell_exp));
+				vib[z][v] = min(127, vb * (float)pow(pos2 - z - 1, bell_rexp) / (float)pow(pos2 - pos - 1, bell_rexp));
 			}
 			// Left part speed
 			for (int z = pos1; z < posf; z++) {
@@ -719,7 +736,7 @@ void CGAdapt::AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei)
 			}
 			// Right part speed
 			for (int z = posf; z < pos2; z++) {
-				vibf[z][v] = min(127, vbf * (float)pow(pos2 - z - 1, fbell_exp) / (float)pow(pos2 - posf - 1, fbell_exp));
+				vibf[z][v] = min(127, vbf * (float)pow(pos2 - z - 1, fbell_rexp) / (float)pow(pos2 - posf - 1, fbell_rexp));
 			}
 			if (comment_adapt) adapt_comment[i][v] += "Vibrato bell. ";
 		}
