@@ -663,12 +663,12 @@ void CGAdapt::AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei)
 		// Center positions
 		int pos, posf;
 		if (ndur < icf[ii].vib_bell_dur) {
-			if (randbw(0, 100) >= icf[ii].vib_sbell_freq) return;
+			if (randbw(0, 99) >= icf[ii].vib_sbell_freq) return;
 			pos = pos1 + (pos2 - pos1) * randbw(icf[ii].vib_sbell_top1, icf[ii].vib_sbell_top2) / 100.0;
 			posf = pos1 + (pos2 - pos1) * randbw(icf[ii].vibf_sbell_top1, icf[ii].vibf_sbell_top2) / 100.0;
 		}
 		else {
-			if (randbw(0, 100) >= icf[ii].vib_bell_freq) return;
+			if (randbw(0, 99) >= icf[ii].vib_bell_freq) return;
 			pos = pos1 + (pos2 - pos1) * randbw(icf[ii].vib_bell_top1, icf[ii].vib_bell_top2) / 100.0;
 			posf = pos1 + (pos2 - pos1) * randbw(icf[ii].vibf_bell_top1, icf[ii].vibf_bell_top2) / 100.0;
 		}
