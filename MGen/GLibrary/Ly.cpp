@@ -1277,7 +1277,12 @@ void CLy::SelectSpeciesRules() {
 	cspecies0 = cspecies;
 	// Load rules
 	for (int i = 0; i < max_flags; ++i) {
-		accept[i] = accepts[cspecies][i];
+		if (severities[cspecies][i] >= prohibit_min_severity) {
+			accept[i] = accepts[cspecies][i];
+		}
+		else {
+			accept[i] = 1;
+		}
 		severity[i] = severities[cspecies][i];
 	}
 	// Check that at least one rule is accepted

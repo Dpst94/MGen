@@ -201,7 +201,6 @@ void CGenCF1::LoadRules(CString fname) {
 			rule = ast[6];
 			subrule = ast[7];
 			flag = atoi(ast[8]);
-			if (sev < prohibit_min_severity && flag == 0) flag = 1;
 			// Find rule id
 			if (rid >= max_flags) {
 				max_flags = rid + 1;

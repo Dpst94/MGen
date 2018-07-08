@@ -267,6 +267,7 @@ public:
 	vector <vector<int>> accepts; // [sp][rid] Each 1 allows showing canti with specific properties
 	vector <vector<int>> severities; // [sp][rid] 
 	int max_flags = 0; // Maximum number of rules
+	int prohibit_min_severity = 0; // Minimum severity to prohibit (below are marked as allowed)
 
 	// Lilypond parameters
 	int ly_flag_style = 1; // 0 - no flag visualisation, 1 - color note, 2 - x above note
