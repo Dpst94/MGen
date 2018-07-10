@@ -38,4 +38,15 @@ protected:
 	vector<float> cor_ack_rp; // [] Two resulting rpenalties
 	vector<CString> cor_ack_st; // [] Two resulting log strings
 	CString cor_log;
+
+	// Autotest
+	CCsvDb edb; // Expect flags database
+	CCsvDb edb2; // Corrected expect flags database
+	vector<vector<int>> enflags; // [s][id] Expected note flags
+	vector<vector<int>> enflags2; // [r_id][s] Expected note flags
+	vector<vector<CString>> ef_log; // [s][id] Expected flag log
+	vector<vector<CString>> ef_name; // [s][id] Expected flag name
+	vector<vector<CString>> ef_subname; // [s][id] Expected flag subname
+	vector<int> enflags3; // [r_id] Expected flags
+	int enflags_count = 0; // Number of expected flags for melody
 };

@@ -422,15 +422,6 @@ protected:
 	vector <long> cids; // []
 
 	// CA1 autotest
-	CCsvDb edb; // Expect flags database
-	CCsvDb edb2; // Corrected expect flags database
-	vector<vector<int>> enflags; // [s][id] Expected note flags
-	vector<vector<int>> enflags2; // [r_id][s] Expected note flags
-	vector<vector<CString>> ef_log; // [s][id] Expected flag log
-	vector<vector<CString>> ef_name; // [s][id] Expected flag name
-	vector<vector<CString>> ef_subname; // [s][id] Expected flag subname
-	vector<int> enflags3; // [r_id] Expected flags
-	int enflags_count = 0; // Number of expected flags for melody
 	vector<int> false_positives_ignore; // [r_id] Ignore false positives for these flags
 	vector<int> false_positives_global; // [r_id] Always check false positives for these flags
 	vector<int> sas_emulator_max_delay; // [r_id] Specify rule identiefiers, which should not be tested for delay in SAS emulator
@@ -438,10 +429,10 @@ protected:
 	vector<int> sas_emulator_unstable; // [r_id] Specify rule identiefiers, which can appeare in emulator, but not in main analysis
 	vector<vector<int>> sas_emulator_replace; // [r_id][] First flag can replace second in SAS emulator
 	vector<vector<int>> flag_replace; // [r_id][] First flag can replace second on second scan or in SAS emulator
+	vector<int> flag_delay; // [r_id] Maximum flag delay in steps
 	vector<int> flags_full; // [r_id] Flags of full analysis
 	vector<vector<int>> nflags_full; // [s][] Note flags of full analysis
 	vector<vector<int>> nflags_prev; // [s][] Note flags of previous SAS run
-	vector<int> flag_delay; // [r_id] Maximum flag delay in steps
 	vector<CString> flag_delay_st; // [r_id] Information about maximum flag delay
 
 	// Cantus correcting
