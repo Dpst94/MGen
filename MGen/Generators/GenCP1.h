@@ -146,4 +146,28 @@ protected:
 	int pco8_last2 = 0;
 	int mli5_last = 0; // Last note measure
 	int mli8_last = 0;
+
+	// CP1
+	vector<int> ivl; // [s] Diatonic interval between voices
+	vector<int> civl; // [s] Chromatic interval between voices
+	vector<int> ivlc; // [s] Diatonic interval between voices (class)
+	vector<int> civlc; // [s] Chromatic interval between voices (class)
+	vector<int> civlc2; // [s] Shows lilypond optimized civlc (0 for unisone, 12 for octave)
+	vector<int> tivl; // [s] Type of interval between voices
+	vector<int> motion; // [s] Melody motion type
+	vector<int> sus; // [ls] Note suspension flag (when above zero, links to first cantus-changing step)
+	vector<int> susres; // [ls] =1 if sus is resolved correctly
+	vector<int> isus; // [ls] Points to sus position or note start if there is no sus
+	vector<int> cfli; // [cfs] Forward links to each cf note
+	vector<int> hli; // [hs] Forward links to first notes of each harmony
+	vector<int> ha64; // [hs] Audible 6/4 chord, while hbc will show root position or sixth chord
+	vector<int> hli2; // [hs] Forward links to last notes of each harmony
+	vector<int> hbcc; // [hs] Bass note of each harmony (chromatic)
+	vector<int> hbc; // [hs] Bass note of each harmony (diatonic)
+	vector<int> bhli; // [s] Back links to first notes of each harmony
+	vector<int> mshb; // [ls] Melody shape types for fli (basic without patterns)
+	vector<int> mshf; // [ls] Melody shape types for fli (with fixed patterns)
+	vector<int> pat; // [ls] Pattern (cambiata, dnt...) for fli
+	vector<int> pat_state; // [ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
+
 };
