@@ -758,58 +758,6 @@ void CF1D::WritePerfLog() {
 	}
 }
 
-void CF1D::LogPerf() {
-	CString st, st2;
-	long long ms = time() - gen_start_time;
-	if (!ms) ms = 1;
-	st.Format("%s\\%s.pl %s CY %s/ms, sent %s/s, c_len %d, swa_steps %d, sent %d, ignored %d, ",
-		m_algo_folder, m_config, method == mScan ? "SAS" : "SWA",
-		HumanFloat(tcycle / (float)ms), HumanFloat(cantus_sent / (float)ms * 1000),
-		c_len, swa_steps, cantus_sent, cantus_ignored);
-	st2 += st;
-	if (m_algo_id == 111 || m_algo_id == 112) {
-		st.Format("analy %d/%d, cor %d, cor_full %d, cor_rp0 %d, ",
-			cantus_id + 1, cpoint.size() + cantus.size(), cor_sent,
-			cor_full, cor_rp0);
-		st2 += st;
-		if (cor_sent) {
-			st.Format("~swa %s, ~rp %s, ~dp %s, ",
-				HumanFloat(swa_sum / cor_sent), HumanFloat(rp_sum / cor_sent),
-				HumanFloat(dp_sum / cor_sent));
-			st2 += st;
-		}
-	}
-	if (m_testing) {
-		st.Format("time_res %ds, ", ANALYZE_RESERVE);
-		st2 += st;
-	}
-	if (cantus_id) {
-		st.Format("%s #%d, ", midi_file, cantus_id);
-		st2 += st;
-	}
-	st.Format("time %ss, cor_ack%d, fstat%d, fblock%d, fcor%d, ssf%d ",
-		HumanFloat(ms / 1000.0), cor_ack, calculate_stat, calculate_blocking,
-		calculate_correlation, calculate_ssf);
-	st2 += st;
-#ifdef CF_DEBUG
-	st2 += "DCF ";
-#endif
-
-#if defined(_DEBUG)
-	st2 += "Debug ";
-#else
-	st2 += "Release ";
-#endif
-
-#ifdef _WIN64
-	st2 += "x64 ";
-#else
-	st2 += "x86 ";
-#endif
-	WriteLog(2, st2);
-	if (m_testing == 1) AppendLineToFile("autotest\\perf.log", st2 + "\n");
-}
-
 void CF1D::OutputFlagDelays() {
 	for (int f = 0; f < MAX_RULES; ++f) if (flag_delay[f] > sas_emulator_max_delay[f]) {
 		//WriteLog(6, flag_delay_st[f]); // 1

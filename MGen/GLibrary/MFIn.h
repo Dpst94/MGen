@@ -29,11 +29,6 @@ public:
 	void UnisonMute(int step1, int step2);
 	void MergeSmallOverlaps(int step1, int step2);
 
-	void LoadCantus(CString path);
-	void LoadCP(CString path);
-
-	void ProcessInter(int pos, int pos_old, std::vector<std::vector<std::pair<int, int>>> &inter, int hid, std::vector<int> &min_len, std::vector<int> &max_len);
-
 	int in_ppq = 1; // PPQ in input midi file
 	int midifile_loaded = 0; // If MIDI was loaded from file
 	int midifile_type = 1; // Type of MIDI file loaded
@@ -46,12 +41,5 @@ protected:
 	int warning_loadmidi_overlap = 0;
 	int warning_unison_mute = 0;
 
-	// Cantus
-	vector< vector <int> > cantus; // Cantus loaded from midi file
-	vector< vector <CString> > cantus_incom; // Cantus lyrics loaded from midi file
-	vector< vector <int> > cantus_len; // Cantus loaded from midi file
-	vector< vector <float> > cantus_tempo; // Cantus loaded from midi file
-	vector< vector <vector<int>>> cpoint; // Counterpoint loaded from midi file
-	vector< vector <vector<int>>> cp_retrig; // [cantus_id][v][s] Counterpoint loaded from midi file
 };
 

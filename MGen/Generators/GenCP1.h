@@ -128,6 +128,10 @@ protected:
 	void ShrinkCantus();
 	void TransposeCantus();
 
+	// Load midi
+	void LoadCP(CString path);
+	void ProcessInter(int pos, int pos_old, std::vector<std::vector<std::pair<int, int>>> &inter, int hid, std::vector<int> &min_len, std::vector<int> &max_len);
+
 	// Variables
 	int cp_culm = 0; // Position of counterpoint culmination
 	int warn_wrong_fn = 0; // If warning of wrong fn has fired

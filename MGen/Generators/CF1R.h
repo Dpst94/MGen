@@ -1,5 +1,5 @@
 #pragma once
-#include "CF1D.h"
+#include "CF1M.h"
 
 // THESE MACROS CAN BE DISABLED TO IMPROVE PERFORMANCE
 
@@ -181,7 +181,7 @@ const CString TaskNames[] = {
 #define iIco   3 // Imperfect consonance
 
 class CF1R :
-	public CF1D
+	public CF1M
 {
 public:
 	CF1R();

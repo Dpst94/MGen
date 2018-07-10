@@ -17,5 +17,6 @@ protected:
 	void EmulateSAS();
 	void RandomSWA();
 	void SWA(int i, int dp);
-	
+	void LogPerf();
+
 };

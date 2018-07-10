@@ -68,7 +68,6 @@ protected:
 	void FillCantusMap(vector<int>& c, vector<int>& smap, int step1, int step2, vector<vector<int>>& value);
 	void FillCantusMap(vector<int>& c, vector<int>& smap, int step1, int step2, vector<int>& value);
 	void FillCantusMap(vector<int>& c, vector<int>& smap, int step1, int step2, int value);
-	void LogPerf();
 	void OutputFlagDelays();
 	void SelectSpeciesRules();
 
