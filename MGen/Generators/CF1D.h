@@ -70,6 +70,7 @@ protected:
 	void FillCantusMap(vector<int>& c, vector<int>& smap, int step1, int step2, int value);
 	void LogPerf();
 	void OutputFlagDelays();
+	void SelectSpeciesRules();
 
 	// Rules
 	vector<vector<vector<vector<int>>>> RuleParam; // Parsed rule parameters
@@ -505,5 +506,37 @@ protected:
 	vector<int> mli; // [ms] Forward links to first steps of each measure
 	vector<int> bmli; // [s] Backward links to measures from steps
 	vector<int> msh; // [ls] Melody shape types for fli
+
+	// Lilypond parameters
+	int ly_flag_style = 1; // 0 - no flag visualisation, 1 - color note, 2 - x above note
+	int ly_msh = 1; // 0 - do not show msh, 1 - show msh
+	int ly_pagebreak = 1; // Page break after each analysis
+	int ly_rule_verbose = 0; // How verbose rule display format is
+
+	// Rules
+	vector <CString> RuleClass; // Groups for flag groups
+	vector <CString> RuleGroup; // Groups for flag groups
+	vector <int> accept; // Each 1 allows showing canti with specific properties
+	vector<int> rule_viz; // [r_id] Rule visualization type
+	vector<int> rule_viz_v2; // [r_id] Rule visualization type for second voice
+	vector<int> rule_viz_int; // [r_id] Rule visualization with interval text
+	vector<CString> rule_viz_t; // [r_id] Rule visualization text
+	vector <int> severity; // Get severity by flag id
+	vector<DWORD>  flag_color; // Flag colors
+	vector<vector <CString>> RuleName; // [sp][rid] Names of all rules
+	vector<vector <CString>> SubRuleName; // [sp][rid] Names of all rules
+	vector<vector <CString>> RuleComment; // [sp][rid] Comments for flag groups
+	vector<vector <CString>> SubRuleComment; // [sp][rid] Comments for flags
+	int cspecies = 0; // Counterpoint species (current). For example, in CA2 can be zero when evaluating CF
+	int cspecies0 = -1; // Last saved species, for which rules and parameters are loaded
+	int flags_need2 = 0; // Number of second level flags set
+	vector <vector<int>> accepts; // [sp][rid] Each 1 allows showing canti with specific properties
+	vector <vector<int>> severities; // [sp][rid] 
+	int max_flags = 0; // Maximum number of rules
+	int prohibit_min_severity = 0; // Minimum severity to prohibit (below are marked as allowed)
+
+	// Config
+	int emulate_sas = 0; // 0 = disable emulator, 1 = Enables SAS algorithm emulator in CA2
+
 };
 

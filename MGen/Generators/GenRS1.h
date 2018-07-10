@@ -9,6 +9,7 @@ public:
 	~CGenRS1();
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void Generate() override;
+	void SaveLy(CString dir, CString fname) override;
 
 	int min_tempo = 160;
 	int max_tempo = 200;

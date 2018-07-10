@@ -9,6 +9,7 @@ public:
 	~CGenRL1();
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void Generate() override;
+	void SaveLy(CString dir, CString fname) override;
 	unsigned int GetVaue();
 	int CGenRL1::GetVaueInt(int iMin, int iMax, int iType, int iDepth = 1);
 private:

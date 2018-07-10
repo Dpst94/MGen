@@ -9,6 +9,7 @@ public:
 	~CGenMP1();
 	void Generate() override;
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
+	void SaveLy(CString dir, CString fname) override;
 
 	CString midi_file;
 };

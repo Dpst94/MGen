@@ -370,3 +370,6 @@ int CGenRL1::GetVaueInt(int iMin, int iMax, int iType, int iDepth)
 	*/
 	return 1;
 }
+
+void CGenRL1::SaveLy(CString dir, CString fname) {
+}

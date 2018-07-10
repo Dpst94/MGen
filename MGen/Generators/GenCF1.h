@@ -1,8 +1,8 @@
 #pragma once
-#include "CF1R.h"
+#include "CF1Ly.h"
 
 class CGenCF1 :
-	public CF1R
+	public CF1Ly
 {
 public:
 	CGenCF1();

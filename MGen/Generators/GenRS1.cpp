@@ -152,3 +152,6 @@ void CGenRS1::Generate()
 	}
 	t_sent = t_generated;
 }
+
+void CGenRS1::SaveLy(CString dir, CString fname) {
+}

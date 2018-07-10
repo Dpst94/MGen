@@ -11,4 +11,5 @@ public:
 	~CGTemplate();
 
 	virtual void Generate() = 0;
+	virtual void SaveLy(CString dir, CString fname) = 0;
 };

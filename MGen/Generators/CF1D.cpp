@@ -816,3 +816,32 @@ void CF1D::OutputFlagDelays() {
 	}
 }
 
+// Select rules
+void CF1D::SelectSpeciesRules() {
+	if (cspecies == cspecies0) return;
+	cspecies0 = cspecies;
+	// Load rules
+	for (int i = 0; i < max_flags; ++i) {
+		if (severities[cspecies][i] >= prohibit_min_severity) {
+			accept[i] = accepts[cspecies][i];
+		}
+		else {
+			accept[i] = 1;
+		}
+		severity[i] = severities[cspecies][i];
+	}
+	// Check that at least one rule is accepted
+	for (int i = 0; i < max_flags; ++i) {
+		if (accept[i]) break;
+		if (i == max_flags - 1) {
+			WriteLog(5, "Warning: all rules are rejected (0) in configuration file");
+			error = 1;
+		}
+	}
+	// Calculate second level flags count
+	flags_need2 = 0;
+	for (int i = 0; i < max_flags; ++i) {
+		if (accept[i] == 2) ++flags_need2;
+	}
+}
+

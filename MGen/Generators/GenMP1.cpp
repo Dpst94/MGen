@@ -27,3 +27,6 @@ void CGenMP1::Generate()
 	Adapt(0, t_generated - 1);
 	t_sent = t_generated;
 }
+
+void CGenMP1::SaveLy(CString dir, CString fname) {
+}
