@@ -7,5 +7,9 @@ class CP2D :
 public:
 	CP2D();
 	~CP2D();
+
+protected:
+	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
+
 };
 

@@ -14,10 +14,29 @@ CGenCA3::~CGenCA3() {
 }
 
 void CGenCA3::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
+	LoadVar(sN, sV, "musicxml_file", &musicxml_file);
+
 	CGenCP2::LoadConfigLine(sN, sV, idata, fdata);
 }
 
 void CGenCA3::Generate() {
+	if (musicxml_file == "") {
+		WriteLog(5, "MusicXML file not specified in configuration file");
+		error = 7;
+		return;
+	}
+	xfi.LoadXML(musicxml_file);
+	if (!xfi.error.IsEmpty()) {
+		WriteLog(5, xfi.error);
+		error = 8;
+		return;
+	}
+	xfi.ValidateXML();
+	if (!xfi.error.IsEmpty()) {
+		WriteLog(5, xfi.error);
+		error = 9;
+		return;
+	}
 }
 
 void CGenCA3::SaveLy(CString dir, CString fname) {

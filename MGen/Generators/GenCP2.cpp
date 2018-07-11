@@ -13,9 +13,6 @@ CGenCP2::CGenCP2() {
 CGenCP2::~CGenCP2() {
 }
 
-void CGenCP2::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
-}
-
 void CGenCP2::Generate() {
 }
 

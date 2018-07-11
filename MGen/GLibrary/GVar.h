@@ -124,6 +124,9 @@ public:
 	// CA1
 	CString midi_file;
 
+	// CA3
+	CString musicxml_file;
+
 protected:
 	void ValidateVectors(int step1, int step2);
 	void ValidateVectors2(int step1, int step2);

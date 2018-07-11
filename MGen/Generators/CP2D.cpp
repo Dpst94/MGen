@@ -12,3 +12,6 @@ CP2D::CP2D() {
 
 CP2D::~CP2D() {
 }
+
+void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
+}
