@@ -11,7 +11,7 @@ struct XMLNote {
 	int dur; // duration
 	int dur_div; // duration divisions
 	char alter;
-	bool rest;
+	bool rest = true;
 	bool tie_start;
 	bool tie_stop;
 	CString lyric;
@@ -31,6 +31,7 @@ struct XMLVoice {
 	CString name;
 	CString display;
 	int staff;
+	int v;
 	int chord;
 };
 
@@ -59,7 +60,7 @@ public:
 private:
 	void GetTextV(CString xpath, vector<CString>& sa);
 	CString GetText(CString xpath);
-	int AllocateVoice(CString id, int staff, int chord);
+	int AllocateVoice(CString id, int staff, int v, int chord);
 	int GetPitchByName(CString pitch);
 	void TestXML(CString pth);
 	void TestXPath(CString pth);

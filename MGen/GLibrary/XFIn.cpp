@@ -31,15 +31,17 @@ CString XFIn::GetText(CString xpath) {
 	}
 }
 
-int XFIn::AllocateVoice(CString id, int staff, int chord) {
+int XFIn::AllocateVoice(CString id, int staff, int v, int chord) {
   // Check if this voice exists
 	for (int i = 0; i < voice.size(); ++i) {
-		if (voice[i].id == id && voice[i].staff == staff && voice[i].chord == chord) return i;
+		if (voice[i].id == id && voice[i].staff == staff && 
+			voice[i].v == v && voice[i].chord == chord) return i;
 	}
 	// Create new voice
 	XMLVoice new_voice;
 	new_voice.id = id;
 	new_voice.staff = staff;
+	new_voice.v = v;
 	new_voice.chord = chord;
 	new_voice.name = GetText("score-partwise/part-list/score-part[@id = '" + id + "']/part-name");
 	new_voice.display = GetText("score-partwise/part-list/score-part[@id = '" + id + "']/part-name-display/display-text");
@@ -65,6 +67,7 @@ void XFIn::LoadXML(CString pth) {
 	int divisions = 2;
 	int vi = 0;
 	int chord = 0;
+	int v = 1;
 	// Init
 	path = pth;
 	error = "";
@@ -102,7 +105,8 @@ void XFIn::LoadXML(CString pth) {
 			CString part_id = nd.parent().parent().attribute("id").as_string();
 			int cur_div = nd.parent().child("attributes").child("divisions").text().as_int();
 			if (cur_div) divisions = cur_div;
-			int v = nd.child("voice").text().as_int();
+			int cur_v = nd.child("voice").text().as_int();
+			if (cur_v) v = cur_v;
 			int staff = nd.child("staff").text().as_int();
 			if (staff >= words.size()) words.resize(staff + 1);
 			int m = nd.parent().attribute("number").as_int();
@@ -110,7 +114,7 @@ void XFIn::LoadXML(CString pth) {
 				++chord;
 			}
 			else chord = 0;
-			vi = AllocateVoice(part_id, staff, chord);
+			vi = AllocateVoice(part_id, staff, v, chord);
 			// Load measure if it is first note in measure
 			if (mea.size() <= m) {
 				mea.resize(m + 1);
