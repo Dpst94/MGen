@@ -37,6 +37,7 @@ void CGenCA3::Generate() {
 		error = 9;
 		return;
 	}
+	WriteLog(1, "Loaded MusicXML successfully");
 }
 
 void CGenCA3::SaveLy(CString dir, CString fname) {

@@ -8,13 +8,14 @@ using namespace pugi;
 
 struct XMLNote {
 	float pos = 0; // position inside measure
-	char pitch; // with alteration applied
-	int dur; // duration
-	int dur_div; // duration divisions
-	char alter;
+	char pitch = 0; // with alteration applied
+	int dur = 0; // duration
+	int dur_div = 1; // duration divisions
+	char alter = 0;
 	bool rest = true;
-	bool tie_start;
-	bool tie_stop;
+	bool tie_start = false;
+	bool tie_stop = false;
+	bool grace = false;
 	CString lyric;
 	CString words;
 	char fifths = 100;
