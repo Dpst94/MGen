@@ -7,6 +7,7 @@
 using namespace pugi;
 
 struct XMLNote {
+	float pos = 0; // position inside measure
 	char pitch; // with alteration applied
 	int dur; // duration
 	int dur_div; // duration divisions
@@ -16,13 +17,13 @@ struct XMLNote {
 	bool tie_stop;
 	CString lyric;
 	CString words;
+	char fifths = 100;
+	CString mode;
 };
 
 struct XMLMeasure {
 	char beats = 0;
 	char beat_type = 0;
-	char fifths = 100;
-	CString mode;
 	CString barline;
 };
 
@@ -41,6 +42,7 @@ public:
 	XFIn();
 	~XFIn();
 	void LoadXML(CString pth);
+	void ValidateXML();
 
 	// Input
 	CString path;
@@ -62,8 +64,6 @@ private:
 	CString GetText(CString xpath);
 	int AllocateVoice(CString id, int staff, int v, int chord);
 	int GetPitchByName(CString pitch);
-	void TestXML(CString pth);
-	void TestXPath(CString pth);
 
 	xml_document d;
 

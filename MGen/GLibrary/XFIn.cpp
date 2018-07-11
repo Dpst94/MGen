@@ -68,6 +68,13 @@ void XFIn::LoadXML(CString pth) {
 	int vi = 0;
 	int chord = 0;
 	int v = 1;
+	int max_mea = 1;
+	CString mode;
+	char fifths;
+	char beats;
+	char beat_type;
+	float m_pos = 0;
+	float m_pos_prev = 0;
 	// Init
 	path = pth;
 	error = "";
@@ -110,6 +117,7 @@ void XFIn::LoadXML(CString pth) {
 			int staff = nd.child("staff").text().as_int();
 			if (staff >= words.size()) words.resize(staff + 1);
 			int m = nd.parent().attribute("number").as_int();
+			if (m > max_mea) max_mea = m;
 			if (nd.child("chord").name()[0] != '\0') {
 				++chord;
 			}
@@ -119,15 +127,28 @@ void XFIn::LoadXML(CString pth) {
 			if (mea.size() <= m) {
 				mea.resize(m + 1);
 				mea[m].barline = nd.parent().child("barline").child("bar-style").text().as_string();
-				if (nd.parent().child("attributes").child("key").child("fifths").name()[0] != '\0')
-					mea[m].fifths = nd.parent().child("attributes").child("key").child("fifths").text().as_int();
-				mea[m].mode = nd.parent().child("attributes").child("key").child("mode").text().as_string();
-				mea[m].beats = nd.parent().child("attributes").child("time").child("beats").text().as_int();
-				mea[m].beat_type = nd.parent().child("attributes").child("time").child("beat-type").text().as_int();
 			}
+			// Load measure if this is first note in measure in this voice
+			if (note[vi].size() <= m) {
+				m_pos = 0;
+				if (nd.parent().child("attributes").child("key").child("fifths").name()[0] != '\0')
+					fifths = nd.parent().child("attributes").child("key").child("fifths").text().as_int();
+				mode = nd.parent().child("attributes").child("key").child("mode").text().as_string();
+				if (nd.parent().child("attributes").child("time").child("beats").text().as_int())
+					beats = nd.parent().child("attributes").child("time").child("beats").text().as_int();
+				mea[m].beats = beats;
+				if (nd.parent().child("attributes").child("time").child("beat-type").text().as_int())
+					beat_type = nd.parent().child("attributes").child("time").child("beat-type").text().as_int();
+				mea[m].beat_type = beat_type;
+			}
+			if (chord)
+				m_pos = m_pos_prev;
 			note[vi].resize(m + 1);
 			int ni = note[vi][m].size();
 			note[vi][m].resize(ni + 1);
+			note[vi][m][ni].pos = m_pos;
+			note[vi][m][ni].fifths = fifths;
+			note[vi][m][ni].mode = mode;
 			if (nd.find_child_by_attribute("tie", "type", "stop")) {
 				note[vi][m][ni].tie_stop = 1;
 			}
@@ -153,43 +174,43 @@ void XFIn::LoadXML(CString pth) {
 				note[vi][m][ni].words = words[staff];
 				words[staff].Empty();
 			}
+			m_pos_prev = m_pos;
+			m_pos += note[vi][m][ni].dur * 25.0 / divisions;
+		}
+	}
+	// Set same measure number for all voices
+	for (int vi = 0; vi < voice.size(); ++vi) {
+		note[vi].resize(max_mea + 1);
+	}
+}
+
+void XFIn::ValidateXML() {
+	// Check if measure is not filled with notes
+	for (int vi = 0; vi < voice.size(); ++vi) {
+		for (int m = 1; m < mea.size(); ++m) {
+			// Do not check measures without notes
+			if (!note[vi][m].size()) continue;
+			float stack = note[vi][m][0].pos;
+			for (int ni = 0; ni < note[vi][m].size(); ++ni) {
+				if (ni && note[vi][m][ni].pos != stack) {
+					error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d: note %d of %d. Note starts at position %.3f that is not stack of previous note lengths %.3f",
+						m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+						mea[m].beats, mea[m].beat_type, ni, note[vi][m].size(),
+						note[vi][m][ni].pos, stack);
+					return;
+				}
+				stack += note[vi][m][ni].dur * 25.0 / note[vi][m][ni].dur_div;
+			}
+			// Do not check chord voices
+			if (voice[vi].chord) continue;
+			if (stack != mea[m].beats * 100.0 / mea[m].beat_type) {
+				error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d: %d notes. Need %.3f time but got %.3f",
+					m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+					mea[m].beats, mea[m].beat_type, note[vi][m].size(),
+					mea[m].beats * 100.0 / mea[m].beat_type, stack);
+				return;
+			}
 		}
 	}
 }
 
-void XFIn::TestXML(CString pth) {
-	path = pth;
-	error = "";
-	xml_parse_result result = d.load_file(path);
-	if (!result) {
-		error = "Cannot open file " + path;
-		return;
-	}
-
-	for (xml_node tool : d.child("Profile").child("Tools").children("Tool"))
-	{
-		int timeout = tool.attribute("Timeout").as_int();
-
-		if (timeout > 0)
-			std::cout << "Tool " << tool.attribute("Filename").value() << " has timeout " << timeout << "\n";
-	}
-}
-
-void XFIn::TestXPath(CString pth) {
-	path = pth;
-	error = "";
-	xml_parse_result result = d.load_file(path);
-	if (!result) {
-		error = "Cannot open file " + path;
-		return;
-	}
-
-	xpath_node_set tools_with_timeout = d.select_nodes("/Profile/Tools/Tool[@Timeout > 0]");
-
-	for (xpath_node node : tools_with_timeout)
-	{
-		xml_node tool = node.node();
-		std::cout << "Tool " << tool.attribute("Filename").value() <<
-			" has timeout " << tool.attribute("Timeout").as_int() << "\n";
-	}
-}
