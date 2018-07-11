@@ -192,6 +192,62 @@ void XFIn::ValidateXML() {
 			if (!note[vi][m].size()) continue;
 			float stack = note[vi][m][0].pos;
 			for (int ni = 0; ni < note[vi][m].size(); ++ni) {
+				if (ni && note[vi][m][ni].tie_start) {
+					if (ni < note[vi][m].size() - 1) {
+						if (note[vi][m][ni].pitch != note[vi][m][ni + 1].pitch) {
+							error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note in this measure has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+								m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+								mea[m].beats, mea[m].beat_type, ni, note[vi][m].size());
+							return;
+						}
+						if (!note[vi][m][ni + 1].tie_stop) {
+							error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note in this measure does not stop tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+								m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+								mea[m].beats, mea[m].beat_type, ni, note[vi][m].size());
+							return;
+						}
+						if (!note[vi][m][ni + 1].rest) {
+							error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note in this measure is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+								m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+								mea[m].beats, mea[m].beat_type, ni, note[vi][m].size());
+							return;
+						}
+					}
+					else if (m < mea.size() - 1) {
+						if (!note[vi][m + 1].size()) {
+							error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, next measure does not have note in this voice.",
+								m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+								mea[m].beats, mea[m].beat_type, ni, note[vi][m].size());
+							return;
+						}
+						else {
+							if (note[vi][m][ni].pitch != note[vi][m + 1][0].pitch) {
+								error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+									m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+									mea[m].beats, mea[m].beat_type, ni, note[vi][m].size());
+								return;
+							}
+							if (!note[vi][m + 1][0].tie_stop) {
+								error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note does not stop tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+									m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+									mea[m].beats, mea[m].beat_type, ni, note[vi][m].size());
+								return;
+							}
+							if (note[vi][m + 1][0].rest) {
+								error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+									m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+									mea[m].beats, mea[m].beat_type, ni, note[vi][m].size());
+								return;
+							}
+						}
+					}
+					else {
+						error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but it is last note in this voice.",
+							m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
+							mea[m].beats, mea[m].beat_type, ni, note[vi][m].size());
+						return;
+					}
+				}
 				if (ni && note[vi][m][ni].pos != stack) {
 					error.Format("Measure %d, vi %d, part id %s, staff %d, voice %d, chord %d, beat %d/%d: note %d of %d. Note starts at position %.3f that is not stack of previous note lengths %.3f",
 						m, vi, voice[vi].id, voice[vi].staff, voice[vi].v, voice[vi].chord,
