@@ -15,6 +15,7 @@ protected:
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	int XML_to_CP();
 	int CheckXML();
+	void GetCP();
 	void SaveLy(CString dir, CString fname) override;
 
 	XFIn xfi;

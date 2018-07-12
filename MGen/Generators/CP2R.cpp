@@ -53,29 +53,33 @@ void CP2R::CreateLinks() {
 
 void CP2R::SendCP() {
 	CreateLinks();
-	ResizeVectors(cc[0].size());
+	int real_len = cc[0].size();
+	int full_len = floor((real_len + 1) / 8 + 1) * 8;
+	ResizeVectors(step0 + full_len);
 	for (int v = 0; v < av_cnt; ++v) {
+		int vi = vid[v];
 		for (int ls = 0; ls < fli_size[v]; ++ls) {
 			for (int s = fli[v][ls]; s <= fli2[v][ls]; ++s) {
 				if (cc[v][s]) {
-					note[s][v] = cc[v][s];
-					pause[s][v] = 0;
+					note[step0 + s][vi] = cc[v][s];
+					pause[step0 + s][vi] = 0;
 				}
 				else {
-					note[s][v] = 0;
-					pause[s][v] = 1;
+					note[step0 + s][vi] = 0;
+					pause[step0 + s][vi] = 1;
 				}
-				len[s][v] = llen[v][ls];
-				coff[s][v] = s - fli[v][ls];
-				tempo[s] = cp_tempo;
+				len[step0 + s][vi] = llen[v][ls];
+				coff[step0 + s][vi] = s - fli[v][ls];
+				tempo[step0 + s] = cp_tempo;
 			}
 		}
 	}
-	CountOff(0, cc[0].size() - 1);
-	CountTime(0, cc[0].size() - 1);
-	UpdateNoteMinMax(0, cc[0].size() - 1);
-	UpdateTempoMinMax(0, cc[0].size() - 1);
-	t_generated = cc[0].size() - 1;
+	for (int s = step0 + real_len; s < step0 + full_len; ++s) tempo[s] = tempo[s - 1];
+	CountOff(step0, step0 + full_len - 1);
+	CountTime(step0, step0 + full_len - 1);
+	UpdateNoteMinMax(step0, step0 + full_len - 1);
+	UpdateTempoMinMax(step0, step0 + full_len - 1);
+	t_generated = step0 + full_len - 1;
 	Adapt(0, t_generated);
 	t_sent = t_generated;
 }

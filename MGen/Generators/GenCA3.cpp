@@ -24,6 +24,7 @@ void CGenCA3::InitAnalysis() {
 	retr.resize(av_cnt);
 	llen.resize(av_cnt);
 	rlen.resize(av_cnt);
+	vid.resize(av_cnt);
 	for (int v = 0; v < av_cnt; ++v) {
 		fli[v].resize(c_len);
 		fli2[v].resize(c_len);
@@ -75,7 +76,6 @@ int CGenCA3::XML_to_CP() {
 	im.resize(c_len);
 	ep2 = c_len;
 	ResizeVectors(t_allocated, av_cnt);
-	InitAnalysis();
 	// Explode music into separate exercises
 	// State: 0 - find note, 1 - find pause
 	int state = 0;
@@ -182,6 +182,23 @@ int CGenCA3::CheckXML() {
 	return 0;
 }
 
+void CGenCA3::GetCP() {
+	av_cnt = cp[cp_id].size();
+	cc.resize(av_cnt);
+	retr.resize(av_cnt);
+	c_len = cp[cp_id][0].size();
+	for (int v = 0; v < av_cnt; ++v) {
+		cc[v].resize(c_len);
+		retr[v].resize(c_len);
+		vid[v] = cp_vid[cp_id][v];
+		for (int s = 0; s < c_len; ++s) {
+			cc[v][s] = cp[cp_id][v][s];
+			retr[v][s] = cp_retr[cp_id][v][s];
+		}
+	}
+	ep2 = c_len;
+}
+
 void CGenCA3::Generate() {
 	if (musicxml_file == "") {
 		WriteLog(5, "MusicXML file not specified in configuration file");
@@ -202,7 +219,17 @@ void CGenCA3::Generate() {
 	}
 	if (CheckXML()) return;
 	if (XML_to_CP()) return;
-	SendCP();
+	for (cp_id = 0; cp_id < cp.size(); ++cp_id) {
+		GetCP();
+		int real_len = cc[0].size();
+		int full_len = floor((real_len + 1) / 8 + 1) * 8;
+		InitAnalysis();
+		for (int v = 0; v < v_cnt; ++v) {
+			FillPause(step0, full_len, v);
+		}
+		SendCP();
+		step0 += full_len;
+	}
 	//WriteLog(1, "Loaded MusicXML successfully");
 }
 

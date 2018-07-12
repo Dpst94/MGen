@@ -19,8 +19,10 @@ protected:
 	vector<int> fli_size;
 
 	int cp_tempo = 100;
+	int step0 = 0;
 
 	// Main vectors
+	vector<int> vid; // [v] Voice id
 	vector<vector<int>> c; // [v][s] Diatonic
 	vector<vector<int>> cc; // [v][s] Chromatic
 	vector<vector<int>> pc; // [v][s] Pitch class (diatonic)
