@@ -42,18 +42,20 @@ void CGenCA3::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 }
 
 int CGenCA3::XML_to_CP() {
-	// Intermediate cc matrix
-	vector<vector<char>> icc;
 	// Intermediate measures vector
 	vector<int> im;
 
 	av_cnt = xfi.voice.size();
 	InitAnalysis();
 	cp_tempo = 0;
+	vname.resize(av_cnt);
 	for (int vi = 0; vi < xfi.voice.size(); ++vi) {
 		int v = av_cnt - vi - 1;
 		int pos = 0;
+		vname[v] = xfi.voice[vi].name;
 		for (int m = 1; m < xfi.mea.size(); ++m) {
+			im.resize(pos + 1);
+			im[pos] = 1;
 			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
 				int len = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
 				cc[v].resize(pos + len);
@@ -70,10 +72,57 @@ int CGenCA3::XML_to_CP() {
 		}
 	}
 	if (!cp_tempo) cp_tempo = 100;
+	im.resize(c_len);
 	ep2 = c_len;
+	ResizeVectors(t_allocated, av_cnt);
 	InitAnalysis();
 	// State: 0 - find note, 1 - find pause
 	int state = 0;
+	int s1 = 0;
+	cp_id = 0;
+	for (int s = 0; s < c_len; ++s) {
+		int is_pause = 1;
+		for (int v = 0; v < av_cnt; ++v) {
+			if (cc[v][s]) {
+				is_pause = 0;
+			}
+		}
+		if (!state) {
+			if (!is_pause) {
+				s1 = s;
+				state = 1;
+			}
+		}
+		else {
+			if (is_pause) {
+				int s2 = s - 1;
+				// Move left to measure
+				while (!im[s1] && s1 > 0) --s1;
+				// Copy cp
+				cp.resize(cp_id + 1);
+				cp_retr.resize(cp_id + 1);
+				cp_mea.resize(cp_id + 1);
+				cp_vname.resize(cp_id + 1);
+				cp[cp_id].resize(av_cnt);
+				cp_retr[cp_id].resize(av_cnt);
+				cp_mea[cp_id].resize(av_cnt);
+				cp_vname[cp_id].resize(av_cnt);
+				for (int v = 0; v < av_cnt; ++v) {
+					cp[cp_id][v].resize(s2 - s1 + 1);
+					cp_retr[cp_id][v].resize(s2 - s1 + 1);
+					cp_mea[cp_id][v].resize(s2 - s1 + 1);
+					cp_vname[cp_id][v] = xfi.voice[av_cnt - v - 1].name;
+					for (int s3 = s1; s3 <= s2; ++s3) {
+						cp[cp_id][v][s3 - s1] = cc[v][s3];
+						cp_retr[cp_id][v][s3 - s1] = retr[v][s3];
+						cp_mea[cp_id][v][s3 - s1] = im[s3];
+					}
+				}
+				cp_id++;
+				state = 0;
+			}
+		}
+	}
 	return 0;
 }
 

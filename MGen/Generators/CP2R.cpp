@@ -53,7 +53,7 @@ void CP2R::CreateLinks() {
 
 void CP2R::SendCP() {
 	CreateLinks();
-	ResizeVectors(cc[0].size(), av_cnt);
+	ResizeVectors(cc[0].size());
 	for (int v = 0; v < av_cnt; ++v) {
 		for (int ls = 0; ls < fli_size[v]; ++ls) {
 			for (int s = fli[v][ls]; s <= fli2[v][ls]; ++s) {

@@ -19,5 +19,13 @@ protected:
 
 	XFIn xfi;
 
+	vector<vector<vector<int>>> cp;
+	vector<vector<vector<int>>> cp_retr;
+	vector<vector<vector<int>>> cp_mea;
+	vector<vector<CString>> cp_vname;
+	vector<CString> vname;
+
+	int cp_id;
+
 };
 
