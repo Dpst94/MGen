@@ -473,7 +473,7 @@ int CGenCP1::SendCP() {
 		LogPmap2();
 	}
 	if (!mutex_animate.try_lock_for(chrono::milliseconds(5000))) {
-		WriteLog(5, "Critical error: ResizeVectors mutex timed out");
+		WriteLog(5, "Critical error: Animate mutex timed out");
 	}
 	for (int av = 0; av < av_cnt; ++av) {
 		CreateLinks(ac[av], av == cpv);
