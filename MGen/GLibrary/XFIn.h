@@ -16,6 +16,7 @@ struct XMLNote {
 	bool tie_start = false;
 	bool tie_stop = false;
 	bool grace = false;
+	float tempo = 0;
 	CString lyric;
 	CString words;
 	char fifths = 100;

@@ -7,6 +7,23 @@
 #define new DEBUG_NEW 
 #endif
 
+map<CString, int> note_type_value = {
+	{ "1024th", 1 },
+	{ "512th", 2 },
+	{ "256th", 4 },
+	{ "128th", 8 },
+	{ "64th", 16 },
+	{ "32nd", 32 },
+	{ "16th", 64 },
+	{ "eighth", 128 },
+	{ "quarter", 256 },
+	{ "half", 512 },
+	{ "whole", 1024 },
+	{ "breve", 2048 },
+	{ "long", 4096 },
+	{ "maxima", 8192 }
+};
+
 XFIn::XFIn() {
 }
 
@@ -75,6 +92,7 @@ void XFIn::LoadXML(CString pth) {
 	char beat_type;
 	float m_pos = 0;
 	float m_pos_prev = 0;
+	float tempo = 0;
 	// Init
 	path = pth;
 	error = "";
@@ -107,6 +125,11 @@ void XFIn::LoadXML(CString pth) {
 			int staff = nd.child("staff").text().as_int();
 			if (staff >= words.size()) words.resize(staff + 1);
 			words[staff] = nd.child("direction-type").child("words").text().as_string();
+			if (nd.child("direction-type").child("metronome").child("per-minute").name()[0] != '\0') {
+				tempo = nd.child("direction-type").child("metronome").child("per-minute").text().as_float() *
+					note_type_value[nd.child("direction-type").child("metronome").child("beat-unit").text().as_string()] / 256.0;
+				//if (!tempo) tempo = 100;
+			}
 		}
 		if (!strcmp(nd.name(), "note")) {
 			CString part_id = nd.parent().parent().attribute("id").as_string();
@@ -149,6 +172,10 @@ void XFIn::LoadXML(CString pth) {
 			note[vi][m][ni].pos = m_pos;
 			note[vi][m][ni].fifths = fifths;
 			note[vi][m][ni].mode = mode;
+			if (tempo) {
+				note[vi][m][ni].tempo = tempo;
+				tempo = 0;
+			}
 			if (nd.find_child_by_attribute("tie", "type", "stop")) {
 				note[vi][m][ni].tie_stop = 1;
 			}
