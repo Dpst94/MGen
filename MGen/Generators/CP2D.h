@@ -18,6 +18,8 @@ protected:
 	vector<int> maxl;
 	vector<int> fli_size;
 
+	int cp_tempo = 100;
+
 	// Main vectors
 	vector<vector<int>> c; // [v][s] Diatonic
 	vector<vector<int>> cc; // [v][s] Chromatic

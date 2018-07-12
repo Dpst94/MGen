@@ -67,7 +67,7 @@ void CP2R::SendCP() {
 				}
 				len[s][v] = llen[v][ls];
 				coff[s][v] = s - fli[v][ls];
-				tempo[s] = 100;
+				tempo[s] = cp_tempo;
 			}
 		}
 	}

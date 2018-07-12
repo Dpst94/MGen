@@ -49,6 +49,7 @@ int CGenCA3::XML_to_CP() {
 
 	av_cnt = xfi.voice.size();
 	InitAnalysis();
+	cp_tempo = 0;
 	for (int vi = 0; vi < xfi.voice.size(); ++vi) {
 		int v = av_cnt - vi - 1;
 		int pos = 0;
@@ -57,6 +58,8 @@ int CGenCA3::XML_to_CP() {
 				int len = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
 				cc[v].resize(pos + len);
 				retr[v].resize(pos + len);
+				if (xfi.note[vi][m][ni].tempo && !cp_tempo)
+					cp_tempo = xfi.note[vi][m][ni].tempo;
 				if (!xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].tie_stop) retr[v][pos] = 1;
 				for (int s = 0; s < len; ++s) {
 					cc[v][pos + s] = xfi.note[vi][m][ni].pitch;
@@ -66,6 +69,7 @@ int CGenCA3::XML_to_CP() {
 			}
 		}
 	}
+	if (!cp_tempo) cp_tempo = 100;
 	ep2 = c_len;
 	InitAnalysis();
 	// State: 0 - find note, 1 - find pause

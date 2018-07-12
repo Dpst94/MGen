@@ -18,5 +18,6 @@ protected:
 	void SaveLy(CString dir, CString fname) override;
 
 	XFIn xfi;
+
 };
 
