@@ -238,6 +238,7 @@ public:
 	static int vsum(vector<int> &v);
 	template<typename T> static T vmax(vector<T> &v);
 	template<typename T> static T vmin(vector<T> &v);
+	template<typename T>  static void verase(vector<T> &v, int i);
 
 	static CString HumanFloat(float f);
 
@@ -386,3 +387,7 @@ template<typename T> T CGLib::vmin(vector<T> &v) {
 	return res;
 }
 
+// Erase element in vector
+template<typename T> void CGLib::verase(vector<T> &v, int i) {
+	v.erase(v.begin() + i);
+}

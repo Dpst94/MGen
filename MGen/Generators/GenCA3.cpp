@@ -76,6 +76,7 @@ int CGenCA3::XML_to_CP() {
 	ep2 = c_len;
 	ResizeVectors(t_allocated, av_cnt);
 	InitAnalysis();
+	// Explode music into separate exercises
 	// State: 0 - find note, 1 - find pause
 	int state = 0;
 	int s1 = 0;
@@ -85,6 +86,7 @@ int CGenCA3::XML_to_CP() {
 		for (int v = 0; v < av_cnt; ++v) {
 			if (cc[v][s]) {
 				is_pause = 0;
+				break;
 			}
 		}
 		if (!state) {
@@ -94,24 +96,26 @@ int CGenCA3::XML_to_CP() {
 			}
 		}
 		else {
-			if (is_pause) {
-				int s2 = s - 1;
+			if (is_pause || s == c_len - 1) {
+				int s2;
+				if (!is_pause) s2 = s;
+				else s2 = s - 1;
 				// Move left to measure
 				while (!im[s1] && s1 > 0) --s1;
 				// Copy cp
 				cp.resize(cp_id + 1);
 				cp_retr.resize(cp_id + 1);
 				cp_mea.resize(cp_id + 1);
-				cp_vname.resize(cp_id + 1);
+				cp_vid.resize(cp_id + 1);
 				cp[cp_id].resize(av_cnt);
 				cp_retr[cp_id].resize(av_cnt);
 				cp_mea[cp_id].resize(av_cnt);
-				cp_vname[cp_id].resize(av_cnt);
+				cp_vid[cp_id].resize(av_cnt);
 				for (int v = 0; v < av_cnt; ++v) {
 					cp[cp_id][v].resize(s2 - s1 + 1);
 					cp_retr[cp_id][v].resize(s2 - s1 + 1);
 					cp_mea[cp_id][v].resize(s2 - s1 + 1);
-					cp_vname[cp_id][v] = xfi.voice[av_cnt - v - 1].name;
+					cp_vid[cp_id][v] = v;
 					for (int s3 = s1; s3 <= s2; ++s3) {
 						cp[cp_id][v][s3 - s1] = cc[v][s3];
 						cp_retr[cp_id][v][s3 - s1] = retr[v][s3];
@@ -120,6 +124,27 @@ int CGenCA3::XML_to_CP() {
 				}
 				cp_id++;
 				state = 0;
+			}
+		}
+	}
+	// Remove empty voices
+	for (cp_id = 0; cp_id < cp.size(); ++cp_id) {
+		vector<int> empty;
+		empty.resize(av_cnt, 1);
+		for (int v = 0; v < av_cnt; ++v) {
+			for (int s = 0; s < cp[cp_id][v].size(); ++s) {
+				if (cp[cp_id][v][s]) {
+					empty[v] = 0;
+					break;
+				}
+			}
+		}
+		for (int v = av_cnt-1; v >= 0; --v) {
+			if (empty[v]) {
+				verase(cp[cp_id], v);
+				verase(cp_retr[cp_id], v);
+				verase(cp_mea[cp_id], v);
+				verase(cp_vid[cp_id], v);
 			}
 		}
 	}

@@ -22,7 +22,7 @@ protected:
 	vector<vector<vector<int>>> cp;
 	vector<vector<vector<int>>> cp_retr;
 	vector<vector<vector<int>>> cp_mea;
-	vector<vector<CString>> cp_vname;
+	vector<vector<int>> cp_vid;
 	vector<CString> vname;
 
 	int cp_id;
