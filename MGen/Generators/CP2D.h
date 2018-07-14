@@ -1,6 +1,39 @@
 #pragma once
 #include "..\GLibrary\GTemplate.h"
 
+// Maximum species
+#define MAX_SPECIES 5
+// Maximum voice count
+#define MAX_VC 9
+// Maximum voice pair (0 = highest voice, 1 = lowest voice, 2 = other voices)
+// Voice pairs (0 = lowest + highest, 1 = lowest + non-highest, 2 = non-lowest + non-highest)
+#define MAX_VP 2
+
+// This information is specific to rule
+struct RuleInfo {
+	CString RuleClass;
+	CString RuleGroup;
+	int viz;
+	int viz_v2;
+	int viz_int;
+	CString viz_text;
+	int false_positives_global;
+	int false_positives_ignore;
+	int sas_emulator_max_delay;
+	int sas_emulator_move_ignore;
+	int sas_emulator_unstable;
+	vector<int> sas_emulator_replace;
+	vector<int> flag_replace;
+};
+
+// This information is specific to rule with particular sp/vc/vg
+struct RuleInfo2 {
+	CString RuleName;
+	CString SubRuleName;
+	CString RuleComment;
+	CString SubRuleComment;
+};
+
 class CP2D :
 	public CGTemplate
 {
@@ -10,7 +43,15 @@ public:
 
 protected:
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
+	void LoadRules(CString fname);
+	void ResizeRuleVariantVector(vector<vector<vector<vector<int>>>>& ve);
+	void ResizeRuleVariantVector(vector<vector<vector<vector<RuleInfo2>>>> &ve);
+	void ResizeRuleVariantVectors2();
+	void SaveRuleVariant(int sp, int vc, int vp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com);
 
+	void CheckRuleList();
+
+	int max_rule = 0;
 	int av_cnt;
 	int c_len = 0;
 	int ep2;
@@ -20,6 +61,16 @@ protected:
 
 	int cp_tempo = 100;
 	int step0 = 0;
+
+	// Rules
+	vector<RuleInfo> ruleinfo; // [rid]
+	vector<vector<vector<vector<RuleInfo2>>>> ruleinfo2; // [sp][vc][vg][rid]
+	vector<vector<vector<vector<int>>>> accept; // [sp][vc][vg][rid]
+	vector<vector<vector<vector<int>>>> severity; // [sp][vc][vg][rid]
+
+	// Rule parameters [sp][vc][vg]
+	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
+	vector<vector<vector<int>>> sus_last_measures; // Last measures in which sus is allowed in species 2 and 3
 
 	// Main vectors
 	vector<int> vid; // [v] Voice id
