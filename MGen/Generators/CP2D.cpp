@@ -191,6 +191,34 @@ void CP2D::LoadRules(CString fname) {
 					return;
 				}
 				rdetailed[rid] == -1;
+			}
+			else {
+				if (rdetailed[rid] == -1) {
+					est.Format("Rule %d tries to combine detailed and non-detailed approaches",
+						rid);
+					WriteLog(5, est);
+					error = 1;
+					return;
+				}
+				rdetailed[rid] == 1;
+				if (!ruleinfo[rid].RuleName.IsEmpty() && !ruleinfo[rid].text_differs) {
+					if (ruleinfo[rid].RuleName != rule || ruleinfo[rid].SubRuleName != subrule ||
+						ruleinfo[rid].RuleComment != ast[10] || ruleinfo[rid].SubRuleComment != ast[11]) {
+						ruleinfo[rid].text_differs = 1;
+						// Copy info
+						ResizeRuleVariantVector(ruleinfo2[rid]);
+						for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+							for (int vc = 1; vc <= MAX_VC; ++vc) {
+								for (int vp = 0; vp <= MAX_VP; ++vp) {
+									SaveRuleVariant(sp, vc, vp, rid, ruleinfo[rid].RuleName, 
+										ruleinfo[rid].SubRuleName, ruleinfo[rid].RuleComment, ruleinfo[rid].SubRuleComment);
+								}
+							}
+						}
+					}
+				}
+			}
+			if (!ruleinfo[rid].text_differs) {
 				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
 						for (int vp = 0; vp <= MAX_VP; ++vp) {
@@ -204,20 +232,6 @@ void CP2D::LoadRules(CString fname) {
 				}
 			}
 			else {
-				if (rdetailed[rid] == -1) {
-					est.Format("Rule %d tries to combine detailed and non-detailed approaches",
-						rid);
-					WriteLog(5, est);
-					error = 1;
-					return;
-				}
-				rdetailed[rid] == 1;
-				if (!ruleinfo[rid].RuleName.IsEmpty()) {
-					if (ruleinfo[rid].RuleName != rule || ruleinfo[rid].SubRuleName != subrule ||
-						ruleinfo[rid].RuleComment != ast[10] || ruleinfo[rid].SubRuleComment != ast[11]) {
-						ruleinfo[rid].text_differs = 1;
-					}
-				}
 				ResizeRuleVariantVector(ruleinfo2[rid]);
 				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
@@ -230,7 +244,7 @@ void CP2D::LoadRules(CString fname) {
 							if (!nsp[sp] || !nvc[vc] || !nvp[vp]) {
 								if (ruleinfo2[rid][sp][vc][vp].RuleName.IsEmpty()) {
 									cur_accept = 0;
-									SaveRuleVariant(sp, vc, vp, rid, cur_accept, sev, rule, subrule, ast[10], ast[11]);
+									SaveRuleVariant(sp, vc, vp, rid, rule, subrule, ast[10], ast[11]);
 								}
 							}
 							else {
@@ -241,7 +255,7 @@ void CP2D::LoadRules(CString fname) {
 									WriteLog(5, est);
 								}
 								else rid_unique[sp][vc][vp][rid] = 1;
-								SaveRuleVariant(sp, vc, vp, rid, cur_accept, sev, rule, subrule, ast[10], ast[11]);
+								SaveRuleVariant(sp, vc, vp, rid, rule, subrule, ast[10], ast[11]);
 							}
 						}
 					}
@@ -313,15 +327,12 @@ void CP2D::ResizeRuleVariantVectors2() {
 	}
 }
 
-void CP2D::SaveRuleVariant(int sp, int vc, int vp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com) {
+void CP2D::SaveRuleVariant(int sp, int vc, int vp, int rid, CString rule, CString subrule, CString rule_com, CString subrule_com) {
 	// Set values
 	ruleinfo2[rid][sp][vc][vp].RuleName = rule;
 	ruleinfo2[rid][sp][vc][vp].SubRuleName = subrule;
 	ruleinfo2[rid][sp][vc][vp].RuleComment = rule_com;
 	ruleinfo2[rid][sp][vc][vp].SubRuleComment = subrule_com;
-	accept[sp][vc][vp][rid] = flag;
-	severity[sp][vc][vp][rid] = sev;
-	// Replace viz text
 }
 
 void CP2D::CheckRuleList() {
