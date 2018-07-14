@@ -15,6 +15,11 @@
 #define rsComment 2 // Rule comment
 #define rsSubComment 3 // Subrule comment
 
+// Voice pair types
+#define vpExt 0 // Extreme voices (bass and highest)
+#define vpBas 1 // Bass + non-highest voice
+#define vpNbs 2 // Non-bass + any other voice (including highest)
+
 // This information is specific to rule
 struct RuleInfo {
 	CString RuleClass;

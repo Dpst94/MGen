@@ -159,9 +159,9 @@ void CP2D::LoadRules(CString fname) {
 			else if (isdigit(voices[0])) {
 				nvc[atoi(voices.Mid(0, 1))] = 1;
 			}
-			if (voices.Find("E") != -1) nvp[0] = 1;
-			else if (voices.Find("B") != -1) nvp[1] = 1;
-			else if (voices.Find("M") != -1) nvp[2] = 1;
+			if (voices.Find("E") != -1) nvp[vpExt] = 1;
+			else if (voices.Find("B") != -1) nvp[vpBas] = 1;
+			else if (voices.Find("N") != -1) nvp[vpNbs] = 1;
 			// Set if empty
 			int found = 0;
 			for (int i = 0; i <= MAX_SPECIES; ++i) if (nsp[i]) found = 1;
