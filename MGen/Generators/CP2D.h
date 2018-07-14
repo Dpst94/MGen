@@ -41,6 +41,7 @@ struct RuleInfo {
 	CString RuleComment;
 	CString SubRuleComment;
 	vector<vector<int>> RuleParam;
+	int text_differs = 0;
 };
 
 // This information is specific to rule with particular sp/vc/vg
@@ -69,7 +70,12 @@ protected:
 	inline void SaveRuleVariant(int sp, int vc, int vp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com);
 	void CheckRuleList();
 	int Interval2Chromatic(int iv);
-	inline void ParseRule(int sp, int vc, int vp, int rid, int type);
+	inline CString GetRuleName(int rid, int sp, int vc, int vp);
+	inline CString GetSubRuleName(int rid, int sp, int vc, int vp);
+	inline CString GetRuleComment(int rid, int sp, int vc, int vp);
+	inline CString GetSubRuleComment(int rid, int sp, int vc, int vp);
+	inline void ParseRule(int rid, int type);
+	inline void ParseRule2(int sp, int vc, int vp, int rid, int type);
 	inline int GetRuleParam(int sp, int vc, int vp, int rid, int type, int id);
 	void ParseRules();
 
@@ -97,6 +103,7 @@ protected:
 	// Rule parameters [sp][vc][vg]
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
 	vector<vector<vector<int>>> sus_last_measures; // Last measures in which sus is allowed in species 2 and 3
+	vector<vector<vector<int>>> cse_leaps_r; // Last measures in which sus is allowed in species 2 and 3
 
 	// Main vectors
 	vector<int> vid; // [v] Voice id

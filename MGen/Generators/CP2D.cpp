@@ -20,8 +20,8 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	if (*sN == "rules_file") {
 		++parameter_found;
 		LoadRules("configs\\" + *sV);
-		//ParseRules();
-		//SetRuleParams();
+		ParseRules();
+		SetRuleParams();
 	}
 }
 
@@ -196,6 +196,12 @@ void CP2D::LoadRules(CString fname) {
 					return;
 				}
 				rdetailed[rid] == -1;
+				if (!ruleinfo[rid].RuleName.IsEmpty()) {
+					if (ruleinfo[rid].RuleName != rule || ruleinfo[rid].SubRuleName != subrule ||
+						ruleinfo[rid].RuleComment != ast[10] || ruleinfo[rid].SubRuleComment != ast[11]) {
+						ruleinfo[rid].text_differs = 1;
+					}
+				}
 				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
 						for (int vp = 0; vp <= MAX_VP; ++vp) {
@@ -357,9 +363,60 @@ int CP2D::Interval2Chromatic(int iv) {
 	return res;
 }
 
+CString CP2D::GetRuleName(int rid, int sp, int vc, int vp) {
+	if (ruleinfo2[rid].size()) {
+		return ruleinfo2[rid][sp][vc][vp].RuleName;
+	}
+	else {
+		return ruleinfo[rid].RuleName;
+	}
+}
+
+CString CP2D::GetSubRuleName(int rid, int sp, int vc, int vp) {
+	if (ruleinfo2[rid].size()) {
+		return ruleinfo2[rid][sp][vc][vp].SubRuleName;
+	}
+	else {
+		return ruleinfo[rid].SubRuleName;
+	}
+}
+
+CString CP2D::GetRuleComment(int rid, int sp, int vc, int vp) {
+	if (ruleinfo2[rid].size()) {
+		return ruleinfo2[rid][sp][vc][vp].RuleComment;
+	}
+	else {
+		return ruleinfo[rid].RuleComment;
+	}
+}
+
+CString CP2D::GetSubRuleComment(int rid, int sp, int vc, int vp) {
+	if (ruleinfo2[rid].size()) {
+		return ruleinfo2[rid][sp][vc][vp].SubRuleComment;
+	}
+	else {
+		return ruleinfo[rid].SubRuleComment;
+	}
+}
+
 // Load rules
-void CP2D::ParseRule(int sp, int vc, int vp, int rid, int type) {
-	if (!ruleinfo2[rid].size()) return;
+void CP2D::ParseRule(int rid, int type) {
+	CString st;
+	if (type == rsName) st = ruleinfo[rid].RuleName;
+	if (type == rsSubName) st = ruleinfo[rid].SubRuleName;
+	if (type == rsComment) st = ruleinfo[rid].RuleComment;
+	if (type == rsSubComment) st = ruleinfo[rid].SubRuleComment;
+	vector<int> v;
+	GetVint(st, v);
+	if (v.size()) {
+		// Create types
+		if (!ruleinfo[rid].RuleParam.size()) ruleinfo[rid].RuleParam.resize(4);
+		// Set params for type
+		ruleinfo[rid].RuleParam[type] = v;
+	}
+}
+
+void CP2D::ParseRule2(int sp, int vc, int vp, int rid, int type) {
 	CString st;
 	if (type == rsName) st = ruleinfo2[rid][sp][vc][vp].RuleName;
 	if (type == rsSubName) st = ruleinfo2[rid][sp][vc][vp].SubRuleName;
@@ -376,34 +433,68 @@ void CP2D::ParseRule(int sp, int vc, int vp, int rid, int type) {
 }
 
 int CP2D::GetRuleParam(int sp, int vc, int vp, int rid, int type, int id) {
-	if (!ruleinfo2[rid][sp][vc][vp].RuleParam.size() || id >= ruleinfo2[rid][sp][vc][vp].RuleParam[type].size()) {
-		CString est, rs;
-		CString st;
-		if (type == rsName) st = ruleinfo2[rid][sp][vc][vp].RuleName;
-		else if (type == rsSubName) st = ruleinfo2[rid][sp][vc][vp].SubRuleName;
-		else if (type == rsComment) st = ruleinfo2[rid][sp][vc][vp].RuleComment;
-		else if (type == rsSubComment) st = ruleinfo2[rid][sp][vc][vp].SubRuleComment;
-		if (type == rsName) rs = "rule name";
-		else if (type == rsSubName) rs = "subrule name";
-		else if (type == rsComment) rs = "rule comment";
-		else if (type == rsSubComment) rs = "subrule comment";
-		est.Format("Error parsing integer #%d from %s %d: '%s' (species %d)", id + 1, rs, rid, st, sp);
-		WriteLog(5, est);
-		error = 1;
-		return 0;
+	// If rule is not detailed
+	if (!ruleinfo[rid].text_differs) {
+		// Rule is not detailed and parameter was not parsed
+		if (!ruleinfo[rid].RuleParam.size() || id >= ruleinfo[rid].RuleParam[type].size()) {
+			CString est, rs;
+			CString st;
+			if (type == rsName) st = ruleinfo[rid].RuleName;
+			else if (type == rsSubName) st = ruleinfo[rid].SubRuleName;
+			else if (type == rsComment) st = ruleinfo[rid].RuleComment;
+			else if (type == rsSubComment) st = ruleinfo[rid].SubRuleComment;
+			if (type == rsName) rs = "rule name";
+			else if (type == rsSubName) rs = "subrule name";
+			else if (type == rsComment) rs = "rule comment";
+			else if (type == rsSubComment) rs = "subrule comment";
+			est.Format("Error parsing integer #%d from %s %d: '%s' (species %d)", id + 1, rs, rid, st, sp);
+			WriteLog(5, est);
+			error = 1;
+			return 0;
+		}
+		return ruleinfo[rid].RuleParam[type][id];
 	}
-	return ruleinfo2[rid][sp][vc][vp].RuleParam[type][id];
+	// If rule is detailed
+	else {
+		// Rule is detailed, but parameter was not parsed
+		if (!ruleinfo2[rid][sp][vc][vp].RuleParam.size() || id >= ruleinfo2[rid][sp][vc][vp].RuleParam[type].size()) {
+			CString est, rs;
+			CString st;
+			if (type == rsName) st = ruleinfo2[rid][sp][vc][vp].RuleName;
+			else if (type == rsSubName) st = ruleinfo2[rid][sp][vc][vp].SubRuleName;
+			else if (type == rsComment) st = ruleinfo2[rid][sp][vc][vp].RuleComment;
+			else if (type == rsSubComment) st = ruleinfo2[rid][sp][vc][vp].SubRuleComment;
+			if (type == rsName) rs = "rule name";
+			else if (type == rsSubName) rs = "subrule name";
+			else if (type == rsComment) rs = "rule comment";
+			else if (type == rsSubComment) rs = "subrule comment";
+			est.Format("Error parsing detailed integer #%d from %s %d: '%s' (species %d)", id + 1, rs, rid, st, sp);
+			WriteLog(5, est);
+			error = 1;
+			return 0;
+		}
+		return ruleinfo2[rid][sp][vc][vp].RuleParam[type][id];
+	}
 }
 
 // Parse rules
 void CP2D::ParseRules() {
 	long long time_start = CGLib::time();
-	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
-			for (int vp = 0; vp <= MAX_VP; ++vp) {
-				for (int rid = 0; rid <= max_rule; ++rid) {
-					for (int rs = 0; rs < 4; ++rs) {
-						ParseRule(sp, vc, vp, rid, rs);
+	for (int rid = 0; rid <= max_rule; ++rid) {
+		// If rule is not detailed
+		if (!ruleinfo[rid].text_differs) {
+			for (int rs = 0; rs < 4; ++rs) {
+				ParseRule(rid, rs);
+			}
+		}
+		// If rule is detailed
+		else {
+			for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+				for (int vc = 1; vc <= MAX_VC; ++vc) {
+					for (int vp = 0; vp <= MAX_VP; ++vp) {
+						for (int rs = 0; rs < 4; ++rs) {
+							ParseRule2(sp, vc, vp, rid, rs);
+						}
 					}
 				}
 			}
@@ -430,6 +521,7 @@ void CP2D::SetRuleParams() {
 	long long time_start = CGLib::time();
 	SetRuleParam(pco_apart, 248, rsName, 1);
 	SetRuleParam(sus_last_measures, 139, rsSubName, 0);
+	SetRuleParam(cse_leaps_r, 502, rsSubName, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;
