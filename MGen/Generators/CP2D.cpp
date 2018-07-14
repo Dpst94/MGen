@@ -30,7 +30,7 @@ void CP2D::LoadRules(CString fname) {
 	//SET_READY_PERSIST(DP_Rules);
 	CString st, est, rule, subrule;
 	vector<CString> ast, ast2;
-	map<int, map<int, map<int, map<int, int>>>> rid_unique; // [rid][sp][vc][vg]
+	map<int, map<int, map<int, map<int, int>>>> rid_unique; // [sp][vc][vp][rid]
 	int i = 0;
 	int sev = 0;
 	CString spec, voices;
@@ -75,7 +75,6 @@ void CP2D::LoadRules(CString fname) {
 			}
 			//est.Format("Found rule %s - %d", rule, rid);
 			//WriteLog(0, est);
-			if (spec == "") spec = "012345";
 			if (rid >= ruleinfo.size()) ruleinfo.resize(rid + 1);
 			ruleinfo[rid].RuleClass = ast[5];
 			ruleinfo[rid].RuleGroup = ast[6];
@@ -143,7 +142,7 @@ void CP2D::LoadRules(CString fname) {
 				}
 				for (int i = 1; i < v; ++i) nvc[i] = 1;
 			}
-			if (voices[0] == '>') {
+			else if (voices[0] == '>') {
 				int v = atoi(voices.Mid(1, 1));
 				if (v >= MAX_VC) {
 					est.Format("Voice count (%d) points above MAX_VC (%d) for rule id %d. Consider increasing MAX_SPECIES",
@@ -154,9 +153,23 @@ void CP2D::LoadRules(CString fname) {
 				}
 				for (int i = v + 1; i <= MAX_VC; ++i) nvc[i] = 1;
 			}
+			else if (isdigit(voices[0])) {
+				nvc[atoi(voices.Mid(0, 1))] = 1;
+			}
 			if (voices.Find("E") != -1) nvp[0] = 1;
-			if (voices.Find("B") != -1) nvp[1] = 1;
-			if (voices.Find("M") != -1) nvp[2] = 1;
+			else if (voices.Find("B") != -1) nvp[1] = 1;
+			else if (voices.Find("M") != -1) nvp[2] = 1;
+			// Set if empty
+			int found = 0;
+			for (int i = 0; i <= MAX_SPECIES; ++i) if (nsp[i]) found = 1;
+			if (!found) for (int i = 0; i <= MAX_SPECIES; ++i) nsp[i] = 1;
+			found = 0;
+			for (int i = 1; i <= MAX_VC; ++i) if (nvc[i]) found = 1;
+			if (!found) for (int i = 1; i <= MAX_VC; ++i) nvc[i] = 1;
+			found = 0;
+			for (int i = 0; i <= MAX_VP; ++i) if (nvp[i]) found = 1;
+			if (!found) for (int i = 0; i <= MAX_VP; ++i) nvp[i] = 1;
+			// Apply all if one is empty
 			for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 				for (int vc = 1; vc <= MAX_VC; ++vc) {
 					for (int vp = 0; vp <= MAX_VP; ++vp) {
@@ -172,12 +185,13 @@ void CP2D::LoadRules(CString fname) {
 							}
 						}
 						else {
-							if (!ruleinfo2[sp][vc][vp][rid].RuleName.IsEmpty()) {
+							if (rid_unique[sp][vc][vp][rid]) {
 								est.Format("Duplicate rule %d species %d, vc %d, vp %d: '%s (%s)' overwrites '%s (%s)' with species filter %s, voices filter %s",
-									rid, sp, vc, vp, rule, subrule, ruleinfo2[sp][vc][vp][rid].RuleName, 
+									rid, sp, vc, vp, rule, subrule, ruleinfo2[sp][vc][vp][rid].RuleName,
 									ruleinfo2[sp][vc][vp][rid].SubRuleName, spec, voices);
 								WriteLog(5, est);
 							}
+							else rid_unique[sp][vc][vp][rid] = 1;
 							SaveRuleVariant(sp, vc, vp, rid, cur_accept, sev, rule, subrule, ast[10], ast[11]);
 						}
 					}
@@ -247,21 +261,15 @@ void CP2D::SaveRuleVariant(int sp, int vc, int vp, int rid, int flag, int sev, C
 void CP2D::CheckRuleList() {
 	CString est;
 	for (int rid = 0; rid <= max_rule; ++rid) {
-		for (int f = 0; f < ruleinfo[rid].sas_emulator_replace.size(); ++f) {
-			int fl = ruleinfo[rid].sas_emulator_replace[f];
-			if (ruleinfo[fl].RuleGroup.IsEmpty()) {
-				est.Format("Detected undefined rule %d in sas_emulator_replace list for rule %d",
-					fl, rid);
-				WriteLog(5, est);
-			}
+		if (ruleinfo[rid].sas_emulator_replace.size() && ruleinfo[rid].RuleGroup.IsEmpty()) {
+			est.Format("Detected undefined rule %d in sas_emulator_replace list",
+				rid);
+			WriteLog(5, est);
 		}
-		for (int f = 0; f < ruleinfo[rid].flag_replace.size(); ++f) {
-			int fl = ruleinfo[rid].flag_replace[f];
-			if (ruleinfo[fl].RuleGroup.IsEmpty()) {
-				est.Format("Detected undefined rule %d in sas_emulator_replace list for rule %d",
-					fl, rid);
-				WriteLog(5, est);
-			}
+		if (ruleinfo[rid].flag_replace.size() && ruleinfo[rid].RuleGroup.IsEmpty()) {
+			est.Format("Detected undefined rule %d in flag_replace list",
+				rid);
+			WriteLog(5, est);
 		}
 	}
 }
