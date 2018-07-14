@@ -334,13 +334,13 @@ int CP2D::GetRuleParam(int sp, int vc, int vp, int rid, int type, int id) {
 		CString est, rs;
 		CString st;
 		if (type == rsName) st = ruleinfo2[sp][vc][vp][rid].RuleName;
-		if (type == rsSubName) st = ruleinfo2[sp][vc][vp][rid].SubRuleName;
-		if (type == rsComment) st = ruleinfo2[sp][vc][vp][rid].RuleComment;
-		if (type == rsSubComment) st = ruleinfo2[sp][vc][vp][rid].SubRuleComment;
+		else if (type == rsSubName) st = ruleinfo2[sp][vc][vp][rid].SubRuleName;
+		else if (type == rsComment) st = ruleinfo2[sp][vc][vp][rid].RuleComment;
+		else if (type == rsSubComment) st = ruleinfo2[sp][vc][vp][rid].SubRuleComment;
 		if (type == rsName) rs = "rule name";
-		if (type == rsSubName) rs = "subrule name";
-		if (type == rsComment) rs = "rule comment";
-		if (type == rsSubComment) rs = "subrule comment";
+		else if (type == rsSubName) rs = "subrule name";
+		else if (type == rsComment) rs = "rule comment";
+		else if (type == rsSubComment) rs = "subrule comment";
 		est.Format("Error parsing integer #%d from %s %d: '%s' (species %d)", id + 1, rs, rid, st, sp);
 		WriteLog(5, est);
 		error = 1;
@@ -383,6 +383,8 @@ void CP2D::SetRuleParams(vector<vector<vector<int>>> &par, int rid, int type, in
 void CP2D::SetRuleParams() {
 	long long time_start = CGLib::time();
 	SetRuleParams(pco_apart, 248, rsName, 1);
+	SetRuleParams(sus_last_measures, 139, rsSubName, 0);
+	// Log
 	long long time_stop = CGLib::time();
 	CString st;
 	st.Format("Set rule parameters in %lld ms", time_stop - time_start);
