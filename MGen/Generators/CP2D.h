@@ -52,7 +52,7 @@ protected:
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void LoadRules(CString fname);
 	void ResizeRuleVariantVector(vector<vector<vector<vector<int>>>>& ve);
-	void ResizeRuleVariantVector(vector<vector<vector<map<int, int>>>>& ve);
+	void ResizeRuleVariantVector(vector<vector<vector<int>>>& ve);
 	void ResizeRuleVariantVector(vector<vector<vector<vector<RuleInfo2>>>> &ve);
 	void ResizeRuleVariantVectors2();
 	inline void SaveRuleVariant(int sp, int vc, int vp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com);
@@ -61,6 +61,10 @@ protected:
 	void ParseRule(int sp, int vc, int vp, int rid, int type);
 	int GetRuleParam(int sp, int vc, int vp, int rid, int type, int id);
 	void ParseRules();
+
+	void SetRuleParams(vector<vector<vector<int>>>& par, int rid, int type, int id);
+
+	void SetRuleParams();
 
 	int max_rule = 0;
 	int av_cnt;

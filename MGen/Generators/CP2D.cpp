@@ -22,6 +22,7 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 		++parameter_found;
 		LoadRules("configs\\" + *sV);
 		ParseRules();
+		SetRuleParams();
 	}
 }
 
@@ -225,7 +226,7 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<vector<int>>>> &ve) {
 	}
 }
 
-void CP2D::ResizeRuleVariantVector(vector<vector<vector<map<int, int>>>> &ve) {
+void CP2D::ResizeRuleVariantVector(vector<vector<vector<int>>> &ve) {
 	ve.resize(MAX_SPECIES + 1);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		ve[sp].resize(MAX_VC + 1);
@@ -365,5 +366,25 @@ void CP2D::ParseRules() {
 	long long time_stop = CGLib::time();
 	CString st;
 	st.Format("Parsed rules in %lld ms", time_stop - time_start);
+	WriteLog(0, st);
+}
+
+void CP2D::SetRuleParams(vector<vector<vector<int>>> &par, int rid, int type, int id) {
+	ResizeRuleVariantVector(par);
+	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+		for (int vc = 1; vc <= MAX_VC; ++vc) {
+			for (int vp = 0; vp <= MAX_VP; ++vp) {
+				par[sp][vc][vp] = GetRuleParam(sp, vc, vp, rid, type, id);
+			}
+		}
+	}
+}
+
+void CP2D::SetRuleParams() {
+	long long time_start = CGLib::time();
+	SetRuleParams(pco_apart, 248, rsName, 1);
+	long long time_stop = CGLib::time();
+	CString st;
+	st.Format("Set rule parameters in %lld ms", time_stop - time_start);
 	WriteLog(0, st);
 }
