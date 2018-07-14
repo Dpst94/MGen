@@ -174,11 +174,6 @@ void CP2D::LoadRules(CString fname) {
 			found = 0;
 			for (int i = 0; i <= MAX_VP; ++i) if (nvp[i]) found = 1;
 			if (!found) for (int i = 0; i <= MAX_VP; ++i) nvp[i] = 1;
-			// Set rule aggregated info
-			ruleinfo[rid].RuleName = rule;
-			ruleinfo[rid].SubRuleName = subrule;
-			ruleinfo[rid].RuleComment = ast[10];
-			ruleinfo[rid].SubRuleComment = ast[11];
 			// Detect if rule is detailed
 			if (spec == "" && voices == "") {
 				if (rdetailed[rid] == 1) {
@@ -196,12 +191,6 @@ void CP2D::LoadRules(CString fname) {
 					return;
 				}
 				rdetailed[rid] == -1;
-				if (!ruleinfo[rid].RuleName.IsEmpty()) {
-					if (ruleinfo[rid].RuleName != rule || ruleinfo[rid].SubRuleName != subrule ||
-						ruleinfo[rid].RuleComment != ast[10] || ruleinfo[rid].SubRuleComment != ast[11]) {
-						ruleinfo[rid].text_differs = 1;
-					}
-				}
 				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
 						for (int vp = 0; vp <= MAX_VP; ++vp) {
@@ -223,6 +212,12 @@ void CP2D::LoadRules(CString fname) {
 					return;
 				}
 				rdetailed[rid] == 1;
+				if (!ruleinfo[rid].RuleName.IsEmpty()) {
+					if (ruleinfo[rid].RuleName != rule || ruleinfo[rid].SubRuleName != subrule ||
+						ruleinfo[rid].RuleComment != ast[10] || ruleinfo[rid].SubRuleComment != ast[11]) {
+						ruleinfo[rid].text_differs = 1;
+					}
+				}
 				ResizeRuleVariantVector(ruleinfo2[rid]);
 				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
@@ -252,6 +247,11 @@ void CP2D::LoadRules(CString fname) {
 					}
 				}
 			}
+			// Set rule aggregated info
+			ruleinfo[rid].RuleName = rule;
+			ruleinfo[rid].SubRuleName = subrule;
+			ruleinfo[rid].RuleComment = ast[10];
+			ruleinfo[rid].SubRuleComment = ast[11];
 			// Replace scripts in viz text
 			ruleinfo[rid].viz_text.Replace("!rn!", ruleinfo[rid].RuleName);
 			ruleinfo[rid].viz_text.Replace("!srn!", ruleinfo[rid].SubRuleName);
