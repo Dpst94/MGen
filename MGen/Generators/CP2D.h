@@ -41,7 +41,6 @@ struct RuleInfo {
 	CString RuleComment;
 	CString SubRuleComment;
 	vector<vector<int>> RuleParam;
-	int text_differs = 0;
 };
 
 // This information is specific to rule with particular sp/vc/vg

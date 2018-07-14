@@ -201,10 +201,9 @@ void CP2D::LoadRules(CString fname) {
 					return;
 				}
 				rdetailed[rid] == 1;
-				if (!ruleinfo[rid].RuleName.IsEmpty() && !ruleinfo[rid].text_differs) {
+				if (!ruleinfo[rid].RuleName.IsEmpty() && !ruleinfo2[rid].size()) {
 					if (ruleinfo[rid].RuleName != rule || ruleinfo[rid].SubRuleName != subrule ||
 						ruleinfo[rid].RuleComment != ast[10] || ruleinfo[rid].SubRuleComment != ast[11]) {
-						ruleinfo[rid].text_differs = 1;
 						// Copy info
 						ResizeRuleVariantVector(ruleinfo2[rid]);
 						for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
@@ -218,7 +217,7 @@ void CP2D::LoadRules(CString fname) {
 					}
 				}
 			}
-			if (!ruleinfo[rid].text_differs) {
+			if (!ruleinfo2[rid].size()) {
 				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
 						for (int vp = 0; vp <= MAX_VP; ++vp) {
@@ -445,7 +444,7 @@ void CP2D::ParseRule2(int sp, int vc, int vp, int rid, int type) {
 
 int CP2D::GetRuleParam(int sp, int vc, int vp, int rid, int type, int id) {
 	// If rule is not detailed
-	if (!ruleinfo[rid].text_differs) {
+	if (!ruleinfo2[rid].size()) {
 		// Rule is not detailed and parameter was not parsed
 		if (!ruleinfo[rid].RuleParam.size() || id >= ruleinfo[rid].RuleParam[type].size()) {
 			CString est, rs;
@@ -493,7 +492,7 @@ void CP2D::ParseRules() {
 	long long time_start = CGLib::time();
 	for (int rid = 0; rid <= max_rule; ++rid) {
 		// If rule is not detailed
-		if (!ruleinfo[rid].text_differs) {
+		if (!ruleinfo2[rid].size()) {
 			for (int rs = 0; rs < 4; ++rs) {
 				ParseRule(rid, rs);
 			}
