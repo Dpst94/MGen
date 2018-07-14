@@ -4267,7 +4267,7 @@ void CGenCP1::LoadCP(CString path)
 	int nid = 0; // note
 	int hid = 0; // harmony
 	int pos_old = -1, pos_new = 0;
-	vector <vector<int>> cpos;
+	vector <vector<int>> cps;
 	vector <int> cl; // length
 	vector <int> cp; // position
 	vector <float> ct; // tempo
@@ -4339,7 +4339,7 @@ void CGenCP1::LoadCP(CString path)
 						}
 						cantus_len.push_back(cl);
 						cantus_tempo.push_back(ct);
-						cpos.push_back(cp);
+						cps.push_back(cp);
 					}
 					else {
 						if (inter.size() < MIN_CP_SIZE && inter.size() > 0) {
@@ -4422,7 +4422,7 @@ void CGenCP1::LoadCP(CString path)
 			}
 			cantus_len.push_back(cl);
 			cantus_tempo.push_back(ct);
-			cpos.push_back(cp);
+			cps.push_back(cp);
 			// Send incom
 			cantus_incom.resize(cid);
 		}
@@ -4455,9 +4455,9 @@ void CGenCP1::LoadCP(CString path)
 					st.MakeLower();
 					// Search for closest note
 					min_dist = INT_MAX;
-					for (int c = 0; c < cpos.size(); ++c) {
-						for (int x = 0; x < cpos[c].size(); ++x) {
-							dist = abs(cpos[c][x] - pos2);
+					for (int c = 0; c < cps.size(); ++c) {
+						for (int x = 0; x < cps[c].size(); ++x) {
+							dist = abs(cps[c][x] - pos2);
 							if (dist <= min_dist) {
 								min_dist = dist;
 								my_c = c;

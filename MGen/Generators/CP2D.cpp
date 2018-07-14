@@ -190,7 +190,7 @@ void CP2D::LoadRules(CString fname) {
 					error = 1;
 					return;
 				}
-				rdetailed[rid] == -1;
+				rdetailed[rid] = -1;
 			}
 			else {
 				if (rdetailed[rid] == -1) {
@@ -200,7 +200,7 @@ void CP2D::LoadRules(CString fname) {
 					error = 1;
 					return;
 				}
-				rdetailed[rid] == 1;
+				rdetailed[rid] = 1;
 				if (!ruleinfo[rid].RuleName.IsEmpty() && !ruleinfo2[rid].size()) {
 					if (ruleinfo[rid].RuleName != rule || ruleinfo[rid].SubRuleName != subrule ||
 						ruleinfo[rid].RuleComment != ast[10] || ruleinfo[rid].SubRuleComment != ast[11]) {

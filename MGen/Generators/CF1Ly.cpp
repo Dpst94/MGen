@@ -434,8 +434,8 @@ void CF1Ly::InitLyI() {
 				}
 			}
 			// Get flag start/stop
-			int s1 = min(ly_s2, ly_s2 + link);
-			int s2 = max(ly_s2, ly_s2 + link);
+			s1 = min(ly_s2, ly_s2 + link);
+			s2 = max(ly_s2, ly_s2 + link);
 			if (lyi[ly_s2].nff[f]) {
 				s1 = min(ly_s2, link_note_step - ly_step1);
 				s2 = max(ly_s2, link_note_step - ly_step1);
@@ -504,7 +504,7 @@ void CF1Ly::InitLyI() {
 #endif
 }
 
-void CF1Ly::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
+void CF1Ly::SaveLySegment(ofstream &fs, int mel, int stp1, int stp2) {
 	vector<CString> sv;
 	CString clef, key, key_visual;
 	int pos, pos2, le, le2, pause_accum, pause_pos, pause_i;
@@ -515,20 +515,20 @@ void CF1Ly::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	// Voice melody max pitch
 	vector<int> vm_max;
 	// Calculate stats
-	ly_step1 = step1;
-	ly_step2 = step2;
-	GetLyRange(step1, step2, vm_min, vm_max);
-	GetLyVcnt(step1, step2, vm_max);
+	ly_step1 = stp1;
+	ly_step2 = stp2;
+	GetLyRange(stp1, stp2, vm_min, vm_max);
+	GetLyVcnt(stp1, stp2, vm_max);
 	// When debugging expected confirmations, do not show segments without flags
 	if (ly_debugexpect && !ly_flags) return;
-	ly_mul = midifile_out_mul[step1];
+	ly_mul = midifile_out_mul[stp1];
 	//if (ly_vm_cnt == 1 && (m_algo_id == 121 || m_algo_id == 112)) mul = 8;
 	// Key
-	if (minor[step1][0]) {
-		key = LyMinorKey[tonic[step1][0]];
+	if (minor[stp1][0]) {
+		key = LyMinorKey[tonic[stp1][0]];
 	}
 	else {
-		key = LyMajorKey[tonic[step1][0]];
+		key = LyMajorKey[tonic[stp1][0]];
 	}
 	key_visual = key[0];
 	key_visual.MakeUpper();
@@ -548,7 +548,7 @@ void CF1Ly::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 	st.Replace("->", " \\char ##x27F6 ");
 	fs << "\\markup \\wordwrap \\bold {\n  ";
 	fs << "    \\vspace #3\n";
-	fs << st << ", Key: " << key_visual << (minor[step1][0] ? " minor" : " major") << "\n}\n";
+	fs << st << ", Key: " << key_visual << (minor[stp1][0] ? " minor" : " major") << "\n}\n";
 	// Save notes
 	fs << "<<\n";
 	ly_vcnt = 0;
@@ -566,15 +566,15 @@ void CF1Ly::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 		st.Format("  \\set Staff.instrumentName = \"Part %d\"\n", ly_vcnt - v);
 		fs << st;
 		fs << "  \\clef \"" << clef << "\" \\key " << key;
-		fs << " \\" << (minor[step1][0] ? "minor" : "major") << "\n";
+		fs << " \\" << (minor[stp1][0] ? "minor" : "major") << "\n";
 		read_file_sv("configs\\ly\\staff.ly", sv);
 		write_file_sv(fs, sv);
 		fs << "  { ";
 		ly_nnum = 0;
 		pause_accum = 0;
 		pause_pos = -1;
-		for (int i = step1; i < step2; i++) {
-			pos = ly_mul * (i - step1);
+		for (int i = stp1; i < stp2; i++) {
+			pos = ly_mul * (i - stp1);
 			le = ly_mul * len[i][v];
 			if (pause[i][v]) {
 				pause_accum += le;
@@ -587,7 +587,7 @@ void CF1Ly::SaveLySegment(ofstream &fs, int mel, int step1, int step2) {
 				++ly_nnum;
 				SendLyEvent(fs, pos, GetLyNote(i, v), le, i, v);
 			}
-			if (pause_accum && (i == step2 - 1 || !pause[i + 1][v])) {
+			if (pause_accum && (i == stp2 - 1 || !pause[i + 1][v])) {
 				SendLyEvent(fs, pause_pos, "r", pause_accum, pause_i, v);
 				pause_accum = 0;
 				pause_pos = -1;

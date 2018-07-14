@@ -58,16 +58,16 @@ int CGenCA3::XML_to_CP() {
 			im.resize(pos + 1);
 			im[pos] = 1;
 			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
-				int len = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
-				cc[v].resize(pos + len);
-				retr[v].resize(pos + len);
+				int ln = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
+				cc[v].resize(pos + ln);
+				retr[v].resize(pos + ln);
 				if (xfi.note[vi][m][ni].tempo && !cp_tempo)
 					cp_tempo = xfi.note[vi][m][ni].tempo;
 				if (!xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].tie_stop) retr[v][pos] = 1;
-				for (int s = 0; s < len; ++s) {
+				for (int s = 0; s < ln; ++s) {
 					cc[v][pos + s] = xfi.note[vi][m][ni].pitch;
 				}
-				pos += len;
+				pos += ln;
 				c_len = max(c_len, pos);
 			}
 		}

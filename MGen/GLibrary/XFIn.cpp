@@ -87,9 +87,9 @@ void XFIn::LoadXML(CString pth) {
 	int v = 1;
 	int max_mea = 1;
 	CString mode;
-	char fifths;
-	char beats;
-	char beat_type;
+	char fifths = 0;
+	char beats = 4;
+	char beat_type = 4;
 	float m_pos = 0;
 	float m_pos_prev = 0;
 	float tempo = 0;

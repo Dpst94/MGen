@@ -83,9 +83,9 @@ protected:
 	void SetRuleParams();
 
 	int max_rule = 0;
-	int av_cnt;
+	int av_cnt = 0;
 	int c_len = 0;
-	int ep2;
+	int ep2 = 0;
 	vector<int> minl;
 	vector<int> maxl;
 	vector<int> fli_size;

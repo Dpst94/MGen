@@ -28,6 +28,7 @@ void CConf::AddIcf() {
 }
 
 void CConf::LoadConfigFile(CString fname, int load_includes) {
+	long long time_start = CGLib::time();
 	CString st, st2, st3, iname;
 	ifstream fs;
 	int instr_id = -1;
@@ -209,7 +210,8 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 	}
 	fs.close();
 	CString est;
-	est.Format("LoadConfigFile loaded %d lines from %s", i, fname);
+	long long time_stop = CGLib::time();
+	est.Format("LoadConfigFile loaded %d lines from %s in %lld ms", i, fname, time_stop - time_start);
 	WriteLog(0, est);
 }
 
@@ -259,6 +261,7 @@ void CConf::ProcessConfig() {
 }
 
 void CConf::LoadConfigFiles(CString fname, int load_includes) {
+	long long time_start = CGLib::time();
 	LoadConfigFile(fname, load_includes);
 	// Load autotest config
 	if (m_testing == 1) {
@@ -269,6 +272,11 @@ void CConf::LoadConfigFiles(CString fname, int load_includes) {
 		CString fname2 = "configs\\server\\" + m_algo_folder + ".pl";
 		if (fileExists(fname2)) LoadConfigFile(fname2, load_includes);
 	}
+	// Log
+	long long time_stop = CGLib::time();
+	CString est;
+	est.Format("LoadConfigFiles loaded %s in %lld ms", fname, time_stop - time_start);
+	WriteLog(0, est);
 }
 
 void CConf::LoadVarInstr(CString * sName, CString * sValue, char* sSearch, vector<int> & Dest) {
@@ -412,7 +420,7 @@ void CConf::LoadInstrumentLayout()
 	// Log
 	long long time_stop = CGLib::time();
 	CString est;
-	est.Format("LoadInstrumentLayout loaded %d lines from " + fname + " in %d ms", x, time_stop - time_start);
+	est.Format("LoadInstrumentLayout loaded %d lines from " + fname + " in %lld ms", x, time_stop - time_start);
 	WriteLog(0, est);
 }
 
@@ -465,7 +473,7 @@ void CConf::LoadInstruments() {
 	// Log
 	long long time_stop = CGLib::time();
 	CString est;
-	est.Format("LoadInstruments loaded %d instruments in %d ms", icf.size(), time_stop - time_start);
+	est.Format("LoadInstruments loaded %d instruments in %lld ms", icf.size(), time_stop - time_start);
 	WriteLog(0, est);
 }
 
@@ -525,7 +533,7 @@ void CConf::LoadInstrument(int i, CString fname)
 	// Log
 	long long time_stop = CGLib::time();
 	CString est;
-	est.Format("LoadInstruments loaded %d lines from " + fname + " in %d ms", x, time_stop - time_start);
+	est.Format("LoadInstruments loaded %d lines from " + fname + " in %lld ms", x, time_stop - time_start);
 	//WriteLog(0, est);
 }
 

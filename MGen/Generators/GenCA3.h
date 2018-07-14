@@ -26,7 +26,7 @@ protected:
 	vector<vector<int>> cp_vid;
 	vector<CString> vname;
 
-	int cp_id;
+	int cp_id = 0;
 
 };
 

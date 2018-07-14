@@ -1816,18 +1816,18 @@ int CF1R::FailTritones(vector<int> &c, vector<int> &cc, vector<int> &pc, vector<
 }
 
 // Calculate global fill
-int CF1R::FailGlobalFill(vector<int> &c, vector<int> &nstat2) {
+int CF1R::FailGlobalFill(vector<int> &c, vector<int> &nstt2) {
 	CHECK_READY(DR_nmin, DR_c);
 	// Clear nstat2
-	for (int i = nmind; i <= nmaxd; ++i) nstat2[i] = 0;
+	for (int i = nmind; i <= nmaxd; ++i) nstt2[i] = 0;
 	// Count nstat2
-	for (int x = 0; x < ep2; ++x) ++nstat2[c[x]];
+	for (int x = 0; x < ep2; ++x) ++nstt2[c[x]];
 	// Check nstat2
 	if (ep2 < c_len) return 0;
 	int skips = 0;
 	int skips2 = 0;
-	for (int x = nmind + 1; x < nmaxd; ++x) if (!nstat2[x]) {
-		if (!nstat2[x + 1]) {
+	for (int x = nmind + 1; x < nmaxd; ++x) if (!nstt2[x]) {
+		if (!nstt2[x + 1]) {
 			++skips2;
 			++x;
 		}
