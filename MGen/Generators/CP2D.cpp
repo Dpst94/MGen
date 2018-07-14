@@ -21,16 +21,18 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	if (*sN == "rules_file") {
 		++parameter_found;
 		LoadRules("configs\\" + *sV);
-		//ParseRules();
+		ParseRules();
 	}
 }
 
 // Load rules
 void CP2D::LoadRules(CString fname) {
 	//SET_READY_PERSIST(DP_Rules);
+	long long time_start = CGLib::time();
 	CString st, est, rule, subrule;
 	vector<CString> ast, ast2;
-	map<int, map<int, map<int, map<int, int>>>> rid_unique; // [sp][vc][vp][rid]
+	vector<vector<vector<vector<int>>>> rid_unique; // [sp][vc][vp][rid]
+	ResizeRuleVariantVector(rid_unique);
 	int i = 0;
 	int sev = 0;
 	CString spec, voices;
@@ -177,6 +179,7 @@ void CP2D::LoadRules(CString fname) {
 						if (accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
 						if (severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
 						if (ruleinfo2[sp][vc][vp].size() <= rid) ruleinfo2[sp][vc][vp].resize(rid + 1);
+						if (rid_unique[sp][vc][vp].size() <= rid) rid_unique[sp][vc][vp].resize(rid + 1);
 						int cur_accept = flag;
 						if (!nsp[sp] || !nvc[vc] || !nvp[vp]) {
 							if (ruleinfo2[sp][vc][vp][rid].RuleName.IsEmpty()) {
@@ -202,7 +205,8 @@ void CP2D::LoadRules(CString fname) {
 		}
 	}
 	fs.close();
-	est.Format("LoadRules loaded %d lines from %s", i, fname);
+	long long time_stop = CGLib::time();
+	est.Format("LoadRules loaded %d lines in %lld ms from %s", i, time_stop - time_start, fname);
 	WriteLog(0, est);
 	// Resize
 	max_rule = ruleinfo.size() - 1;
@@ -212,6 +216,16 @@ void CP2D::LoadRules(CString fname) {
 }
 
 void CP2D::ResizeRuleVariantVector(vector<vector<vector<vector<int>>>> &ve) {
+	ve.resize(MAX_SPECIES + 1);
+	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+		ve[sp].resize(MAX_VC + 1);
+		for (int vc = 1; vc <= MAX_VC; ++vc) {
+			ve[sp][vc].resize(MAX_VP + 1);
+		}
+	}
+}
+
+void CP2D::ResizeRuleVariantVector(vector<vector<vector<map<int, int>>>> &ve) {
 	ve.resize(MAX_SPECIES + 1);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		ve[sp].resize(MAX_VC + 1);
@@ -274,3 +288,82 @@ void CP2D::CheckRuleList() {
 	}
 }
 
+// Return chromatic length of an interval (e.g. return 4 from 3rd)
+int CP2D::Interval2Chromatic(int iv) {
+	if (iv > 0) --iv;
+	else ++iv;
+	int aiv = iv % 7;
+	int res = 0;
+	if (aiv == 1) res = 2;
+	else if (aiv == 2) res = 4;
+	else if (aiv == 3) res = 5;
+	else if (aiv == 4) res = 7;
+	else if (aiv == 5) res = 9;
+	else if (aiv == 6) res = 11;
+	else if (aiv == -1) res = 1;
+	else if (aiv == -2) res = 3;
+	else if (aiv == -3) res = 5;
+	else if (aiv == -4) res = 6; // Tritone
+	else if (aiv == -5) res = 8;
+	else if (aiv == -6) res = 10;
+	// Add octaves
+	res += 12 * abs(iv / 7);
+	return res;
+}
+
+// Load rules
+void CP2D::ParseRule(int sp, int vc, int vp, int rid, int type) {
+	CString st;
+	if (type == rsName) st = ruleinfo2[sp][vc][vp][rid].RuleName;
+	if (type == rsSubName) st = ruleinfo2[sp][vc][vp][rid].SubRuleName;
+	if (type == rsComment) st = ruleinfo2[sp][vc][vp][rid].RuleComment;
+	if (type == rsSubComment) st = ruleinfo2[sp][vc][vp][rid].SubRuleComment;
+	vector<int> v;
+	GetVint(st, v);
+	if (v.size()) {
+		// Create types
+		if (!ruleinfo2[sp][vc][vp][rid].RuleParam.size()) ruleinfo2[sp][vc][vp][rid].RuleParam.resize(4);
+		// Set params for type
+		ruleinfo2[sp][vc][vp][rid].RuleParam[type] = v;
+	}
+}
+
+int CP2D::GetRuleParam(int sp, int vc, int vp, int rid, int type, int id) {
+	if (!ruleinfo2[sp][vc][vp][rid].RuleParam.size() || id >= ruleinfo2[sp][vc][vp][rid].RuleParam[type].size()) {
+		CString est, rs;
+		CString st;
+		if (type == rsName) st = ruleinfo2[sp][vc][vp][rid].RuleName;
+		if (type == rsSubName) st = ruleinfo2[sp][vc][vp][rid].SubRuleName;
+		if (type == rsComment) st = ruleinfo2[sp][vc][vp][rid].RuleComment;
+		if (type == rsSubComment) st = ruleinfo2[sp][vc][vp][rid].SubRuleComment;
+		if (type == rsName) rs = "rule name";
+		if (type == rsSubName) rs = "subrule name";
+		if (type == rsComment) rs = "rule comment";
+		if (type == rsSubComment) rs = "subrule comment";
+		est.Format("Error parsing integer #%d from %s %d: '%s' (species %d)", id + 1, rs, rid, st, sp);
+		WriteLog(5, est);
+		error = 1;
+		return 0;
+	}
+	return ruleinfo2[sp][vc][vp][rid].RuleParam[type][id];
+}
+
+// Parse rules
+void CP2D::ParseRules() {
+	long long time_start = CGLib::time();
+	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+		for (int vc = 1; vc <= MAX_VC; ++vc) {
+			for (int vp = 0; vp <= MAX_VP; ++vp) {
+				for (int rid = 0; rid <= max_rule; ++rid) {
+					for (int rs = 0; rs < 4; ++rs) {
+						ParseRule(sp, vc, vp, rid, rs);
+					}
+				}
+			}
+		}
+	}
+	long long time_stop = CGLib::time();
+	CString st;
+	st.Format("Parsed rules in %lld ms", time_stop - time_start);
+	WriteLog(0, st);
+}

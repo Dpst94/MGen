@@ -9,6 +9,12 @@
 // Voice pairs (0 = lowest + highest, 1 = lowest + non-highest, 2 = non-lowest + non-highest)
 #define MAX_VP 2
 
+// Rule string types
+#define rsName 0 // Rule name
+#define rsSubName 1 // Subrule name
+#define rsComment 2 // Rule comment
+#define rsSubComment 3 // Subrule comment
+
 // This information is specific to rule
 struct RuleInfo {
 	CString RuleClass;
@@ -32,6 +38,7 @@ struct RuleInfo2 {
 	CString SubRuleName;
 	CString RuleComment;
 	CString SubRuleComment;
+	vector<vector<int>> RuleParam;
 };
 
 class CP2D :
@@ -45,11 +52,15 @@ protected:
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void LoadRules(CString fname);
 	void ResizeRuleVariantVector(vector<vector<vector<vector<int>>>>& ve);
+	void ResizeRuleVariantVector(vector<vector<vector<map<int, int>>>>& ve);
 	void ResizeRuleVariantVector(vector<vector<vector<vector<RuleInfo2>>>> &ve);
 	void ResizeRuleVariantVectors2();
-	void SaveRuleVariant(int sp, int vc, int vp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com);
-
+	inline void SaveRuleVariant(int sp, int vc, int vp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com);
 	void CheckRuleList();
+	int Interval2Chromatic(int iv);
+	void ParseRule(int sp, int vc, int vp, int rid, int type);
+	int GetRuleParam(int sp, int vc, int vp, int rid, int type, int id);
+	void ParseRules();
 
 	int max_rule = 0;
 	int av_cnt;

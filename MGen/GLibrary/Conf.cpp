@@ -423,6 +423,7 @@ void CConf::LoadInstrumentLayoutLine(CString &st2, CString &st3) {
 }
 
 void CConf::LoadInstruments() {
+	long long time_start = CGLib::time();
 	CString fname, cname;
 	int found_default, ii2;
 	for (int ii = 0; ii < icf.size(); ++ii) if (icf[ii].default_instr == ii) {
@@ -461,6 +462,11 @@ void CConf::LoadInstruments() {
 			WriteLog(5, "Not found file for default instrument config " + icf[ii].group + "/" + icf[ii].name);
 		}
 	}
+	// Log
+	long long time_stop = CGLib::time();
+	CString est;
+	est.Format("LoadInstruments loaded %d instruments in %d ms", icf.size(), time_stop - time_start);
+	WriteLog(0, est);
 }
 
 void CConf::LoadInstrument(int i, CString fname)
