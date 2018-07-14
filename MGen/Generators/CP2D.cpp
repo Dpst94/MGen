@@ -10,7 +10,6 @@
 CP2D::CP2D() {
 	ResizeRuleVariantVector(accept);
 	ResizeRuleVariantVector(severity);
-	ResizeRuleVariantVector(ruleinfo2);
 }
 
 CP2D::~CP2D() {
@@ -21,8 +20,8 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	if (*sN == "rules_file") {
 		++parameter_found;
 		LoadRules("configs\\" + *sV);
-		ParseRules();
-		SetRuleParams();
+		//ParseRules();
+		//SetRuleParams();
 	}
 }
 
@@ -33,6 +32,7 @@ void CP2D::LoadRules(CString fname) {
 	CString st, est, rule, subrule;
 	vector<CString> ast, ast2;
 	vector<vector<vector<vector<int>>>> rid_unique; // [sp][vc][vp][rid]
+	vector<int> rdetailed; // [rid]
 	ResizeRuleVariantVector(rid_unique);
 	int i = 0;
 	int sev = 0;
@@ -79,6 +79,8 @@ void CP2D::LoadRules(CString fname) {
 			//est.Format("Found rule %s - %d", rule, rid);
 			//WriteLog(0, est);
 			if (rid >= ruleinfo.size()) ruleinfo.resize(rid + 1);
+			if (rid >= ruleinfo2.size()) ruleinfo2.resize(rid + 1);
+			if (rid >= rdetailed.size()) rdetailed.resize(rid + 1);
 			ruleinfo[rid].RuleClass = ast[5];
 			ruleinfo[rid].RuleGroup = ast[6];
 			// If testing, enable all disabled rules so that expected violations can be confirmed
@@ -172,35 +174,83 @@ void CP2D::LoadRules(CString fname) {
 			found = 0;
 			for (int i = 0; i <= MAX_VP; ++i) if (nvp[i]) found = 1;
 			if (!found) for (int i = 0; i <= MAX_VP; ++i) nvp[i] = 1;
-			// Apply all if one is empty
-			for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-				for (int vc = 1; vc <= MAX_VC; ++vc) {
-					for (int vp = 0; vp <= MAX_VP; ++vp) {
-						// Resize
-						if (accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
-						if (severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
-						if (ruleinfo2[sp][vc][vp].size() <= rid) ruleinfo2[sp][vc][vp].resize(rid + 1);
-						if (rid_unique[sp][vc][vp].size() <= rid) rid_unique[sp][vc][vp].resize(rid + 1);
-						int cur_accept = flag;
-						if (!nsp[sp] || !nvc[vc] || !nvp[vp]) {
-							if (ruleinfo2[sp][vc][vp][rid].RuleName.IsEmpty()) {
-								cur_accept = 0;
-								SaveRuleVariant(sp, vc, vp, rid, cur_accept, sev, rule, subrule, ast[10], ast[11]);
-							}
-						}
-						else {
-							if (rid_unique[sp][vc][vp][rid]) {
-								est.Format("Duplicate rule %d species %d, vc %d, vp %d: '%s (%s)' overwrites '%s (%s)' with species filter %s, voices filter %s",
-									rid, sp, vc, vp, rule, subrule, ruleinfo2[sp][vc][vp][rid].RuleName,
-									ruleinfo2[sp][vc][vp][rid].SubRuleName, spec, voices);
-								WriteLog(5, est);
-							}
-							else rid_unique[sp][vc][vp][rid] = 1;
-							SaveRuleVariant(sp, vc, vp, rid, cur_accept, sev, rule, subrule, ast[10], ast[11]);
+			// Set rule aggregated info
+			ruleinfo[rid].RuleName = rule;
+			ruleinfo[rid].SubRuleName = subrule;
+			ruleinfo[rid].RuleComment = ast[10];
+			ruleinfo[rid].SubRuleComment = ast[11];
+			// Detect if rule is detailed
+			if (spec == "" && voices == "") {
+				if (rdetailed[rid] == 1) {
+					est.Format("Rule %d tries to combine detailed and non-detailed approaches",
+						rid);
+					WriteLog(5, est);
+					error = 1;
+					return;
+				}
+				if (rdetailed[rid] == -1) {
+					est.Format("Rule %d is duplicated",
+						rid);
+					WriteLog(5, est);
+					error = 1;
+					return;
+				}
+				rdetailed[rid] == -1;
+				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+					for (int vc = 1; vc <= MAX_VC; ++vc) {
+						for (int vp = 0; vp <= MAX_VP; ++vp) {
+							// Resize
+							if (accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
+							if (severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
+							accept[sp][vc][vp][rid] = flag;
+							severity[sp][vc][vp][rid] = sev;
 						}
 					}
 				}
 			}
+			else {
+				if (rdetailed[rid] == -1) {
+					est.Format("Rule %d tries to combine detailed and non-detailed approaches",
+						rid);
+					WriteLog(5, est);
+					error = 1;
+					return;
+				}
+				rdetailed[rid] == 1;
+				ResizeRuleVariantVector(ruleinfo2[rid]);
+				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+					for (int vc = 1; vc <= MAX_VC; ++vc) {
+						for (int vp = 0; vp <= MAX_VP; ++vp) {
+							// Resize
+							if (accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
+							if (severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
+							if (rid_unique[sp][vc][vp].size() <= rid) rid_unique[sp][vc][vp].resize(rid + 1);
+							int cur_accept = flag;
+							if (!nsp[sp] || !nvc[vc] || !nvp[vp]) {
+								if (ruleinfo2[rid][sp][vc][vp].RuleName.IsEmpty()) {
+									cur_accept = 0;
+									SaveRuleVariant(sp, vc, vp, rid, cur_accept, sev, rule, subrule, ast[10], ast[11]);
+								}
+							}
+							else {
+								if (rid_unique[sp][vc][vp][rid]) {
+									est.Format("Duplicate rule %d species %d, vc %d, vp %d: '%s (%s)' overwrites '%s (%s)' with species filter %s, voices filter %s",
+										rid, sp, vc, vp, rule, subrule, ruleinfo2[rid][sp][vc][vp].RuleName,
+										ruleinfo2[rid][sp][vc][vp].SubRuleName, spec, voices);
+									WriteLog(5, est);
+								}
+								else rid_unique[sp][vc][vp][rid] = 1;
+								SaveRuleVariant(sp, vc, vp, rid, cur_accept, sev, rule, subrule, ast[10], ast[11]);
+							}
+						}
+					}
+				}
+			}
+			// Replace scripts in viz text
+			ruleinfo[rid].viz_text.Replace("!rn!", ruleinfo[rid].RuleName);
+			ruleinfo[rid].viz_text.Replace("!srn!", ruleinfo[rid].SubRuleName);
+			ruleinfo[rid].viz_text.Replace("!src!", ruleinfo[rid].SubRuleComment);
+			ruleinfo[rid].viz_text.Replace("!rc!", ruleinfo[rid].RuleComment);
 			ruleinfo[rid].viz_text.Replace("!rc!", ruleinfo[rid].RuleClass);
 			ruleinfo[rid].viz_text.Replace("!rg!", ruleinfo[rid].RuleGroup);
 		}
@@ -236,7 +286,7 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<int>>> &ve) {
 	}
 }
 
-void CP2D::ResizeRuleVariantVector(vector<vector<vector<vector<RuleInfo2>>>> &ve) {
+void CP2D::ResizeRuleVariantVector(vector<vector<vector<RuleInfo2>>> &ve) {
 	ve.resize(MAX_SPECIES + 1);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		ve[sp].resize(MAX_VC + 1);
@@ -252,7 +302,6 @@ void CP2D::ResizeRuleVariantVectors2() {
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
 				if (accept[sp][vc][vp].size() <= max_rule) accept[sp][vc][vp].resize(max_rule + 1);
 				if (severity[sp][vc][vp].size() <= max_rule) severity[sp][vc][vp].resize(max_rule + 1);
-				if (ruleinfo2[sp][vc][vp].size() <= max_rule) ruleinfo2[sp][vc][vp].resize(max_rule + 1);
 			}
 		}
 	}
@@ -260,17 +309,13 @@ void CP2D::ResizeRuleVariantVectors2() {
 
 void CP2D::SaveRuleVariant(int sp, int vc, int vp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com) {
 	// Set values
-	ruleinfo2[sp][vc][vp][rid].RuleName = rule;
-	ruleinfo2[sp][vc][vp][rid].SubRuleName = subrule;
-	ruleinfo2[sp][vc][vp][rid].RuleComment = rule_com;
-	ruleinfo2[sp][vc][vp][rid].SubRuleComment = subrule_com;
+	ruleinfo2[rid][sp][vc][vp].RuleName = rule;
+	ruleinfo2[rid][sp][vc][vp].SubRuleName = subrule;
+	ruleinfo2[rid][sp][vc][vp].RuleComment = rule_com;
+	ruleinfo2[rid][sp][vc][vp].SubRuleComment = subrule_com;
 	accept[sp][vc][vp][rid] = flag;
 	severity[sp][vc][vp][rid] = sev;
 	// Replace viz text
-	ruleinfo[rid].viz_text.Replace("!rn!", ruleinfo2[sp][vc][vp][rid].RuleName);
-	ruleinfo[rid].viz_text.Replace("!srn!", ruleinfo2[sp][vc][vp][rid].SubRuleName);
-	ruleinfo[rid].viz_text.Replace("!src!", ruleinfo2[sp][vc][vp][rid].SubRuleComment);
-	ruleinfo[rid].viz_text.Replace("!rc!", ruleinfo2[sp][vc][vp][rid].RuleComment);
 }
 
 void CP2D::CheckRuleList() {
@@ -314,29 +359,30 @@ int CP2D::Interval2Chromatic(int iv) {
 
 // Load rules
 void CP2D::ParseRule(int sp, int vc, int vp, int rid, int type) {
+	if (!ruleinfo2[rid].size()) return;
 	CString st;
-	if (type == rsName) st = ruleinfo2[sp][vc][vp][rid].RuleName;
-	if (type == rsSubName) st = ruleinfo2[sp][vc][vp][rid].SubRuleName;
-	if (type == rsComment) st = ruleinfo2[sp][vc][vp][rid].RuleComment;
-	if (type == rsSubComment) st = ruleinfo2[sp][vc][vp][rid].SubRuleComment;
+	if (type == rsName) st = ruleinfo2[rid][sp][vc][vp].RuleName;
+	if (type == rsSubName) st = ruleinfo2[rid][sp][vc][vp].SubRuleName;
+	if (type == rsComment) st = ruleinfo2[rid][sp][vc][vp].RuleComment;
+	if (type == rsSubComment) st = ruleinfo2[rid][sp][vc][vp].SubRuleComment;
 	vector<int> v;
 	GetVint(st, v);
 	if (v.size()) {
 		// Create types
-		if (!ruleinfo2[sp][vc][vp][rid].RuleParam.size()) ruleinfo2[sp][vc][vp][rid].RuleParam.resize(4);
+		if (!ruleinfo2[rid][sp][vc][vp].RuleParam.size()) ruleinfo2[rid][sp][vc][vp].RuleParam.resize(4);
 		// Set params for type
-		ruleinfo2[sp][vc][vp][rid].RuleParam[type] = v;
+		ruleinfo2[rid][sp][vc][vp].RuleParam[type] = v;
 	}
 }
 
 int CP2D::GetRuleParam(int sp, int vc, int vp, int rid, int type, int id) {
-	if (!ruleinfo2[sp][vc][vp][rid].RuleParam.size() || id >= ruleinfo2[sp][vc][vp][rid].RuleParam[type].size()) {
+	if (!ruleinfo2[rid][sp][vc][vp].RuleParam.size() || id >= ruleinfo2[rid][sp][vc][vp].RuleParam[type].size()) {
 		CString est, rs;
 		CString st;
-		if (type == rsName) st = ruleinfo2[sp][vc][vp][rid].RuleName;
-		else if (type == rsSubName) st = ruleinfo2[sp][vc][vp][rid].SubRuleName;
-		else if (type == rsComment) st = ruleinfo2[sp][vc][vp][rid].RuleComment;
-		else if (type == rsSubComment) st = ruleinfo2[sp][vc][vp][rid].SubRuleComment;
+		if (type == rsName) st = ruleinfo2[rid][sp][vc][vp].RuleName;
+		else if (type == rsSubName) st = ruleinfo2[rid][sp][vc][vp].SubRuleName;
+		else if (type == rsComment) st = ruleinfo2[rid][sp][vc][vp].RuleComment;
+		else if (type == rsSubComment) st = ruleinfo2[rid][sp][vc][vp].SubRuleComment;
 		if (type == rsName) rs = "rule name";
 		else if (type == rsSubName) rs = "subrule name";
 		else if (type == rsComment) rs = "rule comment";
@@ -346,7 +392,7 @@ int CP2D::GetRuleParam(int sp, int vc, int vp, int rid, int type, int id) {
 		error = 1;
 		return 0;
 	}
-	return ruleinfo2[sp][vc][vp][rid].RuleParam[type][id];
+	return ruleinfo2[rid][sp][vc][vp].RuleParam[type][id];
 }
 
 // Parse rules
@@ -369,7 +415,7 @@ void CP2D::ParseRules() {
 	WriteLog(0, st);
 }
 
-void CP2D::SetRuleParams(vector<vector<vector<int>>> &par, int rid, int type, int id) {
+void CP2D::SetRuleParam(vector<vector<vector<int>>> &par, int rid, int type, int id) {
 	ResizeRuleVariantVector(par);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		for (int vc = 1; vc <= MAX_VC; ++vc) {
@@ -382,8 +428,8 @@ void CP2D::SetRuleParams(vector<vector<vector<int>>> &par, int rid, int type, in
 
 void CP2D::SetRuleParams() {
 	long long time_start = CGLib::time();
-	SetRuleParams(pco_apart, 248, rsName, 1);
-	SetRuleParams(sus_last_measures, 139, rsSubName, 0);
+	SetRuleParam(pco_apart, 248, rsName, 1);
+	SetRuleParam(sus_last_measures, 139, rsSubName, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;

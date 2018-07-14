@@ -35,6 +35,12 @@ struct RuleInfo {
 	int sas_emulator_unstable;
 	vector<int> sas_emulator_replace;
 	vector<int> flag_replace;
+	// Aggregated info
+	CString RuleName;
+	CString SubRuleName;
+	CString RuleComment;
+	CString SubRuleComment;
+	vector<vector<int>> RuleParam;
 };
 
 // This information is specific to rule with particular sp/vc/vg
@@ -58,16 +64,16 @@ protected:
 	void LoadRules(CString fname);
 	void ResizeRuleVariantVector(vector<vector<vector<vector<int>>>>& ve);
 	void ResizeRuleVariantVector(vector<vector<vector<int>>>& ve);
-	void ResizeRuleVariantVector(vector<vector<vector<vector<RuleInfo2>>>> &ve);
+	void ResizeRuleVariantVector(vector<vector<vector<RuleInfo2>>> &ve);
 	void ResizeRuleVariantVectors2();
 	inline void SaveRuleVariant(int sp, int vc, int vp, int rid, int flag, int sev, CString rule, CString subrule, CString rule_com, CString subrule_com);
 	void CheckRuleList();
 	int Interval2Chromatic(int iv);
-	void ParseRule(int sp, int vc, int vp, int rid, int type);
-	int GetRuleParam(int sp, int vc, int vp, int rid, int type, int id);
+	inline void ParseRule(int sp, int vc, int vp, int rid, int type);
+	inline int GetRuleParam(int sp, int vc, int vp, int rid, int type, int id);
 	void ParseRules();
 
-	void SetRuleParams(vector<vector<vector<int>>>& par, int rid, int type, int id);
+	inline void SetRuleParam(vector<vector<vector<int>>>& par, int rid, int type, int id);
 
 	void SetRuleParams();
 
@@ -86,7 +92,7 @@ protected:
 	vector<RuleInfo> ruleinfo; // [rid]
 	vector<vector<vector<vector<RuleInfo2>>>> ruleinfo2; // [sp][vc][vg][rid]
 	vector<vector<vector<vector<int>>>> accept; // [sp][vc][vg][rid]
-	vector<vector<vector<vector<int>>>> severity; // [sp][vc][vg][rid]
+	vector<vector<vector<vector<int>>>> severity; // [rid][sp][vc][vg]
 
 	// Rule parameters [sp][vc][vg]
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
