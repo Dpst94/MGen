@@ -222,8 +222,8 @@ void CP2D::LoadRules(CString fname) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
 						for (int vp = 0; vp <= MAX_VP; ++vp) {
 							// Resize
-							if (accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
-							if (severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
+							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
+							if (rid >= RULE_ALLOC && severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
 							accept[sp][vc][vp][rid] = flag;
 							severity[sp][vc][vp][rid] = sev;
 						}
@@ -231,13 +231,12 @@ void CP2D::LoadRules(CString fname) {
 				}
 			}
 			else {
-				ResizeRuleVariantVector(ruleinfo2[rid]);
 				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
 						for (int vp = 0; vp <= MAX_VP; ++vp) {
 							// Resize
-							if (accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
-							if (severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
+							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
+							if (rid >= RULE_ALLOC && severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
 							int cur_accept = flag;
 							if (!nsp[sp] || !nvc[vc] || !nvp[vp]) {
 								if (ruleinfo2[rid][sp][vc][vp].RuleName.IsEmpty()) {
@@ -248,7 +247,7 @@ void CP2D::LoadRules(CString fname) {
 								}
 							}
 							else {
-								if (rid_unique[sp][vc][vp].size() <= rid) rid_unique[sp][vc][vp].resize(rid + 1);
+								if (rid >= RULE_ALLOC && rid_unique[sp][vc][vp].size() <= rid) rid_unique[sp][vc][vp].resize(rid + 1);
 								if (rid_unique[sp][vc][vp][rid]) {
 									est.Format("Duplicate rule %d species %d, vc %d, vp %d: '%s (%s)' overwrites '%s (%s)' with species filter %s, voices filter %s",
 										rid, sp, vc, vp, rule, subrule, ruleinfo2[rid][sp][vc][vp].RuleName,
@@ -295,6 +294,11 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<vector<int>>>> &ve) {
 		ve[sp].resize(MAX_VC + 1);
 		for (int vc = 1; vc <= MAX_VC; ++vc) {
 			ve[sp][vc].resize(MAX_VP + 1);
+			for (int vp = 0; vp <= MAX_VP; ++vp) {
+				//if (ve[sp][vc][vp].size() < max(RULE_ALLOC, max_rule + 1))
+				//ve[sp][vc][vp].resize(max(RULE_ALLOC, max_rule + 1));
+				ve[sp][vc][vp].resize(RULE_ALLOC);
+			}
 		}
 	}
 }

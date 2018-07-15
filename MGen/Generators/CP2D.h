@@ -1,6 +1,8 @@
 #pragma once
 #include "..\GLibrary\GTemplate.h"
 
+// Allocate at least this number of rules
+#define RULE_ALLOC 500
 // Maximum species
 #define MAX_SPECIES 5
 // Maximum voice count
