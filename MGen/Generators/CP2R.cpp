@@ -291,11 +291,19 @@ void CP2R::GetNoteTypes() {
 			else if (sm == 5) beat[v][ls] = 12;
 			else if (sm == 6) beat[v][ls] = 5;
 			else if (sm == 7) beat[v][ls] = 13;
+			else if (sm == 8) beat[v][ls] = 2;
+			else if (sm == 9) beat[v][ls] = 14;
+			else if (sm == 10) beat[v][ls] = 6;
+			else if (sm == 11) beat[v][ls] = 15;
+			else if (sm == 12) beat[v][ls] = 4;
+			else if (sm == 13) beat[v][ls] = 16;
+			else if (sm == 14) beat[v][ls] = 7;
+			else if (sm == 15) beat[v][ls] = 17;
 			// Beats for species 1: 0 0 0 0
 			// Beats for species 2: 0 1 0 1
 			// Beats for species 3: 0 3 1 5
 			// Beats for species 4: 0 1 0 1
-			// Beats for species 5: 0 10 3 11 1 12 5 13
+			// Beats for species 5: 0 10 3 11 1 12 5 13 2 14 6 15 4 16 7 17
 			// Get suspension if cantus note changes during counterpoint note
 			sus[v][ls] = 0;
 			if (bmli[s] != bmli[s2]) {
