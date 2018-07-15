@@ -238,15 +238,17 @@ void CP2D::LoadRules(CString fname) {
 							// Resize
 							if (accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
 							if (severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
-							if (rid_unique[sp][vc][vp].size() <= rid) rid_unique[sp][vc][vp].resize(rid + 1);
 							int cur_accept = flag;
 							if (!nsp[sp] || !nvc[vc] || !nvp[vp]) {
 								if (ruleinfo2[rid][sp][vc][vp].RuleName.IsEmpty()) {
 									cur_accept = 0;
 									SaveRuleVariant(sp, vc, vp, rid, rule, subrule, ast[10], ast[11]);
+									accept[sp][vc][vp][rid] = cur_accept;
+									severity[sp][vc][vp][rid] = sev;
 								}
 							}
 							else {
+								if (rid_unique[sp][vc][vp].size() <= rid) rid_unique[sp][vc][vp].resize(rid + 1);
 								if (rid_unique[sp][vc][vp][rid]) {
 									est.Format("Duplicate rule %d species %d, vc %d, vp %d: '%s (%s)' overwrites '%s (%s)' with species filter %s, voices filter %s",
 										rid, sp, vc, vp, rule, subrule, ruleinfo2[rid][sp][vc][vp].RuleName,
@@ -255,6 +257,8 @@ void CP2D::LoadRules(CString fname) {
 								}
 								else rid_unique[sp][vc][vp][rid] = 1;
 								SaveRuleVariant(sp, vc, vp, rid, rule, subrule, ast[10], ast[11]);
+								accept[sp][vc][vp][rid] = cur_accept;
+								severity[sp][vc][vp][rid] = sev;
 							}
 						}
 					}
