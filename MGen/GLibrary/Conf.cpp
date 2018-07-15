@@ -242,7 +242,6 @@ void CConf::LoadConfig(CString fname, int load_includes) {
 	LoadConfigFiles(fname, load_includes);
 	// After loading global mapping of voices to instruments, load algorithm-specific mapping
 	st2 = "instruments";
-	LoadVarInstr(&st2, &m_algo_insts, "instruments", instr);
 	LoadVarInstr(&st2, &m_config_insts, "instruments", instr);
 	// Process configs
 	ProcessConfig();
