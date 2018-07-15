@@ -20,10 +20,11 @@ protected:
 
 	XFIn xfi;
 
-	vector<vector<vector<int>>> cp; // [][v][s]
-	vector<vector<vector<int>>> cp_retr; // [][v][s]
-	vector<vector<int>> cp_mea; // [][s]
+	vector<vector<vector<int>>> cp; // [cp_id][v][s]
+	vector<vector<vector<int>>> cp_retr; // [cp_id][v][s]
+	vector<vector<int>> cp_mea; // [cp_id][s]
 	vector<vector<int>> cp_vid;
+	vector<CString> cp_text; // [cp_id]
 	vector<CString> vname;
 
 	int cp_id = 0;

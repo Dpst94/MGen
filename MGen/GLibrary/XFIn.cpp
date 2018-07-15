@@ -125,6 +125,10 @@ void XFIn::LoadXML(CString pth) {
 			int staff = nd.child("staff").text().as_int();
 			if (staff >= words.size()) words.resize(staff + 1);
 			words[staff] = nd.child("direction-type").child("words").text().as_string();
+			if (nd.child("direction-type").child("words").next_sibling().name()[0] != '\0') {
+				words[staff] += ",";
+				words[staff] += nd.child("direction-type").child("words").next_sibling().text().as_string();
+			}
 			if (nd.child("direction-type").child("metronome").child("per-minute").name()[0] != '\0') {
 				tempo = nd.child("direction-type").child("metronome").child("per-minute").text().as_float() *
 					note_type_value[nd.child("direction-type").child("metronome").child("beat-unit").text().as_string()] / 256.0;

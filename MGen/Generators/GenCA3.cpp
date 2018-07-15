@@ -94,11 +94,14 @@ void CGenCA3::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 int CGenCA3::XML_to_CP() {
 	// Intermediate measures vector
 	vector<int> im;
+	// Intermediate text vector
+	vector<vector<CString>> it;
 
 	av_cnt = xfi.voice.size();
 	InitAnalysis();
 	cp_tempo = 0;
 	vname.resize(av_cnt);
+	it.resize(av_cnt);
 	for (int vi = 0; vi < xfi.voice.size(); ++vi) {
 		int v = av_cnt - vi - 1;
 		int pos = 0;
@@ -108,6 +111,7 @@ int CGenCA3::XML_to_CP() {
 			im[pos] = 1;
 			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
 				int ln = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
+				it[v].resize(pos + ln);
 				cc[v].resize(pos + ln);
 				retr[v].resize(pos + ln);
 				if (xfi.note[vi][m][ni].tempo && !cp_tempo)
@@ -116,6 +120,11 @@ int CGenCA3::XML_to_CP() {
 				for (int s = 0; s < ln; ++s) {
 					cc[v][pos + s] = xfi.note[vi][m][ni].pitch;
 				}
+				// Concatenate text
+				it[v][pos] = xfi.note[vi][m][ni].words;
+				if (!xfi.note[vi][m][ni].words.IsEmpty() && !xfi.note[vi][m][ni].lyric.IsEmpty())
+					it[v][pos] += ",";
+				it[v][pos] += xfi.note[vi][m][ni].lyric;
 				pos += ln;
 				c_len = max(c_len, pos);
 			}
@@ -156,6 +165,7 @@ int CGenCA3::XML_to_CP() {
 				cp_retr.resize(cp_id + 1);
 				cp_vid.resize(cp_id + 1);
 				cp_mea.resize(cp_id + 1);
+				cp_text.resize(cp_id + 1);
 				cp[cp_id].resize(av_cnt);
 				cp_retr[cp_id].resize(av_cnt);
 				cp_vid[cp_id].resize(av_cnt);
@@ -164,6 +174,7 @@ int CGenCA3::XML_to_CP() {
 				for (int s3 = s1; s3 <= s2; ++s3) {
 					cp_mea[cp_id][s3 - s1] = im[s3];
 				}
+				// Copy notes
 				for (int v = 0; v < av_cnt; ++v) {
 					cp[cp_id][v].resize(s2 - s1 + 1);
 					cp_retr[cp_id][v].resize(s2 - s1 + 1);
@@ -171,6 +182,8 @@ int CGenCA3::XML_to_CP() {
 					for (int s3 = s1; s3 <= s2; ++s3) {
 						cp[cp_id][v][s3 - s1] = cc[v][s3];
 						cp_retr[cp_id][v][s3 - s1] = retr[v][s3];
+						if (!cp_text[cp_id].IsEmpty() && !it[v][s3].IsEmpty()) cp_text[cp_id] += ",";
+						cp_text[cp_id] += it[v][s3];
 					}
 				}
 				cp_id++;
