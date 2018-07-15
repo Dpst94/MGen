@@ -97,6 +97,9 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 			CheckVar(&st2, &st3, "mastervolume", &master_vol, 0, 100);
 			LoadVar(&st2, &st3, "instr_layout", &instr_layout);
 			LoadVar(&st2, &st3, "instruments", &m_config_insts);
+			if (st2 == "instruments") {
+				LoadInstruments(m_config_insts);
+			}
 			if (st2 == "unison_mute") {
 				++parameter_found;
 				int val = atoi(st3);
@@ -236,8 +239,8 @@ void CConf::LoadConfig(CString fname, int load_includes) {
 	// Load instruments layout
 	if (instr_layout.IsEmpty()) instr_layout = "Default";
 	LoadInstrumentLayout();
-	// Load instruments
-	LoadInstruments();
+	// Load default instrument
+	LoadInstruments("");
 	// Load configs again, overwriting instrument parameters
 	LoadConfigFiles(fname, load_includes);
 	// After loading global mapping of voices to instruments, load algorithm-specific mapping
@@ -276,56 +279,6 @@ void CConf::LoadConfigFiles(CString fname, int load_includes) {
 	CString est;
 	est.Format("LoadConfigFiles loaded %s in %lld ms", fname, time_stop - time_start);
 	WriteLog(0, est);
-}
-
-void CConf::LoadVarInstr(CString * sName, CString * sValue, char* sSearch, vector<int> & Dest) {
-	if (*sName == sSearch) {
-		int pos = 0, ii = 0;
-		CString st;
-		for (int v = 0; v<MAX_VOICE; v++) {
-			st = sValue->Tokenize(",", pos);
-			st.Trim();
-			if (st.IsEmpty()) break;
-			int found = 0;
-			if (st.Find("/") == -1) {
-				for (ii = 0; ii < icf.size(); ii++) {
-					if (icf[ii].group == st) {
-						++found;
-						Dest[v] = ii;
-						++icf[ii].used;
-						break;
-					}
-				}
-			}
-			// Load particular config
-			else {
-				CString gname = st.Left(st.Find("/"));
-				CString cname = st.Mid(st.Find("/") + 1);
-				for (ii = 0; ii < icf.size(); ii++) {
-					if (icf[ii].group == gname && icf[ii].name == cname) {
-						++found;
-						Dest[v] = ii;
-						++icf[ii].used;
-						break;
-					}
-				}
-			}
-			if (!found) {
-				CString est;
-				est.Format("Cannot find any instrument named %s (%d) in layout %s. Mapped to default instrument %s/%s (%d)",
-					st, v, instr_layout, icf[0].group, icf[0].name, 0);
-				WriteLog(5, est);
-			}
-			else {
-				// Calculate instrument config for voice
-				if (icf[ii].child.find(v + 1) != icf[ii].child.end()) {
-					ii = icf[ii].child[v + 1];
-					instr[v] = ii;
-					++icf[ii].used;
-				}
-			}
-		}
-	}
 }
 
 void CConf::LoadInstrumentLayout()
@@ -429,10 +382,71 @@ void CConf::LoadInstrumentLayoutLine(CString &st2, CString &st3) {
 	CheckVar(&st2, &st3, "rnd_tempo_slow", &rnd_tempo_slow);
 }
 
-void CConf::LoadInstruments() {
+void CConf::LoadVarInstr(CString * sName, CString * sValue, char* sSearch, vector<int> & Dest) {
+	if (*sName == sSearch) {
+		int pos = 0, ii = 0;
+		CString st;
+		for (int v = 0; v<MAX_VOICE; v++) {
+			st = sValue->Tokenize(",", pos);
+			st.Trim();
+			if (st.IsEmpty()) break;
+			int found = 0;
+			if (st.Find("/") == -1) {
+				for (ii = 0; ii < icf.size(); ii++) {
+					if (icf[ii].group == st) {
+						++found;
+						Dest[v] = ii;
+						++icf[ii].used;
+						break;
+					}
+				}
+			}
+			// Load particular config
+			else {
+				CString gname = st.Left(st.Find("/"));
+				CString cname = st.Mid(st.Find("/") + 1);
+				for (ii = 0; ii < icf.size(); ii++) {
+					if (icf[ii].group == gname && icf[ii].name == cname) {
+						++found;
+						Dest[v] = ii;
+						++icf[ii].used;
+						break;
+					}
+				}
+			}
+			if (!found) {
+				CString est;
+				est.Format("Cannot find any instrument named %s (%d) in layout %s. Mapped to default instrument %s/%s (%d)",
+					st, v, instr_layout, icf[0].group, icf[0].name, 0);
+				WriteLog(5, est);
+			}
+			else {
+				// Calculate instrument config for voice
+				if (icf[ii].child.find(v + 1) != icf[ii].child.end()) {
+					ii = icf[ii].child[v + 1];
+					instr[v] = ii;
+					++icf[ii].used;
+				}
+			}
+		}
+	}
+}
+
+void CConf::LoadInstruments(CString ist) {
 	long long time_start = CGLib::time();
 	CString fname, cname;
 	int found_default, ii2;
+	// Build instruments vector
+	vector<CString> iag, iac;
+	Tokenize(ist, iag, ",");
+	iac.resize(iag.size());
+	for (int i = 0; i < iag.size(); ++i) {
+		iag[i].Trim();
+		if (iag[i].Find("/") != -1) {
+			iac[i] = iag[i].Mid(iag[i].Find("/") + 1);
+			iag[i] = iag[i].Left(iag[i].Find("/"));
+		}
+	}
 	for (int ii = 0; ii < icf.size(); ++ii) if (icf[ii].default_instr == ii) {
 		CFileFind finder;
 		CString strWildcard = "instruments\\" + icf[ii].group + "\\*.*";
@@ -453,8 +467,41 @@ void CConf::LoadInstruments() {
 				ii2 = ii;
 				found_default = 1;
 			}
+			// If config was already loaded
+			int found_loaded = 0;
+			for (int i = 0; i < icf.size(); ++i) {
+				// Correct group and not loaded
+				if (icf[i].group == icf[ii].group && cname == icf[i].name && icf[i].loaded) {
+					found_loaded = 1;
+					break;
+				}
+			}
+			if (found_loaded) continue;
+			// Load if this is default config of default instrument
+			int need_load = 0;
+			if (icf[ii].name == cname && !ii) {
+				need_load = 1;
+			}
 			else {
-				// If not, create copy of current config
+				for (int i = 0; i < iag.size(); ++i) {
+					if (iag[i] == icf[ii].group) {
+						// Find default config
+						if (iac[i] == "" && icf[ii].name == cname) {
+							need_load = 1;
+							break;
+						}
+						// Find non-default config
+						else if (iac[i] == cname) {
+							need_load = 1;
+							break;
+						}
+					}
+				}
+			}
+			if (!need_load) continue;
+			//WriteLog(1, "Loading instrument " + icf[ii].group + "/" + cname);
+			if (icf[ii].name != cname) {
+				// If not default, create copy of current config
 				AddIcf();
 				ii2 = icf.size() - 1;
 				icf[ii2] = icf[ii];
@@ -529,6 +576,7 @@ void CConf::LoadInstrument(int i, CString fname)
 		}
 	} // while (fs.good())
 	fs.close();
+	icf[i].loaded = 1;
 	// Log
 	long long time_stop = CGLib::time();
 	CString est;

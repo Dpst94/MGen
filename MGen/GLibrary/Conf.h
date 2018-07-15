@@ -14,7 +14,6 @@ public:
 	~CConf();
 
 	void AddIcf();
-	void LoadInstruments(); // Load instruments config
 	void LoadInstrument(int i, CString fname);
 	void LoadCCName(CString * sName, CString * sValue, CString sSearch, int i);
 	void LoadKswGroup(CString * sName, CString * sValue, CString sSearch, int i);
@@ -32,6 +31,7 @@ public:
 	void LoadConfigFiles(CString fname, int load_includes);
 	void LoadInstrumentLayout();
 	void LoadInstrumentLayoutLine(CString & st2, CString & st3);
+	void LoadInstruments(CString ilist);
 	void LoadConfigFile(CString fname, int load_includes = 1);
 	short CreateVirtualInstrument(int instr_id, int child_id);
 	void LoadVarInstr(CString * sName, CString * sValue, char * sSearch, vector<int>& Dest);
