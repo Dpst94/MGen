@@ -285,8 +285,27 @@ int CGenCA3::GetCP() {
 		}
 	}
 	ep2 = c_len;
-	if (vsp.size() != av_cnt) {
-		est.Format("In config species is marked for %zu voices, but there are %d voices in counterpoint %d",
+	// Check if species can be loaded from MusicXML
+	if (!cp_text[cp_id].IsEmpty()) {
+		vector<CString> sa;
+		Tokenize(cp_text[cp_id], sa, ",");
+		for (int i = 0; i < sa.size(); ++i) {
+			sa[i].Trim();
+			if (sa[i].Left(2) == "sp") {
+				LoadSpecies(sa[i].Mid(2));
+				if (vsp.size() != av_cnt) {
+					est.Format("In MusicXML species is marked for %zu voices, but there are %d voices in counterpoint %d",
+						vsp.size(), av_cnt, cp_id + 1);
+					WriteLog(5, est);
+					error = 10;
+					return 1;
+				}
+				break;
+			}
+		}
+	}
+	else if (vsp.size() != av_cnt) {
+		est.Format("Species not found in MusicXML. In config species is marked for %zu voices, but there are %d voices in counterpoint %d",
 			vsp.size(), av_cnt, cp_id + 1);
 		WriteLog(5, est);
 		error = 10;
