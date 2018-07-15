@@ -94,6 +94,9 @@ protected:
 	vector<int> fli_size;
 	vector<int> vsp; // Species for each voice
 	int npm;
+	int s, s2;
+	int v;
+	int ls;
 
 	int cp_tempo = 100;
 	int step0 = 0;
@@ -136,6 +139,22 @@ protected:
 	vector<vector<float>> macc2; // [v][s] CC moving average smoothed
 	vector<vector<int>> lclimax; // [v][s] Local highest note (chromatic)
 	vector<vector<int>> lclimax2; // [v][s] Local highest note (chromatic)
+	vector<vector<int>> beat; // [v][ls] Beat type for each fli2: 0 = downbeat, 1 = beat 3
+
+	// Harmonic data
+	vector<vector<int>> sus; // [v][ls] Note suspension flag (when above zero, links to first cantus-changing step)
+	vector<vector<int>> susres; // [v][ls] =1 if sus is resolved correctly
+	vector<vector<int>> isus; // [v][ls] Points to sus position or note start if there is no sus
+	vector<vector<int>> mshb; // [v][ls] Melody shape types for fli (basic without patterns)
+	vector<vector<int>> mshf; // [v][ls] Melody shape types for fli (with fixed patterns)
+	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
+	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
+	vector<int> hli; // [hs] Forward links to first notes of each harmony
+	vector<int> ha64; // [hs] Audible 6/4 chord, while hbc will show root position or sixth chord
+	vector<int> hli2; // [hs] Forward links to last notes of each harmony
+	vector<int> hbcc; // [hs] Bass note of each harmony (chromatic)
+	vector<int> hbc; // [hs] Bass note of each harmony (diatonic)
+	vector<int> bhli; // [s] Back links to first notes of each harmony
 
 	// Flags
 	vector<vector<vector<int>>> flag; // [v][s][] Note flags

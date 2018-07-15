@@ -18,6 +18,8 @@
 #define DR_leap					5
 #define DR_slur					6
 #define DR_lclimax			7
+#define DR_beat					8
+#define DR_sus					9
 
 #ifdef CF_DEBUG
 
@@ -43,6 +45,29 @@
 #define ASSERT_RULE(id) 
 
 #endif
+
+// Movement types
+#define mStay 0
+#define mParallel 1
+#define mDirect 2
+#define mOblique 3
+#define mContrary 4
+
+// Melody shape types
+#define pDownbeat 1
+#define pLeapTo 2
+#define pLeapFrom 3
+#define pSusStart 4
+#define pSusRes 5
+#define pLastLT 6
+#define pLong 7
+#define pAux -1
+#define pPass -2
+
+// Patterns
+#define pCam 1 // Cambiata
+#define pDNT 2 // Double-neighbour tone
+#define pPDD 3 // Passing downbeat dissonance
 
 class CP2R :
 	public CP2D
@@ -80,5 +105,6 @@ protected:
 	inline void GetDiatonic(int step1, int step2);
 	inline void GetLeapSmooth();
 	inline void GetLClimax();
+	inline void GetNoteTypes();
 };
 

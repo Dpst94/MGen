@@ -38,6 +38,19 @@ void CGenCA3::InitAnalysis() {
 	flag.resize(av_cnt);
 	fsl.resize(av_cnt);
 	fvl.resize(av_cnt);
+	sus.resize(av_cnt);
+	susres.resize(av_cnt);
+	isus.resize(av_cnt);
+	mshb.resize(av_cnt);
+	mshf.resize(av_cnt);
+	pat.resize(av_cnt);
+	pat_state.resize(av_cnt);
+	hli.resize(c_len);
+	hli2.resize(c_len);
+	ha64.resize(c_len);
+	hbcc.resize(c_len);
+	hbc.resize(c_len);
+	bhli.resize(c_len);
 	vca.resize(c_len);
 	hva.resize(c_len);
 	lva.resize(c_len);
@@ -62,6 +75,13 @@ void CGenCA3::InitAnalysis() {
 		flag[v].resize(c_len);
 		fsl[v].resize(c_len);
 		fvl[v].resize(c_len);
+		sus[v].resize(c_len);
+		susres[v].resize(c_len);
+		isus[v].resize(c_len);
+		mshb[v].resize(c_len);
+		mshf[v].resize(c_len);
+		pat[v].resize(c_len);
+		pat_state[v].resize(c_len);
 	}
 }
 

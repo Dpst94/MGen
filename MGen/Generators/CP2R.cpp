@@ -272,3 +272,38 @@ void CP2R::GetLClimax() {
 	}
 }
 
+void CP2R::GetNoteTypes() {
+	CHECK_READY(DR_fli);
+	SET_READY(DR_beat, DR_sus);
+	for (v = 0; v < av_cnt; ++v) {
+		int l;
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			s2 = fli2[v][ls];
+			l = llen[v][ls];
+			int sm = s % npm;
+			// Get beat
+			if (sm == 0) beat[v][ls] = 0;
+			else if (sm == 1) beat[v][ls] = 10;
+			else if (sm == 2) beat[v][ls] = 3;
+			else if (sm == 3) beat[v][ls] = 11;
+			else if (sm == 4) beat[v][ls] = 1;
+			else if (sm == 5) beat[v][ls] = 12;
+			else if (sm == 6) beat[v][ls] = 5;
+			else if (sm == 7) beat[v][ls] = 13;
+			// Beats for species 1: 0 0 0 0
+			// Beats for species 2: 0 1 0 1
+			// Beats for species 3: 0 3 1 5
+			// Beats for species 4: 0 1 0 1
+			// Beats for species 5: 0 10 3 11 1 12 5 13
+			// Get suspension if cantus note changes during counterpoint note
+			sus[v][ls] = 0;
+			if (bmli[s] != bmli[s2]) {
+				sus[v][ls] = mli[bmli[s] + 1];
+			}
+			// Build isus
+			isus[v][ls] = sus[v][ls] ? sus[v][ls] : fli[v][ls];
+		}
+	}
+}
+
