@@ -15,7 +15,21 @@ CP2D::CP2D() {
 CP2D::~CP2D() {
 }
 
+void CP2D::LoadSpecies(CString st) {
+	vsp.resize(st.GetLength());
+	for (int i = 0; i < st.GetLength(); ++i) {
+		vsp[i] = atoi(st.Mid(i, 1));
+	}
+}
+
 void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
+	CheckVar(sN, sV, "lclimax_notes", &lclimax_notes, 0, 1000);
+	CheckVar(sN, sV, "lclimax_mea", &lclimax_mea, 0, 1000);
+	// Load species
+	if (*sN == "species") {
+		++parameter_found;
+		LoadSpecies(*sV);
+	}
 	// Load rules
 	if (*sN == "rules_file") {
 		++parameter_found;
@@ -540,6 +554,7 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(pco_apart, 248, rsName, 1);
 	SetRuleParam(sus_last_measures, 139, rsSubName, 0);
 	SetRuleParam(cse_leaps_r, 502, rsSubName, 0);
+	SetRuleParam(lclimax_mea5, 325, rsComment, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;

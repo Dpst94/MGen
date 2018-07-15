@@ -62,6 +62,7 @@ public:
 	~CP2D();
 
 protected:
+	void LoadSpecies(CString st);
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void LoadRules(CString fname);
 	void ResizeRuleVariantVector(vector<vector<vector<vector<int>>>>& ve);
@@ -91,6 +92,8 @@ protected:
 	vector<int> minl;
 	vector<int> maxl;
 	vector<int> fli_size;
+	vector<int> vsp; // Species for each voice
+	int npm;
 
 	int cp_tempo = 100;
 	int step0 = 0;
@@ -105,9 +108,17 @@ protected:
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
 	vector<vector<vector<int>>> sus_last_measures; // Last measures in which sus is allowed in species 2 and 3
 	vector<vector<vector<int>>> cse_leaps_r; // Last measures in which sus is allowed in species 2 and 3
+	vector<vector<vector<int>>> lclimax_mea5; // Last measures in which sus is allowed in species 2 and 3
+	int lclimax_notes = 12; // Number of adjacent notes to calculate local climax
+	int lclimax_mea = 6; // Number of adjacent measures to calculate local climax
 
 	// Main vectors
-	vector<int> vid; // [v] Voice id
+	vector<int> vid; // [v] Voice id for each voice
+	vector<int> vca; // [s] Voice count for each step
+	vector<int> hva; // [s] Highest voice for this step
+	vector<int> lva; // [s] Lowest voice for this step
+	vector<int> mli; // [s] Links to measure start step
+	vector<int> bmli; // [s] Links from step to measure
 	vector<vector<int>> c; // [v][s] Diatonic
 	vector<vector<int>> cc; // [v][s] Chromatic
 	vector<vector<int>> pc; // [v][s] Pitch class (diatonic)
@@ -116,11 +127,21 @@ protected:
 	vector<vector<int>> smooth; // [v][s] Smooth movements
 	vector<vector<int>> slur; // [v][s] Slurs
 	vector<vector<int>> retr; // [v][s] Equals 1 if note should be retriggered
-	vector<vector<int>> fli; // [ls] Forward links to start of each non-slurred note
-	vector<vector<int>> fli2; // [ls] Forward links to end of each non-slurred note
-	vector<vector<int>> llen; // [ls] Length of each linked note in steps
-	vector<vector<int>> rlen; // [ls] Real length of each linked note (in croches)
-	vector<vector<int>> bli; // [s] Back links from each step to fli2
+	vector<vector<int>> fli; // [v][ls] Forward links to start of each non-slurred note
+	vector<vector<int>> fli2; // [v][ls] Forward links to end of each non-slurred note
+	vector<vector<int>> llen; // [v][ls] Length of each linked note in steps
+	vector<vector<int>> rlen; // [v][ls] Real length of each linked note (in croches)
+	vector<vector<int>> bli; // [v][s] Back links from each step to fli2
+	vector<vector<float>> macc; // [v][s] CC moving average
+	vector<vector<float>> macc2; // [v][s] CC moving average smoothed
+	vector<vector<int>> lclimax; // [v][s] Local highest note (chromatic)
+	vector<vector<int>> lclimax2; // [v][s] Local highest note (chromatic)
+
+	// Flags
+	vector<vector<vector<int>>> flag; // [v][s][] Note flags
+	vector<vector<vector<int>>> fsl; // [v][s][] Note flags links to steps
+	vector<vector<vector<int>>> fvl; // [v][s][] Note flags links to voices
+	int fpenalty; // Additional flags penalty
 
 	// Check data ready
 	vector<int> data_ready; // If data is ready to be used

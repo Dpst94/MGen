@@ -51,6 +51,23 @@ void CP2R::CreateLinks() {
 	}
 }
 
+void CP2R::GetVca() {
+	SET_READY(DR_vca);
+	// Set first steps in case there is pause
+	for (int s = 0; s < ep2; ++s) {
+		vca[s] = 0;
+		hva[s] = 0;
+		lva[s] = av_cnt - 1;
+		for (int v = 0; v < av_cnt; ++v) {
+			if (cc[v][s]) {
+				++vca[s];
+				if (v > hva[s]) hva[s] = v;
+				if (v < lva[s]) lva[s] = v;
+			}
+		}
+	}
+}
+
 void CP2R::SendCP() {
 	CreateLinks();
 	int real_len = cc[0].size();
@@ -174,3 +191,84 @@ inline void CP2R::CheckReadyPersist(int id, int id2, int id3) {
 	CheckReadyPersist(id2);
 	CheckReadyPersist(id3);
 }
+
+void CP2R::AnalyseCP() {
+	CLEAR_READY();
+	ClearFlags(0, c_len);
+	GetDiatonic(0, c_len);
+	GetPitchClass(0, c_len);
+	CreateLinks();
+	GetLClimax();
+	GetLeapSmooth();
+}
+
+void CP2R::ClearFlags(int step1, int step2) {
+	for (int v = 0; v < av_cnt; ++v) {
+		for (int s = step1; s < step2; ++s) {
+			flag[v][s].clear();
+			fsl[v][s].clear();
+			fvl[v][s].clear();
+		}
+	}
+	fpenalty = 0;
+}
+
+void CP2R::GetPitchClass(int step1, int step2) {
+	CHECK_READY(DR_c);
+	SET_READY(DR_pc);
+	for (int v = 0; v < av_cnt; ++v) {
+		for (int s = step1; s < step2; ++s) {
+			pc[v][s] = c[v][s] % 7;
+			pcc[v][s] = (cc[v][s] + 12 - tonic_cur) % 12;
+		}
+	}
+}
+
+void CP2R::GetDiatonic(int step1, int step2) {
+	SET_READY(DR_c);
+	if (minor_cur) {
+		for (int v = 0; v < av_cnt; ++v) {
+			for (int s = step1; s < step2; ++s) {
+				c[v][s] = m_CC_C(cc[v][s], tonic_cur);
+			}
+		}
+	}
+	else {
+		for (int v = 0; v < av_cnt; ++v) {
+			for (int s = step1; s < step2; ++s) {
+				c[v][s] = maj_CC_C(cc[v][s], tonic_cur);
+			}
+		}
+	}
+}
+
+void CP2R::GetLeapSmooth() {
+	CHECK_READY(DR_c);
+	SET_READY(DR_leap, DR_slur);
+	for (int v = 0; v < av_cnt; ++v) {
+		for (int i = 0; i < ep2 - 1; ++i) {
+			// Find all leaps
+			leap[v][i] = 0;
+			smooth[v][i] = 0;
+			slur[v][i + 1] = 0;
+			if (cc[v][i] == cc[v][i + 1]) slur[v][i + 1] = 1;
+			if (c[v][i + 1] - c[v][i] > 1) leap[v][i] = 1;
+			else if (c[v][i + 1] - c[v][i] < -1) leap[v][i] = -1;
+			// Find all smooth
+			else if (c[v][i + 1] - c[v][i] == 1) smooth[v][i] = 1;
+			else if (c[v][i + 1] - c[v][i] == -1) smooth[v][i] = -1;
+		}
+		leap[v][ep2 - 1] = 0;
+		smooth[v][ep2 - 1] = 0;
+		slur[v][0] = 0;
+	}
+}
+
+void CP2R::GetLClimax() {
+	SET_READY(DR_lclimax);
+	for (int v = 0; v < av_cnt; ++v) {
+		GetMovingMax(cc[v], max(lclimax_notes, lclimax_mea * npm), lclimax[v]);
+		GetMovingMax(cc[v], lclimax_mea5[vsp[v]][av_cnt][0] * npm, lclimax2[v]);
+	}
+}
+

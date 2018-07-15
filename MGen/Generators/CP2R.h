@@ -12,6 +12,12 @@
 
 // Non-persistent
 #define DR_fli					1
+#define DR_vca					2
+#define DR_c						3
+#define DR_pc						4
+#define DR_leap					5
+#define DR_slur					6
+#define DR_lclimax			7
 
 #ifdef CF_DEBUG
 
@@ -46,7 +52,8 @@ public:
 	~CP2R();
 
 protected:
-	void CreateLinks();
+	inline void CreateLinks();
+	inline void GetVca();
 
 	void SendCP();
 	
@@ -67,5 +74,11 @@ protected:
 	inline void CheckReadyPersist(int id);
 	inline void CheckReadyPersist(int id, int id2);
 	inline void CheckReadyPersist(int id, int id2, int id3);
+	void AnalyseCP();
+	inline void ClearFlags(int step1, int step2);
+	inline void GetPitchClass(int step1, int step2);
+	inline void GetDiatonic(int step1, int step2);
+	inline void GetLeapSmooth();
+	inline void GetLClimax();
 };
 

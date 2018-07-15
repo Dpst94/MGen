@@ -15,14 +15,14 @@ protected:
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	int XML_to_CP();
 	int CheckXML();
-	void GetCP();
+	int GetCP();
 	void SaveLy(CString dir, CString fname) override;
 
 	XFIn xfi;
 
-	vector<vector<vector<int>>> cp;
-	vector<vector<vector<int>>> cp_retr;
-	vector<vector<vector<int>>> cp_mea;
+	vector<vector<vector<int>>> cp; // [][v][s]
+	vector<vector<vector<int>>> cp_retr; // [][v][s]
+	vector<vector<int>> cp_mea; // [][s]
 	vector<vector<int>> cp_vid;
 	vector<CString> vname;
 

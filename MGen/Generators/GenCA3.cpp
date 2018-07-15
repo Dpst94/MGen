@@ -20,19 +20,48 @@ void CGenCA3::InitAnalysis() {
 	fli.resize(av_cnt);
 	fli2.resize(av_cnt);
 	bli.resize(av_cnt);
+	c.resize(av_cnt);
 	cc.resize(av_cnt);
+	pc.resize(av_cnt);
+	pcc.resize(av_cnt);
 	retr.resize(av_cnt);
 	llen.resize(av_cnt);
 	rlen.resize(av_cnt);
 	vid.resize(av_cnt);
+	macc.resize(av_cnt);
+	macc2.resize(av_cnt);
+	lclimax.resize(av_cnt);
+	lclimax2.resize(av_cnt);
+	leap.resize(av_cnt);
+	smooth.resize(av_cnt);
+	slur.resize(av_cnt);
+	flag.resize(av_cnt);
+	fsl.resize(av_cnt);
+	fvl.resize(av_cnt);
+	vca.resize(c_len);
+	hva.resize(c_len);
+	lva.resize(c_len);
 	for (int v = 0; v < av_cnt; ++v) {
 		fli[v].resize(c_len);
 		fli2[v].resize(c_len);
 		bli[v].resize(c_len);
 		cc[v].resize(c_len);
+		c[v].resize(c_len);
+		pc[v].resize(c_len);
+		pcc[v].resize(c_len);
 		retr[v].resize(c_len);
 		llen[v].resize(c_len);
 		rlen[v].resize(c_len);
+		macc[v].resize(c_len);
+		macc2[v].resize(c_len);
+		lclimax[v].resize(c_len);
+		lclimax2[v].resize(c_len);
+		leap[v].resize(c_len);
+		smooth[v].resize(c_len);
+		slur[v].resize(c_len);
+		flag[v].resize(c_len);
+		fsl[v].resize(c_len);
+		fvl[v].resize(c_len);
 	}
 }
 
@@ -105,21 +134,23 @@ int CGenCA3::XML_to_CP() {
 				// Copy cp
 				cp.resize(cp_id + 1);
 				cp_retr.resize(cp_id + 1);
-				cp_mea.resize(cp_id + 1);
 				cp_vid.resize(cp_id + 1);
+				cp_mea.resize(cp_id + 1);
 				cp[cp_id].resize(av_cnt);
 				cp_retr[cp_id].resize(av_cnt);
-				cp_mea[cp_id].resize(av_cnt);
 				cp_vid[cp_id].resize(av_cnt);
+				// Set measures
+				cp_mea[cp_id].resize(s2 - s1 + 1);
+				for (int s3 = s1; s3 <= s2; ++s3) {
+					cp_mea[cp_id][s3 - s1] = im[s3];
+				}
 				for (int v = 0; v < av_cnt; ++v) {
 					cp[cp_id][v].resize(s2 - s1 + 1);
 					cp_retr[cp_id][v].resize(s2 - s1 + 1);
-					cp_mea[cp_id][v].resize(s2 - s1 + 1);
 					cp_vid[cp_id][v] = v;
 					for (int s3 = s1; s3 <= s2; ++s3) {
 						cp[cp_id][v][s3 - s1] = cc[v][s3];
 						cp_retr[cp_id][v][s3 - s1] = retr[v][s3];
-						cp_mea[cp_id][v][s3 - s1] = im[s3];
 					}
 				}
 				cp_id++;
@@ -143,7 +174,6 @@ int CGenCA3::XML_to_CP() {
 			if (empty[v]) {
 				verase(cp[cp_id], v);
 				verase(cp_retr[cp_id], v);
-				verase(cp_mea[cp_id], v);
 				verase(cp_vid[cp_id], v);
 			}
 		}
@@ -156,9 +186,11 @@ int CGenCA3::CheckXML() {
 		if (m > 1) {
 			if (xfi.mea[m].beats != xfi.mea[m - 1].beats || xfi.mea[m].beat_type != xfi.mea[m - 1].beat_type) {
 				CString est;
+				// This is not a big problem because each counterpoint can have its measure size
+				// More important to have same measure size inside counterpoint
 				est.Format("Measure %d size is changed",
 					m);
-				WriteLog(5, est);
+				WriteLog(1, est);
 				error = 10;
 				return 1;
 			}
@@ -182,11 +214,34 @@ int CGenCA3::CheckXML() {
 	return 0;
 }
 
-void CGenCA3::GetCP() {
+int CGenCA3::GetCP() {
+	CString est;
 	av_cnt = cp[cp_id].size();
 	cc.resize(av_cnt);
 	retr.resize(av_cnt);
 	c_len = cp[cp_id][0].size();
+	mli.clear();
+	bmli.resize(c_len);
+	npm = 0;
+	// Detect mli and npm
+	for (int s = 0; s < c_len; ++s) {
+		if (cp_mea[cp_id][s]) {
+			mli.push_back(s);
+			if (mli.size() > 1) {
+				if (npm) {
+					if (npm != mli.end()[-1] - mli.end()[-2]) {
+						est.Format("Measure %zu size is changed from %d to %d inside counterpoint %d",
+							mli.size(), npm, mli.end()[-1] - mli.end()[-2], cp_id + 1);
+						WriteLog(5, est);
+						error = 10;
+						return 1;
+					}
+				}
+				else npm = mli.end()[-1] - mli.end()[-2];
+			}
+		}
+		bmli[s] = mli.size();
+	}
 	for (int v = 0; v < av_cnt; ++v) {
 		cc[v].resize(c_len);
 		retr[v].resize(c_len);
@@ -197,6 +252,14 @@ void CGenCA3::GetCP() {
 		}
 	}
 	ep2 = c_len;
+	if (vsp.size() != av_cnt) {
+		est.Format("In config species is marked for %zu voices, but there are %d voices in counterpoint %d",
+			vsp.size(), av_cnt, cp_id + 1);
+		WriteLog(5, est);
+		error = 10;
+		return 1;
+	}
+	return 0;
 }
 
 void CGenCA3::Generate() {
@@ -220,13 +283,14 @@ void CGenCA3::Generate() {
 	if (CheckXML()) return;
 	if (XML_to_CP()) return;
 	for (cp_id = 0; cp_id < cp.size(); ++cp_id) {
-		GetCP();
+		if (GetCP()) continue;
 		int real_len = cc[0].size();
 		int full_len = floor((real_len + 1) / 8 + 1) * 8;
 		InitAnalysis();
 		for (int v = 0; v < v_cnt; ++v) {
 			FillPause(step0, full_len, v);
 		}
+		AnalyseCP();
 		SendCP();
 		step0 += full_len;
 	}
