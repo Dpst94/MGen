@@ -92,10 +92,9 @@ void CGenCA3::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 }
 
 int CGenCA3::XML_to_CP() {
-	// Intermediate measures vector
-	vector<int> im;
-	// Intermediate text vector
-	vector<vector<CString>> it;
+	vector<int> im; // Intermediate measures vector
+	vector<vector<CString>> it; // Intermediate text vector
+	vector<int> ifi; // Intermediate fifths vector
 
 	av_cnt = xfi.voice.size();
 	InitAnalysis();
@@ -112,6 +111,7 @@ int CGenCA3::XML_to_CP() {
 			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
 				int ln = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
 				it[v].resize(pos + ln);
+				ifi.resize(pos + ln, 100);
 				cc[v].resize(pos + ln);
 				retr[v].resize(pos + ln);
 				if (xfi.note[vi][m][ni].tempo && !cp_tempo)
@@ -120,6 +120,8 @@ int CGenCA3::XML_to_CP() {
 				for (int s = 0; s < ln; ++s) {
 					cc[v][pos + s] = xfi.note[vi][m][ni].pitch;
 				}
+				// Get fifths
+				ifi[pos] = xfi.note[vi][m][ni].fifths;
 				// Concatenate text
 				it[v][pos] = xfi.note[vi][m][ni].words;
 				if (!xfi.note[vi][m][ni].words.IsEmpty() && !xfi.note[vi][m][ni].lyric.IsEmpty())
@@ -160,12 +162,15 @@ int CGenCA3::XML_to_CP() {
 				else s2 = s - 1;
 				// Move left to measure
 				while (!im[s1] && s1 > 0) --s1;
-				// Copy cp
+				// Create new cp_id
 				cp.resize(cp_id + 1);
 				cp_retr.resize(cp_id + 1);
 				cp_vid.resize(cp_id + 1);
 				cp_mea.resize(cp_id + 1);
 				cp_text.resize(cp_id + 1);
+				cp_fi.resize(cp_id + 1, 100);
+				cp_error.resize(cp_id + 1);
+				// Fill new cp_id
 				cp[cp_id].resize(av_cnt);
 				cp_retr[cp_id].resize(av_cnt);
 				cp_vid[cp_id].resize(av_cnt);
@@ -180,6 +185,18 @@ int CGenCA3::XML_to_CP() {
 					cp_retr[cp_id][v].resize(s2 - s1 + 1);
 					cp_vid[cp_id][v] = v;
 					for (int s3 = s1; s3 <= s2; ++s3) {
+						if (ifi[s3] != 100) {
+							if (cp_fi[cp_id] == 100) cp_fi[cp_id] = ifi[s3];
+							else {
+								if (cp_fi[cp_id] != ifi[s3] && !cp_error[cp_id]) {
+									CString est;
+									est.Format("Key changed in the middle of counterpoint %d. Ignoring this counterpoint.",
+										cp_id + 1);
+									WriteLog(5, est);
+									cp_error[cp_id] = 1;
+								}
+							}
+						}
 						cp[cp_id][v][s3 - s1] = cc[v][s3];
 						cp_retr[cp_id][v][s3 - s1] = retr[v][s3];
 						if (!cp_text[cp_id].IsEmpty() && !it[v][s3].IsEmpty()) cp_text[cp_id] += ",";
@@ -221,11 +238,10 @@ int CGenCA3::CheckXML() {
 				CString est;
 				// This is not a big problem because each counterpoint can have its measure size
 				// More important to have same measure size inside counterpoint
-				est.Format("Measure %d size is changed",
-					m);
-				WriteLog(1, est);
-				error = 10;
-				return 1;
+				//est.Format("Measure %d size is changed", m);
+				//WriteLog(1, est);
+				//error = 10;
+				//return 1;
 			}
 		}
 		for (int vi = 0; vi < xfi.voice.size(); ++vi) {
@@ -334,7 +350,7 @@ void CGenCA3::Generate() {
 	}
 	if (CheckXML()) return;
 	if (XML_to_CP()) return;
-	for (cp_id = 0; cp_id < cp.size(); ++cp_id) {
+	for (cp_id = 0; cp_id < cp.size(); ++cp_id) if (!cp_error[cp_id]) {
 		if (GetCP()) continue;
 		int real_len = cc[0].size();
 		int full_len = floor((real_len + 1) / 8 + 1) * 8;

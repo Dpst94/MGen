@@ -23,7 +23,9 @@ protected:
 	vector<vector<vector<int>>> cp; // [cp_id][v][s]
 	vector<vector<vector<int>>> cp_retr; // [cp_id][v][s]
 	vector<vector<int>> cp_mea; // [cp_id][s]
-	vector<vector<int>> cp_vid;
+	vector<vector<int>> cp_vid; // [cp_id][s] voice id
+	vector<int> cp_fi; // [cp_id] fifths
+	vector<int> cp_error; // [cp_id] error on load
 	vector<CString> cp_text; // [cp_id]
 	vector<CString> vname;
 
