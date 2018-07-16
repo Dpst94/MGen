@@ -28,7 +28,7 @@ void CP2R::CreateLinks() {
 		minl[v] = 10000;
 		maxl[v] = 0;
 		for (int i = 0; i < ep2; ++i) {
-			if (prev_note != cc[v][i]) {
+			if (prev_note != cc[v][i] || retr[v][i]) {
 				// Save linked note length
 				if (prev_note != -1) {
 					llen[v][lpos - 1] = l;
