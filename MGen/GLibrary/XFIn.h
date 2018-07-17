@@ -26,6 +26,7 @@ struct XMLNote {
 struct XMLMeasure {
 	char beats = 0;
 	char beat_type = 0;
+	float len; // Measure length in whole notes
 	CString barline;
 };
 

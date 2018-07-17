@@ -95,6 +95,7 @@ int CGenCA3::XML_to_CP() {
 	vector<int> im; // Intermediate measures vector
 	vector<vector<CString>> it; // Intermediate text vector
 	vector<int> ifi; // Intermediate fifths vector
+	vector<int> ibl; // Intermediate barlines vector
 
 	av_cnt = xfi.voice.size();
 	InitAnalysis();
@@ -107,7 +108,14 @@ int CGenCA3::XML_to_CP() {
 		vname[v] = xfi.voice[vi].name;
 		for (int m = 1; m < xfi.mea.size(); ++m) {
 			im.resize(pos + 1);
+			ibl.resize(pos + 8.0 * xfi.mea[m].len);
 			im[pos] = 1;
+			if (xfi.mea[m].barline == "heavy" || 
+				xfi.mea[m].barline == "light-light" || 
+				xfi.mea[m].barline == "light-heavy" || 
+				xfi.mea[m].barline == "heavy-light" || 
+				xfi.mea[m].barline == "heavy-heavy") 
+				ibl[pos + 8.0 * xfi.mea[m].len - 1] = 1;
 			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
 				int ln = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
 				it[v].resize(pos + ln);
@@ -149,14 +157,16 @@ int CGenCA3::XML_to_CP() {
 				break;
 			}
 		}
+		// Find note
 		if (!state) {
 			if (!is_pause) {
 				s1 = s;
 				state = 1;
 			}
 		}
+		// Find pause
 		else {
-			if (is_pause || s == c_len - 1) {
+			if (is_pause || s == c_len - 1 || ibl[s]) {
 				int s2;
 				if (!is_pause) s2 = s;
 				else s2 = s - 1;
@@ -291,6 +301,8 @@ int CGenCA3::GetCP() {
 		}
 		bmli[s] = mli.size();
 	}
+	// If there are no measures, then it is a single measure
+	if (!npm) npm = c_len;
 	for (int v = 0; v < av_cnt; ++v) {
 		cc[v].resize(c_len);
 		retr[v].resize(c_len);

@@ -167,6 +167,7 @@ void XFIn::LoadXML(CString pth) {
 				if (nd.parent().child("attributes").child("time").child("beat-type").text().as_int())
 					beat_type = nd.parent().child("attributes").child("time").child("beat-type").text().as_int();
 				mea[m].beat_type = beat_type;
+				mea[m].len = mea[m].beats * 1.0 / mea[m].beat_type;
 			}
 			if (chord)
 				m_pos = m_pos_prev;
@@ -350,7 +351,7 @@ void XFIn::ValidateXML() {
 			}
 			// Do not check chord voices for note length stack
 			if (voice[vi].chord) continue;
-			if (stack != mea[m].beats * 1.0 / mea[m].beat_type) {
+			if (stack != mea[m].len) {
 				error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d: %d notes. Need %.3f time but got %.3f",
 					m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 					mea[m].beats, mea[m].beat_type, note[vi][m].size(),
