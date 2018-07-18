@@ -193,6 +193,11 @@ inline void CP2R::CheckReadyPersist(int id, int id2, int id3) {
 }
 
 void CP2R::AnalyseCP() {
+	skip_flags = 0;
+	EvaluateCP();
+}
+
+int CP2R::EvaluateCP() {
 	CLEAR_READY();
 	ClearFlags(0, c_len);
 	GetDiatonic(0, c_len);
@@ -200,6 +205,15 @@ void CP2R::AnalyseCP() {
 	CreateLinks();
 	GetLClimax();
 	GetLeapSmooth();
+	for (v = 0; v < av_cnt; ++v) {
+		sp = vsp[v];
+		vaccept = &accept[sp][1][0];
+		if (mminor) {
+			if (FailGisTrail()) return 1;
+			if (FailFisTrail()) return 1;
+		}
+	}
+	return 0;
 }
 
 void CP2R::ClearFlags(int step1, int step2) {
@@ -313,5 +327,71 @@ void CP2R::GetNoteTypes() {
 			isus[v][ls] = sus[v][ls] ? sus[v][ls] : fli[v][ls];
 		}
 	}
+}
+
+int CP2R::FailGisTrail() {
+	CHECK_READY(DR_fli, DR_pc);
+	int gis_trail = 0;
+	int _gis_trail_max = gis_trail_max[sp][1][0];
+	for (ls = 0; ls < fli_size[v]; ++ls) {
+		s = fli[v][ls];
+		if (pcc[v][s] == 11) {
+			// Set to maximum on new G# note
+			gis_trail = _gis_trail_max;
+		}
+		else {
+			if (pcc[v][s] == 10) {
+				// Prohibit G note close to G#
+				if (gis_trail) FLAGV(200, s, fli[v][max(0, ls - _gis_trail_max + gis_trail)]);
+			}
+		}
+		// Decrease if not zero
+		if (gis_trail) --gis_trail;
+	}
+	return 0;
+}
+
+int CP2R::FailFisTrail() {
+	CHECK_READY(DR_fli, DR_pc);
+	int pos1, pos2, found;
+	int _fis_gis_max = fis_gis_max[sp][1][0];
+	int _fis_g_max = fis_g_max[sp][1][0];
+	int _fis_g_max2 = fis_g_max2[sp][1][0];
+	for (ls = 0; ls < fli_size[v]; ++ls) {
+		s = fli[v][ls];
+		if (pcc[v][s] == 9) {
+			// Find VII#
+			pos1 = max(0, ls - _fis_gis_max);
+			pos2 = min(fli_size[v] - 1, ls + _fis_gis_max);
+			found = 0;
+			for (int x = pos1; x <= pos2; ++x) {
+				if (pcc[v][fli[v][x]] == 11) {
+					found = 1;
+					break;
+				}
+			}
+			if (!found) {
+				// Flag only if full melody analysis or window is not cut
+				if (ls + _fis_gis_max <= fli_size[v] - 1 || ep2 == c_len)	FLAGV(199, s, s);
+			}
+			// Find VII before
+			pos1 = max(0, ls - _fis_g_max);
+			for (int x = pos1; x < ls; ++x) {
+				if (pcc[v][fli[v][x]] == 10) {
+					FLAGV(349, s, fli[v][x]);
+					break;
+				}
+			}
+			// Find VII after
+			pos2 = min(fli_size[v] - 1, ls + _fis_g_max2);
+			for (int x = ls + 1; x <= pos2; ++x) {
+				if (pcc[v][fli[v][x]] == 10) {
+					FLAGV(350, s, s);
+					break;
+				}
+			}
+		}
+	}
+	return 0;
 }
 

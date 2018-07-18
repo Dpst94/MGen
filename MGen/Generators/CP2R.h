@@ -31,7 +31,7 @@
 #define CHECK_READY_PERSIST(...) CheckReadyPersist(##__VA_ARGS__)
 
 // Check rule usage
-#define ASSERT_RULE(id) { if (SubRuleName[cspecies][id].IsEmpty() && warn_rule_undefined < 5) { ++warn_rule_undefined; CString est; est.Format("Detected undefined rule usage: %d", id); WriteLog(5, est); ASSERT(0); } }
+#define ASSERT_RULE(id) { if (ruleinfo[id].SubRuleName.IsEmpty() && warn_rule_undefined < 5) { ++warn_rule_undefined; CString est; est.Format("Detected undefined rule usage: %d", id); WriteLog(5, est); ASSERT(0); } }
 
 #else
 
@@ -69,6 +69,17 @@
 #define pDNT 2 // Double-neighbour tone
 #define pPDD 3 // Passing downbeat dissonance
 
+// Report violation and save link inside voice
+#define FLAGV(id, s, s2) do { \
+  ASSERT_RULE(id);  \
+  if (skip_flags && !(*vaccept)[id]) return 1;  \
+	flag[v][s].push_back(id);  \
+	fsl[v][s].push_back(s2);  \
+	fvl[v][s].push_back(-1);  \
+} while (0)
+
+
+
 class CP2R :
 	public CP2D
 {
@@ -100,11 +111,14 @@ protected:
 	inline void CheckReadyPersist(int id, int id2);
 	inline void CheckReadyPersist(int id, int id2, int id3);
 	void AnalyseCP();
+	inline int EvaluateCP();
 	inline void ClearFlags(int step1, int step2);
 	inline void GetPitchClass(int step1, int step2);
 	inline void GetDiatonic(int step1, int step2);
 	inline void GetLeapSmooth();
 	inline void GetLClimax();
 	inline void GetNoteTypes();
+	inline int FailGisTrail();
+	inline int FailFisTrail();
 };
 

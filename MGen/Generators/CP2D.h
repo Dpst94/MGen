@@ -97,6 +97,8 @@ protected:
 	int s, s2;
 	int v;
 	int ls;
+	int sp;
+	int mminor = 1; // If current cp is in melodic minor
 
 	int cp_tempo = 100;
 	int step0 = 0;
@@ -106,12 +108,17 @@ protected:
 	vector<vector<vector<vector<RuleInfo2>>>> ruleinfo2; // [sp][vc][vg][rid]
 	vector<vector<vector<vector<int>>>> accept; // [sp][vc][vg][rid]
 	vector<vector<vector<vector<int>>>> severity; // [rid][sp][vc][vg]
+	vector<int>* vaccept;
 
 	// Rule parameters [sp][vc][vg]
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
 	vector<vector<vector<int>>> sus_last_measures; // Last measures in which sus is allowed in species 2 and 3
 	vector<vector<vector<int>>> cse_leaps_r; // Last measures in which sus is allowed in species 2 and 3
 	vector<vector<vector<int>>> lclimax_mea5; // Last measures in which sus is allowed in species 2 and 3
+	vector<vector<vector<int>>> gis_trail_max; // Minimum notes between G# and next G note in Am
+	vector<vector<vector<int>>> fis_gis_max; // Maximum allowed distance between F# and G#
+	vector<vector<vector<int>>> fis_g_max; // Minimum distance from G to F# (+1 to allow)
+	vector<vector<vector<int>>> fis_g_max2; // Minimum distance from F# to G (+1 to allow)
 	int lclimax_notes = 12; // Number of adjacent notes to calculate local climax
 	int lclimax_mea = 6; // Number of adjacent measures to calculate local climax
 
@@ -161,6 +168,7 @@ protected:
 	vector<vector<vector<int>>> fsl; // [v][s][] Note flags links to steps
 	vector<vector<vector<int>>> fvl; // [v][s][] Note flags links to voices
 	int fpenalty; // Additional flags penalty
+	int skip_flags;
 
 	// Check data ready
 	vector<int> data_ready; // If data is ready to be used
@@ -168,5 +176,7 @@ protected:
 	vector<int> data_ready_persist; // If data is ready to be used (not cleared by ClearReady)
 	vector<int> warn_data_ready_persist; // How many warnings of data ready fired
 
+	// Warnings
+	int warn_rule_undefined = 0;
 };
 

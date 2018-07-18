@@ -555,6 +555,10 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(sus_last_measures, 139, rsSubName, 0);
 	SetRuleParam(cse_leaps_r, 502, rsSubName, 0);
 	SetRuleParam(lclimax_mea5, 325, rsComment, 0);
+	SetRuleParam(gis_trail_max, 200, rsSubName, 0);
+	SetRuleParam(fis_gis_max, 199, rsSubName, 0);
+	SetRuleParam(fis_g_max, 349, rsSubName, 0);
+	SetRuleParam(fis_g_max2, 350, rsSubName, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;
