@@ -335,14 +335,16 @@ int CP2R::FailGisTrail() {
 	int _gis_trail_max = gis_trail_max[sp][1][0];
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
-		if (pcc[v][s] == 11) {
-			// Set to maximum on new G# note
-			gis_trail = _gis_trail_max;
-		}
-		else {
-			if (pcc[v][s] == 10) {
-				// Prohibit G note close to G#
-				if (gis_trail) FLAGV(200, s, fli[v][max(0, ls - _gis_trail_max + gis_trail)]);
+		if (cc[v][s]) {
+			if (pcc[v][s] == 11) {
+				// Set to maximum on new G# note
+				gis_trail = _gis_trail_max;
+			}
+			else {
+				if (pcc[v][s] == 10) {
+					// Prohibit G note close to G#
+					if (gis_trail) FLAGV(200, s, fli[v][max(0, ls - _gis_trail_max + gis_trail)]);
+				}
 			}
 		}
 		// Decrease if not zero
@@ -359,13 +361,14 @@ int CP2R::FailFisTrail() {
 	int _fis_g_max2 = fis_g_max2[sp][1][0];
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
-		if (pcc[v][s] == 9) {
+		if (cc[v][s] && pcc[v][s] == 9) {
 			// Find VII#
 			pos1 = max(0, ls - _fis_gis_max);
 			pos2 = min(fli_size[v] - 1, ls + _fis_gis_max);
 			found = 0;
 			for (int x = pos1; x <= pos2; ++x) {
-				if (pcc[v][fli[v][x]] == 11) {
+				s2 = fli[v][x];
+				if (cc[v][s2] && pcc[v][s2] == 11) {
 					found = 1;
 					break;
 				}
@@ -377,15 +380,17 @@ int CP2R::FailFisTrail() {
 			// Find VII before
 			pos1 = max(0, ls - _fis_g_max);
 			for (int x = pos1; x < ls; ++x) {
-				if (pcc[v][fli[v][x]] == 10) {
-					FLAGV(349, s, fli[v][x]);
+				s2 = fli[v][x];
+				if (cc[v][s2] && pcc[v][s2] == 10) {
+					FLAGV(349, s, s2);
 					break;
 				}
 			}
 			// Find VII after
 			pos2 = min(fli_size[v] - 1, ls + _fis_g_max2);
 			for (int x = ls + 1; x <= pos2; ++x) {
-				if (pcc[v][fli[v][x]] == 10) {
+				s2 = fli[v][x];
+				if (cc[v][s2] && pcc[v][s2] == 10) {
 					FLAGV(350, s, s);
 					break;
 				}
