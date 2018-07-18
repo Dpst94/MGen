@@ -606,3 +606,22 @@ void MFIn::MergeSmallOverlaps(int step1, int step2) {
 	}
 }
 
+// Fill pause from start step to (start+length) step inclusive
+void MFIn::FillPause(int start, int length, int v) {
+	if (start + length >= t_allocated) ResizeVectors(max(start + length + 1, t_allocated * 2));
+	for (int x = start; x <= start + length; ++x) {
+		pause[x][v] = 1;
+		note[x][v] = 0;
+		len[x][v] = 1;
+		coff[x][v] = 0;
+		vel[x][v] = 0;
+		if (tonic.size()) {
+			tonic[x][v] = 0;
+			minor[x][v] = 0;
+			comment[x][v].clear();
+			comment2[x][v].Empty();
+		}
+		midifile_out_mul[x] = midifile_out_mul0 * midifile_out_mul2;
+	}
+}
+

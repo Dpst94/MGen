@@ -1002,25 +1002,6 @@ void CGVar::AddNote(int pos, int v, char note2, int len2, int dyn2) {
 	}
 }
 
-// Fill pause from start step to (start+length) step inclusive
-void CGVar::FillPause(int start, int length, int v) {
-	if (start + length >= t_allocated) ResizeVectors(max(start + length + 1, t_allocated * 2));
-	for (int x = start; x <= start + length; ++x) {
-		pause[x][v] = 1;
-		note[x][v] = 0;
-		len[x][v] = 1;
-		coff[x][v] = 0;
-		vel[x][v] = 0;
-		if (tonic.size()) {
-			tonic[x][v] = tonic_cur;
-			minor[x][v] = minor_cur;
-			comment[x][v].clear();
-			comment2[x][v].Empty();
-		}
-		midifile_out_mul[x] = midifile_out_mul0 * midifile_out_mul2;
-	}
-}
-
 // Adds new graph, 
 void CGVar::RegisterGraph(CString name, float scale) {
 	graph_name.push_back(name);

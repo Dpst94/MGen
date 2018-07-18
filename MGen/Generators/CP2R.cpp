@@ -68,8 +68,62 @@ void CP2R::GetVca() {
 	}
 }
 
+void CP2R::SendComment(int pos, int v, int x, int i) {
+	int vi = vid[v];
+	CString st, com;
+	int current_severity = -1;
+	// Clear
+	comment[pos + i][vi].clear();
+	ccolor[pos + i][vi].clear();
+	color[pos + i][vi] = color_noflag;
+	if (flag[v][x].size() > 0) for (int f = 0; f < flag[v][x].size(); ++f) {
+		int fl = flag[v][x][f];
+		sp = vsp[v];
+		vc = vca[x];
+		v2 = fvl[v][x][f];
+		if (v2 == v) {
+			if (v == hva[x]) vp = vpExt;
+			else if (v == lva[x]) vp = vpBas;
+			else vp = vpNbs;
+		}
+		else {
+			if (v == lva[x] && v2 == hva[x]) vp = vpExt;
+			else if (v == lva[x] && v2 != hva[x]) vp = vpBas;
+			else vp = vpNbs;
+		}
+		// Send comments and color only if rule is not ignored
+		if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) continue;
+		// Send comments and color only if rule is not ignored
+		if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) continue;
+		// Do not send if ignored
+		if (severity[sp][vc][vp][fl] < show_min_severity) continue;
+		if (!i) {
+			if (!accept[sp][vc][vp][fl]) st = "- ";
+			else if (accept[sp][vc][vp][fl] == -1) st = "$ ";
+			else st = "+ ";
+			com = st + GetRuleName(fl, sp, vc, vp) + " (" + GetSubRuleName(fl, sp, vc, vp) + ")";
+			if (show_severity) {
+				st.Format(" [%d/%d]", fl, severity[fl]);
+				com += st;
+			}
+			if (GetRuleComment(fl, sp, vc, vp) != "") com += ". " + GetRuleComment(fl, sp, vc, vp);
+			if (GetSubRuleComment(fl, sp, vc, vp) != "") com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
+			//com += ". ";
+			comment[pos][v].push_back(com);
+			ccolor[pos][v].push_back(sev_color[severity[sp][vc][vp][fl]]);
+		}
+		// Set note color if this is maximum flag severity
+		if (severity[sp][vc][vp][fl] > current_severity && severity[sp][vc][vp][fl] >= show_min_severity
+			&& ruleinfo[fl].viz != vHarm) {
+			current_severity = severity[sp][vc][vp][fl];
+			color[pos + i][v] = sev_color[severity[sp][vc][vp][fl]];
+		}
+	}
+}
+
 void CP2R::SendCP() {
-	CreateLinks();
+	CString st;
+	//CreateLinks();
 	int real_len = cc[0].size();
 	int full_len = floor((real_len + 1) / 8 + 1) * 8;
 	ResizeVectors(step0 + full_len);
@@ -88,8 +142,14 @@ void CP2R::SendCP() {
 				len[step0 + s][vi] = llen[v][ls];
 				coff[step0 + s][vi] = s - fli[v][ls];
 				tempo[step0 + s] = cp_tempo;
+				SendComment(step0 + fli[v][ls], v, s, s - fli[v][ls]);
 			}
 		}
+		MergeNotes(step0, step0 + full_len - 1, v);
+		// If  window-scan
+		st.Format("#%d (from %s)",
+			cp_id + 1, bname_from_path(musicxml_file));
+		AddMelody(step0, step0 + full_len - 1, vi, st);
 	}
 	for (int s = step0 + real_len; s < step0 + full_len; ++s) tempo[s] = tempo[s - 1];
 	CountOff(step0, step0 + full_len - 1);
@@ -203,6 +263,7 @@ int CP2R::EvaluateCP() {
 	GetDiatonic(0, c_len);
 	GetPitchClass(0, c_len);
 	CreateLinks();
+	GetVca();
 	GetLClimax();
 	GetLeapSmooth();
 	for (v = 0; v < av_cnt; ++v) {
@@ -233,24 +294,24 @@ void CP2R::GetPitchClass(int step1, int step2) {
 	for (int v = 0; v < av_cnt; ++v) {
 		for (int s = step1; s < step2; ++s) {
 			pc[v][s] = c[v][s] % 7;
-			pcc[v][s] = (cc[v][s] + 12 - tonic_cur) % 12;
+			pcc[v][s] = (cc[v][s] + 12 - bn) % 12;
 		}
 	}
 }
 
 void CP2R::GetDiatonic(int step1, int step2) {
 	SET_READY(DR_c);
-	if (minor_cur) {
+	if (mode == 5) {
 		for (int v = 0; v < av_cnt; ++v) {
 			for (int s = step1; s < step2; ++s) {
-				c[v][s] = m_CC_C(cc[v][s], tonic_cur);
+				c[v][s] = m_CC_C(cc[v][s], bn);
 			}
 		}
 	}
 	else {
 		for (int v = 0; v < av_cnt; ++v) {
 			for (int s = step1; s < step2; ++s) {
-				c[v][s] = maj_CC_C(cc[v][s], tonic_cur);
+				c[v][s] = maj_CC_C(cc[v][s], bn);
 			}
 		}
 	}
@@ -398,5 +459,34 @@ int CP2R::FailFisTrail() {
 		}
 	}
 	return 0;
+}
+
+// Merge notes of same pitch, that do not have pauses between them. Step2 inclusive
+void CP2R::MergeNotes(int step1, int step2, int v) {
+	// Start of current note
+	int first_pos = step1;
+	DWORD col = color[step1][v];
+	for (int x = step1 + 1; x <= step2; ++x) {
+		// Detect steps that have same pitch and there is no retrigger 
+		if (coff[x][v]) {
+			// select best color: gray is ignored, then most red is selected
+			if (color[x][v] != color_noflag &&
+				(col == color_noflag || GetRed(color[x][v]) > GetRed(col))) {
+				col = color[x][v];
+				// update color of previous steps
+				for (int z = first_pos; z < x; ++z) {
+					color[z][v] = col;
+				}
+			}
+			coff[x][v] = coff[x - 1][v] + 1;
+			// Copy color forward
+			color[x][v] = col;
+		}
+		// New note
+		else {
+			first_pos = x;
+			col = color[x][v];
+		}
+	}
 }
 

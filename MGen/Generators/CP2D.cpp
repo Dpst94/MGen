@@ -10,6 +10,11 @@
 CP2D::CP2D() {
 	ResizeRuleVariantVector(accept);
 	ResizeRuleVariantVector(severity);
+	// Set rule colors
+	sev_color.resize(MAX_SEVERITY);
+	for (int i = 0; i < MAX_SEVERITY; ++i) {
+		sev_color[i] = MakeColor(0, 255.0 / MAX_SEVERITY * i, 255 - 255.0 / MAX_SEVERITY * i, 0);
+	}
 }
 
 CP2D::~CP2D() {
@@ -25,6 +30,10 @@ void CP2D::LoadSpecies(CString st) {
 void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "lclimax_notes", &lclimax_notes, 0, 1000);
 	CheckVar(sN, sV, "lclimax_mea", &lclimax_mea, 0, 1000);
+	CheckVar(sN, sV, "show_ignored_flags", &show_ignored_flags, 0, 1);
+	CheckVar(sN, sV, "show_allowed_flags", &show_allowed_flags, 0, 1);
+	CheckVar(sN, sV, "show_min_severity", &show_min_severity, 0, 100);
+	CheckVar(sN, sV, "show_severity", &show_severity, 0, 1);
 	// Load species
 	if (*sN == "species") {
 		++parameter_found;
@@ -565,3 +574,23 @@ void CP2D::SetRuleParams() {
 	st.Format("Set rule parameters in %lld ms", time_stop - time_start);
 	WriteLog(0, st);
 }
+
+// Fill pause from start step to (start+length) step inclusive
+void CP2D::FillPause(int start, int length, int v) {
+	if (start + length >= t_allocated) ResizeVectors(max(start + length + 1, t_allocated * 2));
+	for (int x = start; x <= start + length; ++x) {
+		pause[x][v] = 1;
+		note[x][v] = 0;
+		len[x][v] = 1;
+		coff[x][v] = 0;
+		vel[x][v] = 0;
+		if (tonic.size()) {
+			tonic[x][v] = 0;
+			minor[x][v] = 0;
+			comment[x][v].clear();
+			comment2[x][v].Empty();
+		}
+		midifile_out_mul[x] = midifile_out_mul0 * midifile_out_mul2;
+	}
+}
+

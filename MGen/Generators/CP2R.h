@@ -91,6 +91,8 @@ protected:
 	inline void CreateLinks();
 	inline void GetVca();
 
+	void SendComment(int pos, int v, int x, int i);
+
 	void SendCP();
 	
 	// Check data ready
@@ -120,5 +122,6 @@ protected:
 	inline void GetNoteTypes();
 	inline int FailGisTrail();
 	inline int FailFisTrail();
+	void MergeNotes(int step1, int step2, int v);
 };
 

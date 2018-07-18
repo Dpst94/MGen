@@ -1,6 +1,7 @@
 #pragma once
 #include "..\GLibrary\GTemplate.h"
 
+#define MAX_SEVERITY 101
 // Allocate at least this number of rules
 #define RULE_ALLOC 500
 // Maximum species
@@ -72,10 +73,10 @@ protected:
 	inline void SaveRuleVariant(int sp, int vc, int vp, int rid, CString rule, CString subrule, CString rule_com, CString subrule_com);
 	void CheckRuleList();
 	int Interval2Chromatic(int iv);
-	inline CString GetRuleName(int rid, int sp, int vc, int vp);
-	inline CString GetSubRuleName(int rid, int sp, int vc, int vp);
-	inline CString GetRuleComment(int rid, int sp, int vc, int vp);
-	inline CString GetSubRuleComment(int rid, int sp, int vc, int vp);
+	CString GetRuleName(int rid, int sp, int vc, int vp);
+	CString GetSubRuleName(int rid, int sp, int vc, int vp);
+	CString GetRuleComment(int rid, int sp, int vc, int vp);
+	CString GetSubRuleComment(int rid, int sp, int vc, int vp);
 	inline void ParseRule(int rid, int type);
 	inline void ParseRule2(int sp, int vc, int vp, int rid, int type);
 	inline int GetRuleParam(int sp, int vc, int vp, int rid, int type, int id);
@@ -84,6 +85,8 @@ protected:
 	inline void SetRuleParam(vector<vector<vector<int>>>& par, int rid, int type, int id);
 
 	void SetRuleParams();
+
+	void FillPause(int start, int length, int v);
 
 	int max_rule = 0;
 	int av_cnt = 0;
@@ -95,22 +98,33 @@ protected:
 	vector<int> vsp; // Species for each voice
 	int npm;
 	int s, s2;
-	int v;
+	int v, v2;
 	int ls;
-	int sp;
+	int sp, vc, vp;
+
+	// Key
+	int fifths = 0; // Number of alterations near key
+	int bn = 9; // Base tonic note (C - 0, Am - 9)
 	int mminor = 1; // If current cp is in melodic minor
+	int mode = 5; // 0 - major, 1 - dorian, 5 - aeolian
 
 	int cp_tempo = 100;
 	int step0 = 0;
 
 	// Rules
 	vector<RuleInfo> ruleinfo; // [rid]
-	vector<vector<vector<vector<RuleInfo2>>>> ruleinfo2; // [sp][vc][vg][rid]
-	vector<vector<vector<vector<int>>>> accept; // [sp][vc][vg][rid]
-	vector<vector<vector<vector<int>>>> severity; // [rid][sp][vc][vg]
+	vector<vector<vector<vector<RuleInfo2>>>> ruleinfo2; // [sp][vc][vp][rid]
+	vector<vector<vector<vector<int>>>> accept; // [sp][vc][vp][rid]
+	vector<vector<vector<vector<int>>>> severity; // [sp][vc][vp][rid]
 	vector<int>* vaccept;
 
-	// Rule parameters [sp][vc][vg]
+	// Parameters
+	int show_allowed_flags = 0; // Show even allowed flags(bold in rules.xlsm)
+	int show_ignored_flags = 0; // Show even ignored flags(with strikethrough in rules.xlsm)
+	int show_min_severity = 0; // Minimum severity to highlight note
+	int show_severity = 0; // =1 to show severity and flag id in square brackets in comments to notes (also when exporting to MIDI file)
+
+	// Rule parameters [sp][vc][vp]
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
 	vector<vector<vector<int>>> sus_last_measures; // Last measures in which sus is allowed in species 2 and 3
 	vector<vector<vector<int>>> cse_leaps_r; // Last measures in which sus is allowed in species 2 and 3
@@ -167,6 +181,7 @@ protected:
 	vector<vector<vector<int>>> flag; // [v][s][] Note flags
 	vector<vector<vector<int>>> fsl; // [v][s][] Note flags links to steps
 	vector<vector<vector<int>>> fvl; // [v][s][] Note flags links to voices
+	vector<DWORD>  sev_color; // Severity colors
 	int fpenalty; // Additional flags penalty
 	int skip_flags;
 
@@ -178,5 +193,7 @@ protected:
 
 	// Warnings
 	int warn_rule_undefined = 0;
+
+	int cp_id = 0;
 };
 

@@ -71,6 +71,8 @@ protected:
 	void OutputFlagDelays();
 	void SelectSpeciesRules();
 
+	void FillPause(int start, int length, int v);
+
 	// Rules
 	vector<vector<vector<vector<int>>>> RuleParam; // Parsed rule parameters
 
@@ -537,5 +539,7 @@ protected:
 	// Config
 	int emulate_sas = 0; // 0 = disable emulator, 1 = Enables SAS algorithm emulator in CA2
 
+	int tonic_cur = 0; // Tonic key
+	int minor_cur = 0; // Key minor indicator (0 = major, 1 = minor)
 };
 

@@ -29,7 +29,5 @@ protected:
 	vector<CString> cp_text; // [cp_id]
 	vector<CString> vname;
 
-	int cp_id = 0;
-
 };
 

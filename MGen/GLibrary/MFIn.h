@@ -29,6 +29,8 @@ public:
 	void UnisonMute(int step1, int step2);
 	void MergeSmallOverlaps(int step1, int step2);
 
+	void FillPause(int start, int length, int v);
+
 	int in_ppq = 1; // PPQ in input midi file
 	int midifile_loaded = 0; // If MIDI was loaded from file
 	int midifile_type = 1; // Type of MIDI file loaded
