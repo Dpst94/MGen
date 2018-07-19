@@ -161,6 +161,9 @@ void CP2R::SendCP() {
 	t_sent = t_generated;
 }
 
+void CP2R::SaveLyCP() {
+}
+
 inline void CP2R::ClearReady() {
 	fill(data_ready.begin(), data_ready.end(), 0);
 }

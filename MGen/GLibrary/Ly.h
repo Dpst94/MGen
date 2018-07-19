@@ -209,5 +209,8 @@ protected:
 
 	// Shape scripts
 	vector <vector<unordered_map<int, CString>>> shsc;
+
+	// General
+	ofstream ly_fs;
 };
 

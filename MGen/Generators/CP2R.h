@@ -96,6 +96,7 @@ protected:
 	void SendComment(int pos, int v, int x, int i);
 
 	void SendCP();
+	void SaveLyCP();
 	
 	// Check data ready
 	inline void ClearReady();

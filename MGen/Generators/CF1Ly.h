@@ -48,7 +48,6 @@ protected:
 	void SendLyNoteNames();
 
 	// Lilypond other
-	ofstream ly_fs;
 	float ly_mul = 1; // midifile_mul
 	int ly_nnum = 0; // Note number
 	int ly_step1 = 0;

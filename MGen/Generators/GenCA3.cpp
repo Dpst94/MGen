@@ -376,10 +376,38 @@ void CGenCA3::Generate() {
 		}
 		AnalyseCP();
 		SendCP();
+		SaveLyCP();
 		step0 += full_len;
 	}
 	//WriteLog(1, "Loaded MusicXML successfully");
 }
 
 void CGenCA3::SaveLy(CString dir, CString fname) {
+	LoadLyShapes("configs\\ly\\shapes.csv");
+	vector<CString> sv;
+	CString title;
+	// Remove server config prefix
+	CString my_config;
+	my_config = m_config;
+	if (my_config.Left(3) == "sv_") {
+		my_config = my_config.Mid(3);
+	}
+	DeleteFile(dir + "\\lyi-" + fname + ".csv");
+	title = m_algo_name + ": " + my_config + " (" +
+		CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M") + ")";
+	ly_fs.open(dir + "\\" + fname + ".ly");
+	read_file_sv("configs\\ly\\header.ly", sv);
+	for (int i = 0; i < sv.size(); ++i) {
+		sv[i].Replace("$SUBTITLE$", title);
+		sv[i].Replace("$TITLE$", "");
+		sv[i].Replace("$DEDICATION$", "");
+		ly_fs << sv[i] << "\n";
+	}
+
+	ly_fs << "\\header {tagline = \"This file was created by MGen CP2 ";
+	ly_fs << APP_VERSION << " at " << CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S") << "\"}\n";
+	read_file_sv("configs\\ly\\footer.ly", sv);
+	write_file_sv(ly_fs, sv);
+	ly_fs.close();
+	ly_saved = 1;
 }
