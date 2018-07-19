@@ -41,6 +41,7 @@ void CGenCA3::InitAnalysis() {
 	sus.resize(av_cnt);
 	susres.resize(av_cnt);
 	isus.resize(av_cnt);
+	msh.resize(av_cnt);
 	mshb.resize(av_cnt);
 	mshf.resize(av_cnt);
 	pat.resize(av_cnt);
@@ -78,6 +79,7 @@ void CGenCA3::InitAnalysis() {
 		sus[v].resize(c_len);
 		susres[v].resize(c_len);
 		isus[v].resize(c_len);
+		msh[v].resize(c_len);
 		mshb[v].resize(c_len);
 		mshf[v].resize(c_len);
 		pat[v].resize(c_len);
@@ -313,6 +315,7 @@ int CGenCA3::GetCP() {
 		}
 	}
 	ep2 = c_len;
+	int species_found = 0;
 	// Check if species can be loaded from MusicXML
 	if (!cp_text[cp_id].IsEmpty()) {
 		vector<CString> sa;
@@ -328,11 +331,12 @@ int CGenCA3::GetCP() {
 					error = 10;
 					return 1;
 				}
+				species_found = 1;
 				break;
 			}
 		}
 	}
-	else if (vsp.size() != av_cnt) {
+	if (!species_found && vsp.size() != av_cnt) {
 		est.Format("Species not found in MusicXML. In config species is marked for %zu voices, but there are %d voices in counterpoint %d",
 			vsp.size(), av_cnt, cp_id + 1);
 		WriteLog(5, est);

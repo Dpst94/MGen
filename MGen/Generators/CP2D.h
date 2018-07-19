@@ -170,6 +170,7 @@ protected:
 	vector<vector<int>> isus; // [v][ls] Points to sus position or note start if there is no sus
 	vector<vector<int>> mshb; // [v][ls] Melody shape types for fli (basic without patterns)
 	vector<vector<int>> mshf; // [v][ls] Melody shape types for fli (with fixed patterns)
+	vector<vector<int>> msh; // [v][ls] Melody shape types for fli
 	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
 	vector<int> hli; // [hs] Forward links to first notes of each harmony

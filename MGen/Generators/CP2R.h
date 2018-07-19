@@ -20,6 +20,8 @@
 #define DR_lclimax			7
 #define DR_beat					8
 #define DR_sus					9
+#define DR_msh					10
+#define DR_mshb					11
 
 #ifdef CF_DEBUG
 
@@ -123,6 +125,9 @@ protected:
 	inline int FailGisTrail();
 	inline int FailFisTrail();
 	inline int FailMinor();
+	inline int FailMinorStepwise();
 	void MergeNotes(int step1, int step2, int v);
+	inline void GetBasicMsh();
+	inline void ApplyFixedPat();
 };
 

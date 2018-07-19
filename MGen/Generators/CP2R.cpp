@@ -157,7 +157,7 @@ void CP2R::SendCP() {
 	UpdateNoteMinMax(step0, step0 + full_len - 1);
 	UpdateTempoMinMax(step0, step0 + full_len - 1);
 	t_generated = step0 + full_len - 1;
-	Adapt(0, t_generated);
+	Adapt(step0, t_generated);
 	t_sent = t_generated;
 }
 
@@ -269,8 +269,11 @@ int CP2R::EvaluateCP() {
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		vaccept = &accept[sp][1][0];
+		GetBasicMsh();
+		ApplyFixedPat();
 		if (mminor) {
 			if (FailMinor()) return 1;
+			if (FailMinorStepwise()) return 1;
 			if (FailGisTrail()) return 1;
 			if (FailFisTrail()) return 1;
 		}
@@ -529,6 +532,26 @@ int CP2R::FailMinor() {
 	return 0;
 }
 
+int CP2R::FailMinorStepwise() {
+	CHECK_READY(DR_pc, DR_fli);
+	CHECK_READY(DR_msh);
+	// For non-border notes only, because border notes have their own rules
+	for (ls = 1; ls < fli_size[v] - 1; ++ls) {
+		s = fli[v][ls];
+		s_1 = fli[v][ls - 1];
+		s1 = fli[v][ls + 1];
+		// Prohibit harmonic VI# not stepwize ascending
+		if ((sp < 2 || msh[v][ls] > 0) && pcc[v][s] == 9 &&
+			(c[v][s] - c[v][s_1] != 1 || c[v][s1] - c[v][s] != 1))
+			FLAGV(201, s_1, s1);
+		// Prohibit harmonic VII natural not stepwize descending
+		if ((sp < 2 || msh[v][ls] > 0) && pcc[v][s] == 10 &&
+			(c[v][s] - c[v][s_1] != -1 || c[v][s1] - c[v][s] != -1))
+			FLAGV(202, s_1, s1);
+	}
+	return 0;
+}
+
 // Merge notes of same pitch, that do not have pauses between them. Step2 inclusive
 void CP2R::MergeNotes(int step1, int step2, int v) {
 	// Start of current note
@@ -558,3 +581,28 @@ void CP2R::MergeNotes(int step1, int step2, int v) {
 	}
 }
 
+void CP2R::GetBasicMsh() {
+	CHECK_READY(DR_c, DR_fli, DR_leap);
+	SET_READY(DR_mshb);
+	// First note is always downbeat
+	mshb[v][0] = pDownbeat;
+	// Main calculation
+	for (ls = 1; ls < fli_size[v]; ++ls) {
+		s = fli[v][ls];
+		s2 = fli2[v][ls];
+		if (s % npm == 0) mshb[v][ls] = pDownbeat;
+		else if (s > 0 && leap[v][s - 1]) mshb[v][ls] = pLeapTo;
+		else if (s2 < ep2 - 1 && leap[v][s2]) mshb[v][ls] = pLeapFrom;
+		else {
+			if (s > 0 && s2 < ep2 - 1 && c[v][s - 1] == c[v][s2 + 1]) mshb[v][ls] = pAux;
+			else mshb[v][ls] = pPass;
+		}
+	}
+}
+
+void CP2R::ApplyFixedPat() {
+	CHECK_READY(DR_mshb);
+	CHECK_READY(DR_fli);
+	SET_READY(DR_msh);
+	for (int ls = 0; ls < fli_size[v]; ++ls) msh[v][ls] = mshb[v][ls];
+}
