@@ -122,6 +122,7 @@ protected:
 	inline void GetNoteTypes();
 	inline int FailGisTrail();
 	inline int FailFisTrail();
+	inline int FailMinor();
 	void MergeNotes(int step1, int step2, int v);
 };
 

@@ -270,6 +270,7 @@ int CP2R::EvaluateCP() {
 		sp = vsp[v];
 		vaccept = &accept[sp][1][0];
 		if (mminor) {
+			if (FailMinor()) return 1;
 			if (FailGisTrail()) return 1;
 			if (FailFisTrail()) return 1;
 		}
@@ -293,8 +294,14 @@ void CP2R::GetPitchClass(int step1, int step2) {
 	SET_READY(DR_pc);
 	for (int v = 0; v < av_cnt; ++v) {
 		for (int s = step1; s < step2; ++s) {
-			pc[v][s] = c[v][s] % 7;
-			pcc[v][s] = (cc[v][s] + 12 - bn) % 12;
+			if (cc[v][s]) {
+				pc[v][s] = c[v][s] % 7;
+				pcc[v][s] = (cc[v][s] + 12 - bn) % 12;
+			}
+			else {
+				pc[v][s] = -1;
+				pcc[v][s] = -1;
+			}
 		}
 	}
 }
@@ -303,7 +310,12 @@ void CP2R::GetDiatonic(int step1, int step2) {
 	SET_READY(DR_c);
 	for (int v = 0; v < av_cnt; ++v) {
 		for (int s = step1; s < step2; ++s) {
-			c[v][s] = CC_C(cc[v][s], bn, mode);
+			if (cc[v][s]) {
+				c[v][s] = CC_C(cc[v][s], bn, mode);
+			}
+			else {
+				c[v][s] = 0;
+			}
 		}
 	}
 }
@@ -448,6 +460,71 @@ int CP2R::FailFisTrail() {
 				}
 			}
 		}
+	}
+	return 0;
+}
+
+int CP2R::FailMinor() {
+	CHECK_READY(DR_pc, DR_fli);
+	for (ls = 1; ls < fli_size[v]; ++ls) {
+		s = fli[v][ls];
+		s_1 = fli[v][ls - 1];
+		// Prohibit minor second up before VII - absorbed
+		// Prohibit augmented second up before VII - absorbed
+		// Prohibit unaltered VI or VII two steps from altered VI or VII
+		if (pcc[v][s] == 11) {
+			if (pcc[v][s_1] == 10) FLAGV(153, s_1, s);
+			if (pcc[v][s_1] == 8) FLAGV(154, s_1, s);
+			if (pcc[v][s_1] == 3) {
+				if (ls < fli_size[v] - 1) {
+					// III-VII#-I downward
+					if (pcc[v][fli[v][ls + 1]] == 0 && cc[v][s] - cc[v][s_1] < 0) FLAGV(432, s_1, fli[v][ls + 1]);
+					// III-VII#
+					else FLAGV(157, s_1, s);
+				}
+				else {
+					if (ep2 == c_len) FLAGV(157, s_1, s);
+				}
+			}
+			if (ls > 1) {
+				s_2 = fli[v][ls - 2];
+				if (pcc[v][s_2] == 10) FLAGV(159, s_2, s);
+				if (pcc[v][s_2] == 8) FLAGV(160, s_2, s);
+				if (pcc[v][s_2] == 3) FLAGV(163, s_2, s);
+			}
+			if (ls < fli_size[v] - 1) {
+				s1 = fli[v][ls + 1];
+				if (pcc[v][s1] == 10) FLAGV(153, s1, s);
+				if (pcc[v][s1] == 8) FLAGV(154, s1, s);
+				if (pcc[v][s1] == 3) FLAGV(156, s1, s);
+				if (ls < fli_size[v] - 2) {
+					s2 = fli[v][ls + 2];
+					if (pcc[v][s2] == 10) FLAGV(159, s2, s);
+					if (pcc[v][s2] == 8) FLAGV(160, s2, s);
+					if (pcc[v][s2] == 3) FLAGV(162, s2, s);
+				}
+			}
+		}
+		if (pcc[v][s] == 9) {
+			if (pcc[v][s_1] == 8) FLAGV(152, s_1, s);
+			if (pcc[v][s_1] == 3) FLAGV(155, s_1, s);
+			if (ls > 1) {
+				s_2 = fli[v][ls - 2];
+				if (pcc[v][s_2] == 8) FLAGV(158, s_2, s);
+				if (pcc[v][s_2] == 3) FLAGV(161, s_2, s);
+			}
+			if (ls < fli_size[v] - 1) {
+				s1 = fli[v][ls + 1];
+				if (pcc[v][s1] == 8) FLAGV(152, s1, s);
+				if (pcc[v][s1] == 3) FLAGV(155, s1, s);
+				if (ls < fli_size[v] - 2) {
+					s2 = fli[v][ls + 2];
+					if (pcc[v][s2] == 8) FLAGV(158, s2, s);
+					if (pcc[v][s2] == 3) FLAGV(161, s2, s);
+				}
+			}
+		}
+		// Prohibit unresolved minor tritone DG# (direct or with inserted note)
 	}
 	return 0;
 }

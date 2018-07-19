@@ -99,7 +99,7 @@ protected:
 	vector<int> fli_size;
 	vector<int> vsp; // Species for each voice
 	int npm;
-	int s, s2;
+	int s, s1, s2, s_1, s_2;
 	int v, v2;
 	int ls;
 	int sp, vc, vp;
