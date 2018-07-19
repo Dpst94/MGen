@@ -301,18 +301,9 @@ void CP2R::GetPitchClass(int step1, int step2) {
 
 void CP2R::GetDiatonic(int step1, int step2) {
 	SET_READY(DR_c);
-	if (mode == 5) {
-		for (int v = 0; v < av_cnt; ++v) {
-			for (int s = step1; s < step2; ++s) {
-				c[v][s] = m_CC_C(cc[v][s], bn);
-			}
-		}
-	}
-	else {
-		for (int v = 0; v < av_cnt; ++v) {
-			for (int s = step1; s < step2; ++s) {
-				c[v][s] = maj_CC_C(cc[v][s], bn);
-			}
+	for (int v = 0; v < av_cnt; ++v) {
+		for (int s = step1; s < step2; ++s) {
+			c[v][s] = CC_C(cc[v][s], bn, mode);
 		}
 	}
 }

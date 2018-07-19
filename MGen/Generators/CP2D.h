@@ -12,6 +12,8 @@
 // Voice pairs (0 = lowest + highest, 1 = lowest + non-highest, 2 = non-lowest + non-highest)
 #define MAX_VP 2
 
+#define CC_C(note, bn, mode) (chrom_to_dia[(note + 12 - bn + mode) % 12] + ((note + 12 - bn + mode) / 12) * 7)
+
 // Rule string types
 #define rsName 0 // Rule name
 #define rsSubName 1 // Subrule name
@@ -106,7 +108,7 @@ protected:
 	int fifths = 0; // Number of alterations near key
 	int bn = 9; // Base tonic note (C - 0, Am - 9)
 	int mminor = 1; // If current cp is in melodic minor
-	int mode = 5; // 0 - major, 1 - dorian, 5 - aeolian
+	int mode = 9; // 0 - major, 2 - dorian, 9 - aeolian
 
 	int cp_tempo = 100;
 	int step0 = 0;
