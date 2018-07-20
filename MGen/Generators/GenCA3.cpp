@@ -14,6 +14,8 @@ CGenCA3::~CGenCA3() {
 }
 
 void CGenCA3::InitAnalysis() {
+	nstat2.resize(MAX_NOTE);
+	nstat3.resize(MAX_NOTE);
 	minl.resize(av_cnt);
 	maxl.resize(av_cnt);
 	fli_size.resize(av_cnt);

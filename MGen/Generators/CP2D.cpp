@@ -34,6 +34,7 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "show_allowed_flags", &show_allowed_flags, 0, 1);
 	CheckVar(sN, sV, "show_min_severity", &show_min_severity, 0, 100);
 	CheckVar(sN, sV, "show_severity", &show_severity, 0, 1);
+	CheckVar(sN, sV, "fill_steps_mul", &fill_steps_mul);
 	// Load species
 	if (*sN == "species") {
 		++parameter_found;
@@ -568,6 +569,15 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(fis_gis_max, 199, rsSubName, 0);
 	SetRuleParam(fis_g_max, 349, rsSubName, 0);
 	SetRuleParam(fis_g_max2, 350, rsSubName, 0);
+	SetRuleParam(dev_late2, 191, rsSubName, 0);
+	SetRuleParam(dev_late3, 192, rsSubName, 0);
+	SetRuleParam(dev2_maxlen, 386, rsSubComment, 0);
+	SetRuleParam(c4p_last_meas, 144, rsName, 1);
+	SetRuleParam(c4p_last_notes, 144, rsName, 2);
+	SetRuleParam(fill_pre3_notes, 100, rsComment, 0);
+	SetRuleParam(fill_pre4_int, 144, rsComment, 0);
+	SetRuleParam(fill_pre4_notes, 144, rsComment, 1);
+	SetRuleParam(pre_last_leaps, 204, rsName, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;

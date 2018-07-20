@@ -6,5 +6,6 @@ class CP2Ly :
 public:
 	CP2Ly();
 	~CP2Ly();
+	void SaveLyCP();
 };
 

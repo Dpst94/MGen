@@ -1,6 +1,7 @@
 #pragma once
 #include "..\GLibrary\GTemplate.h"
 
+#define MAX_NOTE 127
 #define MAX_SEVERITY 101
 // Allocate at least this number of rules
 #define RULE_ALLOC 500
@@ -125,6 +126,7 @@ protected:
 	int show_ignored_flags = 0; // Show even ignored flags(with strikethrough in rules.xlsm)
 	int show_min_severity = 0; // Minimum severity to highlight note
 	int show_severity = 0; // =1 to show severity and flag id in square brackets in comments to notes (also when exporting to MIDI file)
+	int fill_steps_mul = 2; // Multiply number of notes between leap notes to get steps for filling
 
 	// Rule parameters [sp][vc][vp]
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
@@ -135,7 +137,19 @@ protected:
 	vector<vector<vector<int>>> fis_gis_max; // Maximum allowed distance between F# and G#
 	vector<vector<vector<int>>> fis_g_max; // Minimum distance from G to F# (+1 to allow)
 	vector<vector<vector<int>>> fis_g_max2; // Minimum distance from F# to G (+1 to allow)
-	int lclimax_notes = 12; // Number of adjacent notes to calculate local climax
+
+	vector<vector<vector<int>>> pre_last_leaps; // Last leaps that can be precompensated
+	vector<vector<vector<int>>> dev_late2; // Maximum note count to consider non-late leap compensation deviation to 2nd
+	vector<vector<vector<int>>> dev_late3; // Maximum note count to consider non-late leap compensation deviation to 3rd
+	vector<vector<vector<int>>> dev2_maxlen; // Maximum >5th 2nd deviation length in number of 1/4
+	vector<vector<vector<int>>> fill_pre3_notes; // How many notes to search for fill preparation for compensation to 3rd
+	vector<vector<vector<int>>> fill_pre4_notes; // How many notes to search for fill preparation for compensation to Xth in the end
+	vector<vector<vector<int>>> fill_pre4_int; // Interval to be compensated in the end
+	vector<vector<vector<int>>> c4p_last_meas; // Last measures that can have leap c4p compensated
+	vector<vector<vector<int>>> c4p_last_notes; // Last notes that can have leap c4p compensated
+	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
+	int c4p_last_notes2; // Last notes that can have leap c4p compensated (corrected with regard to measures)
+	int lclimax_notes; // Number of adjacent notes to calculate local climax
 	int lclimax_mea = 6; // Number of adjacent measures to calculate local climax
 
 	// Main vectors
@@ -163,6 +177,20 @@ protected:
 	vector<vector<int>> lclimax; // [v][s] Local highest note (chromatic)
 	vector<vector<int>> lclimax2; // [v][s] Local highest note (chromatic)
 	vector<vector<int>> beat; // [v][ls] Beat type for each fli2: 0 = downbeat, 1 = beat 3
+	vector<int> nstat2; // [c]
+	vector<int> nstat3; // [c]
+
+	// FailLeap local variables
+	int leap_start; // Step where leap starts
+	int leap_end; // Step where leap ends
+	int leap_mid; // Middle step of leap in case when leap is created by two consecutive 3rds
+	int fleap_start; // fli2 position where leap starts
+	int fleap_end; // fli2 position where leap ends
+	int leap_size; // Diatonic size of leap
+	int leap_id; // Id of leap size
+	int filled, prefilled; // If leap is filled and prefilled
+	int mdc1, mdc2; // Status of melody direction change before and after leap
+	vector <int> tc; // [] Tail diatonic notes
 
 	// Harmonic data
 	vector<vector<int>> sus; // [v][ls] Note suspension flag (when above zero, links to first cantus-changing step)

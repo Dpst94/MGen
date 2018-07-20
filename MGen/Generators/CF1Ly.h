@@ -12,10 +12,10 @@ struct LY_Intermediate {
 	vector<int> nflags; // [] Current flags
 	vector<int> fsev; // [] Severity for each flag
 	vector<int> nfl; // [] Current flags links
-	vector<int> nfn; // Note flag number
-	vector<int> nff; // Note flag foreign
-	vector<int> nfs; // Note flag shape
-	vector<CString> nfc; // Note flag comment
+	vector<int> nfn; // [] Note flag number
+	vector<int> nff; // [] Note flag foreign
+	vector<int> nfs; // [] Note flag shape
+	vector<CString> nfc; // [] Note flag comment
 };
 
 class CF1Ly :

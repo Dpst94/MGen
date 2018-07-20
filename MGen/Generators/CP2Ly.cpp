@@ -12,3 +12,7 @@ CP2Ly::CP2Ly() {
 
 CP2Ly::~CP2Ly() {
 }
+
+void CP2Ly::SaveLyCP() {
+}
+

@@ -72,15 +72,22 @@
 #define pPDD 3 // Passing downbeat dissonance
 
 // Report violation and save link inside voice
-#define FLAGV(id, s, s2) do { \
+#define FLAGV(id, s) do { \
+  ASSERT_RULE(id);  \
+  if (skip_flags && !(*vaccept)[id]) return 1;  \
+	flag[v][s].push_back(id);  \
+	fsl[v][s].push_back(s);  \
+	fvl[v][s].push_back(v);  \
+} while (0)
+
+// Report violation and save link inside voice
+#define FLAGVL(id, s, s2) do { \
   ASSERT_RULE(id);  \
   if (skip_flags && !(*vaccept)[id]) return 1;  \
 	flag[v][s].push_back(id);  \
 	fsl[v][s].push_back(s2);  \
-	fvl[v][s].push_back(-1);  \
+	fvl[v][s].push_back(v);  \
 } while (0)
-
-
 
 class CP2R :
 	public CP2D
@@ -96,7 +103,6 @@ protected:
 	void SendComment(int pos, int v, int x, int i);
 
 	void SendCP();
-	void SaveLyCP();
 	
 	// Check data ready
 	inline void ClearReady();
@@ -130,5 +136,14 @@ protected:
 	void MergeNotes(int step1, int step2, int v);
 	inline void GetBasicMsh();
 	inline void ApplyFixedPat();
+	inline void CountFillInit(int tail_len, int pre, int & t1, int & t2, int & fill_end);
+	inline void CountFill(int tail_len, int & skips, int & fill_to, int pre, int & fill_to_pre, int & fill_from_pre, int & fill_from, int & deviates, int & dev_count, int leap_prev, int & fill_end, int & fill_goal);
+	inline void CountFillSkips(int leap_prev, int & skips, int t1, int t2);
+	inline void CountFillLimits(int pre, int t1, int t2, int & fill_to, int & fill_to_pre, int & fill_from_pre, int & fill_from);
+	inline void FailLeapInit(int & late_leap, int & presecond, int & leap_next, int & leap_prev, int & arpeg, int & overflow);
+	inline int FailLeapMulti(int leap_next, int & arpeg, int & overflow, int & child_leap);
+	inline int FailLeap();
+	inline int FailLeapFill(int late_leap, int leap_prev, int child_leap);
+	inline int FailLeapMDC();
 };
 
