@@ -1098,3 +1098,18 @@ int CP2R::FailLeapMDC() {
 	return 0;
 }
 
+// Count limits
+void CP2R::GetMelodyInterval(int step1, int step2) {
+	SET_READY(DR_nmin);
+	// Calculate range
+	nmin[v] = MAX_NOTE;
+	nmax[v] = 0;
+	for (int i = step1; i < step2; ++i) {
+		if (cc[v][i] < nmin[v]) nmin[v] = cc[v][i];
+		if (cc[v][i] > nmax[v]) nmax[v] = cc[v][i];
+	}
+	// Calculate diatonic limits
+	nmind[v] = CC_C(nmin[v], bn, mode);
+	nmaxd[v] = CC_C(nmax[v], bn, mode);
+}
+

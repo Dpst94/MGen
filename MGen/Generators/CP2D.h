@@ -95,10 +95,14 @@ protected:
 	int av_cnt = 0;
 	int c_len = 0;
 	int ep2 = 0;
-	vector<int> minl;
-	vector<int> maxl;
-	vector<int> fli_size;
+	vector<int> minl; // [v]
+	vector<int> maxl; // [v]
+	vector<int> fli_size; // [v]
 	vector<int> vsp; // Species for each voice
+	vector<int> nmin; // [v]
+	vector<int> nmax; // [v]
+	vector<int> nmind; // [v] diatonic
+	vector<int> nmaxd; // [v] diatonic
 	int npm;
 	int s, s1, s2, s_1, s_2;
 	int v, v2;

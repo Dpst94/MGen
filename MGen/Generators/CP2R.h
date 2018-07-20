@@ -22,6 +22,7 @@
 #define DR_sus					9
 #define DR_msh					10
 #define DR_mshb					11
+#define DR_nmin					12
 
 #ifdef CF_DEBUG
 
@@ -145,5 +146,6 @@ protected:
 	inline int FailLeap();
 	inline int FailLeapFill(int late_leap, int leap_prev, int child_leap);
 	inline int FailLeapMDC();
+	void GetMelodyInterval(int step1, int step2);
 };
 

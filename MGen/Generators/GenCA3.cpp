@@ -18,6 +18,10 @@ void CGenCA3::InitAnalysis() {
 	nstat3.resize(MAX_NOTE);
 	minl.resize(av_cnt);
 	maxl.resize(av_cnt);
+	nmin.resize(av_cnt);
+	nmax.resize(av_cnt);
+	nmind.resize(av_cnt);
+	nmaxd.resize(av_cnt);
 	fli_size.resize(av_cnt);
 	fli.resize(av_cnt);
 	fli2.resize(av_cnt);
@@ -404,6 +408,10 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 		sv[i].Replace("$TITLE$", "");
 		sv[i].Replace("$DEDICATION$", "");
 		ly_fs << sv[i] << "\n";
+	}
+
+	for (int cp_id = 0; cp_id < cp.size(); ++cp_id) {
+		ly_fs << ly_st[cp_id];
 	}
 
 	ly_fs << "\\header {tagline = \"This file was created by MGen CP2 ";
