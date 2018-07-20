@@ -52,6 +52,7 @@ void CGenCA3::InitAnalysis() {
 	mshf.resize(av_cnt);
 	pat.resize(av_cnt);
 	pat_state.resize(av_cnt);
+	beat.resize(av_cnt);
 	hli.resize(c_len);
 	hli2.resize(c_len);
 	ha64.resize(c_len);
@@ -76,6 +77,7 @@ void CGenCA3::InitAnalysis() {
 		macc2[v].resize(c_len);
 		lclimax[v].resize(c_len);
 		lclimax2[v].resize(c_len);
+		beat[v].resize(c_len);
 		leap[v].resize(c_len);
 		smooth[v].resize(c_len);
 		slur[v].resize(c_len);

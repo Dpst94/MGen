@@ -263,6 +263,7 @@ int CP2R::EvaluateCP() {
 	GetDiatonic(0, c_len);
 	GetPitchClass(0, c_len);
 	CreateLinks();
+	GetNoteTypes();
 	GetVca();
 	GetLClimax();
 	GetLeapSmooth();
