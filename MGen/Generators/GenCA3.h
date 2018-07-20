@@ -27,7 +27,6 @@ protected:
 	vector<int> cp_fi; // [cp_id] fifths
 	vector<int> cp_error; // [cp_id] error on load
 	vector<CString> cp_text; // [cp_id]
-	vector<CString> vname;
 
 };
 

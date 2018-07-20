@@ -197,7 +197,7 @@ void XFIn::LoadXML(CString pth) {
 				note[vi][m][ni].rest = false;
 				int alter = nd.child("pitch").child("alter").text().as_int();
 				note[vi][m][ni].pitch =
-					12 * nd.child("pitch").child("octave").text().as_int() +
+					12 * (nd.child("pitch").child("octave").text().as_int() + 1) +
 					GetPitchByName(nd.child("pitch").child("step").text().as_string()) +
 					alter;
 				note[vi][m][ni].alter = alter;

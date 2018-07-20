@@ -112,8 +112,8 @@ int CGenCA3::XML_to_CP() {
 	cp_tempo = 0;
 	vname.resize(av_cnt);
 	it.resize(av_cnt);
-	for (int vi = 0; vi < xfi.voice.size(); ++vi) {
-		int v = av_cnt - vi - 1;
+	for (vi = 0; vi < xfi.voice.size(); ++vi) {
+		v = av_cnt - vi - 1;
 		int pos = 0;
 		vname[v] = xfi.voice[vi].name;
 		for (int m = 1; m < xfi.mea.size(); ++m) {
@@ -264,7 +264,7 @@ int CGenCA3::CheckXML() {
 				//return 1;
 			}
 		}
-		for (int vi = 0; vi < xfi.voice.size(); ++vi) {
+		for (vi = 0; vi < xfi.voice.size(); ++vi) {
 			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
 				float len = xfi.note[vi][m][ni].dur * 0.25 / xfi.note[vi][m][ni].dur_div;
 				if (len < 0.125) {

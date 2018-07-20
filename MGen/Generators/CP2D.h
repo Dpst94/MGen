@@ -99,13 +99,14 @@ protected:
 	vector<int> maxl; // [v]
 	vector<int> fli_size; // [v]
 	vector<int> vsp; // Species for each voice
+	vector<CString> vname; // [v] 
 	vector<int> nmin; // [v]
 	vector<int> nmax; // [v]
 	vector<int> nmind; // [v] diatonic
 	vector<int> nmaxd; // [v] diatonic
 	int npm;
 	int s, s1, s2, s_1, s_2;
-	int v, v2;
+	int v, v2, vi;
 	int ls;
 	int sp, vc, vp;
 

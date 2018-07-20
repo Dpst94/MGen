@@ -57,12 +57,13 @@ void CP2Ly::SaveLyCP() {
 	// Save notes
 	ly_ly_st += "<<\n";
 	for (v = av_cnt - 1; v >= 0; --v) {
+		vi = vid[v];
 		//InitLyI();
 		// Select best clef
 		clef = DetectLyClef(nmin[v], nmax[v]);
 		st.Format("\\new Staff = \"staff%d\" {\n", v);
 		ly_ly_st += st;
-		st.Format("  \\set Staff.instrumentName = \"Part %d\"\n", av_cnt - v);
+		st.Format("  \\set Staff.instrumentName = \"%s\"\n", vname[vi]);
 		ly_ly_st += st;
 		ly_ly_st += "  \\clef \"" + clef + "\" \\key " + key;
 		if (mode == 9) ly_ly_st += " \\minor\n";

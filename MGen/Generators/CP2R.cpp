@@ -69,7 +69,7 @@ void CP2R::GetVca() {
 }
 
 void CP2R::SendComment(int pos, int v, int x, int i) {
-	int vi = vid[v];
+	vi = vid[v];
 	CString st, com;
 	int current_severity = -1;
 	// Clear
@@ -128,7 +128,7 @@ void CP2R::SendCP() {
 	int full_len = floor((real_len + 1) / 8 + 1) * 8;
 	ResizeVectors(step0 + full_len);
 	for (int v = 0; v < av_cnt; ++v) {
-		int vi = vid[v];
+		vi = vid[v];
 		for (int ls = 0; ls < fli_size[v]; ++ls) {
 			for (int s = fli[v][ls]; s <= fli2[v][ls]; ++s) {
 				if (cc[v][s]) {
@@ -286,8 +286,8 @@ int CP2R::EvaluateCP() {
 }
 
 void CP2R::ClearFlags(int step1, int step2) {
-	for (int v = 0; v < av_cnt; ++v) {
-		for (int s = step1; s < step2; ++s) {
+	for (v = 0; v < av_cnt; ++v) {
+		for (s = step1; s < step2; ++s) {
 			flag[v][s].clear();
 			fsl[v][s].clear();
 			fvl[v][s].clear();
@@ -1105,7 +1105,7 @@ void CP2R::GetMelodyInterval(int step1, int step2) {
 	// Calculate range
 	nmin[v] = MAX_NOTE;
 	nmax[v] = 0;
-	for (int i = step1; i < step2; ++i) {
+	for (int i = step1; i < step2; ++i) if (cc[v][i]) {
 		if (cc[v][i] < nmin[v]) nmin[v] = cc[v][i];
 		if (cc[v][i] > nmax[v]) nmax[v] = cc[v][i];
 	}
