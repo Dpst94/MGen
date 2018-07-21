@@ -327,6 +327,7 @@ void CP2R::GetLeapSmooth() {
 			smooth[v][i] = 0;
 			slur[v][i + 1] = 0;
 			if (cc[v][i] == cc[v][i + 1]) slur[v][i + 1] = 1;
+			if (!cc[v][i] || !cc[v][i + 1]) continue;
 			if (c[v][i + 1] - c[v][i] > 1) leap[v][i] = 1;
 			else if (c[v][i + 1] - c[v][i] < -1) leap[v][i] = -1;
 			// Find all smooth
