@@ -189,6 +189,7 @@ protected:
 	vector<vector<int>> beat; // [v][ls] Beat type for each fli2: 0 = downbeat, 1 = beat 3
 	vector<int> nstat2; // [c]
 	vector<int> nstat3; // [c]
+	vector<vector<int>> dtp; // [v] Distance to closest pause in notes
 
 	// FailLeap local variables
 	int leap_start; // Step where leap starts

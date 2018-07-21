@@ -23,6 +23,7 @@
 #define DR_msh					10
 #define DR_mshb					11
 #define DR_nmin					12
+#define DR_dtp 					13
 
 #ifdef CF_DEBUG
 
@@ -136,6 +137,7 @@ protected:
 	inline int FailMinorStepwise();
 	void MergeNotes(int step1, int step2);
 	inline void GetBasicMsh();
+	inline void GetDtp();
 	inline void ApplyFixedPat();
 	inline void CountFillInit(int tail_len, int pre, int & t1, int & t2, int & fill_end);
 	inline void CountFill(int tail_len, int & skips, int & fill_to, int pre, int & fill_to_pre, int & fill_from_pre, int & fill_from, int & deviates, int & dev_count, int leap_prev, int & fill_end, int & fill_goal);

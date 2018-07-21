@@ -125,9 +125,8 @@ void CP2R::SendCP() {
 					note[step0 + s][vi] = 0;
 					pause[step0 + s][vi] = 1;
 				}
-				if (av_cnt > 2 && v % 2) {
+				if (v % 2) {
 					lining[step0 + s][v] = HatchStyleDiagonalCross;
-					//lining[step0 + s][v] = HatchStyleLargeCheckerBoard;
 				}
 				len[step0 + s][vi] = llen[v][ls];
 				coff[step0 + s][vi] = s - fli[v][ls];
@@ -270,6 +269,7 @@ int CP2R::EvaluateCP() {
 		if (mminor) {
 			if (FailMinorStepwise()) return 1;
 		}
+		GetDtp();
 		if (FailLeap()) return 1;
 	}
 	return 0;
@@ -595,6 +595,18 @@ void CP2R::GetBasicMsh() {
 	}
 }
 
+void CP2R::GetDtp() {
+	CHECK_READY(DR_fli);
+  SET_READY(DR_dtp);
+	int pause_dist = 0;
+	for (ls = fli_size[v] - 1; ls >= 0 ; --ls) {
+		s = fli[v][ls];
+		dtp[v][ls] = pause_dist;
+		if (cc[v][s]) ++pause_dist;
+		else pause_dist = 0;
+	}
+}
+
 void CP2R::ApplyFixedPat() {
 	CHECK_READY(DR_mshb);
 	CHECK_READY(DR_fli);
@@ -610,14 +622,14 @@ void CP2R::CountFillInit(int tail_len, int pre, int &t1, int &t2, int &fill_end)
 		int pos2 = max(fleap_start - tail_len, 0);
 		if (c[v][leap_end] > c[v][leap_start]) {
 			for (int i = pos1; i >= pos2; --i) {
-				tc.push_back(128 - c[v][fli[v][i]]);
+				if (cc[v][fli[v][i]]) tc.push_back(128 - c[v][fli[v][i]]);
 			}
 			t1 = 128 - c[v][leap_end];
 			t2 = 128 - c[v][leap_start];
 		}
 		else {
 			for (int i = pos1; i >= pos2; --i) {
-				tc.push_back(c[v][fli[v][i]]);
+				if (cc[v][fli[v][i]]) tc.push_back(c[v][fli[v][i]]);
 			}
 			t1 = c[v][leap_end];
 			t2 = c[v][leap_start];
@@ -628,14 +640,14 @@ void CP2R::CountFillInit(int tail_len, int pre, int &t1, int &t2, int &fill_end)
 		int pos2 = min(fleap_end + tail_len, fli_size[v] - 1);
 		if (c[v][leap_end] > c[v][leap_start]) {
 			for (int i = pos1; i <= pos2; ++i) {
-				tc.push_back(c[v][fli[v][i]]);
+				if (cc[v][fli[v][i]]) tc.push_back(c[v][fli[v][i]]);
 			}
 			t1 = c[v][leap_start];
 			t2 = c[v][leap_end];
 		}
 		else {
 			for (int i = pos1; i <= pos2; ++i) {
-				tc.push_back(128 - c[v][fli[v][i]]);
+				if (cc[v][fli[v][i]]) tc.push_back(128 - c[v][fli[v][i]]);
 			}
 			t1 = 128 - c[v][leap_start];
 			t2 = 128 - c[v][leap_end];
@@ -821,8 +833,6 @@ void CP2R::FailLeapInit(int &late_leap, int &presecond, int &leap_next, int &lea
 	if (fleap_start > 0) leap_prev = leap[v][leap_start] * leap[v][fli2[v][fleap_start] - 1];
 	// Late leap?
 	late_leap = fli_size[v] - fleap_start;
-	// Find late leap border 
-	c4p_last_notes2 = min(c4p_last_notes[sp][1][0], fli_size[v] - bli[v][max(0, ep2 - c4p_last_steps)]);
 }
 
 int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_leap) {
@@ -881,6 +891,7 @@ int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_lea
 
 int CP2R::FailLeap() {
 	CHECK_READY(DR_leap, DR_c, DR_fli);
+	CHECK_READY(DR_dtp);
 	if (sp > 1) {
 		CHECK_READY(DR_beat);
 	}
@@ -892,6 +903,8 @@ int CP2R::FailLeap() {
 	int overflow, arpeg, late_leap;
 	// Calculate last steps that are allowed to have C4P
 	c4p_last_steps = c4p_last_meas[sp][1][0] * npm;
+	// Find late leap border 
+	c4p_last_notes2 = min(c4p_last_notes[sp][1][0], fli_size[v] - bli[v][max(0, ep2 - c4p_last_steps)]);
 	for (s = 0; s < ep2 - 1; ++s) {
 		if (leap[v][s] != 0) {
 			ls = bli[v][s];

@@ -51,6 +51,7 @@ void CGenCA3::InitAnalysis() {
 	mshb.resize(av_cnt);
 	mshf.resize(av_cnt);
 	pat.resize(av_cnt);
+	dtp.resize(av_cnt);
 	pat_state.resize(av_cnt);
 	beat.resize(av_cnt);
 	hli.resize(c_len);
@@ -91,6 +92,7 @@ void CGenCA3::InitAnalysis() {
 		mshb[v].resize(c_len);
 		mshf[v].resize(c_len);
 		pat[v].resize(c_len);
+		dtp[v].resize(c_len);
 		pat_state[v].resize(c_len);
 	}
 }

@@ -256,7 +256,7 @@ void CP2Ly::SaveLyCP() {
 		clef = DetectLyClef(nmin[v], nmax[v]);
 		st.Format("\\new Staff = \"staff%d\" {\n", v);
 		ly_ly_st += st;
-		st.Format("  \\set Staff.instrumentName = \"%s\"\n", vname[vi]);
+		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \"%s\" }\n", vname[vi]);
 		ly_ly_st += st;
 		ly_ly_st += "  \\clef \"" + clef + "\" \\key " + key;
 		if (mode == 9) ly_ly_st += " \\minor\n";
@@ -381,7 +381,7 @@ void CP2Ly::SaveLyComments() {
 	int pos1, pos2, found;
 	if (!lyi.size()) return;
 	if (lyi[s].nflags.size()) {
-		note_st = "\\markup \\wordwrap \\bold {\n  ";
+		note_st = "\\markup \\wordwrap \\tiny \\bold {\n  ";
 		// Show voice number if more than 1 voice
 		if (av_cnt > 1) {
 			note_st += vname[vid[v]];
@@ -436,7 +436,7 @@ void CP2Ly::SaveLyComments() {
 				found = 1;
 				ly_com_st += note_st;
 			}
-			ly_com_st += "\\markup \\wordwrap \\with-color #(rgb-color " +
+			ly_com_st += "\\markup \\smaller \\wordwrap \\with-color #(rgb-color " +
 				GetLyColor(sev) + ") {\n  ";
 			com.Replace("\"", "\\\"");
 			com.Replace(" ", "\" \"");
