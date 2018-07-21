@@ -762,14 +762,14 @@ int CF1R::FailManyLeaps(vector<int> &c, vector<int> &cc, vector<int> &leap, vect
 			if (!accept[flag4]) ++fpenalty[flag4];
 		}
 	}
-	if (pm_win_leaps > mleaps)
-		FLAG2L(flag1, fli[leap_sum_i + 1], fli[max(0, leap_sum_i - mleapsteps)]);
-	else if (pm_win_leaps > mleaps2)
+	if (pm_win_leaps > mleaps2)
 		FLAG2L(flag3, fli[leap_sum_i + 1], fli[max(0, leap_sum_i - mleapsteps)]);
-	if (pm_win_leapnotes > mleaped)
-		FLAG2L(flag2, fli[leap_sum_i + 1], fli[max(0, leap_sum_i - mleapsteps)]);
-	else if (pm_win_leapnotes > mleaped2)
+	else if (pm_win_leaps > mleaps)
+		FLAG2L(flag1, fli[leap_sum_i + 1], fli[max(0, leap_sum_i - mleapsteps)]);
+	if (pm_win_leapnotes > mleaped2)
 		FLAG2L(flag4, fli[leap_sum_i + 1], fli[max(0, leap_sum_i - mleapsteps)]);
+	else if (pm_win_leapnotes > mleaped)
+		FLAG2L(flag2, fli[leap_sum_i + 1], fli[max(0, leap_sum_i - mleapsteps)]);
 	return 0;
 }
 
