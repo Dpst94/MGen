@@ -252,7 +252,8 @@ void CP2Ly::SaveLyCP() {
 	for (v = 0; v < av_cnt; ++v) {
 		st.Format("%d", vsp[v]);
 		if (v) ly_ly_st += "-";
-		ly_ly_st += st;
+		if (vsp[v]) ly_ly_st += st;
+		else ly_ly_st += "CF";
 	}
 	ly_ly_st += "\n}\n";
 	// Save notes

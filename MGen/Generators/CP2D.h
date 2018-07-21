@@ -161,10 +161,21 @@ protected:
 	vector<vector<vector<int>>> fill_pre4_int; // Interval to be compensated in the end
 	vector<vector<vector<int>>> c4p_last_meas; // Last measures that can have leap c4p compensated
 	vector<vector<vector<int>>> c4p_last_notes; // Last notes that can have leap c4p compensated
+
+	vector<vector<vector<int>>> max_leaps; // Maximum allowed leaps during max_leap_steps
+	vector<vector<vector<int>>> max_leaped; // Maximum allowed leaped-over-notes during max_leap_steps
+	vector<vector<vector<int>>> max_leap_steps;
+	vector<vector<vector<int>>> max_leaps_r; // Maximum allowed leaps during max_leap_steps2
+	vector<vector<vector<int>>> max_leaped_r; // Maximum allowed leaped-over-notes during max_leap_steps
+	vector<vector<vector<int>>> max_leap_steps2;
+	vector<vector<vector<int>>> max_leaps2; // Maximum allowed leaps during max_leap_steps
+	vector<vector<vector<int>>> max_leaped2; // Maximum allowed leaped-over-notes during max_leap_steps
+	vector<vector<vector<int>>> max_leaps2_r; // Maximum allowed leaps during max_leap_steps
+	vector<vector<vector<int>>> max_leaped2_r; // Maximum allowed leaped-over-notes during max_leap_steps
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
 	int c4p_last_notes2; // Last notes that can have leap c4p compensated (corrected with regard to measures)
 	int lclimax_notes; // Number of adjacent notes to calculate local climax
-	int lclimax_mea = 6; // Number of adjacent measures to calculate local climax
+	int lclimax_mea; // Number of adjacent measures to calculate local climax
 
 	// Main vectors
 	vector<int> vid; // [v] Voice id for each voice
@@ -244,6 +255,11 @@ protected:
 	// Ly Parameters
 	int ly_msh = 1; // 0 - do not show msh, 1 - show msh
 	int ly_rule_verbose = 0; // How verbose rule display format is
+
+	// Graphs
+	vector <vector <float>> tweight; // [ls] Tonic weight for each note
+	vector <vector <int>> g_leaps; // [s] Number or leaps in window
+	vector <vector <int>> g_leaped; // [s] Number or leaped notes in window
 
 	int cp_id = 0;
 };

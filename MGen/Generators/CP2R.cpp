@@ -258,6 +258,12 @@ int CP2R::EvaluateCP() {
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		vaccept = &accept[sp][1][0];
+		if (FailManyLeaps(max_leaps[sp][av_cnt][0], max_leaped[sp][av_cnt][0], max_leaps_r[sp][av_cnt][0],
+			max_leaped_r[sp][av_cnt][0], max_leap_steps[sp][av_cnt][0],
+			493, 494, 495, 496)) return 1;
+		if (FailManyLeaps(max_leaps2[sp][av_cnt][0], max_leaped2[sp][av_cnt][0], max_leaps2_r[sp][av_cnt][0],
+			max_leaped2_r[sp][av_cnt][0], max_leap_steps2[sp][av_cnt][0],
+			497, 498, 499, 500)) return 1;
 		FailIntervals();
 		if (mminor) {
 			if (FailMinor()) return 1;
@@ -272,6 +278,66 @@ int CP2R::EvaluateCP() {
 		GetDtp();
 		if (FailLeap()) return 1;
 	}
+	return 0;
+}
+
+int CP2R::FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int mleapsteps,
+	int flag1, int flag2, int flag3, int flag4) {
+	CHECK_READY(DR_fli, DR_c);
+	int leap_sum = 0;
+	int leaped_sum = 0;
+	int leap_sum_i = 0;
+	g_leaps[v][fli_size[v] - 1] = 0;
+	g_leaped[v][fli_size[v] - 1] = 0;
+	int win_leaps = 0;
+	int win_leapnotes = 0;
+	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+		s = fli2[v][ls];
+		s1 = fli2[v][ls + 1];
+		// Add new leap
+		if (leap[v][s] != 0) {
+			++leap_sum;
+			leaped_sum += abs(c[v][s] - c[v][s1]) + 1;
+		}
+		// Subtract old leap
+		if ((ls >= mleapsteps) && (leap[v][fli2[v][ls - mleapsteps]] != 0)) {
+			leap_sum--;
+			leaped_sum -= abs(c[v][fli[v][ls - mleapsteps]] - c[v][fli[v][ls - mleapsteps + 1]]) + 1;
+		}
+		// Get maximum leap_sum
+		if (leap_sum > win_leaps) {
+			win_leaps = leap_sum;
+			leap_sum_i = ls;
+		}
+		if (leaped_sum > win_leapnotes) {
+			win_leapnotes = leaped_sum;
+			leap_sum_i = ls;
+		}
+		// Record for graph
+		g_leaps[v][ls] = leap_sum;
+		g_leaped[v][ls] = leaped_sum;
+		// Calculate penalty 
+		if (leap_sum > mleaps) {
+			if (!accept[sp][vc][vp][flag1]) ++fpenalty;
+		}
+		else if (leap_sum > mleaps2) {
+			if (!accept[sp][vc][vp][flag3]) ++fpenalty;
+		}
+		if (leaped_sum > mleaped) {
+			if (!accept[sp][vc][vp][flag2]) ++fpenalty;
+		}
+		else if (leaped_sum > mleaped2) {
+			if (!accept[sp][vc][vp][flag4]) ++fpenalty;
+		}
+	}
+	if (win_leaps > mleaps2)
+		FLAGV(flag3, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
+	else if (win_leaps > mleaps)
+		FLAGV(flag1, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
+	if (win_leapnotes > mleaped2)
+		FLAGV(flag4, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
+	else if (win_leapnotes > mleaped)
+		FLAGV(flag2, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
 	return 0;
 }
 

@@ -583,6 +583,16 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(fill_pre4_int, 144, rsComment, 0);
 	SetRuleParam(fill_pre4_notes, 144, rsComment, 1);
 	SetRuleParam(pre_last_leaps, 204, rsName, 0);
+	SetRuleParam(max_leap_steps, 493, rsName, 0);
+	SetRuleParam(max_leaps, 493, rsSubName, 0);
+	SetRuleParam(max_leaped, 494, rsSubName, 0);
+	SetRuleParam(max_leap_steps2, 497, rsName, 0);
+	SetRuleParam(max_leaps_r, 495, rsSubName, 0);
+	SetRuleParam(max_leaped_r, 496, rsSubName, 0);
+	SetRuleParam(max_leaps2, 497, rsSubName, 0);
+	SetRuleParam(max_leaped2, 498, rsSubName, 0);
+	SetRuleParam(max_leaps2_r, 499, rsSubName, 0);
+	SetRuleParam(max_leaped2_r, 500, rsSubName, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;

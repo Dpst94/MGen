@@ -40,6 +40,9 @@ void CGenCA3::InitAnalysis() {
 	lclimax2.resize(av_cnt);
 	leap.resize(av_cnt);
 	smooth.resize(av_cnt);
+	tweight.resize(av_cnt);
+	g_leaps.resize(av_cnt);
+	g_leaped.resize(av_cnt);
 	slur.resize(av_cnt);
 	flag.resize(av_cnt);
 	fsl.resize(av_cnt);
@@ -82,6 +85,9 @@ void CGenCA3::InitAnalysis() {
 		beat[v].resize(c_len);
 		leap[v].resize(c_len);
 		smooth[v].resize(c_len);
+		tweight[v].resize(c_len);
+		g_leaps[v].resize(c_len);
+		g_leaped[v].resize(c_len);
 		slur[v].resize(c_len);
 		flag[v].resize(c_len);
 		fsl[v].resize(c_len);
@@ -416,7 +422,7 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 		ly_fs << sv[i] << "\n";
 	}
 
-	for (int cp_id = 0; cp_id < cp.size(); ++cp_id) {
+	for (int cp_id = 0; cp_id < ly_st.size(); ++cp_id) {
 		ly_fs << ly_st[cp_id];
 	}
 
