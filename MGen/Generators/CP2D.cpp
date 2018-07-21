@@ -35,6 +35,11 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "show_min_severity", &show_min_severity, 0, 100);
 	CheckVar(sN, sV, "show_severity", &show_severity, 0, 1);
 	CheckVar(sN, sV, "fill_steps_mul", &fill_steps_mul);
+	CheckVar(sN, sV, "ly_rule_verbose", &ly_rule_verbose, 0, 2);
+	CheckVar(sN, sV, "harm_notation", &harm_notation, 0, 5);
+	CheckVar(sN, sV, "show_harmony_bass", &show_harmony_bass, 0, 2);
+	CheckVar(sN, sV, "first_steps_tonic", &first_steps_tonic, 1);
+	CheckVar(sN, sV, "show_hatch", &show_hatch, 0, 2);
 	// Load species
 	if (*sN == "species") {
 		++parameter_found;

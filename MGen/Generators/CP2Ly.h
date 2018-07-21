@@ -50,9 +50,5 @@ private:
 	int ly_vflags = 0; // Number of flags in current voice
 	int ly_notenames = 0; // Number of note names in current melody
 
-  // Parameters
-	int ly_msh = 1; // 0 - do not show msh, 1 - show msh
-	int ly_rule_verbose = 0; // How verbose rule display format is
-
 };
 

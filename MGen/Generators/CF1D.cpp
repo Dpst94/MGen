@@ -590,9 +590,9 @@ void CF1D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "reduce_between", &reduce_between, 0, 100);
 	CheckVar(sN, sV, "confirm_mode", &confirm_mode, 0, 2);
 	CheckVar(sN, sV, "ly_pagebreak", &ly_pagebreak, 0, 1);
-	CheckVar(sN, sV, "ly_rule_verbose", &ly_rule_verbose, 0, 2);
 	CheckVar(sN, sV, "ly_msh", &ly_msh, 0, 1);
 	CheckVar(sN, sV, "ly_flag_style", &ly_flag_style, 0, 2);
+	CheckVar(sN, sV, "ly_rule_verbose", &ly_rule_verbose, 0, 2);
 	CheckVar(sN, sV, "harm_notation", &harm_notation, 0, 5);
 	CheckVar(sN, sV, "show_harmony_bass", &show_harmony_bass, 0, 2);
 	CheckVar(sN, sV, "log_pmap", &log_pmap, 0, 1);

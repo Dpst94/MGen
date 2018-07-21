@@ -137,6 +137,10 @@ protected:
 	int show_min_severity = 0; // Minimum severity to highlight note
 	int show_severity = 0; // =1 to show severity and flag id in square brackets in comments to notes (also when exporting to MIDI file)
 	int fill_steps_mul = 2; // Multiply number of notes between leap notes to get steps for filling
+	int harm_notation = 1; // 1 - wordwide harmonic notation(I, II...), 2 - Sposobin harmonic notation(T, SII...)
+	int show_hatch = 1; // 0 - show no hatch, 1 = show dissonance hatch, 2 = show msh hatch
+	int show_harmony_bass = 1; // 0 = do not show bass, 1 = Show harmony bass for higher cantus only, 2 = always show harmony bass
+	int first_steps_tonic = 3; // Number of first steps, which must contain tonic note
 
 	// Rule parameters [sp][vc][vp]
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
@@ -190,6 +194,7 @@ protected:
 	vector<int> nstat2; // [c]
 	vector<int> nstat3; // [c]
 	vector<vector<int>> dtp; // [v] Distance to closest pause in notes
+	vector<vector<int>> dtp_s; // [v] Distance to closest pause in notes
 
 	// FailLeap local variables
 	int leap_start; // Step where leap starts
@@ -235,6 +240,10 @@ protected:
 
 	// Warnings
 	int warn_rule_undefined = 0;
+
+	// Ly Parameters
+	int ly_msh = 1; // 0 - do not show msh, 1 - show msh
+	int ly_rule_verbose = 0; // How verbose rule display format is
 
 	int cp_id = 0;
 };

@@ -89,7 +89,7 @@ void CP2R::SendComment(int pos, int x, int i) {
 			else st = "+ ";
 			com = st + GetRuleName(fl, sp, vc, vp) + " (" + GetSubRuleName(fl, sp, vc, vp) + ")";
 			if (show_severity) {
-				st.Format(" [%d/%d]", fl, severity[fl]);
+				st.Format(" [%d/%d]", fl, severity[sp][vc][vp][fl]);
 				com += st;
 			}
 			if (GetRuleComment(fl, sp, vc, vp) != "") com += ". " + GetRuleComment(fl, sp, vc, vp);
@@ -599,11 +599,19 @@ void CP2R::GetDtp() {
 	CHECK_READY(DR_fli);
   SET_READY(DR_dtp);
 	int pause_dist = 0;
+	int pause_dist_s = 0;
 	for (ls = fli_size[v] - 1; ls >= 0 ; --ls) {
 		s = fli[v][ls];
 		dtp[v][ls] = pause_dist;
-		if (cc[v][s]) ++pause_dist;
-		else pause_dist = 0;
+		dtp_s[v][ls] = pause_dist_s;
+		if (cc[v][s]) {
+			++pause_dist;
+			pause_dist_s += llen[v][ls];
+		}
+		else {
+			pause_dist = 0;
+			pause_dist_s = 0;
+		}
 	}
 }
 
@@ -832,7 +840,7 @@ void CP2R::FailLeapInit(int &late_leap, int &presecond, int &leap_next, int &lea
 	// Prev is leap?
 	if (fleap_start > 0) leap_prev = leap[v][leap_start] * leap[v][fli2[v][fleap_start] - 1];
 	// Late leap?
-	late_leap = fli_size[v] - fleap_start;
+	late_leap = dtp_s[v][fleap_start] <= c4p_last_steps || dtp[v][fleap_start] <= c4p_last_notes[sp][1][0];
 }
 
 int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_leap) {
@@ -933,11 +941,11 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 	int allowed_skips = 1;
 	if (leap_size > 4) ++allowed_skips;
 	if (leap_size > 6) ++allowed_skips;
-	if (late_leap <= c4p_last_notes2 + 1) allowed_skips += 2;
+	if (late_leap) allowed_skips += 2;
 	int allowed_pskips = 1;
 	if (leap_size > 4) ++allowed_pskips;
 	if (leap_size > 6) ++allowed_pskips;
-	if (late_leap <= c4p_last_notes2 + 1) allowed_pskips += 1;
+	if (late_leap) allowed_pskips += 1;
 	// Check if leap is filled
 	tail_len = 2 + (leap_size - 1) * fill_steps_mul;
 	// Do not check fill if search window is cut by end of current not-last scan window
@@ -947,15 +955,15 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 			fill_from, deviates, dev_count, leap_prev, fill_end, fill_goal);
 		if (skips > allowed_skips) filled = 0;
 		else if (fill_to >= 3 && fill_to < fill_pre4_int[sp][1][0] &&
-			(fill_to_pre == fill_to || late_leap > c4p_last_notes2 + 1 ||
+			(fill_to_pre == fill_to || !late_leap ||
 				!accept[sp][1][0][144 + leap_id] || (fleap_end < fli_size[v] - 1 && !fill_goal))) filled = 0;
-		else if (fill_to > 3 && late_leap > c4p_last_notes2 + 1) filled = 0;
-		else if (fill_to >= fill_pre4_int[sp][1][0] && late_leap <= c4p_last_notes2 + 1) filled = 0;
+		else if (fill_to > 3 && !late_leap) filled = 0;
+		else if (fill_to >= fill_pre4_int[sp][1][0] && late_leap) filled = 0;
 		else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start) && !accept[sp][1][0][100 + leap_id]) filled = 0;
 		else if (fill_to == 2 && fill_to_pre > 1 && fleap_start && !accept[sp][1][0][104 + leap_id]) filled = 0;
-		else if (fill_from >= 3 && fill_from < fill_pre4_int[sp][1][0] && (!fill_from_pre || late_leap > c4p_last_notes2 + 1 || !accept[sp][1][0][144 + leap_id])) filled = 0;
-		else if (fill_from > 3 && late_leap > c4p_last_notes2 + 1) filled = 0;
-		else if (fill_from >= fill_pre4_int[sp][1][0] && late_leap <= c4p_last_notes2 + 1) filled = 0;
+		else if (fill_from >= 3 && fill_from < fill_pre4_int[sp][1][0] && (!fill_from_pre || !late_leap || !accept[sp][1][0][144 + leap_id])) filled = 0;
+		else if (fill_from > 3 && !late_leap) filled = 0;
+		else if (fill_from >= fill_pre4_int[sp][1][0] && late_leap) filled = 0;
 		else if (fill_from == 2 && !accept[sp][1][0][53 + leap_id]) filled = 0;
 		else if (deviates > 2) filled = 0;
 		else if (deviates == 1 && !accept[sp][1][0][42 + leap_id]) filled = 0;
@@ -984,7 +992,7 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 					else if (pdeviates == 2 && !accept[sp][1][0][120 + leap_id]) prefilled = 0;
 				}
 				if (prefilled) {
-					if (late_leap <= pre_last_leaps[sp][1][0] + 1) FLAGV(204 + leap_id, fli[v][fleap_start]);
+					if (fli_size[v] - fleap_start <= pre_last_leaps[sp][1][0] + 1) FLAGV(204 + leap_id, fli[v][fleap_start]);
 					else FLAGV(112 + leap_id, fli[v][fleap_start]);
 				}
 				else
@@ -995,9 +1003,9 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 		// This means that compensation errors are not shown if uncompensated (successfully or not)
 		else {
 			// Flag late uncompensated precompensated leap
-			if (fill_to >= 3 && fill_to < fill_pre4_int[sp][1][0] && late_leap <= c4p_last_notes2 + 1)
+			if (fill_to >= 3 && fill_to < fill_pre4_int[sp][1][0] && late_leap)
 				FLAGV(144 + leap_id, fli[v][fleap_start]);
-			else if (fill_from >= 3 && fill_from < fill_pre4_int[sp][1][0] && late_leap <= c4p_last_notes2 + 1)
+			else if (fill_from >= 3 && fill_from < fill_pre4_int[sp][1][0] && late_leap)
 				FLAGV(144 + leap_id, fli[v][fleap_start]);
 			// Flag prepared unfinished fill if it is not blocking 
 			else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start)) FLAGV(100 + leap_id, fli[v][fleap_start]);
@@ -1022,8 +1030,8 @@ int CP2R::FailLeapMDC() {
 	int prev_note = cc[v][leap_start];
 	for (int pos = leap_start - 1; pos >= 0; --pos) {
 		if (cc[v][pos] != prev_note) {
-			// Check if direction changes or long without changes
-			if (leap[v][leap_start] * (cc[v][pos] - prev_note) > 0 || mdc1 > 1) break;
+			// Check if direction changes or pause or long without changes
+			if (!cc[v][pos] || leap[v][leap_start] * (cc[v][pos] - prev_note) > 0 || mdc1 > 1) break;
 			prev_note = cc[v][pos];
 			++mdc1;
 		}
@@ -1032,8 +1040,8 @@ int CP2R::FailLeapMDC() {
 	prev_note = cc[v][leap_end];
 	for (int pos = leap_end + 1; pos < ep2; ++pos) {
 		if (cc[v][pos] != prev_note) {
-			// Check if direction changes or long without changes
-			if (leap[v][leap_start] * (cc[v][pos] - prev_note) < 0 || mdc2 > 2) break;
+			// Check if direction changes or pause or long without changes
+			if (!cc[v][pos] || leap[v][leap_start] * (cc[v][pos] - prev_note) < 0 || mdc2 > 2) break;
 			prev_note = cc[v][pos];
 			++mdc2;
 		}
@@ -1046,7 +1054,8 @@ int CP2R::FailLeapMDC() {
 	if (!mdc1 && mdc2 == 1) {
 		// Close + aux
 		if ((sp == 3 || sp == 5) && (
-			(fleap_end >= fli_size[v] - 3 && ep2 < c_len) || (fleap_end < fli_size[v] - 3 && cc[v][fli[v][fleap_end + 2]] == cc[v][leap_end] &&
+			(fleap_end >= fli_size[v] - 3 && ep2 < c_len) || 
+			(fleap_end < fli_size[v] - 3 && cc[v][fli[v][fleap_end + 2]] == cc[v][leap_end] &&
 			(cc[v][fli[v][fleap_end + 3]] - cc[v][fli[v][fleap_end + 2]]) * leap[v][leap_start] < 0)))
 			FLAGV(510 + leap_id, fli[v][fleap_start]);
 		else FLAGV(128 + leap_id, fli[v][fleap_start]);
