@@ -384,6 +384,7 @@ void CGenCA3::Generate() {
 			FillPause(step0, full_len, v);
 		}
 		AnalyseCP();
+		ValidateFlags();
 		SendCP();
 		SaveLyCP();
 		step0 += full_len;

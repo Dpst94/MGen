@@ -1104,3 +1104,25 @@ void CP2R::GetMelodyInterval(int step1, int step2) {
 	nmaxd[v] = CC_C(nmax[v], bn, mode);
 }
 
+void CP2R::ValidateFlags() {
+	for (v = 0; v < av_cnt; ++v) {
+		for (s = 0; s < c_len; ++s) {
+			if (flag[v][s].size()) {
+				if (cc[v][s]) {
+					// Note start is ok
+					if (s == fli[v][bli[v][s]]) continue;
+					// Downbeat is ok
+					if (!(s % npm)) continue;
+				}
+				for (int f = 0; f < flag[v][s].size(); ++f) {
+					GetFlag(f);
+					CString est;
+					est.Format("Detected flag at hidden position %d/%d: [%d] %s %s (%s)",
+						s, fsl[v][s][f], fl, accept[sp][vc][vp][fl] ? "+" : "-",
+						GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
+					WriteLog(5, est);
+				}
+			}
+		}
+	}
+}

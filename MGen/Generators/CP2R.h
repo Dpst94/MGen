@@ -147,5 +147,6 @@ protected:
 	inline int FailLeapFill(int late_leap, int leap_prev, int child_leap);
 	inline int FailLeapMDC();
 	void GetMelodyInterval(int step1, int step2);
+	void ValidateFlags();
 };
 
