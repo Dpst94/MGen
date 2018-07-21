@@ -125,6 +125,10 @@ void CP2R::SendCP() {
 					note[step0 + s][vi] = 0;
 					pause[step0 + s][vi] = 1;
 				}
+				if (av_cnt > 2 && v % 2) {
+					lining[step0 + s][v] = HatchStyleDiagonalCross;
+					//lining[step0 + s][v] = HatchStyleLargeCheckerBoard;
+				}
 				len[step0 + s][vi] = llen[v][ls];
 				coff[step0 + s][vi] = s - fli[v][ls];
 				tempo[step0 + s] = cp_tempo;
