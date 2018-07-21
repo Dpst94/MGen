@@ -91,6 +91,10 @@ protected:
 
 	void FillPause(int start, int length, int v);
 
+	void GetFlag(int f);
+
+	void GetSpVcVp();
+
 	int max_rule = 0;
 	int av_cnt = 0;
 	int c_len = 0;
@@ -109,6 +113,7 @@ protected:
 	int v, v2, vi;
 	int ls;
 	int sp, vc, vp;
+	int fl; // Current flag id
 
 	// Key
 	int fifths = 0; // Number of alterations near key

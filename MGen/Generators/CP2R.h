@@ -101,7 +101,7 @@ protected:
 	inline void CreateLinks();
 	inline void GetVca();
 
-	void SendComment(int pos, int v, int x, int i);
+	void SendComment(int pos, int x, int i);
 
 	void SendCP();
 	
@@ -134,7 +134,7 @@ protected:
 	inline int FailFisTrail();
 	inline int FailMinor();
 	inline int FailMinorStepwise();
-	void MergeNotes(int step1, int step2, int v);
+	void MergeNotes(int step1, int step2);
 	inline void GetBasicMsh();
 	inline void ApplyFixedPat();
 	inline void CountFillInit(int tail_len, int pre, int & t1, int & t2, int & fill_end);

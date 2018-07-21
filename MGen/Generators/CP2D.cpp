@@ -604,3 +604,23 @@ void CP2D::FillPause(int start, int length, int v) {
 	}
 }
 
+void CP2D::GetFlag(int f) {
+	fl = flag[v][s][f];
+	v2 = fvl[v][s][f];
+	GetSpVcVp();
+}
+
+void CP2D::GetSpVcVp() {
+	sp = vsp[v];
+	vc = vca[s];
+	if (v2 == v) {
+		if (v == hva[s]) vp = vpExt;
+		else if (v == lva[s]) vp = vpBas;
+		else vp = vpNbs;
+	}
+	else {
+		if (v == lva[s] && v2 == hva[s]) vp = vpExt;
+		else if (v == lva[s] && v2 != hva[s]) vp = vpBas;
+		else vp = vpNbs;
+	}
+}

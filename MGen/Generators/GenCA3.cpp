@@ -400,7 +400,6 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 	if (my_config.Left(3) == "sv_") {
 		my_config = my_config.Mid(3);
 	}
-	DeleteFile(dir + "\\lyi-" + fname + ".csv");
 	title = m_algo_name + ": " + my_config + " (" +
 		CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M") + ")";
 	ly_fs.open(dir + "\\" + fname + ".ly");

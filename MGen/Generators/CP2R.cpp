@@ -68,8 +68,7 @@ void CP2R::GetVca() {
 	}
 }
 
-void CP2R::SendComment(int pos, int v, int x, int i) {
-	vi = vid[v];
+void CP2R::SendComment(int pos, int x, int i) {
 	CString st, com;
 	int current_severity = -1;
 	// Clear
@@ -77,20 +76,7 @@ void CP2R::SendComment(int pos, int v, int x, int i) {
 	ccolor[pos + i][vi].clear();
 	color[pos + i][vi] = color_noflag;
 	if (flag[v][x].size() > 0) for (int f = 0; f < flag[v][x].size(); ++f) {
-		int fl = flag[v][x][f];
-		sp = vsp[v];
-		vc = vca[x];
-		v2 = fvl[v][x][f];
-		if (v2 == v) {
-			if (v == hva[x]) vp = vpExt;
-			else if (v == lva[x]) vp = vpBas;
-			else vp = vpNbs;
-		}
-		else {
-			if (v == lva[x] && v2 == hva[x]) vp = vpExt;
-			else if (v == lva[x] && v2 != hva[x]) vp = vpBas;
-			else vp = vpNbs;
-		}
+		GetFlag(f);
 		// Send comments and color only if rule is not ignored
 		if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) continue;
 		// Send comments and color only if rule is not ignored
@@ -127,10 +113,10 @@ void CP2R::SendCP() {
 	int real_len = cc[0].size();
 	int full_len = floor((real_len + 1) / 8 + 1) * 8;
 	ResizeVectors(step0 + full_len);
-	for (int v = 0; v < av_cnt; ++v) {
+	for (v = 0; v < av_cnt; ++v) {
 		vi = vid[v];
-		for (int ls = 0; ls < fli_size[v]; ++ls) {
-			for (int s = fli[v][ls]; s <= fli2[v][ls]; ++s) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			for (s = fli[v][ls]; s <= fli2[v][ls]; ++s) {
 				if (cc[v][s]) {
 					note[step0 + s][vi] = cc[v][s];
 					pause[step0 + s][vi] = 0;
@@ -142,10 +128,10 @@ void CP2R::SendCP() {
 				len[step0 + s][vi] = llen[v][ls];
 				coff[step0 + s][vi] = s - fli[v][ls];
 				tempo[step0 + s] = cp_tempo;
-				SendComment(step0 + fli[v][ls], v, s, s - fli[v][ls]);
+				SendComment(step0 + fli[v][ls], s, s - fli[v][ls]);
 			}
 		}
-		MergeNotes(step0, step0 + full_len - 1, v);
+		MergeNotes(step0, step0 + full_len - 1);
 		// If  window-scan
 		st.Format("#%d (from %s)",
 			cp_id + 1, bname_from_path(musicxml_file));
@@ -557,7 +543,7 @@ int CP2R::FailMinorStepwise() {
 }
 
 // Merge notes of same pitch, that do not have pauses between them. Step2 inclusive
-void CP2R::MergeNotes(int step1, int step2, int v) {
+void CP2R::MergeNotes(int step1, int step2) {
 	// Start of current note
 	int first_pos = step1;
 	DWORD col = color[step1][v];
