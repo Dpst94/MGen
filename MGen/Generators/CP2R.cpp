@@ -135,7 +135,6 @@ void CP2R::SendCP() {
 			}
 		}
 		MergeNotes(step0, step0 + full_len - 1);
-		// If  window-scan
 		st.Format("#%d (from %s)",
 			cp_id + 1, bname_from_path(musicxml_file));
 		AddMelody(step0, step0 + full_len - 1, vi, st);
@@ -259,6 +258,7 @@ int CP2R::EvaluateCP() {
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		vaccept = &accept[sp][1][0];
+		FailIntervals();
 		if (mminor) {
 			if (FailMinor()) return 1;
 			if (FailGisTrail()) return 1;
@@ -338,6 +338,34 @@ void CP2R::GetLeapSmooth() {
 		smooth[v][ep2 - 1] = 0;
 		slur[v][0] = 0;
 	}
+}
+
+int CP2R::FailIntervals() {
+	CHECK_READY(DR_pc, DR_c, DR_fli);
+	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+		s0 = fli[v][ls];
+		s = fli2[v][ls];
+		s1 = fli2[v][ls + 1];
+		// Ignore pauses
+		if (!cc[v][s1]) continue;
+		if (!cc[v][s]) continue;
+		// Leap size prohibit
+		if (cc[v][s1] - cc[v][s] == 8) FLAGV(175, s0);
+		else if (cc[v][s1] - cc[v][s] == -8) FLAGV(181, s0);
+		else if (cc[v][s1] - cc[v][s] == 9) FLAGV(176, s0);
+		else if (cc[v][s1] - cc[v][s] == -9) FLAGV(182, s0);
+		else if (cc[v][s1] - cc[v][s] == 10) FLAGV(177, s0);
+		else if (cc[v][s1] - cc[v][s] == -10) FLAGV(183, s0);
+		else if (cc[v][s1] - cc[v][s] == 11) FLAGV(178, s0);
+		else if (cc[v][s1] - cc[v][s] == -11) FLAGV(184, s0);
+		else if (cc[v][s1] - cc[v][s] == 12) FLAGV(179, s0);
+		else if (cc[v][s1] - cc[v][s] == -12) FLAGV(185, s0);
+		else if (cc[v][s1] - cc[v][s] > 12) FLAGV(180, s0);
+		else if (cc[v][s1] - cc[v][s] < -12) FLAGV(186, s0);
+		// Prohibit BB
+		if (pcc[v][fli[v][ls + 1]] == 11 && pcc[v][s] == 11) FLAGV(348, s0);
+	}
+	return 0;
 }
 
 void CP2R::GetLClimax() {

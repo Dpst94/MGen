@@ -317,7 +317,7 @@ int CGenCA3::GetCP() {
 	}
 	// If there are no measures, then it is a single measure
 	if (!npm) npm = c_len;
-	for (int v = 0; v < av_cnt; ++v) {
+	for (v = 0; v < av_cnt; ++v) {
 		cc[v].resize(c_len);
 		retr[v].resize(c_len);
 		vid[v] = cp_vid[cp_id][v];

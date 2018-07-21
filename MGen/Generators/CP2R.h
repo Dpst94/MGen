@@ -129,6 +129,7 @@ protected:
 	inline void GetPitchClass(int step1, int step2);
 	inline void GetDiatonic(int step1, int step2);
 	inline void GetLeapSmooth();
+	inline int FailIntervals();
 	inline void GetLClimax();
 	inline void GetNoteTypes();
 	inline int FailGisTrail();

@@ -243,9 +243,17 @@ void CP2Ly::SaveLyCP() {
 	CString st, st3;
 	ly_ly_st += "\\markup \\wordwrap \\bold {\n  ";
 	ly_ly_st += "    \\vspace #3\n";
-	ly_ly_st += " Key: " + key_visual;
+	st.Format("\"#\"%d (from %s)",
+		cp_id + 1, bname_from_path(musicxml_file));
+	ly_ly_st += st + " Key: " + key_visual;
 	if (mode == 9) ly_ly_st += " minor";
 	else if (mode == 0) ly_ly_st += " major";
+	ly_ly_st += ", Species: ";
+	for (v = 0; v < av_cnt; ++v) {
+		st.Format("%d", vsp[v]);
+		if (v) ly_ly_st += "-";
+		ly_ly_st += st;
+	}
 	ly_ly_st += "\n}\n";
 	// Save notes
 	ly_ly_st += "<<\n";

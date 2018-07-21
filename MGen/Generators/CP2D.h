@@ -109,7 +109,7 @@ protected:
 	vector<int> nmind; // [v] diatonic
 	vector<int> nmaxd; // [v] diatonic
 	int npm;
-	int s, s1, s2, s_1, s_2;
+	int s, s0, s1, s2, s_1, s_2;
 	int v, v2, vi;
 	int ls;
 	int sp, vc, vp;
