@@ -83,7 +83,7 @@ void CP2Ly::InitLyI() {
 	ly_vflags = 0;
 	ly_notenames = 0;
 	lyi.clear();
-	lyi.resize(c_len);
+	lyi.resize(c_len + 1);
 	for (int i = 0; i < lyi.size(); ++i) {
 		// Init vectors
 		lyi[i].shs.resize(MAX_VIZ);
@@ -95,6 +95,7 @@ void CP2Ly::InitLyI() {
 		lyi[i].sht.resize(MAX_VIZ);
 	}
 	for (s = 0; s < c_len; ++s) {
+		if (!cc[v][s]) continue;
 		ParseNLinks();
 	}
 	for (s = 0; s < c_len; ++s) {
@@ -214,6 +215,7 @@ void CP2Ly::ExportLyI() {
 }
 
 void CP2Ly::SaveLyCP() {
+	ly_flags = 0;
 	vector<CString> sv;
 	CString clef, key, key_visual;
 	int pos, pos2, le, le2, pause_accum, pause_pos, pause_i;
@@ -343,6 +345,37 @@ CString CP2Ly::GetLyNoteVisualCP(CString sz) {
 	return NoteName[no2] + GetLyAlterVisual(alter, sz);
 }
 
+void CP2Ly::SendLyViz(int phase) {
+	int shape, sev;
+	if (!lyi.size()) return;
+	for (int task = ssFinish; task >= ssStart; --task) {
+		for (auto it : shsc[phase][task]) {
+			shape = it.first;
+			if (task == ssFinish) {
+				if (!lyi[s].shf[shape]) continue;
+				sev = lyi[s + lyi[s].shsl[shape]].shse[shape];
+			}
+			if (task == ssStart) {
+				if (!lyi[s].shs[shape]) continue;
+				sev = lyi[s].shse[shape];
+			}
+			CString script = it.second;
+			CString text2;
+			if (lyi[s].sht[shape].IsEmpty()) {
+				text2 = "#f\n ";
+			}
+			else {
+				text2 = "\\markup{ \\raise #0.6 \\teeny \"" + lyi[s].sht[shape] + "\" }\n ";
+			}
+			script.Replace("$n$", "\n");
+			script.Replace("$COLOR$", GetLyColor(sev));
+			script.Replace("$TEXT$", lyi[s].sht[shape]);
+			script.Replace("$TEXT2$", text2);
+			ly_ly_st += script + "\n";
+		}
+	}
+}
+
 void CP2Ly::SaveLyComments() {
 	CString st, com, note_st;
 	int pos1, pos2, found;
@@ -423,17 +456,17 @@ void CP2Ly::SendLyEvent(CString ev) {
 	SplitLyNoteMeasure(s, llen[v][ls], la);
 	for (int lc = 0; lc < la.size(); ++lc) {
 		SaveLyComments();
-		//SendLyViz(fs, pos, ev, le, i, v, 1);
+		SendLyViz(1);
 		ly_ly_st += ev + GetLyLen(la[lc]);
 		if (lc < la.size() - 1 && ev != "r") ly_ly_st += "~";
 		ly_ly_st += "\n";
+		SendLyViz(9);
+		SendLyViz(10);
+		SendLyViz(11);
+		SendLyViz(12);
 		if (s > -1) {
 			s += la[lc];
 		}
-		//SendLyViz(fs, pos, ev, le, i, v, 9);
-		//SendLyViz(fs, pos, ev, le, i, v, 10);
-		//SendLyViz(fs, pos, ev, le, i, v, 11);
-		//SendLyViz(fs, pos, ev, le, i, v, 12);
 	}
 }
 

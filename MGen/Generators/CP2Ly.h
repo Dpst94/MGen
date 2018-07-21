@@ -31,6 +31,7 @@ private:
 	CString SendLySkips(int count);
 	void SendLyMistakes();
 	CString GetLyNoteVisualCP(CString sz);
+	void SendLyViz(int phase);
 	void SaveLyComments();
 	CString GetLyNoteCP();
 	void AddNLink(int f);

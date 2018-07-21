@@ -355,6 +355,7 @@ int CGenCA3::GetCP() {
 }
 
 void CGenCA3::Generate() {
+	LoadLyShapes("configs\\ly\\shapes.csv");
 	if (musicxml_file == "") {
 		WriteLog(5, "MusicXML file not specified in configuration file");
 		error = 7;
@@ -391,7 +392,6 @@ void CGenCA3::Generate() {
 }
 
 void CGenCA3::SaveLy(CString dir, CString fname) {
-	LoadLyShapes("configs\\ly\\shapes.csv");
 	vector<CString> sv;
 	CString title;
 	// Remove server config prefix
