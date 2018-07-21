@@ -365,6 +365,7 @@ int CGenCA3::GetCP() {
 }
 
 void CGenCA3::Generate() {
+	CString st;
 	LoadLyShapes("configs\\ly\\shapes.csv");
 	if (musicxml_file == "") {
 		WriteLog(5, "MusicXML file not specified in configuration file");
@@ -398,7 +399,10 @@ void CGenCA3::Generate() {
 		SendCP();
 		SaveLyCP();
 		step0 += full_len;
+		if (need_exit) break;
 	}
+	st.Format("Analyzed %d of %d", cp_id, cp.size());
+	SetStatusText(3, st);
 	//WriteLog(1, "Loaded MusicXML successfully");
 }
 

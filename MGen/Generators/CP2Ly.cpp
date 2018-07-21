@@ -248,6 +248,7 @@ void CP2Ly::SaveLyCP() {
 	ly_ly_st += st + " Key: " + key_visual;
 	if (mode == 9) ly_ly_st += " minor";
 	else if (mode == 0) ly_ly_st += " major";
+	/*
 	ly_ly_st += ", Species: ";
 	for (v = 0; v < av_cnt; ++v) {
 		st.Format("%d", vsp[v]);
@@ -255,6 +256,7 @@ void CP2Ly::SaveLyCP() {
 		if (vsp[v]) ly_ly_st += st;
 		else ly_ly_st += "CF";
 	}
+	*/
 	ly_ly_st += "\n}\n";
 	// Save notes
 	ly_ly_st += "<<\n";
@@ -265,7 +267,11 @@ void CP2Ly::SaveLyCP() {
 		clef = DetectLyClef(nmin[v], nmax[v]);
 		st.Format("\\new Staff = \"staff%d\" {\n", v);
 		ly_ly_st += st;
-		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \"%s\" }\n", vname[vi]);
+		if (vsp[v]) st3.Format("species %d", vsp[v]);
+		else st3 = "c.f.";
+		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \\override #'(baseline-skip . 2) \\center-column{ \"%s\" \"[%s]\" } }\n", vname[vi], st3);
+		ly_ly_st += "     \n";
+		//ly_ly_st += "    \\override #'(line-width . 100)  \n";
 		ly_ly_st += st;
 		ly_ly_st += "  \\clef \"" + clef + "\" \\key " + key;
 		if (mode == 9) ly_ly_st += " \\minor\n";
