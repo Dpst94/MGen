@@ -24,6 +24,7 @@
 #define DR_mshb					11
 #define DR_nmin					12
 #define DR_dtp 					13
+#define DR_macc					14
 
 #ifdef CF_DEBUG
 
@@ -152,5 +153,27 @@ protected:
 	inline int FailLeapMDC();
 	void GetMelodyInterval(int step1, int step2);
 	void ValidateFlags();
+	inline int FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, int csel2, int flag1, int flag2, int flag3, int flag4, int first_run);
+	inline int FailStagnation(int steps, int notes, int fl);
+	inline int FailMultiCulm();
+	inline int FailFirstNotes();
+	inline int FailLastNotes();
+	inline int FailAdSymRepeat(int relen);
+	inline int IsRepeat(int ls1, int ls2, int relen);
+	inline void maVector(vector<float>& v, vector<float>& v2, int range);
+	inline void maVector(vector<int>& v, vector<float>& v2, int range);
+	inline void mawVector(vector<float>& v, vector<float>& v2, int range);
+	inline void mawVector(vector<int>& v, vector<float>& v2, int range);
+	inline void MakeMacc();
+	inline int FailLocalMacc(int notes, float mrange, int flag);
+	inline int FailLocalRange(int notes, int mrange, int flag);
+	inline int FailLocalPiCount(int notes, int picount, int flag);
+	inline float GetTonicWeight(int l_ls, int tt);
+	inline int FailTonic(int tt);
+	inline int FailLastNoteRes();
+	inline void GetTritoneResolution(int ta, int t1, int t2, int tb, int & res1, int & res2);
+	inline int FailTritone(int ta, int t1, int t2, int tb);
+	inline int FailTritones();
+	inline int FailGlobalFill();
 };
 

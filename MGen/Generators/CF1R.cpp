@@ -384,7 +384,7 @@ int CF1R::EvalMelodyHarm(int hp, int &last_flag, int &max_p) {
 }
 
 int CF1R::FailMelodyHarm(vector<int> &pc, vector<int> &pcc) {
-	CHECK_READY(DR_fli, DR_pc);
+	CHECK_READY(DR_fli, DR_pc, DR_culm_ls);
 	//CHECK_READY_PERSIST(DP_hv, DP_hsp);
 	int h;
 	int is_first_tonic = 0;
@@ -1738,7 +1738,7 @@ int CF1R::FailTritone(int ta, int t1, int t2, int tb, vector<int> &c, vector<int
 	int found;
 	int res1 = 0; // First note resolution flag
 	int res2 = 0; // Second note resolution flag
-								// Tritone prohibit
+	// Tritone prohibit
 	leap_start = s;
 	found = 0;
 	// Check consecutive tritone

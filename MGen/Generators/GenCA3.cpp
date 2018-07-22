@@ -14,6 +14,7 @@ CGenCA3::~CGenCA3() {
 }
 
 void CGenCA3::InitAnalysis() {
+	nstat.resize(MAX_NOTE);
 	nstat2.resize(MAX_NOTE);
 	nstat3.resize(MAX_NOTE);
 	minl.resize(av_cnt);
@@ -34,8 +35,6 @@ void CGenCA3::InitAnalysis() {
 	llen.resize(av_cnt);
 	rlen.resize(av_cnt);
 	vid.resize(av_cnt);
-	macc.resize(av_cnt);
-	macc2.resize(av_cnt);
 	lclimax.resize(av_cnt);
 	lclimax2.resize(av_cnt);
 	leap.resize(av_cnt);
@@ -67,6 +66,11 @@ void CGenCA3::InitAnalysis() {
 	vca.resize(c_len);
 	hva.resize(c_len);
 	lva.resize(c_len);
+	macc.resize(c_len);
+	macc2.resize(c_len);
+	decc.resize(c_len);
+	decc2.resize(c_len);
+	maw.resize(c_len);
 	for (int v = 0; v < av_cnt; ++v) {
 		fli[v].resize(c_len);
 		fli2[v].resize(c_len);
@@ -78,8 +82,6 @@ void CGenCA3::InitAnalysis() {
 		retr[v].resize(c_len);
 		llen[v].resize(c_len);
 		rlen[v].resize(c_len);
-		macc[v].resize(c_len);
-		macc2[v].resize(c_len);
 		lclimax[v].resize(c_len);
 		lclimax2[v].resize(c_len);
 		beat[v].resize(c_len);

@@ -26,6 +26,11 @@
 #define vpBas 1 // Bass + non-highest voice
 #define vpNbs 2 // Non-bass + any other voice (including highest)
 
+// Task
+#define tGen 0
+#define tEval 1
+#define tCor 2
+
 // This information is specific to rule
 struct RuleInfo {
 	CString RuleClass;
@@ -145,7 +150,6 @@ protected:
 	// Rule parameters [sp][vc][vp]
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
 	vector<vector<vector<int>>> sus_last_measures; // Last measures in which sus is allowed in species 2 and 3
-	vector<vector<vector<int>>> cse_leaps_r; // Last measures in which sus is allowed in species 2 and 3
 	vector<vector<vector<int>>> lclimax_mea5; // Last measures in which sus is allowed in species 2 and 3
 	vector<vector<vector<int>>> gis_trail_max; // Minimum notes between G# and next G note in Am
 	vector<vector<vector<int>>> fis_gis_max; // Maximum allowed distance between F# and G#
@@ -172,10 +176,26 @@ protected:
 	vector<vector<vector<int>>> max_leaped2; // Maximum allowed leaped-over-notes during max_leap_steps
 	vector<vector<vector<int>>> max_leaps2_r; // Maximum allowed leaps during max_leap_steps
 	vector<vector<vector<int>>> max_leaped2_r; // Maximum allowed leaped-over-notes during max_leap_steps
+	vector<vector<vector<int>>> thirds_ignored; // Number of thirds ignored for consecutive leaps rule
+	vector<vector<vector<int>>> late_culm; // Early culmination step
+	vector<vector<vector<int>>> early_culm; // Early culmination step
+	vector<vector<vector<int>>> early_culm2; // Early culmination step (second rule)
+	vector<vector<vector<int>>> early_culm3; // Early culmination step percent
+	vector<vector<vector<vector<int>>>> tonic_window; // Number of notes that are searched for number of tonic notes
+	vector<vector<vector<vector<int>>>> tonic_max; // Maximum number of tonic notes that can be contained in tonic window
+	vector<vector<vector<int>>> tritone_res_quart; // Search X quarters for tritone resolution
+	vector<vector<vector<int>>> max_smooth_direct; // Maximum linear movement in one direction allowed (in steps)
+	vector<vector<vector<int>>> max_smooth; // Maximum linear movement allowed (in steps)
+	vector<vector<vector<int>>> max_smooth_direct2; // Maximum linear movement in one direction allowed in cp (in steps)
+	vector<vector<vector<int>>> max_smooth2; // Maximum linear movement allowed in cp (in steps)
+	vector<vector<vector<int>>> cse_leaps; // Maximum allowed consecutive leaps for Consecutive leaps
+	vector<vector<vector<int>>> cse_leaps_r; // Maximum allowed consecutive leaps for Consecutive leaps+
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
 	int c4p_last_notes2; // Last notes that can have leap c4p compensated (corrected with regard to measures)
 	int lclimax_notes; // Number of adjacent notes to calculate local climax
 	int lclimax_mea; // Number of adjacent measures to calculate local climax
+
+	// Main variables
 
 	// Main vectors
 	vector<int> vid; // [v] Voice id for each voice
@@ -197,15 +217,21 @@ protected:
 	vector<vector<int>> llen; // [v][ls] Length of each linked note in steps
 	vector<vector<int>> rlen; // [v][ls] Real length of each linked note (in croches)
 	vector<vector<int>> bli; // [v][s] Back links from each step to fli2
-	vector<vector<float>> macc; // [v][s] CC moving average
-	vector<vector<float>> macc2; // [v][s] CC moving average smoothed
 	vector<vector<int>> lclimax; // [v][s] Local highest note (chromatic)
 	vector<vector<int>> lclimax2; // [v][s] Local highest note (chromatic)
 	vector<vector<int>> beat; // [v][ls] Beat type for each fli2: 0 = downbeat, 1 = beat 3
+	vector<int> nstat; // [c]
 	vector<int> nstat2; // [c]
 	vector<int> nstat3; // [c]
 	vector<vector<int>> dtp; // [v] Distance to closest pause in notes
 	vector<vector<int>> dtp_s; // [v] Distance to closest pause in notes
+	vector<float> macc; // [s] CC moving average
+	vector<float> macc2; // [s] CC moving average smoothed
+	int macc_range = 0; // Steps outside window used to build macc
+	int macc2_range = 0; // Steps outside window used to build macc2
+	vector<float> decc; // [s] CC deviation
+	vector<float> decc2; // [s] CC deviation smoothed
+	vector<float> maw; // [] Moving average weight
 
 	// FailLeap local variables
 	int leap_start; // Step where leap starts
@@ -242,6 +268,7 @@ protected:
 	vector<DWORD>  sev_color; // Severity colors
 	int fpenalty; // Additional flags penalty
 	int skip_flags;
+	int task; // What task to accomplish using the method
 
 	// Check data ready
 	vector<int> data_ready; // If data is ready to be used

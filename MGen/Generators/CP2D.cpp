@@ -593,6 +593,24 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(max_leaped2, 498, rsSubName, 0);
 	SetRuleParam(max_leaps2_r, 499, rsSubName, 0);
 	SetRuleParam(max_leaped2_r, 500, rsSubName, 0);
+	SetRuleParam(thirds_ignored, 501, rsComment, 0);
+	SetRuleParam(early_culm, 78, rsSubName, 0);
+	SetRuleParam(early_culm2, 79, rsSubName, 0);
+	SetRuleParam(early_culm3, 193, rsSubName, 0);
+	SetRuleParam(late_culm, 21, rsSubName, 0);
+	tonic_max.resize(2);
+	tonic_window.resize(2);
+	for (int tt = 0; tt < 2; ++tt) {
+		SetRuleParam(tonic_max[tt], 70 + tt, rsSubName, 0);
+		SetRuleParam(tonic_window[tt], 70 + tt, rsSubName, 1);
+	}
+	SetRuleParam(tritone_res_quart, 2, rsSubComment, 0);
+	SetRuleParam(max_smooth, 4, rsSubName, 0);
+	SetRuleParam(max_smooth_direct, 5, rsSubName, 0);
+	SetRuleParam(max_smooth2, 302, rsSubName, 0);
+	SetRuleParam(max_smooth_direct2, 303, rsSubName, 0);
+	SetRuleParam(cse_leaps, 501, rsSubName, 0);
+	SetRuleParam(cse_leaps_r, 502, rsSubName, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;

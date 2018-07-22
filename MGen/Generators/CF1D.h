@@ -304,14 +304,8 @@ protected:
 	vector<int> m_leap; // [s]
 	vector<int> m_smooth; // [s] 
 	vector<int> m_slur; // [s] 
-	vector<float> macc; // [s] CC moving average
-	vector<float> macc2; // [s] CC moving average smoothed
 	vector<int> lclimax; // [s] Local highest note (chromatic)
 	vector<int> lclimax2; // [s] Local highest note (chromatic)
-	int macc_range = 0; // Steps outside window used to build macc
-	int macc2_range = 0; // Steps outside window used to build macc2
-	vector<float> decc; // [s] CC deviation
-	vector<float> decc2; // [s] CC deviation smoothed
 	vector<float> fpenalty; // [r_id] Additional penalty for flags
 	vector<int>  flags; // [r_id] Flags for whole cantus
 	vector<vector<vector<int>>> anflags; // [v][s][] Note flags
@@ -393,6 +387,12 @@ protected:
 	int cf_culm_cfs = -1; // Position of cantus firmus culmination in cf notes
 	int fn = 0; // First note of analyzed melody
 	int fn_source = 0; // First note of source melody
+	vector<float> macc; // [s] CC moving average
+	vector<float> macc2; // [s] CC moving average smoothed
+	int macc_range = 0; // Steps outside window used to build macc
+	int macc2_range = 0; // Steps outside window used to build macc2
+	vector<float> decc; // [s] CC deviation
+	vector<float> decc2; // [s] CC deviation smoothed
 	vector<float> maw; // [] Moving average weight
 	vector<int> len_export; // [s] For Send
 	vector<int> coff_export; // [s] For Send
