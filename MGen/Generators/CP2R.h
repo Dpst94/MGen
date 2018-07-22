@@ -175,5 +175,16 @@ protected:
 	inline int FailTritone(int ta, int t1, int t2, int tb);
 	inline int FailTritones();
 	inline int FailGlobalFill();
+	inline int FailAdjacentTritone2(int ta, int t1, int t2, int tb);
+	inline int FailAdjacentTritones();
+	inline int FailTritones2();
+	inline int FailRhythm();
+	inline int FailRhythm2();
+	inline int FailRhythm4();
+	inline int FailRhythm3();
+	inline int FailRhythm5();
+	inline int FailMissSlurs();
+	inline int FailSlurs();
+	inline int FailStartPause();
 };
 

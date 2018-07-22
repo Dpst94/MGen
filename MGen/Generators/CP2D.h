@@ -113,10 +113,12 @@ protected:
 	vector<int> nmax; // [v]
 	vector<int> nmind; // [v] diatonic
 	vector<int> nmaxd; // [v] diatonic
+	vector<int> fin; // [v] first note position in steps (after starting pause)
 	int npm;
 	int s, s0, s1, s2, s_1, s_2;
 	int v, v2, vi;
 	int ls;
+	int ms;
 	int sp, vc, vp;
 	int fl; // Current flag id
 
@@ -190,6 +192,8 @@ protected:
 	vector<vector<vector<int>>> max_smooth2; // Maximum linear movement allowed in cp (in steps)
 	vector<vector<vector<int>>> cse_leaps; // Maximum allowed consecutive leaps for Consecutive leaps
 	vector<vector<vector<int>>> cse_leaps_r; // Maximum allowed consecutive leaps for Consecutive leaps+
+	vector<vector<vector<int>>> miss_slurs_window; // Number of steps to check for missing slur limit
+	vector<vector<vector<int>>> slurs_window; // Number of steps to check for slur limit
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
 	int c4p_last_notes2; // Last notes that can have leap c4p compensated (corrected with regard to measures)
 	int lclimax_notes; // Number of adjacent notes to calculate local climax

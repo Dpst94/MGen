@@ -598,6 +598,8 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(early_culm2, 79, rsSubName, 0);
 	SetRuleParam(early_culm3, 193, rsSubName, 0);
 	SetRuleParam(late_culm, 21, rsSubName, 0);
+	SetRuleParam(miss_slurs_window, 188, rsName, 0);
+	SetRuleParam(slurs_window, 93, rsName, 0);
 	tonic_max.resize(2);
 	tonic_window.resize(2);
 	for (int tt = 0; tt < 2; ++tt) {

@@ -22,6 +22,14 @@ void CP2R::CreateLinks() {
 	SET_READY(DR_fli);
 	// Set first steps in case there is pause
 	for (int v = 0; v < av_cnt; ++v) {
+		// Search for first note
+		fin[v] = 0;
+		for (s = 0; s < ep2; ++s) {
+			if (cc[v][s]) {
+				fin[v] = s;
+				break;
+			}
+		}
 		int prev_note = -1;
 		int lpos = 0;
 		int l = 0;
@@ -1231,12 +1239,10 @@ void CP2R::ValidateFlags() {
 	for (v = 0; v < av_cnt; ++v) {
 		for (s = 0; s < c_len; ++s) {
 			if (flag[v][s].size()) {
-				if (cc[v][s]) {
-					// Note start is ok
-					if (s == fli[v][bli[v][s]]) continue;
-					// Downbeat is ok
-					if (!(s % npm)) continue;
-				}
+				// Note start is ok
+				if (s == fli[v][bli[v][s]]) continue;
+				// Downbeat is ok
+				if (!(s % npm)) continue;
 				for (int f = 0; f < flag[v][s].size(); ++f) {
 					GetFlag(f);
 					CString est;
@@ -1433,8 +1439,8 @@ int CP2R::FailMultiCulm() {
 int CP2R::FailFirstNotes() {
 	CHECK_READY(DR_fli, DR_pc);
 	// Prohibit first note not tonic
-	if (pc[v][0] != 0) {
-		FLAGV(33, 0);
+	if (pc[v][fin[v]] != 0) {
+		FLAGV(33, fin[v]);
 	}
 	return 0;
 }
@@ -1956,12 +1962,12 @@ int CP2R::FailTritone(int ta, int t1, int t2, int tb) {
 		/*
 		// Check if tritone is highest leap if this is last window
 		if (ep2 == c_len && (av_cnt == 1 || !cantus_high)) {
-			if ((cc[v][leap_start] >= lclimax[v][leap_start]) || (cc[v][s1] >= lclimax[v][leap_start])) {
-				// Consecutive
-				if (found == 1) FLAGVL(32, s0, fli[v][ls + 1]);
-				// Compound framed
-				else if (found == 2) FLAGVL(373, fli[v][ls - 1], fli[v][ls + 1]); //-V547
-			}
+		if ((cc[v][leap_start] >= lclimax[v][leap_start]) || (cc[v][s1] >= lclimax[v][leap_start])) {
+		// Consecutive
+		if (found == 1) FLAGVL(32, s0, fli[v][ls + 1]);
+		// Compound framed
+		else if (found == 2) FLAGVL(373, fli[v][ls - 1], fli[v][ls + 1]); //-V547
+		}
 		}
 		*/
 		// Check if resolution is correct
@@ -2023,9 +2029,589 @@ int CP2R::FailGlobalFill() {
 		else ++skips;
 	}
 	// Set flags
-	if (skips2) FLAGV(69, 0);
-	if (skips == 1) FLAGV(67, 0);
-	else if (skips >= 2) FLAGV(68, 0);
+	if (skips2) FLAGV(69, fin[v]);
+	if (skips == 1) FLAGV(67, fin[v]);
+	else if (skips >= 2) FLAGV(68, fin[v]);
+	return 0;
+}
+
+int CP2R::FailAdjacentTritone2(int ta, int t1, int t2, int tb) {
+	int found = 0;
+	int res1 = 0;
+	int res2 = 0;
+	// Check consecutive tritone
+	if ((pcc[v][s2] != t2 || pcc[v][s] != t1) &&
+		(pcc[v][s2] != t1 || pcc[v][s] != t2)) return 0;
+	// Check different measures
+	//if (bmli[s] != bmli[s2]) return 0;
+	fleap_start = ls;
+	fleap_end = ls + 1;
+	// Do not check tritone if it is at the end of not-last window
+	if (ls >= fli_size[v] - 2 && ep2 != c_len) return 0;
+	// Check framed by ending, pause, leap or opposite movement
+	if ((ls >= fli_size[v] - 2 || !cc[v][fli2[v][ls + 2]] || 
+		leap[v][s] * (cc[v][fli2[v][ls + 2]] - cc[v][fli2[v][ls + 1]]) < 0 ||
+		leap[v][fli2[v][ls + 1]]) &&
+		(ls == 0 || !cc[v][fli2[v][ls - 1]] || 
+			leap[v][s] * (cc[v][s] - cc[v][fli2[v][ls - 1]]) < 0 ||
+			leap[v][fli2[v][ls - 1]])) found = 1;
+	if (!found) {
+		if (sp == 5) {
+			// Is last note at least 1/2 and not shorter than previous?
+			if (rlen[v][ls + 1] >= 4 && llen[v][ls + 1] >= llen[v][ls]) found = 2;
+		}
+		// Is last note longer than previous ?
+		if (llen[v][ls + 1] > llen[v][ls]) found = 2;
+	}
+	// Search measure for repeat tritone second note
+	if (!found) {
+		ms = bmli[s2];
+		int mea_end, ls1, ls2;
+		int note_count = 0;
+		if (ms < mli.size() - 1) mea_end = mli[ms + 1] - 1;
+		else mea_end = c_len - 1;
+		// Prevent going out of window
+		if (mea_end < ep2) {
+			ls1 = bli[v][mli[ms]];
+			ls2 = bli[v][mea_end];
+			// Loop inside measure
+			for (int ls3 = ls1; ls3 <= ls2; ++ls3) {
+				if (cc[v][fli[v][ls3]] == cc[v][s2]) ++note_count;
+			}
+			if (note_count > 1) found = 3;
+		}
+	}
+	//if (!found) return 0;
+	// Check if tritone is highest leap if this is last window
+	/*
+	if (ep2 == c_len && !cantus_high) {
+		if ((cc[v][s] >= lclimax[v][s]) || (cc[v][s2] >= lclimax[v][s2])) {
+			if (found == 0) FLAGVL(370, fli[v][fleap_start], fli[v][fleap_end]);
+			else if (found == 1) FLAGVL(367, fli[v][fleap_start], fli[v][fleap_end]);
+			else FLAGVL(362, fli[v][fleap_start], fli[v][fleap_end]);
+		}
+	}
+	*/
+	GetTritoneResolution(ta, t1, t2, tb, res1, res2);
+	// Flag resolution for normal tritone
+	if (found == 0) {
+		if (res1*res2 == 0) FLAGVL(369, fli[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(368, fli[v][fleap_start], fli[v][fleap_end]);
+	}
+	// Flag resolution for framed tritone
+	else if (found == 1) {
+		if (res1*res2 == 0) FLAGVL(366, fli[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(365, fli[v][fleap_start], fli[v][fleap_end]);
+	}
+	// Flag resolution for accented tritone
+	else {
+		if (res1*res2 == 0) FLAGVL(361, fli[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(360, fli[v][fleap_start], fli[v][fleap_end]);
+	}
+	return 0;
+}
+
+// This function is for species 2-5
+int CP2R::FailAdjacentTritones() {
+	// Find adjacent notes
+	CHECK_READY(DR_pc, DR_c, DR_fli);
+	CHECK_READY(DR_leap);
+	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+		s = fli2[v][ls];
+		s2 = fli[v][ls + 1];
+		if (mode == 9) {
+			if (FailAdjacentTritone2(3, 5, 11, 0)) return 1;
+			if (FailAdjacentTritone2(7, 8, 2, 3)) return 1;
+		}
+		else {
+			if (FailAdjacentTritone2(4, 5, 11, 0)) return 1;
+		}
+	}
+	return 0;
+}
+
+// This function is for species 2-5
+int CP2R::FailTritones2() {
+	CHECK_READY(DR_pc, DR_c, DR_fli);
+	CHECK_READY(DR_leap, DR_lclimax);
+	// Find both tritone notes in measure (non-adjacent)
+	int mea_end, ls1, ls2, lpcc, cch, ccl, exceed, found, res1, res2, last_repeat;
+	for (ms = 0; ms < mli.size(); ++ms) {
+		// Stop processing when last measure is not fully generated
+		if (ms == mli.size() - 1 && ep2 < c_len) break;
+		// Get first and last measure notes
+		if (ms + 1 < mli.size()) mea_end = mli[ms + 1] - 1;
+		else mea_end = c_len - 1;
+		// Prevent going out of window
+		if (mea_end >= ep2) break;
+		ls1 = bli[v][mli[ms]];
+		ls2 = bli[v][mea_end];
+		vector<vector<int>> tfound, tfound2;
+		tfound.resize(2);
+		tfound2.resize(2);
+		// Loop inside measure
+		for (ls = ls1; ls <= ls2; ++ls) {
+			lpcc = pcc[v][fli[v][ls]];
+			// Find first and last notes of major tritone
+			if (lpcc == 5) tfound[0].push_back(ls);
+			if (lpcc == 11) tfound2[0].push_back(ls);
+			if (mode == 9) {
+				// Find first and last notes of minor tritone
+				if (lpcc == 8) tfound[1].push_back(ls);
+				if (lpcc == 2) tfound2[1].push_back(ls);
+			}
+		}
+		// Loop through tritone types 
+		for (int tt = 0; tt < 2; ++tt) {
+			// Check each note combination
+			for (int tn = 0; tn < tfound[tt].size(); ++tn) {
+				for (int tn2 = 0; tn2 < tfound2[tt].size(); ++tn2) {
+					found = 0;
+					// Do not check adjacent
+					if (abs(tfound[tt][tn] - tfound2[tt][tn2]) == 1) continue;
+					// Do intermediate notes exceed pitch range?
+					if (tfound[tt][tn] > tfound2[tt][tn2]) {
+						last_repeat = tfound[tt].size();
+						fleap_start = tfound2[tt][tn2];
+						fleap_end = tfound[tt][tn];
+					}
+					else {
+						last_repeat = tfound2[tt].size();
+						fleap_start = tfound[tt][tn];
+						fleap_end = tfound2[tt][tn2];
+					}
+					// Do not check if fleap_end is last note in scan window
+					if (fleap_end >= fli_size[v] - 1 && ep2 != c_len) return 0;
+					// Low / high notes
+					ccl = min(cc[v][fli[v][tfound[tt][tn]]], cc[v][fli[v][tfound2[tt][tn2]]]);
+					cch = max(cc[v][fli[v][tfound[tt][tn]]], cc[v][fli[v][tfound2[tt][tn2]]]);
+					exceed = 0;
+					for (ls = fleap_start + 1; ls < fleap_end; ++ls) if (cc[v][fli[v][ls]]) {
+						if (cc[v][fli[v][ls]] > cch || cc[v][fli[v][ls]] < ccl) {
+							exceed = 1;
+							break;
+						}
+					}
+					if (exceed) continue;
+					// Check framed 
+					if ((fleap_end == fli_size[v] - 1 || !cc[v][fli2[v][fleap_end + 1]] ||
+						(cc[v][fli[v][fleap_end]] - cc[v][fli2[v][fleap_start]]) *
+						(cc[v][fli2[v][fleap_end + 1]] - cc[v][fli[v][fleap_end]]) < 0 ||
+						leap[v][fli2[v][fleap_end]]) &&
+						(fleap_start == 0 || !cc[v][fli[v][fleap_start - 1]] ||
+						(cc[v][fli[v][fleap_end]] - cc[v][fli2[v][fleap_start]]) *
+						(cc[v][fli2[v][fleap_start]] - cc[v][fli[v][fleap_start - 1]]) < 0 ||
+							leap[v][fli2[v][fleap_start - 1]])) found = 1;
+					if (!found) {
+						if (sp == 5) {
+							// Is last note at least 1/2 and not shorter than previous?
+							if (rlen[v][fleap_end] >= 4 && llen[v][fleap_end] >= llen[v][fleap_start]) found = 2;
+						}
+						// Is last note longer than previous ?
+						if (llen[v][fleap_end] > llen[v][fleap_start]) found = 2;
+					}
+					// Check last note repeats
+					if (!found) {
+						if (last_repeat > 1) found = 3;
+					}
+					if (mode == 9) {
+						if (tt == 0)
+							GetTritoneResolution(3, 5, 11, 0, res1, res2);
+						if (tt == 1)
+							GetTritoneResolution(7, 8, 2, 3, res1, res2);
+					}
+					else {
+						if (tt == 0)
+							GetTritoneResolution(4, 5, 11, 0, res1, res2);
+					}
+					// Probably next line can be moved higher (before GetTritoneResolution) for performance optimization
+					if (!found) continue;
+					/*
+					// Check if tritone is highest leap if this is last window
+					if (ep2 == c_len && !cantus_high) {
+						if ((cc[v][fli[v][fleap_start]] >= lclimax[v][fli[v][fleap_start]]) ||
+							(cc[v][fli[v][fleap_end]] >= lclimax[v][fli[v][fleap_end]])) {
+							if (found == 1) FLAGVL(363, fli[v][fleap_start], fli[v][fleap_end]);
+							else FLAGVL(364, fli[v][fleap_start], fli[v][fleap_end]);
+						}
+					}
+					*/
+					// Flag resolution for framed tritone
+					if (found == 1) {
+						if (res1*res2 == 0) FLAGVL(19, fli[v][fleap_start], fli[v][fleap_end]);
+						else FLAGVL(18, fli[v][fleap_start], fli[v][fleap_end]);
+					}
+					// Flag resolution for accented tritone
+					else {
+						if (res1*res2 == 0) FLAGVL(343, fli[v][fleap_start], fli[v][fleap_end]);
+						else FLAGVL(342, fli[v][fleap_start], fli[v][fleap_end]);
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+int CP2R::FailRhythm() {
+	CHECK_READY(DR_fli, DR_beat, DR_sus);
+	CHECK_READY(DR_leap);
+	if (sp == 2) {
+		if (FailRhythm2()) return 1;
+	}
+	else if (sp == 3) {
+		if (FailRhythm3()) return 1;
+	}
+	else if (sp == 4) {
+		if (FailRhythm4()) return 1;
+	}
+	else if (sp == 5) {
+		if (FailRhythm5()) return 1;
+	}
+	return 0;
+}
+
+// Fail rhythm for species 2
+int CP2R::FailRhythm2() {
+	// Last measure not whole
+	if (c_len - fli[v][fli_size[v] - 1] < npm) {
+		FLAGV(267, fli[v][fli_size[v] - 1]);
+	}
+	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+		// Whole inside
+		if (!beat[v][ls] && llen[v][ls] == npm) FLAGV(236, fli[v][ls]);
+	}
+	return 0;
+}
+
+// Fail rhythm for species 4
+int CP2R::FailRhythm4() {
+	// Last measure not whole
+	if (c_len - fli[v][fli_size[v] - 1] < npm) {
+		FLAGV(267, fli[v][fli_size[v] - 1]);
+	}
+	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+		// Whole inside
+		if (!beat[v][ls] && llen[v][ls] == npm) FLAGV(236, fli[v][ls]);
+	}
+	return 0;
+}
+
+// Fail rhythm for species 3
+int CP2R::FailRhythm3() {
+	// Check uneven pause
+	if (fli_size[v] > 2 && !cc[v][0] && llen[v][0] != llen[v][1]) FLAGV(237, 0);
+	// Last measure not whole
+	if (c_len - fli[v][fli_size[v] - 1] < npm) {
+		FLAGV(267, fli[v][fli_size[v] - 1]);
+		if (c_len - fli[v][fli_size[v] - 1] == 2) FLAGV(252, fli[v][fli_size[v] - 1]);
+	}
+	for (ls = 0; ls < fli_size[v]; ++ls) {
+		s = fli[v][ls];
+		// 1/4 syncope (not for last 1/4 because it is applied with anticipation or sus)
+		if (beat[v][ls] == 3 && llen[v][ls] > 2) FLAGV(235, s);
+		// 1/2 after 1/4
+		if (ls > 0 && beat[v][ls] == 1 && llen[v][ls] > 2 && llen[v][ls - 1] == 2) {
+			if (bmli[s] >= mli.size() - 2) FLAGVL(238, s, mli[bmli[s]]);
+			// Flag slurred if sus or note is cut by scan window
+			else if (sus[v][ls] || (ls == fli_size[v] - 1 && c_len > ep2)) FLAGVL(239, s, mli[bmli[s]]);
+			else FLAGVL(240, s, mli[bmli[s]]);
+		}
+		// Non-uniform starting rhythm
+		if (ls > 0 && bmli[s] == 0 && llen[v][ls] != llen[v][ls - 1] && ls < fli_size[v] - 1) {
+			FLAGVL(254, s, fin[v]);
+		}
+	}
+	return 0;
+}
+
+// Fail rhythm for species 5
+int CP2R::FailRhythm5() {
+	// Rhythm id
+	vector<int> rid;
+	int rid_cur = 0;
+	int count8;
+	// Note lengths inside measure
+	vector<int> l_len;
+	vector<int> l_ls;
+	l_len.resize(npm);
+	l_ls.resize(npm);
+	int s3;
+	// Measure size in notes
+	int m_size = 0;
+	// Slurs at start and finish of measure (show length of slurred notes)
+	int slur1 = 0;
+	int slur2 = 0;
+	// Full measure collected
+	int full_measure = 0;
+	// Position inside measure
+	int pos = 0;
+	int uneven_start_fired = 0;
+	// Starting step of measure
+	int mstart = 0;
+	// Length sum
+	int suml = 0;
+	int ls2 = 0;
+	// Check pause length
+	if (!cc[v][0] && llen[v][0] > 4) FLAGV(197, 0);
+	for (ms = 0; ms < mli.size(); ++ms) {
+		s = mli[ms];
+		if (s >= ep2) break;
+		ls = bli[v][s];
+		l_len.clear();
+		l_ls.clear();
+		slur1 = 0;
+		slur2 = 0;
+		pos = 0;
+		mstart = 0;
+		// Build note lengths
+		full_measure = 0;
+		int has_croche = 0;
+		for (ls2 = ls; ls2 < fli_size[v]; ++ls2) {
+			pos = max(0, fli[v][ls2] - s);
+			// Do not process last note if not full melody generated
+			if (ep2 != c_len && ls2 == fli_size[v] - 1) {
+				// Last measure without whole note
+				if (ms == mli.size() - 1 && l_len.size()) FLAGV(267, fli[v][fli_size[v] - 1]);
+				// Whole inside if it starts not from first measure, from first step and is not a suspension
+				if (llen[v][ls2] >= 8 && ms && !pos && !sus[v][ls2]) FLAGV(236, s);
+				// 1/8 syncope
+				else if (llen[v][ls2] > 1 && pos % 2) FLAGV(232, fli[v][ls2]);
+				// 1/4 syncope (not last, because it is flagged in suspension)
+				else if (llen[v][ls2] > 2 && pos == 2) FLAGV(235, fli[v][ls2]);
+				full_measure = 0;
+				break;
+			}
+			s2 = fli[v][ls2];
+			l_len.push_back(llen[v][ls2]);
+			l_ls.push_back(ls2);
+			if (llen[v][ls2] == 1) has_croche = 1;
+			// Stop if out of measure
+			if (mstart + fli2[v][ls2] - s + 1 >= npm) {
+				full_measure = 1;
+				break;
+			}
+			pos += l_len.back();
+		}
+		// Check if there is nothing to analyze
+		if (!l_len.size()) continue;
+		// First note in measure with slur
+		if (fli[v][ls] < s) {
+			l_len[0] = min(8, (fli2[v][ls] - s + 1));
+			slur1 = s - fli[v][ls];
+		}
+		// Last note in measure with slur
+		if (full_measure && sus[v][ls2] && fli[v][ls2] >= s) {
+			l_len[l_len.size() - 1] = min(8, sus[v][ls2] - s2);
+			slur2 = fli2[v][ls2] - sus[v][ls2] + 1;
+		}
+		// Full evaluation?
+		if (ep2 == c_len) {
+			// Last measure
+			if (ms == mli.size() - 1) {
+				// Check last whole note
+				if (l_len[0] != 8)
+					FLAGV(267, fli[v][fli_size[v] - 1]);
+			}
+		}
+		// Set first rhythm id bit
+		rid_cur = slur1 ? 0 : 1;
+		// Iterative rhythm checks
+		count8 = 0;
+		pos = 0;
+		for (int lp = 0; lp < l_len.size(); ++lp) {
+			s2 = s + pos;
+			ls2 = bli[v][s2];
+			// Last note
+			if (ep2 == c_len && ls2 == fli_size[v] - 1 && ms == mli.size() - 1) {
+				// Check length
+				if (l_len[lp] == 1) FLAGV(253, fli[v][fli_size[v] - 1]);
+				else if (l_len[lp] == 2) FLAGV(252, fli[v][fli_size[v] - 1]);
+			}
+			// Calculate rhythm id
+			if (lp < l_len.size() - 1 || !slur2)
+				rid_cur += 1 << (pos + l_len[lp]);
+			// Check 1/8
+			if (l_len[lp] == 1) {
+				// Last 1/8 syncope
+				if (pos == 7 && slur2) FLAGV(232, s2);
+				// Other types of 1/8
+				else {
+					// If second 1/8
+					if (pos % 2) {
+						// Isolated 1/8
+						if (l_len[lp - 1] != 1) FLAGV(231, s2);
+					}
+					// Too many 1/8
+					++count8;
+					if (count8 == 3) FLAGV(255, s2);
+					else if (count8 > 3) ++fpenalty;
+					// 1/8 in first measure
+					if (ms == 0) FLAGV(230, s2);
+					// If first 8th
+					else {
+						// 1/8 beats
+						if (pos == 0) FLAGV(226, s2);
+						else if (pos == 2) FLAGV(227, s2);
+						else if (pos == 4) FLAGV(228, s2);
+						else if (pos == 6) FLAGV(229, s2);
+					}
+				}
+				// 1/8 on leap
+				if (ls2 < fli_size[v] - 1 && leap[v][s2])
+					FLAGV(88, s2);
+				else if (ls2 > 0 && leap[v][s2 - 1]) {
+					if (llen[v][ls2 - 1] > 1) FLAGV(88, isus[v][bli[v][s2 - 1]]);
+				}
+			}
+			else {
+				// 1/8 syncope
+				if (pos % 2) FLAGV(232, s2);
+				// 1/4 syncope
+				else if (l_len[lp] > 2 && pos == 2) FLAGV(235, s2);
+				//else if (l_len[lp] == 2 && pos == 6 && slur2) FLAGV(235, s2);
+			}
+			// Uneven starting rhythm
+			if (!ms && lp > 0 && l_len[lp] != l_len[lp - 1] && !uneven_start_fired) {
+				// Check for exception: (pause + 1/4 + 1/2 slurred)
+				if (!cc[v][0] && llen[v][0] == 2 && lp == 2 && l_len[lp] >= 4 && l_len[lp - 1] == 2 && slur2) {}
+				else {
+					uneven_start_fired = 1;
+					FLAGVL(254, s2, fin[v]);
+				}
+			}
+			pos += l_len[lp];
+		}
+		// Check rhythm repeat
+		if (full_measure) {
+			// Check only if no croches or less than 4 notes
+			if (rid.size() && (!has_croche || l_len.size() <4)) {
+				// Do not fire for first measure if measure starts with pause
+				if (rid.back() == rid_cur && (ms > 1 || cc[v][0])) FLAGVL(247, s, fli[v][bli[v][s + npm - 1]]);
+			}
+			rid.push_back(rid_cur);
+		}
+		// Check rhythm rules
+		// First measure
+		if (!ms) {
+			// Uneven pause
+			if (l_len.size() > 1 && l_len[0] == fin[v] && l_len[0] != l_len[1]) FLAGV(237, s);
+		}
+		// Whole inside
+		if (l_len[0] >= 8 && ms < mli.size() - 1 && ms) FLAGV(236, s);
+		// 1/2.
+		else if (l_len[0] == 6 && !slur1) FLAGV(233, s);
+		else if (l_len.size() > 1 && l_len[1] == 6) FLAGV(234, fli[v][l_ls[1]], fli[v][l_ls[0]]);
+		else if (l_len.size() > 2 && l_len[2] == 6) FLAGV(234, fli[v][l_ls[2]], fli[v][l_ls[0]]);
+		// 1/2 after 1/4 or 1/8 in measure
+		else if (full_measure && l_len[l_len.size() - 1] == 4 && l_len[0] != 4) {
+			s3 = fli[v][l_ls[l_ls.size() - 1]];
+			if (ms >= mli.size() - 2) FLAGVL(238, s3, s);
+			else if (slur2 != 0) FLAGVL(239, s3, s);
+			else if (slur1 != 0) FLAGVL(278, s3, s);
+			else FLAGVL(240, s3, s);
+		}
+		// Many notes in measure
+		if (l_len.size() == 5) {
+			if (slur1) FLAGV(301, s);
+			else FLAGVL(245, s, fli[v][bli[v][s + npm - 1]]);
+		}
+		else if (l_len.size() > 5) FLAGVL(246, s, fli[v][bli[v][s + npm - 1]]);
+		// Suspensions
+		if (slur1 == 4 && l_len[0] == 2) FLAGV(241, s);
+		else if (slur1 == 4 && l_len[0] == 4) FLAGV(242, s);
+		//else if (slur1 == 2) FLAGV(251, s)
+		if (slur1 && l_len[0] == 6) FLAGV(243, s);
+		if (slur1 == 6) FLAGV(244, s);
+	}
+	return 0;
+}
+
+// Detect missing slurs
+int CP2R::FailMissSlurs() {
+	// Check only for species 4
+	if (sp != 4) return 0;
+	// Current window size
+	int wsize = 0;
+	// Number of slurs in window
+	int scount = 0;
+	int miss, max_miss = 0;
+	int max_ls = 0;
+	for (ls = 0; ls < fli_size[v] - 2; ++ls) {
+		if (!ls && !cc[v][0]) continue;
+		if (ls < miss_slurs_window[sp][av_cnt][0]) ++wsize;
+		// Subtract old slur
+		if (ls >= miss_slurs_window[sp][av_cnt][0] && sus[v][ls - miss_slurs_window[sp][av_cnt][0]])
+			--scount;
+		// Check slurs in window
+		if (sus[v][ls]) {
+			++scount;
+		}
+		else {
+			miss = wsize - scount;
+			if (miss > max_miss) {
+				max_miss = miss;
+				max_ls = ls;
+			}
+		}
+	}
+	if (max_miss == 1) FLAGV(188, fli[v][max_ls]);
+	else if (max_miss == 2) FLAGV(189, fli[v][max_ls]);
+	else if (max_miss > 2) {
+		FLAGV(190, fli[v][max_ls]);
+		if (!accept[sp][av_cnt][0][190]) fpenalty += (max_miss - 2) * 50;
+	}
+	return 0;
+}
+
+// Detect many slurs
+int CP2R::FailSlurs() {
+	CHECK_READY(DR_fli);
+	// For species 5 there are separate rules (FailRhythm5)
+	// For species 4 we can have all notes slurred
+	if (sp >= 4) return 0;
+	// Current window size
+	int wsize = 0;
+	// Number of slurs in window
+	int scount = 0;
+	int cnt, max_count = 0;
+	int max_ls = 0;
+	// Check pause length
+	if (!cc[v][0] && llen[v][0] > 4) FLAGV(197, 0);
+	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+		if (!ls && !cc[v][0]) continue;
+		if (ls < slurs_window[sp][av_cnt][0]) ++wsize;
+		// Subtract old slur
+		if (ls >= slurs_window[sp][av_cnt][0] && sus[v][ls - slurs_window[sp][av_cnt][0]])
+			--scount;
+		// Check slurs in window
+		if (sus[v][ls]) {
+			++scount;
+		}
+		else {
+			cnt = wsize - scount;
+			if (cnt > max_count) {
+				max_count = cnt;
+				max_ls = ls;
+			}
+		}
+	}
+	if (max_count == 1) FLAGV(93, fli[v][max_ls]);
+	else if (max_count == 2) FLAGV(94, fli[v][max_ls]);
+	else if (max_count > 2) {
+		FLAGV(95, fli[v][max_ls]);
+		if (!accept[sp][av_cnt][0][95]) fpenalty += (max_count - 2) * 50;
+	}
+	return 0;
+}
+
+int CP2R::FailStartPause() {
+	if (sp <= 1 && fin[v]) {
+		FLAGV(138, 0);
+	}
+	else if (sp > 1 && !fin[v]) {
+		FLAGV(273, 0);
+	}
 	return 0;
 }
 

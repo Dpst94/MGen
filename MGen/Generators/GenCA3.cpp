@@ -41,6 +41,7 @@ void CGenCA3::InitAnalysis() {
 	smooth.resize(av_cnt);
 	tweight.resize(av_cnt);
 	g_leaps.resize(av_cnt);
+	fin.resize(av_cnt);
 	g_leaped.resize(av_cnt);
 	slur.resize(av_cnt);
 	flag.resize(av_cnt);

@@ -95,7 +95,7 @@ void CP2Ly::InitLyI() {
 		lyi[i].sht.resize(MAX_VIZ);
 	}
 	for (s = 0; s < c_len; ++s) {
-		if (!cc[v][s]) continue;
+		//if (!cc[v][s]) continue;
 		ParseNLinks();
 	}
 	for (s = 0; s < c_len; ++s) {
