@@ -33,11 +33,11 @@ int CP2R::EvaluateCP() {
 	GetVca();
 	GetLClimax();
 	GetLeapSmooth();
-	FailStartPause();
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		vaccept = &accept[sp][av_cnt][0];
 		GetMelodyInterval(0, c_len);
+		FailStartPause();
 		if (av_cnt == 1) {
 			FailFirstNotes();
 			FailLastNotes();
