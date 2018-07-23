@@ -299,7 +299,7 @@ void CP2Ly::SaveLyCP() {
 		//SendLyIntervals();
 	}
 	ly_ly_st += ">>\n";
-	if (st3 != "") ly_ly_st += "\\markup { " + st3 + " }\n";
+	//if (st3 != "") ly_ly_st += "\\markup { " + st3 + " }\n";
 	ly_ly_st += ly_com_st;
 	if (ly_com_st == "") {
 		if (!ly_debugexpect) {
@@ -331,18 +331,18 @@ void CP2Ly::SendLyMistakes() {
 			ly_ly_st += SendLySkips(1);
 			continue;
 		}
-		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) { \\dir-column {\n";
+		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
 		int max_mist = lyi[s].nflags.size() - 1;
 		// Do not show too many mistakes
-		if (max_mist > 5) {
-			max_mist = 4;
+		if (max_mist > 2) {
+			max_mist = 1;
 			ly_ly_st += "...\n";
 		}
 		for (int f = max_mist; f >= 0; --f) {
 			int fl = lyi[s].nflags[f];
 			int sev = lyi[s].fsev[f];
 			st.Format("        \\with-color #(rgb-color " +
-				GetLyColor(sev) + ") %s \\circle %d\n",
+				GetLyColor(sev) + ") %s %d\n", // \\circle 
 				lyi[s].nfs[f] ? "\\underline" : "", lyi[s].nfn[f]);
 			// \override #'(offset . 5) \override #'(thickness . 2) 
 			ly_ly_st += st;
@@ -455,7 +455,7 @@ void CP2Ly::SaveLyComments() {
 				GetLyColor(sev) + ") {\n  ";
 			com.Replace("\"", "\\\"");
 			com.Replace(" ", "\" \"");
-			st.Format("\\teeny \\raise #0.2 \\circle %d \"", lyi[s].nfn[c]);
+			st.Format("\\teeny \\raise #0.2 %d \"", lyi[s].nfn[c]); // \\circle
 			ly_com_st += st;
 			ly_com_st += com + "\"\n";
 			ly_com_st += "\n}\n";
