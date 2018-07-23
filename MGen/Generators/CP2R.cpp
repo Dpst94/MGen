@@ -363,16 +363,16 @@ int CP2R::FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int 
 		g_leaped[v][ls] = leaped_sum;
 		// Calculate penalty 
 		if (leap_sum > mleaps) {
-			if (!accept[sp][vc][vp][flag1]) ++fpenalty;
+			if (!accept[sp][av_cnt][0][flag1]) ++fpenalty;
 		}
 		else if (leap_sum > mleaps2) {
-			if (!accept[sp][vc][vp][flag3]) ++fpenalty;
+			if (!accept[sp][av_cnt][0][flag3]) ++fpenalty;
 		}
 		if (leaped_sum > mleaped) {
-			if (!accept[sp][vc][vp][flag2]) ++fpenalty;
+			if (!accept[sp][av_cnt][0][flag2]) ++fpenalty;
 		}
 		else if (leaped_sum > mleaped2) {
-			if (!accept[sp][vc][vp][flag4]) ++fpenalty;
+			if (!accept[sp][av_cnt][0][flag4]) ++fpenalty;
 		}
 	}
 	if (win_leaps > mleaps2)

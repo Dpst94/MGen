@@ -13,7 +13,7 @@
 // Voice pairs (0 = lowest + highest, 1 = lowest + non-highest, 2 = non-lowest + non-highest)
 #define MAX_VP 2
 
-#define CC_C(note, bn, mode) (chrom_to_dia[(note + 12 - bn + mode) % 12] + ((note + 12 - bn + mode) / 12) * 7)
+#define CC_C(note, bn, mode) ( (chrom_to_dia[(note + 12 - bn + mode) % 12] - chrom_to_dia[mode] + 7) % 7 + ((note + 12 - bn) / 12) * 7)
 
 // Rule string types
 #define rsName 0 // Rule name
