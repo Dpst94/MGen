@@ -8,7 +8,7 @@
 #endif
 
 CP2D::CP2D() {
-	ResizeRuleVariantVector(accept);
+	ResizeRuleVariantVectorNegative(accept);
 	ResizeRuleVariantVector(severity);
 	// Set rule colors
 	sev_color.resize(MAX_SEVERITY);
@@ -251,10 +251,14 @@ void CP2D::LoadRules(CString fname) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
 						for (int vp = 0; vp <= MAX_VP; ++vp) {
 							// Resize
-							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
+							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1, -1);
 							if (rid >= RULE_ALLOC && severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
-							accept[sp][vc][vp][rid] = flag;
-							severity[sp][vc][vp][rid] = sev;
+							if (!nsp[sp] || !nvc[vc] || !nvp[vp]) {
+							}
+							else {
+								accept[sp][vc][vp][rid] = flag;
+								severity[sp][vc][vp][rid] = sev;
+							}
 						}
 					}
 				}
@@ -264,15 +268,13 @@ void CP2D::LoadRules(CString fname) {
 					for (int vc = 1; vc <= MAX_VC; ++vc) {
 						for (int vp = 0; vp <= MAX_VP; ++vp) {
 							// Resize
-							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1);
+							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1, -1);
 							if (rid >= RULE_ALLOC && severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
-							int cur_accept = flag;
 							if (!nsp[sp] || !nvc[vc] || !nvp[vp]) {
 								if (ruleinfo2[rid][sp][vc][vp].RuleName.IsEmpty()) {
-									cur_accept = 0;
 									SaveRuleVariant(sp, vc, vp, rid, rule, subrule, ast[10], ast[11]);
-									accept[sp][vc][vp][rid] = cur_accept;
-									severity[sp][vc][vp][rid] = sev;
+									//accept[sp][vc][vp][rid] = -1;
+									//severity[sp][vc][vp][rid] = sev;
 								}
 							}
 							else {
@@ -285,7 +287,7 @@ void CP2D::LoadRules(CString fname) {
 								}
 								else rid_unique[sp][vc][vp][rid] = 1;
 								SaveRuleVariant(sp, vc, vp, rid, rule, subrule, ast[10], ast[11]);
-								accept[sp][vc][vp][rid] = cur_accept;
+								accept[sp][vc][vp][rid] = flag;
 								severity[sp][vc][vp][rid] = sev;
 							}
 						}
@@ -324,9 +326,20 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<vector<int>>>> &ve) {
 		for (int vc = 1; vc <= MAX_VC; ++vc) {
 			ve[sp][vc].resize(MAX_VP + 1);
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
-				//if (ve[sp][vc][vp].size() < max(RULE_ALLOC, max_rule + 1))
-				//ve[sp][vc][vp].resize(max(RULE_ALLOC, max_rule + 1));
 				ve[sp][vc][vp].resize(RULE_ALLOC);
+			}
+		}
+	}
+}
+
+void CP2D::ResizeRuleVariantVectorNegative(vector<vector<vector<vector<int>>>> &ve) {
+	ve.resize(MAX_SPECIES + 1);
+	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+		ve[sp].resize(MAX_VC + 1);
+		for (int vc = 1; vc <= MAX_VC; ++vc) {
+			ve[sp][vc].resize(MAX_VP + 1);
+			for (int vp = 0; vp <= MAX_VP; ++vp) {
+				ve[sp][vc][vp].resize(RULE_ALLOC, -1);
 			}
 		}
 	}
@@ -356,7 +369,7 @@ void CP2D::ResizeRuleVariantVectors2() {
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		for (int vc = 1; vc <= MAX_VC; ++vc) {
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
-				if (accept[sp][vc][vp].size() <= max_rule) accept[sp][vc][vp].resize(max_rule + 1);
+				if (accept[sp][vc][vp].size() <= max_rule) accept[sp][vc][vp].resize(max_rule + 1, -1);
 				if (severity[sp][vc][vp].size() <= max_rule) severity[sp][vc][vp].resize(max_rule + 1);
 			}
 		}

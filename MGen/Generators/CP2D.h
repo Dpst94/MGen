@@ -75,6 +75,7 @@ protected:
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void LoadRules(CString fname);
 	void ResizeRuleVariantVector(vector<vector<vector<vector<int>>>>& ve);
+	void ResizeRuleVariantVectorNegative(vector<vector<vector<vector<int>>>>& ve);
 	void ResizeRuleVariantVector(vector<vector<vector<int>>>& ve);
 	void ResizeRuleVariantVector(vector<vector<vector<RuleInfo2>>> &ve);
 	void ResizeRuleVariantVectors2();
