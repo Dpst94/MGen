@@ -204,6 +204,12 @@ protected:
 	vector<vector<vector<int>>> min_arange; // Minimum allowed local range of notes_arange consecutive notes
 	vector<vector<vector<int>>> notes_arange2; // Maximum number of consecutive notes having low average range
 	vector<vector<vector<int>>> min_arange2; // Minimum allowed local range of notes_arange consecutive notes
+	vector<vector<vector<int>>> notes_picount; // Maximum number of consecutive notes having low pitch count
+	vector<vector<vector<int>>> min_picount; // Minimum allowed pitch count of notes_picount consecutive notes
+	vector<vector<vector<int>>> notes_picount2; // Maximum number of consecutive notes having low pitch count
+	vector<vector<vector<int>>> min_picount2; // Minimum allowed pitch count of notes_picount2 consecutive notes
+	vector<vector<vector<int>>> notes_picount3; // Maximum number of consecutive notes having low pitch count
+	vector<vector<vector<int>>> min_picount3; // Minimum allowed pitch count of notes_picount3 consecutive notes
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
 	int c4p_last_notes2; // Last notes that can have leap c4p compensated (corrected with regard to measures)
 	int lclimax_notes; // Number of adjacent notes to calculate local climax

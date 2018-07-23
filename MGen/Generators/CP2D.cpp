@@ -626,6 +626,12 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(max_smooth_direct2, 303, rsSubName, 0);
 	SetRuleParam(cse_leaps, 501, rsSubName, 0);
 	SetRuleParam(cse_leaps_r, 502, rsSubName, 0);
+	SetRuleParam(notes_picount, 344, rsSubName, 0);
+	SetRuleParam(min_picount, 344, rsSubName, 1);
+	SetRuleParam(notes_picount2, 345, rsSubName, 0);
+	SetRuleParam(min_picount2, 345, rsSubName, 1);
+	SetRuleParam(notes_picount3, 346, rsSubName, 0);
+	SetRuleParam(min_picount3, 346, rsSubName, 1);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;

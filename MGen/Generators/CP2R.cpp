@@ -18,6 +18,84 @@ CP2R::CP2R() {
 CP2R::~CP2R() {
 }
 
+void CP2R::AnalyseCP() {
+	skip_flags = 0;
+	EvaluateCP();
+}
+
+int CP2R::EvaluateCP() {
+	CLEAR_READY();
+	ClearFlags(0, c_len);
+	GetDiatonic(0, c_len);
+	GetPitchClass(0, c_len);
+	CreateLinks();
+	GetNoteTypes();
+	GetVca();
+	GetLClimax();
+	GetLeapSmooth();
+	FailStartPause();
+	for (v = 0; v < av_cnt; ++v) {
+		sp = vsp[v];
+		vaccept = &accept[sp][av_cnt][0];
+		GetMelodyInterval(0, c_len);
+		if (av_cnt == 1) {
+			FailFirstNotes();
+			FailLastNotes();
+		}
+		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
+		if (FailLocalPiCount(notes_picount2[sp][av_cnt][0], min_picount2[sp][av_cnt][0], 345)) return 1;
+		if (FailLocalPiCount(notes_picount3[sp][av_cnt][0], min_picount3[sp][av_cnt][0], 346)) return 1;
+		if (FailMaxNoteLen()) return 1;
+		if (FailMissSlurs()) return 1;
+		if (FailSlurs()) return 1;
+		if (FailRhythm()) return 1;
+		if (FailMultiCulm()) return 1;
+		if (FailTonic(0)) return 1;
+		if (FailTonic(1)) return 1;
+		if (FailLastNoteRes()) return 1;
+		if (sp > 1) {
+			if (FailAdjacentTritones()) return 1;
+			if (FailTritones2()) return 1;
+		}
+		else {
+			if (FailTritones()) return 1;
+		}
+		if (FailManyLeaps(max_leaps[sp][av_cnt][0], max_leaped[sp][av_cnt][0], max_leaps_r[sp][av_cnt][0],
+			max_leaped_r[sp][av_cnt][0], max_leap_steps[sp][av_cnt][0],
+			493, 494, 495, 496)) return 1;
+		if (FailManyLeaps(max_leaps2[sp][av_cnt][0], max_leaped2[sp][av_cnt][0], max_leaps2_r[sp][av_cnt][0],
+			max_leaped2_r[sp][av_cnt][0], max_leap_steps2[sp][av_cnt][0],
+			497, 498, 499, 500)) return 1;
+		if (FailLeapSmooth(max_smooth2[sp][av_cnt][0], max_smooth_direct2[sp][av_cnt][0],
+			cse_leaps[sp][av_cnt][0], cse_leaps_r[sp][av_cnt][0], 302, 303, 501, 502, 1)) return 1;
+		if (FailAdSymRepeat(3)) return 1;
+		if (FailAdSymRepeat(4)) return 1;
+		if (FailGlobalFill()) return 1;
+		for (int iv = 0; iv < 4; ++iv) {
+			if (FailLocalRange(notes_lrange[iv][sp][av_cnt][0], iv + 2, 434 + iv)) return 1;
+		}
+		if (FailStagnation(stag_note_steps[sp][av_cnt][0], stag_notes[sp][av_cnt][0], 10)) return 1;
+		if (FailStagnation(stag_note_steps2[sp][av_cnt][0], stag_notes2[sp][av_cnt][0], 39)) return 1;
+		FailIntervals();
+		if (mminor) {
+			if (FailMinor()) return 1;
+			if (FailGisTrail()) return 1;
+			if (FailFisTrail()) return 1;
+		}
+		GetBasicMsh();
+		ApplyFixedPat();
+		if (mminor) {
+			if (FailMinorStepwise()) return 1;
+		}
+		GetDtp();
+		if (FailLeap()) return 1;
+		MakeMacc();
+		if (FailLocalMacc(notes_arange[sp][av_cnt][0], min_arange[sp][av_cnt][0] / 10.0, 15)) return 1;
+		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
+	}
+	return 0;
+}
+
 void CP2R::CreateLinks() {
 	SET_READY(DR_fli);
 	// Set first steps in case there is pause
@@ -246,79 +324,6 @@ inline void CP2R::CheckReadyPersist(int id, int id2, int id3) {
 	CheckReadyPersist(id);
 	CheckReadyPersist(id2);
 	CheckReadyPersist(id3);
-}
-
-void CP2R::AnalyseCP() {
-	skip_flags = 0;
-	EvaluateCP();
-}
-
-int CP2R::EvaluateCP() {
-	CLEAR_READY();
-	ClearFlags(0, c_len);
-	GetDiatonic(0, c_len);
-	GetPitchClass(0, c_len);
-	CreateLinks();
-	GetNoteTypes();
-	GetVca();
-	GetLClimax();
-	GetLeapSmooth();
-	if (av_cnt == 1) {
-		FailFirstNotes();
-		FailLastNotes();
-	}
-	for (v = 0; v < av_cnt; ++v) {
-		sp = vsp[v];
-		vaccept = &accept[sp][av_cnt][0];
-		GetMelodyInterval(0, c_len);
-		if (FailMaxNoteLen()) return 1;
-		if (FailMissSlurs()) return 1;
-		if (FailSlurs()) return 1;
-		if (FailRhythm()) return 1;
-		if (FailMultiCulm()) return 1;
-		if (FailTonic(0)) return 1;
-		if (FailTonic(1)) return 1;
-		if (sp > 1) {
-			if (FailAdjacentTritones()) return 1;
-			if (FailTritones2()) return 1;
-		}
-		else {
-			if (FailTritones()) return 1;
-		}
-		if (FailManyLeaps(max_leaps[sp][av_cnt][0], max_leaped[sp][av_cnt][0], max_leaps_r[sp][av_cnt][0],
-			max_leaped_r[sp][av_cnt][0], max_leap_steps[sp][av_cnt][0],
-			493, 494, 495, 496)) return 1;
-		if (FailManyLeaps(max_leaps2[sp][av_cnt][0], max_leaped2[sp][av_cnt][0], max_leaps2_r[sp][av_cnt][0],
-			max_leaped2_r[sp][av_cnt][0], max_leap_steps2[sp][av_cnt][0],
-			497, 498, 499, 500)) return 1;
-		if (FailLeapSmooth(max_smooth2[sp][av_cnt][0], max_smooth_direct2[sp][av_cnt][0],
-			cse_leaps[sp][av_cnt][0], cse_leaps_r[sp][av_cnt][0], 302, 303, 501, 502, 1)) return 1;
-		if (FailAdSymRepeat(3)) return 1;
-		if (FailAdSymRepeat(4)) return 1;
-		if (FailGlobalFill()) return 1;
-		for (int iv = 0; iv < 4; ++iv) {
-			if (FailLocalRange(notes_lrange[iv][sp][av_cnt][0], iv + 2, 434 + iv)) return 1;
-		}
-		if (FailStagnation(stag_note_steps[sp][av_cnt][0], stag_notes[sp][av_cnt][0], 10)) return 1;
-		if (FailStagnation(stag_note_steps2[sp][av_cnt][0], stag_notes2[sp][av_cnt][0], 39)) return 1;
-		FailIntervals();
-		if (mminor) {
-			if (FailMinor()) return 1;
-			if (FailGisTrail()) return 1;
-			if (FailFisTrail()) return 1;
-		}
-		GetBasicMsh();
-		ApplyFixedPat();
-		if (mminor) {
-			if (FailMinorStepwise()) return 1;
-		}
-		GetDtp();
-		if (FailLeap()) return 1;
-		MakeMacc();
-		if (FailLocalMacc(notes_arange[sp][av_cnt][0], min_arange[sp][av_cnt][0] / 10.0, 15)) return 1;
-		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
-	}
-	return 0;
 }
 
 int CP2R::FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int mleapsteps,
