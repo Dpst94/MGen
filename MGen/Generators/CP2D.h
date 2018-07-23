@@ -183,8 +183,10 @@ protected:
 	vector<vector<vector<int>>> early_culm; // Early culmination step
 	vector<vector<vector<int>>> early_culm2; // Early culmination step (second rule)
 	vector<vector<vector<int>>> early_culm3; // Early culmination step percent
-	vector<vector<vector<vector<int>>>> tonic_window; // Number of notes that are searched for number of tonic notes
-	vector<vector<vector<vector<int>>>> tonic_max; // Maximum number of tonic notes that can be contained in tonic window
+	vector<vector<vector<vector<int>>>> tonic_window; // [] Number of notes that are searched for number of tonic notes
+	vector<vector<vector<vector<int>>>> tonic_max; // [] Maximum number of tonic notes that can be contained in tonic window
+	vector<vector<vector<int>>> max_note_len; // Maximum note real length in croches by species
+	vector<vector<vector<vector<int>>>> notes_lrange; // [range][species] Maximum number of consecutive notes having low range
 	vector<vector<vector<int>>> tritone_res_quart; // Search X quarters for tritone resolution
 	vector<vector<vector<int>>> max_smooth_direct; // Maximum linear movement in one direction allowed (in steps)
 	vector<vector<vector<int>>> max_smooth; // Maximum linear movement allowed (in steps)
@@ -194,6 +196,14 @@ protected:
 	vector<vector<vector<int>>> cse_leaps_r; // Maximum allowed consecutive leaps for Consecutive leaps+
 	vector<vector<vector<int>>> miss_slurs_window; // Number of steps to check for missing slur limit
 	vector<vector<vector<int>>> slurs_window; // Number of steps to check for slur limit
+	vector<vector<vector<int>>> stag_notes; // Maximum allowed stag_notes (same notes) during stag_note_steps
+	vector<vector<vector<int>>> stag_note_steps;
+	vector<vector<vector<int>>> stag_notes2; // Maximum allowed stag_notes2 (same notes) during stag_note_steps2
+	vector<vector<vector<int>>> stag_note_steps2;
+	vector<vector<vector<int>>> notes_arange; // Maximum number of consecutive notes having low average range
+	vector<vector<vector<int>>> min_arange; // Minimum allowed local range of notes_arange consecutive notes
+	vector<vector<vector<int>>> notes_arange2; // Maximum number of consecutive notes having low average range
+	vector<vector<vector<int>>> min_arange2; // Minimum allowed local range of notes_arange consecutive notes
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
 	int c4p_last_notes2; // Last notes that can have leap c4p compensated (corrected with regard to measures)
 	int lclimax_notes; // Number of adjacent notes to calculate local climax

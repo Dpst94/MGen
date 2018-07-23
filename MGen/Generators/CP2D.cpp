@@ -600,6 +600,19 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(late_culm, 21, rsSubName, 0);
 	SetRuleParam(miss_slurs_window, 188, rsName, 0);
 	SetRuleParam(slurs_window, 93, rsName, 0);
+	SetRuleParam(max_note_len, 336, rsSubName, 1);
+	SetRuleParam(stag_notes, 10, rsSubName, 0);
+	SetRuleParam(stag_note_steps, 10, rsSubName, 1);
+	SetRuleParam(stag_notes2, 39, rsSubName, 0);
+	SetRuleParam(stag_note_steps2, 39, rsSubName, 1);
+	SetRuleParam(notes_arange, 15, rsSubName, 0);
+	SetRuleParam(notes_arange2, 16, rsSubName, 0);
+	SetRuleParam(min_arange, 15, rsSubName, 1);
+	SetRuleParam(min_arange2, 16, rsSubName, 1);
+	notes_lrange.resize(4);
+	for (int rt = 0; rt < 4; ++rt) {
+		SetRuleParam(notes_lrange[rt], 434 + rt, rsSubName, 0);
+	}
 	tonic_max.resize(2);
 	tonic_window.resize(2);
 	for (int tt = 0; tt < 2; ++tt) {
