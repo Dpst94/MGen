@@ -139,39 +139,43 @@ void CGVar::ResizeVectors(int size, int vsize)
 	}
 
 	if (m_algo_id != 2001) {
+		if (m_algo_id != 113 && m_algo_id != 122) {
+			tonic.resize(size);
+			minor.resize(size);
+			linecolor.resize(size);
+			comment2.resize(size);
+			nlink.resize(size);
+			fsev.resize(size);
+			sstep.resize(size);
+			for (int i = start; i < size; i++) {
+				tonic[i].resize(vsize);
+				minor[i].resize(vsize);
+				comment2[i].resize(vsize);
+				nlink[i].resize(vsize);
+				fsev[i].resize(vsize);
+			}
+		}
 		ngraph.resize(size, vector<vector<float> >(vsize, vector<float>(ngraph_size)));
 		graph.resize(size, vector<vector<float> >(vsize, vector<float>(graph_size)));
-		tonic.resize(size);
-		minor.resize(size);
 		lining.resize(size);
-		linecolor.resize(size);
 		mel_id.resize(size);
 		mark.resize(size);
 		mark_color.resize(size);
 		comment.resize(size);
 		ccolor.resize(size);
-		comment2.resize(size);
 		nsr1.resize(size);
 		nsr2.resize(size);
-		nlink.resize(size);
-		fsev.resize(size);
-		sstep.resize(size);
 		for (int i = start; i < size; i++) {
 			ngraph[i].resize(vsize);
 			graph[i].resize(vsize);
-			tonic[i].resize(vsize);
-			minor[i].resize(vsize);
 			lining[i].resize(vsize);
 			mel_id[i].resize(vsize, -1);
 			mark[i].resize(vsize);
 			mark_color[i].resize(vsize);
 			comment[i].resize(vsize);
 			ccolor[i].resize(vsize);
-			comment2[i].resize(vsize);
 			nsr1[i].resize(vsize);
 			nsr2[i].resize(vsize);
-			nlink[i].resize(vsize);
-			fsev[i].resize(vsize);
 		}
 	}
 

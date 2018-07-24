@@ -29,6 +29,7 @@ protected:
 
 private:
 	CString SendLySkips(int count);
+	void SendLyNoteNames();
 	void SendLyMistakes();
 	CString GetLyNoteVisualCP(CString sz);
 	void SendLyViz(int phase);

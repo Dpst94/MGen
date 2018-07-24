@@ -295,7 +295,7 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += "\n  }\n";
 		ly_ly_st += "}\n";
 		SendLyMistakes();
-		//SendLyNoteNames();
+		SendLyNoteNames();
 		//SendLyHarm();
 		//SendLyIntervals();
 	}
@@ -317,6 +317,36 @@ CString CP2Ly::SendLySkips(int count) {
 		lst += " \\skip 8 ";
 	}
 	return lst;
+}
+
+void CP2Ly::SendLyNoteNames() {
+	CString st;
+	if (!ly_notenames) return;
+	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", v);
+	ly_ly_st += st;
+	ly_ly_st += "    \\lyricmode {\n";
+	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
+	ly_ly_st += "      \\set stanza = #\" Note:\"\n";
+	ly_ly_st += "      \\override InstrumentName #'X-offset = #1\n";
+	ly_ly_st += "      \\override InstrumentName #'font-series = #'bold\n";
+	ly_ly_st += "      \\override InstrumentName.font-size = #-2\n";
+	ly_ly_st += "      \\set shortVocalName = \"N:\"\n";
+	for (s = 0; s < c_len; ++s) {
+		if (!lyi[s].shs[vNoteName] && !lyi[s].shf[vNoteName]) {
+			ly_ly_st += SendLySkips(1);
+			continue;
+		}
+		CString st = GetLyNoteVisualCP("\\raise #0.3 \\magnify #0.5 ");
+		ly_ly_st += "\\markup{ ";
+		ly_ly_st += "\\teeny ";
+		if (lyi[s].shse[vNoteName] > -1) {
+			ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor(lyi[s].shse[vNoteName]) + ") ";
+		}
+		ly_ly_st += " \\pad-markup #0.4 \\concat { " + st + " } ";
+		ly_ly_st += "}\n";
+	}
+	ly_ly_st += "    }\n";
+	ly_ly_st += "  }\n";
 }
 
 void CP2Ly::SendLyMistakes() {
