@@ -448,7 +448,7 @@ void CP2Ly::SaveLyComments() {
 			else if (accept[sp][vc][vp][fl] == -1) st = "$ ";
 			else st = "+ ";
 			CString rule_name = GetRuleName(fl, sp, vc, vp);
-			rule_name.SetAt(0, rule_name.Left(1).MakeLower().GetAt(0));
+			//rule_name.SetAt(0, rule_name.Left(1).MakeLower().GetAt(0));
 			if (ly_debugexpect) {
 				CString st2;
 				st2.Format("[%d/%d] ", fl, s + 1);

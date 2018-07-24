@@ -337,6 +337,23 @@ int CGenCA3::GetCP() {
 			retr[v][s] = cp_retr[cp_id][v][s];
 		}
 	}
+
+	// Check if cp starts with pause
+	int has_note = 0;
+	for (v = 0; v < av_cnt; ++v) {
+		if (cc[v][0]) {
+			has_note = 1;
+			break;
+		}
+	}
+	if (!has_note) {
+		est.Format("Counterpoint %d starts not on downbeat. Please check counterpoint.",
+			cp_id + 1);
+		WriteLog(5, est);
+		error = 10;
+		return 1;
+	}
+
 	ep2 = c_len;
 	return 0;
 }
