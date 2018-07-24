@@ -193,8 +193,6 @@ protected:
 	vector<vector<vector<int>>> tritone_res_quart; // Search X quarters for tritone resolution
 	vector<vector<vector<int>>> max_smooth_direct; // Maximum linear movement in one direction allowed (in steps)
 	vector<vector<vector<int>>> max_smooth; // Maximum linear movement allowed (in steps)
-	vector<vector<vector<int>>> max_smooth_direct2; // Maximum linear movement in one direction allowed in cp (in steps)
-	vector<vector<vector<int>>> max_smooth2; // Maximum linear movement allowed in cp (in steps)
 	vector<vector<vector<int>>> cse_leaps; // Maximum allowed consecutive leaps for Consecutive leaps
 	vector<vector<vector<int>>> cse_leaps_r; // Maximum allowed consecutive leaps for Consecutive leaps+
 	vector<vector<vector<int>>> miss_slurs_window; // Number of steps to check for missing slur limit

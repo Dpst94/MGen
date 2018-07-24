@@ -65,7 +65,7 @@ int CP2R::EvaluateCP() {
 		if (FailManyLeaps(max_leaps2[sp][av_cnt][0], max_leaped2[sp][av_cnt][0], max_leaps2_r[sp][av_cnt][0],
 			max_leaped2_r[sp][av_cnt][0], max_leap_steps2[sp][av_cnt][0],
 			497, 498, 499, 500)) return 1;
-		if (FailLeapSmooth(max_smooth2[sp][av_cnt][0], max_smooth_direct2[sp][av_cnt][0],
+		if (FailLeapSmooth(max_smooth[sp][av_cnt][0], max_smooth_direct[sp][av_cnt][0],
 			cse_leaps[sp][av_cnt][0], cse_leaps_r[sp][av_cnt][0], 302, 303, 501, 502, 1)) return 1;
 		if (FailAdSymRepeat(3)) return 1;
 		if (FailAdSymRepeat(4)) return 1;

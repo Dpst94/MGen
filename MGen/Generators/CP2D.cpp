@@ -634,10 +634,8 @@ void CP2D::SetRuleParams() {
 		SetRuleParam(tonic_window[tt], 70 + tt, rsSubName, 1);
 	}
 	SetRuleParam(tritone_res_quart, 2, rsSubComment, 0);
-	SetRuleParam(max_smooth, 4, rsSubName, 0);
-	SetRuleParam(max_smooth_direct, 5, rsSubName, 0);
-	SetRuleParam(max_smooth2, 302, rsSubName, 0);
-	SetRuleParam(max_smooth_direct2, 303, rsSubName, 0);
+	SetRuleParam(max_smooth, 302, rsSubName, 0);
+	SetRuleParam(max_smooth_direct, 303, rsSubName, 0);
 	SetRuleParam(cse_leaps, 501, rsSubName, 0);
 	SetRuleParam(cse_leaps_r, 502, rsSubName, 0);
 	SetRuleParam(notes_picount, 344, rsSubName, 0);
