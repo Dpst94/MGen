@@ -234,6 +234,7 @@ int CGenCA3::XML_to_CP() {
 						cp_retr[cp_id][v][s3 - s1] = retr[v][s3];
 						if (!cp_text[cp_id].IsEmpty() && !it[v][s3].IsEmpty()) cp_text[cp_id] += ",";
 						cp_text[cp_id] += it[v][s3];
+						cp_text[cp_id].Replace(" ", ",");
 					}
 				}
 				if (cp_fi[cp_id] == 100) cp_fi[cp_id] = 0;

@@ -76,6 +76,9 @@ int CP2R::EvaluateCP() {
 		if (FailStagnation(stag_note_steps[sp][av_cnt][0], stag_notes[sp][av_cnt][0], 10)) return 1;
 		if (FailStagnation(stag_note_steps2[sp][av_cnt][0], stag_notes2[sp][av_cnt][0], 39)) return 1;
 		FailIntervals();
+		if (sp == 5) {
+			FailSusCount();
+		}
 		if (mminor) {
 			if (FailMinor()) return 1;
 			if (FailGisTrail()) return 1;
@@ -2655,6 +2658,25 @@ int CP2R::FailMaxNoteLen() {
 		// Check notes crossing multiple measures
 		if (bmli[fli2[v][ls]] - bmli[fli[v][ls]] > 1) FLAGV(41, fli[v][ls]);
 	}
+	return 0;
+}
+
+int CP2R::FailSusCount() {
+	CHECK_READY(DR_sus);
+	int c_sus = 0;
+	int c_anti = 0;
+	for (ls = 0; ls < fli_size[v]; ++ls) {
+		if (sus[v][ls]) {
+			if (retr[v][sus[v][ls]]) ++c_anti;
+			else ++c_sus;
+		}
+	}
+	int mcount = bmli[ep2 - 1];
+	// Do not check for first measure
+	if (!mcount) return 0;
+	// Check for not enough sus
+	if ((c_sus + c_anti + 1) * 1.0 / mcount < 1.0 / mea_per_sus[sp][av_cnt][0])
+		FLAGV(341, 0);
 	return 0;
 }
 

@@ -211,6 +211,7 @@ protected:
 	vector<vector<vector<int>>> min_picount2; // Minimum allowed pitch count of notes_picount2 consecutive notes
 	vector<vector<vector<int>>> notes_picount3; // Maximum number of consecutive notes having low pitch count
 	vector<vector<vector<int>>> min_picount3; // Minimum allowed pitch count of notes_picount3 consecutive notes
+	vector<vector<vector<int>>> mea_per_sus; // Maximum measures per suspension
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
 	int c4p_last_notes2; // Last notes that can have leap c4p compensated (corrected with regard to measures)
 	int lclimax_notes; // Number of adjacent notes to calculate local climax
