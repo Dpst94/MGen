@@ -38,8 +38,9 @@ int CP2R::EvaluateCP() {
 		GetMelodyInterval(0, c_len);
 		FailStartPause();
 		if (av_cnt == 1) {
-			FailFirstNotes();
-			FailLastNotes();
+			if (FailNoteRepeat()) return 1;
+			if (FailFirstNotes()) return 1;
+			if (FailLastNotes()) return 1;
 		}
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
 		if (FailLocalPiCount(notes_picount2[sp][av_cnt][0], min_picount2[sp][av_cnt][0], 345)) return 1;
@@ -2677,6 +2678,14 @@ int CP2R::FailSusCount() {
 	// Check for not enough sus
 	if ((c_sus + c_anti + 1) * 1.0 / mcount < 1.0 / mea_per_sus[sp][av_cnt][0])
 		FLAGV(341, 0);
+	return 0;
+}
+
+// Detect repeating notes. Step2 excluding
+int CP2R::FailNoteRepeat() {
+	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+		if (cc[v][fli[v][ls]] == cc[v][fli[v][ls + 1]]) FLAGV(30, fli[v][ls]);
+	}
 	return 0;
 }
 

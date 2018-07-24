@@ -188,5 +188,6 @@ protected:
 	inline int FailStartPause();
 	inline int FailMaxNoteLen();
 	inline int FailSusCount();
+	inline int FailNoteRepeat();
 };
 
