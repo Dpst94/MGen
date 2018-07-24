@@ -18,8 +18,7 @@ CP2R::CP2R() {
 CP2R::~CP2R() {
 }
 
-void CP2R::AnalyseCP() {
-	skip_flags = 0;
+void CP2R::ScanCP() {
 	EvaluateCP();
 }
 
@@ -522,7 +521,7 @@ void CP2R::GetNoteTypes() {
 			// Get suspension if cantus note changes during counterpoint note
 			sus[v][ls] = 0;
 			if (bmli[s] != bmli[s2]) {
-				sus[v][ls] = mli[bmli[s] + 1];
+				sus[v][ls] = mli[bmli[fli2[v][ls]]];
 			}
 			// Build isus
 			isus[v][ls] = sus[v][ls] ? sus[v][ls] : fli[v][ls];

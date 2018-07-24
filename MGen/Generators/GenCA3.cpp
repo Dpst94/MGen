@@ -236,6 +236,7 @@ int CGenCA3::XML_to_CP() {
 						cp_text[cp_id] += it[v][s3];
 					}
 				}
+				if (cp_fi[cp_id] == 100) cp_fi[cp_id] = 0;
 				cp_id++;
 				state = 0;
 			}
@@ -322,8 +323,9 @@ int CGenCA3::GetCP() {
 				else npm = mli.end()[-1] - mli.end()[-2];
 			}
 		}
-		bmli[s] = mli.size();
+		bmli[s] = mli.size() - 1;
 	}
+
 	// If there are no measures, then it is a single measure
 	if (!npm) npm = c_len;
 	for (v = 0; v < av_cnt; ++v) {
@@ -336,7 +338,12 @@ int CGenCA3::GetCP() {
 		}
 	}
 	ep2 = c_len;
-	int species_found = 0;
+	return 0;
+}
+
+int CGenCA3::GetCPSpecies() {
+	CString est;
+	LoadSpecies(conf_species);
 	// Check if species can be loaded from MusicXML
 	if (!cp_text[cp_id].IsEmpty()) {
 		vector<CString> sa;
@@ -345,20 +352,51 @@ int CGenCA3::GetCP() {
 			sa[i].Trim();
 			if (sa[i].Left(2) == "sp") {
 				LoadSpecies(sa[i].Mid(2));
-				if (vsp.size() != av_cnt) {
-					est.Format("In MusicXML species is marked for %zu voices, but there are %d voices in counterpoint %d",
-						vsp.size(), av_cnt, cp_id + 1);
-					WriteLog(5, est);
-					error = 10;
-					return 1;
-				}
-				species_found = 1;
 				break;
 			}
 		}
 	}
-	if (!species_found && vsp.size() != av_cnt) {
-		est.Format("Species not found in MusicXML. In config species is marked for %zu voices, but there are %d voices in counterpoint %d",
+	if (vsp.size() == 1 && av_cnt > 1) {
+		// Find voice with maximum notes or pauses
+		int my_sp = vsp[0];
+		int best_fli = 0;
+		int best_v = 0;
+		if (my_sp <= 1) {
+			// For species 1 search voice with minimum notes (because counterpoint can contain slurs)
+			best_fli = 1000000;
+			for (v = 0; v < av_cnt; ++v) {
+				if (fli_size[v] < best_fli) {
+					best_fli = fli_size[v];
+					best_v = v;
+				}
+			}
+		}
+		else {
+			// For species 2-5 search for voice with maximum notes or pauses
+			for (v = 0; v < av_cnt; ++v) {
+				if (fli_size[v] > best_fli) {
+					best_fli = fli_size[v];
+					best_v = v;
+				}
+			}
+		}
+		vsp.clear();
+		vsp.resize(av_cnt, -1);
+		vsp[best_v] = my_sp;
+		int lowest_v;
+		if (best_v) lowest_v = 0;
+		else lowest_v = 1;
+		for (v = 0; v < av_cnt; ++v) {
+			if (vsp[v] == -1) {
+				// Set species 1 for all voices except lowest
+				if (v == lowest_v) vsp[v] = 0;
+				// Set CF for lowest voice
+				else vsp[v] = 1;
+			}
+		}
+	}
+	else if (vsp.size() != av_cnt) {
+		est.Format("Check species parameter in config or MusicXML file: found %zu voices, but there are %d voices in counterpoint %d. Parameter in MusicXML will have precedence",
 			vsp.size(), av_cnt, cp_id + 1);
 		WriteLog(5, est);
 		error = 10;
@@ -390,10 +428,14 @@ void CGenCA3::Generate() {
 	if (CheckXML()) return;
 	if (XML_to_CP()) return;
 	for (cp_id = 0; cp_id < cp.size(); ++cp_id) if (!cp_error[cp_id]) {
+		st.Format("Analyzing: %d of %zu", cp_id + 1, cp.size());
+		SetStatusText(3, st);
 		if (GetCP()) continue;
 		int real_len = cc[0].size();
 		int full_len = floor((real_len + 1) / 8 + 1) * 8;
 		InitAnalysis();
+		CreateLinks();
+		if (GetCPSpecies()) continue;
 		for (int v = 0; v < v_cnt; ++v) {
 			FillPause(step0, full_len, v);
 		}
@@ -440,3 +482,30 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 	ly_fs.close();
 	ly_saved = 1;
 }
+
+void CGenCA3::GetCPKey() {
+	fifths = cp_fi[cp_id];
+	// Get base note as last note in bass
+	for (s = c_len - 1; s >= 0; ++s) {
+		if (cc[0][s]) {
+			bn = cc[0][s] % 12;
+			break;
+		}
+	}
+	// Convert fifths with base note to mode
+	maj_bn = (fifths * 7) % 12;
+	mode = (bn - maj_bn + 12) % 12;
+	// TODO: Find alterations
+	// TODO: Select better key if alterations do not fit
+	// TODO: If mode == 9, detect mminor using alterations
+	// Always select melodic minor if minor mode
+	if (mode == 9) mminor = 1;
+	else mminor = 0;
+}
+
+void CGenCA3::AnalyseCP() {
+	skip_flags = 0;
+	GetCPKey();
+	EvaluateCP();
+}
+

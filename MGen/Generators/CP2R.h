@@ -100,6 +100,7 @@ public:
 	~CP2R();
 
 protected:
+	void ScanCP();
 	inline void CreateLinks();
 	inline void GetVca();
 
@@ -124,7 +125,6 @@ protected:
 	inline void CheckReadyPersist(int id);
 	inline void CheckReadyPersist(int id, int id2);
 	inline void CheckReadyPersist(int id, int id2, int id3);
-	void AnalyseCP();
 	inline int EvaluateCP();
 	inline int FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int mleapsteps, int flag1, int flag2, int flag3, int flag4);
 	inline void ClearFlags(int step1, int step2);

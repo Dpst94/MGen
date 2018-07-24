@@ -43,6 +43,7 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	// Load species
 	if (*sN == "species") {
 		++parameter_found;
+		conf_species = *sV;
 		LoadSpecies(*sV);
 	}
 	// Load rules

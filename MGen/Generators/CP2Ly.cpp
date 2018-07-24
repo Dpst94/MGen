@@ -232,7 +232,7 @@ void CP2Ly::SaveLyCP() {
 	if (mode == 9) {
 		key = LyMinorKey[bn];
 	}
-	else if (mode == 0) {
+	else {
 		key = LyMajorKey[bn];
 	}
 	key_visual = key[0];
@@ -246,8 +246,9 @@ void CP2Ly::SaveLyCP() {
 	st.Format("\"#\"%d (from %s)",
 		cp_id + 1, bname_from_path(musicxml_file));
 	ly_ly_st += st + " Key: " + key_visual;
-	if (mode == 9) ly_ly_st += " minor";
-	else if (mode == 0) ly_ly_st += " major";
+	ly_ly_st += " " + mode_name[mode];
+	//if (mode == 9) ly_ly_st += " minor";
+	//else if (mode == 0) ly_ly_st += " major";
 	/*
 	ly_ly_st += ", Species: ";
 	for (v = 0; v < av_cnt; ++v) {
@@ -269,13 +270,13 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += st;
 		if (vsp[v]) st3.Format("species %d", vsp[v]);
 		else st3 = "c.f.";
-		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \\override #'(baseline-skip . 2) \\center-column{ \"%s\" \"[%s]\" } }\n", vname[vi], st3);
+		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" \"[%s]\" } }\n", vname[vi], st3);
 		ly_ly_st += "     \n";
 		//ly_ly_st += "    \\override #'(line-width . 100)  \n";
 		ly_ly_st += st;
-		ly_ly_st += "  \\clef \"" + clef + "\" \\key " + key;
-		if (mode == 9) ly_ly_st += " \\minor\n";
-		else if (mode == 0) ly_ly_st += " \\major\n";
+		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key " + key + "\n";
+		if (mode == 9) ly_ly_st += "  \\minor\n";
+		else ly_ly_st += "  \\major\n";
 		read_file_sv("configs\\ly\\staff.ly", sv);
 		for (int i = 0; i < sv.size(); ++i) {
 			ly_ly_st += sv[i] + "\n";

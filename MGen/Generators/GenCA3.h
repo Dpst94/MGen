@@ -10,13 +10,16 @@ public:
 	~CGenCA3();
 	void Generate() override;
 
-protected:
+private:
 	void InitAnalysis();
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	int XML_to_CP();
 	int CheckXML();
 	int GetCP();
+	int GetCPSpecies();
 	void SaveLy(CString dir, CString fname) override;
+	void GetCPKey();
+	void AnalyseCP();
 
 	XFIn xfi;
 

@@ -147,6 +147,36 @@ const CString LyOctave[] = {
 	"'''''''" // 11
 };
 
+const CString mode_name[] = {
+	"major", // 0
+	"", // 1
+	"dorian", // 2
+	"", // 3
+	"phrygian", // 4
+	"lydian", // 5
+	"", // 6
+	"mixolydian", // 7
+	"", // 8
+	"minor", // 9
+	"", // 10
+	"locrian" // 11
+};
+
+const CString mode_name2[] = {
+	"ionian", // 0
+	"", // 1
+	"dorian", // 2
+	"", // 3
+	"phrygian", // 4
+	"lydian", // 5
+	"", // 6
+	"mixolydian", // 7
+	"", // 8
+	"aeolian", // 9
+	"", // 10
+	"locrian" // 11
+};
+
 // Rule visualization
 #define vDefault 0
 #define vHarm 1

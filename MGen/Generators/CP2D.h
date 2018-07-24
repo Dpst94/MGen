@@ -126,6 +126,7 @@ protected:
 	// Key
 	int fifths = 0; // Number of alterations near key
 	int bn = 9; // Base tonic note (C - 0, Am - 9)
+	int maj_bn = 0; // Base note if it was major (C - 0, Am - 0)
 	int mminor = 1; // If current cp is in melodic minor
 	int mode = 9; // 0 - major, 2 - dorian, 9 - aeolian
 
@@ -149,6 +150,7 @@ protected:
 	int show_hatch = 1; // 0 - show no hatch, 1 = show dissonance hatch, 2 = show msh hatch
 	int show_harmony_bass = 1; // 0 = do not show bass, 1 = Show harmony bass for higher cantus only, 2 = always show harmony bass
 	int first_steps_tonic = 3; // Number of first steps, which must contain tonic note
+	CString conf_species; // Species string
 
 	// Rule parameters [sp][vc][vp]
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
