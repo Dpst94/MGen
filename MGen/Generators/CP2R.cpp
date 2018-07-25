@@ -2364,6 +2364,9 @@ int CP2R::FailRhythm5() {
 	// Rhythm id
 	vector<int> rid;
 	int rid_cur = 0;
+	// Pause rhythm id
+	vector<int> pid;
+	int pid_cur = 0;
 	int count8;
 	// Note lengths inside measure
 	vector<int> l_len;
@@ -2450,6 +2453,7 @@ int CP2R::FailRhythm5() {
 		}
 		// Set first rhythm id bit
 		rid_cur = slur1 ? 0 : 1;
+		pid_cur = 0;
 		// Iterative rhythm checks
 		count8 = 0;
 		pos = 0;
@@ -2465,6 +2469,9 @@ int CP2R::FailRhythm5() {
 			// Calculate rhythm id
 			if (lp < l_len.size() - 1 || !slur2)
 				rid_cur += 1 << (pos + l_len[lp]);
+			if (!cc[v][s2]) {
+				pid_cur += 1 << (pos + l_len[lp]);
+			}
 			// Check 1/8
 			if (l_len[lp] == 1) {
 				// Last 1/8 syncope
@@ -2521,10 +2528,11 @@ int CP2R::FailRhythm5() {
 			// Check only if no croches or less than 4 notes
 			if (rid.size() && (!has_croche || l_len.size() <4)) {
 				// Do not fire for first measure if measure starts with pause
-				if (rid.back() == rid_cur && (ms > 1 || cc[v][0])) 
+				if (rid.back() == rid_cur && pid.back() == pid_cur)
 					FLAGVL(247, s, fli[v][bli[v][s + npm - 1]]);
 			}
 			rid.push_back(rid_cur);
+			pid.push_back(pid_cur);
 		}
 		// Check rhythm rules
 		// First measure
