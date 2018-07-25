@@ -1302,6 +1302,7 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 	int thirds_sum = 0;
 	int leap_sum_corrected = 0;
 	int max_leap_sum2 = 0;
+	int max_leap_sum3 = 0;
 	int smooth_sum = 0;
 	int smooth_sum2 = 0;
 	int leap_sum_s2 = 0;
@@ -1322,6 +1323,7 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 		leap_sum_corrected = leap_sum2 - min(thirds_sum, thirds_ignored[sp][av_cnt][0]);
 		if (leap_sum_corrected > max_leap_sum2) {
 			max_leap_sum2 = leap_sum_corrected;
+			max_leap_sum3 = leap_sum2;
 			leap_sum_s2 = s;
 		}
 		// Calculate penalty
@@ -1402,8 +1404,11 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 	}
 	if (first_run && max_leap_sum2 >= csel) {
 		if (max_leap_sum2 > csel2)
-			FLAGVL(flag4, fli[v][bli[v][leap_sum_s2] + 1], fli[v][max(0, bli[v][leap_sum_s2] - max_leap_sum2 + 1)]);
-		else FLAGVL(flag3, fli[v][bli[v][leap_sum_s2] + 1], fli[v][max(0, bli[v][leap_sum_s2] - max_leap_sum2 + 1)]);
+			FLAGVL(flag4, fli[v][bli[v][leap_sum_s2] + 1], 
+				fli[v][max(0, bli[v][leap_sum_s2] - max_leap_sum3 + 1)]);
+		else 
+			FLAGVL(flag3, fli[v][bli[v][leap_sum_s2] + 1], 
+			fli[v][max(0, bli[v][leap_sum_s2] - max_leap_sum3 + 1)]);
 	}
 	return 0;
 }
