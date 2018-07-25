@@ -486,7 +486,7 @@ void CP2Ly::SaveLyComments() {
 				GetLyColor(sev) + ") {\n  ";
 			com.Replace("\"", "\\\"");
 			com.Replace(" ", "\" \"");
-			st.Format("\\teeny \\raise #0.2 %d \"", lyi[s].nfn[c]); // \\circle
+			st.Format("%d \"", lyi[s].nfn[c]); // \\teeny \\raise #0.2 \\circle
 			ly_com_st += st;
 			ly_com_st += com + "\"\n";
 			ly_com_st += "\n}\n";
