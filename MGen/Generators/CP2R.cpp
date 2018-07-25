@@ -1498,19 +1498,6 @@ int CP2R::FailLastNotes() {
 			if (pcc[v][s] == 0 && pcc[v][s_2] == 10) FLAGV(74, s_2, s);
 		}
 	}
-	// Wrong second to last note (last note never can be slurred)
-	if (ep2 > c_len - 2) {
-		s_1 = c_len - 2;
-		if ((pc[v][s_1] == 0) || (pc[v][s_1] == 2) || (pc[v][s_1] == 3) || (pc[v][s_1] == 5)) FLAGV(13, s_1);
-		if (pc[v][s_1] == 4) FLAGV(51, s_1);
-	}
-	// Wrong third to last note
-	if (ep2 > c_len - 3) {
-		s_2 = c_len - 3;
-		if ((pc[v][s_2] == 0) || (pc[v][s_2] == 2) || (pc[v][s_2] == 4)) FLAGV(14, s_2);
-		// Leading third to last note
-		if (pc[v][s_2] == 6) FLAGV(34, s_2);
-	}
 	return 0;
 }
 
