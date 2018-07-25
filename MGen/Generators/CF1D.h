@@ -105,8 +105,6 @@ protected:
 	int max_repeat_mul = 2; // Allow repeat of X notes after at least X*max_repeat_mul steps if beats are different
 	int max_smooth_direct = 5; // Maximum linear movement in one direction allowed (in steps)
 	int max_smooth = 7; // Maximum linear movement allowed (in steps)
-	int max_smooth_direct2 = 5; // Maximum linear movement in one direction allowed in cp (in steps)
-	int max_smooth2 = 7; // Maximum linear movement allowed in cp (in steps)
 	int max_leaps; // Maximum allowed leaps during max_leap_steps
 	int max_leaped; // Maximum allowed leaped-over-notes during max_leap_steps
 	int max_leap_steps;

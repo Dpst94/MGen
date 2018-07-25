@@ -3870,7 +3870,7 @@ check:
 		if (FailManyLeaps(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_leaps2, max_leaped2,
 			max_leaps2_r, max_leaped2_r, max_leap_steps2, 
 			497, 498, 499, 500)) goto skip;
-		if (FailLeapSmooth(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_smooth2, max_smooth_direct2,
+		if (FailLeapSmooth(ac[cpv], acc[cpv], aleap[cpv], asmooth[cpv], aslur[cpv], max_smooth, max_smooth_direct,
 			cse_leaps, cse_leaps_r, 302, 303, 501, 502, 1)) goto skip;
 		if (FailAdSymRepeat(ac[cpv], acc[cpv], aleap[cpv], 3)) goto skip;
 		if (FailAdSymRepeat(ac[cpv], acc[cpv], aleap[cpv], 4)) goto skip;

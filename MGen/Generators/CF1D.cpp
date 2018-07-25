@@ -330,10 +330,8 @@ void CF1D::SetRuleParams() {
 	fill_pre4_notes = GetRuleParam(cspecies, 144, rsComment, 1);
 	c4p_last_notes = GetRuleParam(cspecies, 144, rsName, 2);
 	pre_last_leaps = GetRuleParam(cspecies, 204, rsName, 0);
-	max_smooth = GetRuleParam(cspecies, 4, rsSubName, 0);
-	max_smooth_direct = GetRuleParam(cspecies, 5, rsSubName, 0);
-	max_smooth2 = GetRuleParam(cspecies, 302, rsSubName, 0);
-	max_smooth_direct2 = GetRuleParam(cspecies, 303, rsSubName, 0);
+	max_smooth = GetRuleParam(cspecies, 302, rsSubName, 0);
+	max_smooth_direct = GetRuleParam(cspecies, 303, rsSubName, 0);
 	stag_notes = GetRuleParam(cspecies, 10, rsSubName, 0);
 	stag_note_steps = GetRuleParam(cspecies, 10, rsSubName, 1);
 	stag_notes2 = GetRuleParam(cspecies, 39, rsSubName, 0);
