@@ -1112,11 +1112,12 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 		else if (deviates == 2 && !accept[sp][av_cnt][0][120 + leap_id]) filled = 0;
 		if (!filled) {
 			// If starting 3rd
-			if (fleap_start == 0 && leap_size == 2 && accept[sp][av_cnt][0][1]) {
-				FLAGV(1, fli[v][fleap_start]);
+			if (fleap_start == fin[v] && leap_size == 2 && accept[sp][av_cnt][0][1]) {
+				FLAGVL(1, fli[v][fleap_start], fli[v][fleap_end]);
 				return 0;
 			}
-			if (child_leap && accept[sp][av_cnt][0][116 + leap_id]) FLAGV(116 + leap_id, fli[v][fleap_start]);
+			if (child_leap && accept[sp][av_cnt][0][116 + leap_id]) 
+				FLAGVL(116 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 			// Check if  leap is prefilled
 			else {
 				if (ls > 0) {
@@ -1134,11 +1135,12 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 					else if (pdeviates == 2 && !accept[sp][av_cnt][0][120 + leap_id]) prefilled = 0;
 				}
 				if (prefilled) {
-					if (fli_size[v] - fleap_start <= pre_last_leaps[sp][av_cnt][0] + 1) FLAGV(204 + leap_id, fli[v][fleap_start]);
-					else FLAGV(112 + leap_id, fli[v][fleap_start]);
+					if (fli_size[v] - fleap_start <= pre_last_leaps[sp][av_cnt][0] + 1) 
+						FLAGVL(204 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
+					else FLAGVL(112 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 				}
 				else
-					FLAGV(124 + leap_id, fli[v][fleap_start]);
+					FLAGVL(124 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 			}
 		}
 		// Show compensation flags only if successfully compensated
@@ -1146,19 +1148,19 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 		else {
 			// Flag late uncompensated precompensated leap
 			if (fill_to >= 3 && fill_to < fill_pre4_int[sp][av_cnt][0] && late_leap)
-				FLAGV(144 + leap_id, fli[v][fleap_start]);
+				FLAGVL(144 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 			else if (fill_from >= 3 && fill_from < fill_pre4_int[sp][av_cnt][0] && late_leap)
-				FLAGV(144 + leap_id, fli[v][fleap_start]);
+				FLAGVL(144 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 			// Flag prepared unfinished fill if it is not blocking 
-			else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start)) FLAGV(100 + leap_id, fli[v][fleap_start]);
+			else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start)) FLAGVL(100 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 			// Flag unfinished fill if it is not blocking
-			else if (fill_to == 2 && fill_to_pre > 1) FLAGV(104 + leap_id, fli[v][fleap_start]);
+			else if (fill_to == 2 && fill_to_pre > 1) FLAGVL(104 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 			// Flag after 3rd if it is not blocking
-			if (fill_from == 2) FLAGV(53 + leap_id, fli[v][fleap_start]);
+			if (fill_from == 2) FLAGVL(53 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 			// Flag deviation if it is not blocking
-			if (deviates == 1) FLAGV(42 + leap_id, fli[v][fleap_start]);
+			if (deviates == 1) FLAGVL(42 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 			// Flag deviation if it is not blocking
-			if (deviates == 2) FLAGV(120 + leap_id, fli[v][fleap_start]);
+			if (deviates == 2) FLAGVL(120 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 		}
 	}
 	return 0;
@@ -1199,28 +1201,29 @@ int CP2R::FailLeapMDC() {
 			(fleap_end >= fli_size[v] - 3 && ep2 < c_len) ||
 			(fleap_end < fli_size[v] - 3 && cc[v][fli[v][fleap_end + 2]] == cc[v][leap_end] &&
 			(cc[v][fli[v][fleap_end + 3]] - cc[v][fli[v][fleap_end + 2]]) * leap[v][leap_start] < 0)))
-			FLAGV(510 + leap_id, fli[v][fleap_start]);
-		else FLAGV(128 + leap_id, fli[v][fleap_start]);
+			FLAGVL(510 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(128 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Close + far
-	else if (!mdc1 && mdc2 == 2) FLAGV(140 + leap_id, fli[v][fleap_start]);
+	else if (!mdc1 && mdc2 == 2) FLAGVL(140 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	// Close + no
-	else if (!mdc1 && mdc2 == 3) FLAGV(108 + leap_id, fli[v][fleap_start]);
+	else if (!mdc1 && mdc2 == 3) FLAGVL(108 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	// next + close
 	else if (mdc1 == 1 && !mdc2) {
 		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) {
 			// Aux + close
 			if ((sp == 3 || sp == 5) && fleap_start > 2 && cc[v][fli[v][fleap_start - 2]] == cc[v][leap_start] &&
 				(cc[v][fli[v][fleap_start - 2]] - cc[v][fli[v][fleap_start - 3]]) * leap[v][leap_start] < 0)
-				FLAGV(506 + leap_id, fli[v][fleap_start]);
-			else FLAGV(59 + leap_id, fli[v][fleap_start]);
+				FLAGVL(506 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
+			else FLAGVL(59 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 		}
-		else FLAGV(476 + leap_id, fli[v][fleap_start]);
+		else FLAGVL(476 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Far + close
 	else if (mdc1 == 2 && !mdc2) {
-		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGV(132 + leap_id, fli[v][fleap_start]);
-		else FLAGV(25 + leap_id, fli[v][fleap_start]);
+		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) 
+			FLAGVL(132 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(25 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Next + next
 	else if (mdc1 == 1 && mdc2 == 1) {
@@ -1231,25 +1234,25 @@ int CP2R::FailLeapMDC() {
 				(cc[v][fli[v][fleap_end + 3]] - cc[v][fli[v][fleap_end + 2]]) * leap[v][leap_start] < 0)) &&
 				fleap_start > 2 && cc[v][fli[v][fleap_start - 2]] == cc[v][leap_start] &&
 				(cc[v][fli[v][fleap_start - 2]] - cc[v][fli[v][fleap_start - 3]]) * leap[v][leap_start] < 0)
-				FLAGV(414 + leap_id, fli[v][fleap_start]);
-			else FLAGV(63 + leap_id, fli[v][fleap_start]);
+				FLAGVL(414 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
+			else FLAGVL(63 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 		}
-		else FLAGV(460 + leap_id, fli[v][fleap_start]);
+		else FLAGVL(460 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Next + far
 	else if (mdc1 == 1 && mdc2 >= 2) {
-		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGV(391 + leap_id, fli[v][fleap_start]);
-		else FLAGV(464 + leap_id, fli[v][fleap_start]);
+		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGVL(391 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(464 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Far + next
 	else if (mdc1 >= 2 && mdc2 == 1) {
-		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGV(148 + leap_id, fli[v][fleap_start]);
-		else FLAGV(468 + leap_id, fli[v][fleap_start]);
+		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGVL(148 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(468 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Far + far
 	else if (mdc1 >= 2 && mdc2 >= 2) {
-		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGV(398 + leap_id, fli[v][fleap_start]);
-		else FLAGV(472 + leap_id, fli[v][fleap_start]);
+		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGVL(398 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(472 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	}
 	return 0;
 }
