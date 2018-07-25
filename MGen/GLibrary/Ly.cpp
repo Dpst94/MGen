@@ -169,7 +169,7 @@ CString CLy::GetLyAlterVisual(int alter, CString sz) {
 	if (alter == -1) return sz + "\\flat ";
 	else if (alter == -2) return sz + "\\doubleflat ";
 	else if (alter == 1) return "\"#\"";
-	else if (alter == 2) return "\\doublesharp ";
+	else if (alter == 2) return "\\raise #0.5 \\doublesharp ";
 	return "";
 }
 
