@@ -270,7 +270,7 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += st;
 		if (vsp[v]) st3.Format("species %d", vsp[v]);
 		else st3 = "c.f.";
-		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" \"[%s]\" } }\n", vname[vi], st3);
+		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" \"[%s]\" } }\n", vname2[vi], st3);
 		ly_ly_st += "     \n";
 		//ly_ly_st += "    \\override #'(line-width . 100)  \n";
 		ly_ly_st += st;
@@ -430,7 +430,8 @@ void CP2Ly::SaveLyComments() {
 		note_st = "\\markup \\wordwrap \\tiny \\bold {\n  ";
 		// Show voice number if more than 1 voice
 		if (av_cnt > 1) {
-			note_st += vname[vid[v]];
+			//st.Format("%d. %s", av_cnt - v, vname[vid[v]]);
+			note_st += vname2[vid[v]];
 		}
 		st.Format(" [bar %d, beat %d] note %s", // ly_nnum
 			s / 8 + 1, (s % 8) / 2 + 1,

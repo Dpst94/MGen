@@ -263,6 +263,17 @@ int CGenCA3::XML_to_CP() {
 			}
 		}
 	}
+	// Make unique voice names
+	vname2 = vname;
+	for (v = av_cnt - 1; v > 0; --v) {
+		int dupl = 1;
+		for (v2 = v - 1; v2 >= 0; --v2) {
+			if (vname2[v2] == vname2[v]) {
+				++dupl;
+				vname2[v2].Format("%s (%d)", vname2[v2], dupl);
+			}
+		}
+	}
 	return 0;
 }
 
