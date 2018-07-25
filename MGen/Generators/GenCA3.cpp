@@ -148,6 +148,14 @@ int CGenCA3::XML_to_CP() {
 				if (xfi.note[vi][m][ni].tempo && !cp_tempo)
 					cp_tempo = xfi.note[vi][m][ni].tempo;
 				if (!xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].tie_stop) retr[v][pos] = 1;
+				// Check lowest note
+				if (!xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].pitch) {
+					CString est;
+					est.Format("Detected too low note. This note will be replaced with a rest. Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d.",
+						m, vi, xfi.voice[vi].id, xfi.voice[vi].name, xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord,
+						xfi.mea[m].beats, xfi.mea[m].beat_type, ni + 1, xfi.note[vi][m].size());
+					WriteLog(5, est);
+				}
 				for (int s = 0; s < ln; ++s) {
 					cc[v][pos + s] = xfi.note[vi][m][ni].pitch;
 				}
