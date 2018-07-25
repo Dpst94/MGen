@@ -1799,6 +1799,7 @@ int CP2R::FailLocalPiCount(int notes, int picount, int fl) {
 	// Clear nstat
 	for (i = nmin[v]; i <= nmax[v]; ++i) nstat[i] = 0;
 	int pauses_inside = 0;
+	int last_flag_ls = -10;
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
 		// Add new note to stagnation array
@@ -1816,7 +1817,11 @@ int CP2R::FailLocalPiCount(int notes, int picount, int fl) {
 				if (nstat[0]) ++picount2;
 			}
 			// For long windows do nothing - this shortens window a little, but this is not very important
-			if (picount2 < picount) FLAGVL(fl, fli[v][ls - notes + 1], fli[v][ls]);
+			if (picount2 < picount) {
+				if (ls - last_flag_ls > 1)
+					FLAGVL(fl, fli[v][ls - notes + 1], s);
+				last_flag_ls = ls;
+			}
 		}
 	}
 	return 0;
