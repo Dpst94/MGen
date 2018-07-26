@@ -988,6 +988,16 @@ void CP2R::FailLeapInit(int &late_leap, int &presecond, int &leap_next, int &lea
 int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_leap) {
 	child_leap = 0; // If we have a child_leap
 									// Check if leap is third
+	if (fleap_end < fli_size[v] - 1) {
+		// Next leap in same direction
+		if (leap_next > 0) {
+			// Flag if greater than two thirds
+			if (abs(c[v][fli2[v][fleap_end + 1]] - c[v][leap_start]) > 4)
+				FLAGVL(505, fli[v][fleap_start], fli[v][bli[v][leap_end] + 1]);
+			// Allow if both thirds, without flags (will process next cycle)
+			else arpeg = 1;
+		}
+	}
 	if (leap_size == 2) {
 		// Check if leap is second third
 		if (fleap_start > 0 && abs(c[v][leap_end] - c[v][fli2[v][fleap_start - 1]]) == 4 &&
@@ -1008,16 +1018,8 @@ int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_lea
 	}
 	leap_id = min(leap_size - 2, 3);
 	if (fleap_end < fli_size[v] - 1) {
-		// Next leap in same direction
-		if (leap_next > 0) {
-			// Flag if greater than two thirds
-			if (abs(c[v][fli2[v][fleap_end + 1]] - c[v][leap_start]) > 4)
-				FLAGVL(505, fli[v][fleap_start], fli[v][bli[v][leap_end] + 1]);
-			// Allow if both thirds, without flags (will process next cycle)
-			else arpeg = 1;
-		}
 		// Next leap back
-		else if (leap_next < 0) {
+		if (leap_next < 0) {
 			int leap_size2 = abs(c[v][fli2[v][fleap_end + 1]] - c[v][leap_end]);
 			// Flag if back leap greater than 6th
 			if (leap_size2 > 5) FLAGV(22, fli[v][bli[v][leap_end]]);
