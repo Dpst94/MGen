@@ -2619,22 +2619,19 @@ int CP2R::FailSlurs() {
 	int scount = 0;
 	int cnt, max_count = 0;
 	int max_ls = 0;
+	int stl = sp_nlen[sp];
 	// Check pause length
 	if (!cc[v][0] && llen[v][0] > 4) FLAGV(197, 0);
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		if (!ls && !cc[v][0]) continue;
-		if (ls < slurs_window[sp][av_cnt][0]) ++wsize;
 		// Subtract old slur
-		if (ls >= slurs_window[sp][av_cnt][0] && sus[v][ls - slurs_window[sp][av_cnt][0]])
+		if (ls >= slurs_window[sp][av_cnt][0] && llen[v][ls - slurs_window[sp][av_cnt][0]] > stl)
 			--scount;
 		// Check slurs in window
-		if (sus[v][ls]) {
+		if (llen[v][ls] > stl) {
 			++scount;
-		}
-		else {
-			cnt = wsize - scount;
-			if (cnt > max_count) {
-				max_count = cnt;
+			if (scount > max_count) {
+				max_count = scount;
 				max_ls = ls;
 			}
 		}

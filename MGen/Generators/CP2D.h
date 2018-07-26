@@ -31,6 +31,16 @@
 #define tEval 1
 #define tCor 2
 
+// Miminal note length for each species
+const int sp_nlen[] = {
+	8, // 0
+	8, // 1
+	4, // 2
+	2, // 3
+	4, // 4
+	1 // 5
+};
+
 // This information is specific to rule
 struct RuleInfo {
 	CString RuleClass;
