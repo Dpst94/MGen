@@ -2315,7 +2315,7 @@ int CP2R::FailRhythm2() {
 	}
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		// Whole inside
-		if (!beat[v][ls] && llen[v][ls] == npm) FLAGV(236, fli[v][ls]);
+		if (!beat[v][ls] && llen[v][ls] == npm && cc[v][fli[v][ls]]) FLAGV(236, fli[v][ls]);
 	}
 	return 0;
 }
