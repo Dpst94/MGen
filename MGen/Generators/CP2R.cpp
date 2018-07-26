@@ -1006,6 +1006,9 @@ int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_lea
 			if (fleap_end < fli_size[v] - 1 && abs(c[v][fli2[v][fleap_end + 1]] - c[v][fli2[v][fleap_start - 1]]) == 6) {
 				FLAGVL(504, fli[v][fleap_start - 1], fli[v][fleap_start + 1]);
 			}
+			// If there is one more third backward (3 x 3rds total) - do not flag because it was already flagged
+			else if (fleap_start > 1 && abs(c[v][leap_end] - c[v][fli2[v][fleap_start - 2]]) == 6) {
+			}
 			else FLAGVL(503, fli[v][fleap_start - 1], fli[v][fleap_start + 1]);
 			// Set middle leap note
 			leap_mid = leap_start;
