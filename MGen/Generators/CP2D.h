@@ -199,7 +199,7 @@ protected:
 	vector<vector<vector<int>>> early_culm3; // Early culmination step percent
 	vector<vector<vector<vector<int>>>> tonic_window; // [] Number of notes that are searched for number of tonic notes
 	vector<vector<vector<vector<int>>>> tonic_max; // [] Maximum number of tonic notes that can be contained in tonic window
-	vector<vector<vector<int>>> max_note_len; // Maximum note real length in croches by species
+	//vector<vector<vector<int>>> max_note_len; // Maximum note real length in croches by species
 	vector<vector<vector<vector<int>>>> notes_lrange; // [range][species] Maximum number of consecutive notes having low range
 	vector<vector<vector<int>>> tritone_res_quart; // Search X quarters for tritone resolution
 	vector<vector<vector<int>>> max_smooth_direct; // Maximum linear movement in one direction allowed (in steps)

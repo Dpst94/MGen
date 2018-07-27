@@ -190,5 +190,6 @@ protected:
 	inline int FailSusCount();
 	inline int FailNoteRepeat();
 	inline int FailNoteLen();
+	inline int FailBeat();
 };
 

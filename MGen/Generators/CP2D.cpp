@@ -614,7 +614,7 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(late_culm, 21, rsSubName, 0);
 	SetRuleParam(miss_slurs_window, 188, rsName, 0);
 	SetRuleParam(slurs_window, 93, rsName, 0);
-	SetRuleParam(max_note_len, 336, rsSubName, 1);
+	//SetRuleParam(max_note_len, 336, rsSubName, 1);
 	SetRuleParam(stag_notes, 10, rsSubName, 0);
 	SetRuleParam(stag_note_steps, 10, rsSubName, 1);
 	SetRuleParam(stag_notes2, 39, rsSubName, 0);

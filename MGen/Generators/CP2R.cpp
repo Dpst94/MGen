@@ -38,6 +38,7 @@ int CP2R::EvaluateCP() {
 		GetMelodyInterval(0, c_len);
 		FailStartPause();
 		if (FailNoteLen()) return 1;
+		if (FailBeat()) return 1;
 		if (av_cnt == 1) {
 			if (FailNoteRepeat()) return 1;
 			if (FailFirstNotes()) return 1;
@@ -508,13 +509,13 @@ void CP2R::GetNoteTypes() {
 			else if (sm == 3) beat[v][ls] = 11;
 			else if (sm == 4) beat[v][ls] = 1;
 			else if (sm == 5) beat[v][ls] = 12;
-			else if (sm == 6) beat[v][ls] = 5;
+			else if (sm == 6) beat[v][ls] = 4;
 			else if (sm == 7) beat[v][ls] = 13;
 			else if (sm == 8) beat[v][ls] = 2;
 			else if (sm == 9) beat[v][ls] = 14;
 			else if (sm == 10) beat[v][ls] = 6;
 			else if (sm == 11) beat[v][ls] = 15;
-			else if (sm == 12) beat[v][ls] = 4;
+			else if (sm == 12) beat[v][ls] = 3;
 			else if (sm == 13) beat[v][ls] = 16;
 			else if (sm == 14) beat[v][ls] = 7;
 			else if (sm == 15) beat[v][ls] = 17;
@@ -522,7 +523,7 @@ void CP2R::GetNoteTypes() {
 			// Beats for species 2: 0 1 0 1
 			// Beats for species 3: 0 3 1 5
 			// Beats for species 4: 0 1 0 1
-			// Beats for species 5: 0 10 3 11 1 12 5 13 2 14 6 15 4 16 7 17
+			// Beats for species 5: 0 10 4 11 1 12 5 13 2 14 6 15 3 16 7 17
 			// Get suspension if cantus note changes during counterpoint note
 			sus[v][ls] = 0;
 			if (bmli[s] != bmli[s2]) {
@@ -2349,7 +2350,7 @@ int CP2R::FailRhythm3() {
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
 		// 1/4 syncope (not for last 1/4 because it is applied with anticipation or sus)
-		if (beat[v][ls] == 3 && llen[v][ls] > 2) FLAGV(235, s);
+		if (beat[v][ls] == 4 && llen[v][ls] > 2) FLAGV(235, s);
 		// 1/2 after 1/4
 		if (ls > 0 && beat[v][ls] == 1 && llen[v][ls] > 2 && llen[v][ls - 1] == 2) {
 			if (bmli[s] >= mli.size() - 2) FLAGVL(238, s, mli[bmli[s]]);
@@ -2758,6 +2759,46 @@ int CP2R::FailNoteLen() {
 			if (llen[v][ls] == 8) continue;
 			if (llen[v][ls] == 12) continue;
 			FLAGV(514, s);
+		}
+	}
+	return 0;
+}
+
+// Detect repeating notes. Step2 excluding
+int CP2R::FailBeat() {
+	if (sp == 0) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			if (!beat[v][ls]) continue;
+			s = fli[v][ls];
+			FLAGV(515, s);
+		}
+	}
+	else if (sp == 1) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			if (!beat[v][ls]) continue;
+			s = fli[v][ls];
+			FLAGV(515, s);
+		}
+	}
+	else if (sp == 2) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			if (beat[v][ls] < 4) continue;
+			s = fli[v][ls];
+			FLAGV(515, s);
+		}
+	}
+	else if (sp == 3) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			if (beat[v][ls] < 10) continue;
+			s = fli[v][ls];
+			FLAGV(515, s);
+		}
+	}
+	else if (sp == 4) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			if (beat[v][ls] < 4) continue;
+			s = fli[v][ls];
+			FLAGV(515, s);
 		}
 	}
 	return 0;
