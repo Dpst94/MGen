@@ -353,7 +353,7 @@ void CGenCA1::SelectExpect() {
 	if (m_testing != 2) {
 		if (cantus_incom.size() && cantus_incom[0].size() && cantus_incom[0][0].Find("expect") != -1) {
 			if (!edb.result.size())
-				WriteLog(5, "This midi file requires expected flags, but none found in database");
+				WriteLog(5, "This midi file '" + midi_file + "' requires expected flags, but none found in database");
 		}
 		else {
 			if (edb.result.size())
