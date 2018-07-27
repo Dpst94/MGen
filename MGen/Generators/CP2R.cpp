@@ -2827,9 +2827,9 @@ void CP2R::GetHarm(vector<int> &chn) {
 		// No root note
 		if (!chn[x]) continue;
 		// VI note means other chord
-		if (chn[x + 5]) continue;
+		if (chn[(x + 5) % 7]) continue;
 		// IV note means other chord
-		if (chn[x + 3]) continue;
+		if (chn[(x + 3) % 7]) continue;
 		chm[hs] = x;
 		return;
 	}
@@ -2902,9 +2902,10 @@ int CP2R::FailHarm() {
 				++chn[n];
 				++cchn[pcc[v][s9]];
 				// Detect harmony
-				GetHarm(cchn);
+				GetHarm(chn);
 			}
 		}
+		GetHarm(chn);
 		RemoveHarmDuplicate();
 		if (ls2 && hli2.size()) hli2[hli2.size() - 1] = fli2[v][ls2];
 	}
