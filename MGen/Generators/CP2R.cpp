@@ -37,6 +37,7 @@ int CP2R::EvaluateCP() {
 		vaccept = &accept[sp][av_cnt][0];
 		GetMelodyInterval(0, c_len);
 		FailStartPause();
+		if (FailNoteLen()) return 1;
 		if (av_cnt == 1) {
 			if (FailNoteRepeat()) return 1;
 			if (FailFirstNotes()) return 1;
@@ -45,7 +46,7 @@ int CP2R::EvaluateCP() {
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
 		if (FailLocalPiCount(notes_picount2[sp][av_cnt][0], min_picount2[sp][av_cnt][0], 345)) return 1;
 		if (FailLocalPiCount(notes_picount3[sp][av_cnt][0], min_picount3[sp][av_cnt][0], 346)) return 1;
-		if (FailMaxNoteLen()) return 1;
+		//if (FailMaxNoteLen()) return 1;
 		if (FailMissSlurs()) return 1;
 		if (FailSlurs()) return 1;
 		if (FailRhythm()) return 1;
@@ -2662,6 +2663,7 @@ int CP2R::FailStartPause() {
 
 int CP2R::FailMaxNoteLen() {
 	CHECK_READY(DR_fli);
+	/*
 	// Never check last note, either end of scan window or end of counterpoint
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		if (rlen[v][ls] > max_note_len[sp][av_cnt][0] * 2) 
@@ -2669,6 +2671,7 @@ int CP2R::FailMaxNoteLen() {
 		// Check notes crossing multiple measures
 		if (bmli[fli2[v][ls]] - bmli[fli[v][ls]] > 1) FLAGV(41, fli[v][ls]);
 	}
+	*/
 	return 0;
 }
 
@@ -2695,6 +2698,67 @@ int CP2R::FailSusCount() {
 int CP2R::FailNoteRepeat() {
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		if (cc[v][fli[v][ls]] == cc[v][fli[v][ls + 1]]) FLAGV(30, fli[v][ls]);
+	}
+	return 0;
+}
+
+// Detect repeating notes. Step2 excluding
+int CP2R::FailNoteLen() {
+	if (sp == 0) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			if (!cc[v][s]) continue;
+			if (llen[v][ls] == 8) continue;
+			FLAGV(514, s);
+		}
+	}
+	else if (sp == 1) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			if (!cc[v][s]) continue;
+			if (llen[v][ls] == 8) continue;
+			if (llen[v][ls] == 16) continue;
+			FLAGV(514, s);
+		}
+	}
+	else if (sp == 2) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			if (!cc[v][s]) continue;
+			if (llen[v][ls] == 4) continue;
+			if (llen[v][ls] == 8) continue;
+			FLAGV(514, s);
+		}
+	}
+	else if (sp == 3) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			if (!cc[v][s]) continue;
+			if (llen[v][ls] == 2) continue;
+			FLAGV(514, s);
+		}
+	}
+	else if (sp == 4) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			if (!cc[v][s]) continue;
+			if (llen[v][ls] == 4) continue;
+			if (llen[v][ls] == 8) continue;
+			FLAGV(514, s);
+		}
+	}
+	else if (sp == 5) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			if (!cc[v][s]) continue;
+			if (llen[v][ls] == 1) continue;
+			if (llen[v][ls] == 2) continue;
+			if (llen[v][ls] == 4) continue;
+			if (llen[v][ls] == 6) continue;
+			if (llen[v][ls] == 8) continue;
+			if (llen[v][ls] == 12) continue;
+			FLAGV(514, s);
+		}
 	}
 	return 0;
 }
