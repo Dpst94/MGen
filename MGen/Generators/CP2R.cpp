@@ -199,6 +199,15 @@ void CP2R::SendComment(int pos, int x, int i) {
 	}
 }
 
+void CP2R::SendLining(int pos, int x, int i) {
+	if (show_hatch == 1) {
+	}
+	if (show_hatch == 2) {
+		if (msh[v][bli[v][x]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
+		else lining[pos + i][vi] = 0;
+	}
+}
+
 void CP2R::SendCP() {
 	CString st;
 	//CreateLinks();
@@ -224,6 +233,7 @@ void CP2R::SendCP() {
 				coff[step0 + s][vi] = s - fli[v][ls];
 				tempo[step0 + s] = cp_tempo;
 				SendComment(step0 + fli[v][ls], s, s - fli[v][ls]);
+				SendLining(step0 + fli[v][ls], s, s - fli[v][ls]);
 			}
 		}
 		MergeNotes(step0, step0 + full_len - 1);
@@ -724,11 +734,17 @@ void CP2R::MergeNotes(int step1, int step2) {
 void CP2R::GetBasicMsh() {
 	CHECK_READY(DR_c, DR_fli, DR_leap);
 	SET_READY(DR_mshb);
-	// First note is always downbeat
-	mshb[v][0] = pDownbeat;
+	int first = 1;
 	// Main calculation
-	for (ls = 1; ls < fli_size[v]; ++ls) {
+	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
+		if (!cc[v][s]) continue;
+		if (first) {
+			first = 0;
+			// First note is always downbeat
+			mshb[v][ls] = pDownbeat;
+			continue;
+		}
 		s2 = fli2[v][ls];
 		if (s % npm == 0) mshb[v][ls] = pDownbeat;
 		else if (s > 0 && leap[v][s - 1]) mshb[v][ls] = pLeapTo;
@@ -2862,6 +2878,8 @@ int CP2R::FailHarm() {
 		for (s = mli[ms]; s <= mea_end; ++s) {
 			for (v = 0; v < av_cnt; ++v) {
 				ls = bli[v][s];
+				// Skip if not note start or sus
+				if (fli[v][ls] != s && sus[v][ls] != s) continue;
 				// Skip pauses
 				if (!cc[v][s]) continue;
 				// For first suspension in measure, evaluate last step. In other cases - first step

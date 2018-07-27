@@ -105,9 +105,8 @@ protected:
 	void ScanCP();
 	inline void CreateLinks();
 	inline void GetVca();
-
 	void SendComment(int pos, int x, int i);
-
+	void SendLining(int pos, int x, int i);
 	void SendCP();
 	
 	// Check data ready
