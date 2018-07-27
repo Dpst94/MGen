@@ -25,6 +25,8 @@
 #define DR_nmin					12
 #define DR_dtp 					13
 #define DR_macc					14
+#define DR_hli					15
+#define DR_hbc					16
 
 #ifdef CF_DEBUG
 
@@ -191,5 +193,13 @@ protected:
 	inline int FailNoteRepeat();
 	inline int FailNoteLen();
 	inline int FailBeat();
+	inline void GetHarm(vector<int>& chn);
+	inline int FailHarm();
+	inline int EvalHarm();
+	inline int FailTonicCP();
+	inline void RemoveHarmDuplicate();
+	inline int FailHarmStep(int i, const int * hv, int & count, int & wcount, int repeat_letters, int miss_letters, int flagr, int flagm);
+	inline void GetBhli();
+	inline void GetHarmBass();
 };
 

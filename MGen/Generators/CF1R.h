@@ -149,11 +149,6 @@
 	anflags[cpv][i].push_back(id);  \
 } while (0)
 
-// Letters in harmonies
-const int hvt[] = { 1, 0, 1, 0, 0, 1, 0 };
-const int hvd[] = { 0, 0, 1, 0, 1, 0, 1 };
-const int hvs[] = { 0, 1, 0, 1, 0, 1, 0 };
-
 #define SCAN_VISUAL_CODE_BASE 3
 const char scan_visual_code[] = { '!', '.', ',', ':', ';', '`', '|', '(', ')', '[', ']', '{', '}', ' / ', '\\' };
 

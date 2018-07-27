@@ -29,6 +29,7 @@ protected:
 
 private:
 	CString SendLySkips(int count);
+	void SendLyHarm();
 	void SendLyNoteNames();
 	void SendLyMistakes();
 	CString GetLyNoteVisualCP(CString sz);

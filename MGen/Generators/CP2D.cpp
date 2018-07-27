@@ -15,6 +15,10 @@ CP2D::CP2D() {
 	for (int i = 0; i < MAX_SEVERITY; ++i) {
 		sev_color[i] = MakeColor(0, 255.0 / MAX_SEVERITY * i, 255 - 255.0 / MAX_SEVERITY * i, 0);
 	}
+	// Harmony notation
+	HarmName.resize(7);
+	HarmName_m.resize(7);
+	HarmName_ma.resize(7);
 }
 
 CP2D::~CP2D() {
@@ -52,6 +56,10 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 		LoadRules("configs\\" + *sV);
 		ParseRules();
 		SetRuleParams();
+	}
+	// Load harmonic notation
+	if (*sN == "harm_notation") {
+		LoadHarmNotation();
 	}
 }
 
@@ -623,6 +631,15 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(notes_arange2, 16, rsSubName, 0);
 	SetRuleParam(min_arange, 15, rsSubName, 1);
 	SetRuleParam(min_arange2, 16, rsSubName, 1);
+	SetRuleParam(repeat_letters_t, 17, rsSubName, 0);
+	SetRuleParam(repeat_letters_d, 428, rsSubName, 0);
+	SetRuleParam(repeat_letters_s, 429, rsSubName, 0);
+	SetRuleParam(miss_letters_t, 20, rsSubName, 0);
+	SetRuleParam(miss_letters_d, 430, rsSubName, 0);
+	SetRuleParam(miss_letters_s, 431, rsSubName, 0);
+	SetRuleParam(tonic_max_cp, 310, rsSubName, 0);
+	SetRuleParam(tonic_window_cp, 310, rsSubName, 1);
+	SetRuleParam(tonic_wei_inv, 310, rsSubComment, 0);
 	notes_lrange.resize(4);
 	for (int rt = 0; rt < 4; ++rt) {
 		SetRuleParam(notes_lrange[rt], 434 + rt, rsSubName, 0);
@@ -691,3 +708,68 @@ void CP2D::GetSpVcVp() {
 		else vp = vpNbs;
 	}
 }
+
+void CP2D::LoadHarmNotation() {
+	CString fname = "configs\\harm\\harm-notation.csv";
+	if (!CGLib::fileExists(fname)) {
+		CString est;
+		est.Format("Cannot find file: %s", fname);
+		WriteLog(5, est);
+		error = 1;
+		return;
+	}
+	vector <CString> sv;
+	ifstream fs;
+	int cur_nid = -1;
+	fs.open(fname);
+	CString st;
+	char pch[2550];
+	int pos = 0;
+	// Load header
+	//fs.getline(pch, 2550);
+	while (fs.good()) {
+		fs.getline(pch, 2550);
+		st = pch;
+		// Skip comments
+		pos = st.Find("#");
+		if (pos == 0)	continue;
+		st.Trim();
+		pos = 0;
+		if (st.Find(";") != -1) {
+			Tokenize(st, sv, ";");
+			if (sv.size() != 8) {
+				CString est;
+				est.Format("Wrong count of columns (%d) in file %s", sv.size(), fname);
+				WriteLog(5, est);
+				error = 1;
+				return;
+			}
+			for (int i = 0; i < sv.size(); ++i) sv[i].Trim();
+			if (sv[0] == "Major") ++cur_nid;
+			if (cur_nid == harm_notation) {
+				if (sv[0] == "Major")
+					for (int i = 1; i < 8; ++i) HarmName[i - 1] = sv[i];
+				if (sv[0] == "Minor natural")
+					for (int i = 1; i < 8; ++i) HarmName_m[i - 1] = sv[i];
+				if (sv[0] == "Minor altered")
+					for (int i = 1; i < 8; ++i) HarmName_ma[i - 1] = sv[i];
+			}
+		}
+	}
+	fs.close();
+	if (HarmName[6].IsEmpty() || HarmName_m[6].IsEmpty() || HarmName_ma[6].IsEmpty()) {
+		CString est;
+		est.Format("Error loading harmonic notation");
+		WriteLog(5, est);
+		error = 1;
+	}
+}
+
+CString CP2D::GetHarmName(int pitch, int alter) {
+	if (mode == 9) {
+		if (alter == 1) return HarmName_ma[pitch];
+		else return HarmName_m[pitch];
+	}
+	else return HarmName[pitch];
+}
+

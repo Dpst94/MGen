@@ -296,9 +296,9 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += "}\n";
 		SendLyMistakes();
 		SendLyNoteNames();
-		//SendLyHarm();
 		//SendLyIntervals();
 	}
+	SendLyHarm();
 	ly_ly_st += ">>\n";
 	//if (st3 != "") ly_ly_st += "\\markup { " + st3 + " }\n";
 	ly_ly_st += ly_com_st;
@@ -317,6 +317,55 @@ CString CP2Ly::SendLySkips(int count) {
 		lst += " \\skip 8 ";
 	}
 	return lst;
+}
+
+void CP2Ly::SendLyHarm() {
+	CString st, lst;
+	//if (!ly_flags) return;
+	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", 0);
+	lst += st;
+	lst += "    \\lyricmode {\n";
+	lst += "      \\override StanzaNumber.font-size = #-2\n";
+	lst += "      \\set stanza = #\" Harmony:\"\n";
+	lst += "      \\override InstrumentName #'X-offset = #1\n";
+	lst += "      \\override InstrumentName #'font-series = #'bold\n";
+	lst += "      \\override InstrumentName.font-size = #-2\n";
+	lst += "      \\set shortVocalName = \"H:\"\n";
+	int pos = -1;
+	for (hs = 0; hs < hli.size(); ++hs) {
+		s = hli[hs];
+		lst += SendLySkips(s - pos - 1);
+		pos = s;
+		lst += "  \\markup{ ";
+		lst += "  \\teeny \n";
+		if (lyi[s].shs[vHarm] || lyi[s].shf[vHarm]) {
+			lst += "  \\on-color #(rgb-color " + GetLyMarkColor(lyi[s].shse[vHarm]) + ") ";
+		}
+		lst += "  \\pad-markup #0.4 \n";
+		st = GetHarmName(chm[hs], chm_alter[hs]);;
+		st.Replace("#", " \"#\" ");
+		st.Replace("b", " \\raise #0.3 \\magnify #0.5 \\flat ");
+		if (st.Right(1) == "6") {
+			st.Replace("6", " \\raise #0.7 6");
+			lst += "\\concat { " + st + " } ";
+		}
+		else if (st.Right(3) == "6/4") {
+			lst += "  \\concat { \n";
+			lst += "    \\general-align #Y #0.5 \"" + st.Left(st.GetLength() - 3) + "\"\n";
+			lst += "    \\teeny\n";
+			lst += "    \\override #'(baseline-skip . 1.5) \n";
+			lst += "    \\override #'(line-width . 100)  \n";
+			lst += "    \\center-column{ 6 4 } \n";
+			lst += "  }\n";
+		}
+		else {
+			lst += "\\concat { " + st + " } ";
+		}
+		lst += "}8\n";
+	}
+	lst += "    }\n";
+	lst += "  }\n";
+	ly_ly_st += lst;
 }
 
 void CP2Ly::SendLyNoteNames() {

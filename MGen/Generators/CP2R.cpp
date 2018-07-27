@@ -98,6 +98,7 @@ int CP2R::EvaluateCP() {
 		if (FailLocalMacc(notes_arange[sp][av_cnt][0], min_arange[sp][av_cnt][0] / 10.0, 15)) return 1;
 		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
 	}
+	if (FailHarm()) return 1;
 	return 0;
 }
 
@@ -1123,7 +1124,7 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 				FLAGVL(1, fli[v][fleap_start], fli[v][fleap_end]);
 				return 0;
 			}
-			if (child_leap && accept[sp][av_cnt][0][116 + leap_id]) 
+			if (child_leap && accept[sp][av_cnt][0][116 + leap_id])
 				FLAGVL(116 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 			// Check if  leap is prefilled
 			else {
@@ -1142,7 +1143,7 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 					else if (pdeviates == 2 && !accept[sp][av_cnt][0][120 + leap_id]) prefilled = 0;
 				}
 				if (prefilled) {
-					if (fli_size[v] - fleap_start <= pre_last_leaps[sp][av_cnt][0] + 1) 
+					if (fli_size[v] - fleap_start <= pre_last_leaps[sp][av_cnt][0] + 1)
 						FLAGVL(204 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 					else FLAGVL(112 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 				}
@@ -1228,7 +1229,7 @@ int CP2R::FailLeapMDC() {
 	}
 	// Far + close
 	else if (mdc1 == 2 && !mdc2) {
-		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) 
+		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start])
 			FLAGVL(132 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 		else FLAGVL(25 + leap_id, fli[v][fleap_start], fli[v][fleap_end]);
 	}
@@ -1411,11 +1412,11 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 	}
 	if (first_run && max_leap_sum2 >= csel) {
 		if (max_leap_sum2 > csel2)
-			FLAGVL(flag4, fli[v][bli[v][leap_sum_s2] + 1], 
+			FLAGVL(flag4, fli[v][bli[v][leap_sum_s2] + 1],
 				fli[v][max(0, bli[v][leap_sum_s2] - max_leap_sum3 + 1)]);
-		else 
-			FLAGVL(flag3, fli[v][bli[v][leap_sum_s2] + 1], 
-			fli[v][max(0, bli[v][leap_sum_s2] - max_leap_sum3 + 1)]);
+		else
+			FLAGVL(flag3, fli[v][bli[v][leap_sum_s2] + 1],
+				fli[v][max(0, bli[v][leap_sum_s2] - max_leap_sum3 + 1)]);
 	}
 	return 0;
 }
@@ -2090,10 +2091,10 @@ int CP2R::FailAdjacentTritone2(int ta, int t1, int t2, int tb) {
 	// Do not check tritone if it is at the end of not-last window
 	if (ls >= fli_size[v] - 2 && ep2 != c_len) return 0;
 	// Check framed by ending, pause, leap or opposite movement
-	if ((ls >= fli_size[v] - 2 || !cc[v][fli2[v][ls + 2]] || 
+	if ((ls >= fli_size[v] - 2 || !cc[v][fli2[v][ls + 2]] ||
 		leap[v][s] * (cc[v][fli2[v][ls + 2]] - cc[v][fli2[v][ls + 1]]) < 0 ||
 		leap[v][fli2[v][ls + 1]]) &&
-		(ls == 0 || !cc[v][fli2[v][ls - 1]] || 
+		(ls == 0 || !cc[v][fli2[v][ls - 1]] ||
 			leap[v][s] * (cc[v][s] - cc[v][fli2[v][ls - 1]]) < 0 ||
 			leap[v][fli2[v][ls - 1]])) found = 1;
 	if (!found) {
@@ -2126,11 +2127,11 @@ int CP2R::FailAdjacentTritone2(int ta, int t1, int t2, int tb) {
 	// Check if tritone is highest leap if this is last window
 	/*
 	if (ep2 == c_len && !cantus_high) {
-		if ((cc[v][s] >= lclimax[v][s]) || (cc[v][s2] >= lclimax[v][s2])) {
-			if (found == 0) FLAGVL(370, fli[v][fleap_start], fli[v][fleap_end]);
-			else if (found == 1) FLAGVL(367, fli[v][fleap_start], fli[v][fleap_end]);
-			else FLAGVL(362, fli[v][fleap_start], fli[v][fleap_end]);
-		}
+	if ((cc[v][s] >= lclimax[v][s]) || (cc[v][s2] >= lclimax[v][s2])) {
+	if (found == 0) FLAGVL(370, fli[v][fleap_start], fli[v][fleap_end]);
+	else if (found == 1) FLAGVL(367, fli[v][fleap_start], fli[v][fleap_end]);
+	else FLAGVL(362, fli[v][fleap_start], fli[v][fleap_end]);
+	}
 	}
 	*/
 	GetTritoneResolution(ta, t1, t2, tb, res1, res2);
@@ -2241,7 +2242,7 @@ int CP2R::FailTritones2() {
 						leap[v][fli2[v][fleap_end]]) &&
 						(fleap_start == 0 || !cc[v][fli[v][fleap_start - 1]] ||
 						(cc[v][fli[v][fleap_end]] - cc[v][fli2[v][fleap_start]]) *
-						(cc[v][fli2[v][fleap_start]] - cc[v][fli[v][fleap_start - 1]]) < 0 ||
+							(cc[v][fli2[v][fleap_start]] - cc[v][fli[v][fleap_start - 1]]) < 0 ||
 							leap[v][fli2[v][fleap_start - 1]])) found = 1;
 					if (!found) {
 						if (sp == 5) {
@@ -2270,11 +2271,11 @@ int CP2R::FailTritones2() {
 					/*
 					// Check if tritone is highest leap if this is last window
 					if (ep2 == c_len && !cantus_high) {
-						if ((cc[v][fli[v][fleap_start]] >= lclimax[v][fli[v][fleap_start]]) ||
-							(cc[v][fli[v][fleap_end]] >= lclimax[v][fli[v][fleap_end]])) {
-							if (found == 1) FLAGVL(363, fli[v][fleap_start], fli[v][fleap_end]);
-							else FLAGVL(364, fli[v][fleap_start], fli[v][fleap_end]);
-						}
+					if ((cc[v][fli[v][fleap_start]] >= lclimax[v][fli[v][fleap_start]]) ||
+					(cc[v][fli[v][fleap_end]] >= lclimax[v][fli[v][fleap_end]])) {
+					if (found == 1) FLAGVL(363, fli[v][fleap_start], fli[v][fleap_end]);
+					else FLAGVL(364, fli[v][fleap_start], fli[v][fleap_end]);
+					}
 					}
 					*/
 					// Flag resolution for framed tritone
@@ -2667,10 +2668,10 @@ int CP2R::FailMaxNoteLen() {
 	/*
 	// Never check last note, either end of scan window or end of counterpoint
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
-		if (rlen[v][ls] > max_note_len[sp][av_cnt][0] * 2) 
-			FLAGV(336, fli[v][ls]);
-		// Check notes crossing multiple measures
-		if (bmli[fli2[v][ls]] - bmli[fli[v][ls]] > 1) FLAGV(41, fli[v][ls]);
+	if (rlen[v][ls] > max_note_len[sp][av_cnt][0] * 2)
+	FLAGV(336, fli[v][ls]);
+	// Check notes crossing multiple measures
+	if (bmli[fli2[v][ls]] - bmli[fli[v][ls]] > 1) FLAGV(41, fli[v][ls]);
 	}
 	*/
 	return 0;
@@ -2802,5 +2803,348 @@ int CP2R::FailBeat() {
 		}
 	}
 	return 0;
+}
+
+// Take vector of diatonic notes and detect most possible chord
+void CP2R::GetHarm(vector<int> &chn) {
+	for (int x = 0; x < 7; ++x) {
+		// No root note
+		if (!chn[x]) continue;
+		// VI note means other chord
+		if (chn[x + 5]) continue;
+		// IV note means other chord
+		if (chn[x + 3]) continue;
+		chm[hs] = x;
+		return;
+	}
+}
+
+int CP2R::FailHarm() {
+	CHECK_READY(DR_fli, DR_c, DR_pc);
+	SET_READY(DR_hli);
+	int ls1, ls2 = 0;
+	int s9;
+	int n, harm_conflict, hcount;
+	int last_b; // First harmony in measure has b
+	vector<int> chn, cchn;
+	int mea_end;
+	chn.resize(7);
+	cchn.resize(12);
+	hli.clear();
+	hli2.clear();
+	ha64.clear();
+	chm.clear();
+	hbcc.clear();
+	hbc.clear();
+	chm_alter.clear();
+	// Build chm vector
+	for (ms = 0; ms < mli.size(); ++ms) {
+		// Stop processing when last measure is not fully generated
+		if (ms == mli.size() - 1 && ep2 < c_len) break;
+		// Get last measure step
+		mea_end = mli[ms] + npm - 1;
+		// Prevent going out of window
+		if (mea_end >= ep2) break;
+		// Clear harmonic notes vector
+		fill(chn.begin(), chn.end(), 0);
+		fill(cchn.begin(), cchn.end(), 0);
+		hli.push_back(mli[ms]);
+		hli2.push_back(0);
+		hs = hli.size() - 1;
+		if (hli2.size() > 1) hli2[hli2.size() - 2] = hli[hli.size() - 1] - 1;
+		ha64.push_back(0);
+		// Set harmony bass to random
+		hbcc.push_back(0);
+		hbc.push_back(0);
+		chm.push_back(0);
+		chm_alter.push_back(0);
+		hcount = 0;
+		for (s = mli[ms]; s <= mea_end; ++s) {
+			for (v = 0; v < av_cnt; ++v) {
+				ls = bli[v][s];
+				// Skip pauses
+				if (!cc[v][s]) continue;
+				// For first suspension in measure, evaluate last step. In other cases - first step
+				if (fli[v][ls] <= mli[ms] && sus[v][ls]) {
+					s9 = fli2[v][ls];
+					// For first suspended dissonance resolved note do not check msh
+					if (susres[v][ls]) continue;
+				}
+				else {
+					s9 = fli[v][ls];
+					// For all other notes, check msh and iHarm4
+					if (msh[v][ls] <= 0) continue;
+				}
+				// Pitch class
+				n = pc[v][s9];
+				// Find harmonic conflict
+				if (s > mli[ms] && (chn[(n + 1) % 7] || chn[(n + 6) % 7])) {
+				}
+				// Record note
+				++chn[n];
+				++cchn[pcc[v][s9]];
+				// Detect harmony
+				GetHarm(cchn);
+			}
+		}
+		RemoveHarmDuplicate();
+		if (ls2 && hli2.size()) hli2[hli2.size() - 1] = fli2[v][ls2];
+	}
+	GetBhli();
+	//GetHarmBass();
+	// Check first harmony not T
+	if (chm.size() && (chm[0] || hbc[0])) {
+		FLAGV(137, hli[0]);
+	}
+	//if (EvalHarm()) return 1;
+	//if (FailTonicCP()) return 1;
+	return 0;
+}
+
+int CP2R::EvalHarm() {
+	int pen1;
+	int p2c = 0; // Count of consecutive penalty 2
+	int p3c = 0; // Count of consecutive penalty 3
+	int dcount = 0;
+	int scount = 0;
+	int tcount = 0;
+	int wdcount = 0;
+	int wscount = 0;
+	int wtcount = 0;
+	int harm_end, found;
+	for (int i = 0; i < chm.size(); ++i) {
+		s = hli[i];
+		ls = bli[v][s];
+		if (i > 0) {
+			// Check GC for low voice and not last note (last note in any window is ignored)
+			if (ls < fli_size[v] - 1 &&
+				chm[i] == 0 && chm[i - 1] == 4 &&
+				pc[0][s] == 0 && pc[1][s] == 0 &&
+				s > 0 && pc[0][s - 1] == 4) FLAGV(48, s);
+			// Prohibit 64 chord
+			if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
+				FLAGV(433, s);
+			}
+			// Prohibit audible 64 chord
+			else if (ha64[i] == 1) FLAGV(196, s);
+			// Prohibit audible 64 chord
+			else if (ha64[i] == 2) FLAGV(383, s);
+			if (mminor) {
+				// Prohibit VI<->VI# containing progression
+				if (chm[i] % 2 && chm[i - 1] % 2 && chm_alter[i] * chm_alter[i - 1] == -1) {
+					FLAGV(377, s);
+				}
+				// Prohibit VII<->VII# containing progression
+				if (chm[i] && chm[i] % 2 == 0 && chm[i - 1] && chm[i - 1] % 2 == 0 &&
+					chm_alter[i] * chm_alter[i - 1] == -1) {
+					FLAGV(378, s);
+				}
+				// Prohibit DTIII#5 augmented chord
+				if (chm[i] == 2 && chm_alter[i] == 1) {
+					FLAGV(375, s);
+				}
+				// Prohibit dVII (GBD) in root position after S (DF#A) in root position
+				if (chm[i] == 6 && chm[i - 1] == 3 && chm_alter[i]<1 && chm_alter[i - 1] == 1) {
+					if (ls > 0 && pc[0][s] == 6 && pc[0][fli[v][ls - 1]] == 3) FLAGV(308, s);
+				}
+				// Prohibit DTIII (CEG) in root position after dVII (GBD) in root position
+				if (chm[i] == 2 && chm[i - 1] == 6 && chm_alter[i]<1 && chm_alter[i - 1]<1) {
+					if (ls > 0 && pc[0][s] == 2 && pc[0][fli[v][ls - 1]] == 6) FLAGV(309, s);
+				}
+			}
+			// Check harmonic penalty	
+			/*
+			pen1 = hsp[chm[i - 1]][chm[i]];
+			if (pen1 == 1) FLAGVL(77, s, hli[i - 1]);
+			if (pen1 == 2) {
+				++p2c;
+				if (p2c == 1) FLAGVL(57, s, hli[i - 1]);
+				else if (p2c == 2) FLAGVL(92, s, hli[i - 2]);
+				else if (p2c == 3) FLAGVL(23, s, hli[i - 3]);
+			}
+			else if (pen1 < 2) {
+				p2c = 0;
+			}
+			// Harmonic repeats
+			if (pen1 == 3) {
+				++p3c;
+				if (p3c == 1) {
+					if (hbc[i] % 7 == hbc[i - 1] % 7) FLAGVL(99, s, hli[i - 1]);
+					else FLAGVL(418, s, hli[i - 1]);
+				}
+				else if (p3c == 2) FLAGVL(321, s, hli[i - 2]);
+			}
+			else {
+				p3c = 0;
+			}
+			*/
+		}
+		// Check letter repeat and miss
+		hrepeat_fired = 0;
+		hmiss_fired = 0;
+		if (FailHarmStep(i, hvt, tcount, wtcount, repeat_letters_t[sp][av_cnt][0], miss_letters_t[sp][av_cnt][0], 17, 20)) return 1;
+		if (FailHarmStep(i, hvd, dcount, wdcount, repeat_letters_d[sp][av_cnt][0], miss_letters_d[sp][av_cnt][0], 428, 430)) return 1;
+		if (FailHarmStep(i, hvs, scount, wscount, repeat_letters_s[sp][av_cnt][0], miss_letters_s[sp][av_cnt][0], 429, 431)) return 1;
+	}
+	return 0;
+}
+
+int CP2R::FailTonicCP() {
+	CHECK_READY(DR_hbc);
+	float tcount = 0;
+	int fire, fired = 0;
+	// Do not check if melody is short
+	if (hli.size() < 3) return 0;
+	// Loop from second to second to last note
+	for (int hs = 1; hs < hli.size() - 1; ++hs) {
+		s = hli[hs];
+		// Decrement for previous tonic note
+		if (hs > tonic_window_cp[sp][av_cnt][0]) {
+			if (!chm[hs - tonic_window_cp[sp][av_cnt][0]]) --tcount;
+		}
+		if (!chm[hs]) {
+			// Increment for current tonic note (depending on inversion)
+			if (hbc[hs] % 7 == chm[hs]) ++tcount;
+			else tcount += tonic_wei_inv[sp][av_cnt][0] / 100.0;
+			// Check count of tonic notes
+			if (tcount > tonic_max_cp[sp][av_cnt][0]) {
+				// Grant one more tonic in first window if first chord not tonic
+				fire = 0;
+				if (hs < tonic_window_cp[sp][av_cnt][0] && chm[0]) {
+					if (tcount > tonic_max_cp[sp][av_cnt][0] + 1)	fire = 1;
+				}
+				else fire = 1;
+				if (fire) {
+					if (fired) {
+						fpenalty += severity[sp][av_cnt][0][310] + 1;
+					}
+					else {
+						FLAGV(310, s);
+						fired = 1;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+void CP2R::RemoveHarmDuplicate() {
+	int chm_id = hli.size() - 1;
+	// Need to be at least two harmonies
+	if (chm_id == 0) return;
+	// Harmony should be not first in measure
+	if (hli[chm_id] <= mli[ms]) return;
+	// Harmonies should match
+	if (chm[chm_id] != chm[chm_id - 1]) return;
+	// Alterations should match
+	if (chm_alter[chm_id] * chm_alter[chm_id - 1] == -1) return;
+	// Remove duplicate
+	hli.resize(chm_id);
+	hli2.resize(chm_id);
+	chm.resize(chm_id);
+	chm_alter.resize(chm_id);
+	hbc.resize(chm_id);
+	hbcc.resize(chm_id);
+	ha64.resize(chm_id);
+}
+
+int CP2R::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat_letters, int miss_letters, int flagr, int flagm) {
+	if (hv[chm[i]]) {
+		++count;
+		wcount = 0;
+	}
+	else {
+		++wcount;
+		count = 0;
+	}
+	if (count > repeat_letters && !hrepeat_fired) {
+		if (count == repeat_letters + 1) {
+			FLAGVL(flagr, s, hli[i - count + 1]);
+			hrepeat_fired = 1;
+		}
+		else {
+			fpenalty += severity[sp][av_cnt][0][flagr] + 1;
+		}
+	}
+	if (wcount > miss_letters && !hmiss_fired) {
+		if (wcount == miss_letters + 1) {
+			FLAGVL(flagm, s, hli[i - wcount + 1]);
+			hmiss_fired = 1;
+		}
+		else {
+			fpenalty += severity[sp][av_cnt][0][flagm] + 1;
+		}
+	}
+	return 0;
+}
+
+void CP2R::GetBhli() {
+	fill(bhli.begin(), bhli.end(), 0);
+	for (int hs = 0; hs < chm.size(); ++hs) {
+		for (s = hli[hs]; s <= hli2[hs]; ++s) {
+			bhli[s] = hs;
+		}
+	}
+}
+
+void CP2R::GetHarmBass() {
+	SET_READY(DR_hbc);
+	// Do not process for lower cantus, because in this case lowest note is always cantus and it is already set
+	int ls1, ls2;
+	int harm_end, nt;
+	int de1, de2, de3;
+	for (int hs = 0; hs < hli.size(); ++hs) {
+		// Get harmonic notes
+		de1 = chm[hs];
+		de2 = (de1 + 2) % 7;
+		de3 = (de1 + 4) % 7;
+		// 5th for 6/4 count
+		int q_prev = -1;
+		// Init habcc - lowest harmonic note, including audible or suggested
+		int habcc = hbcc[hs];
+		// Loop inside harmony
+		for (ls = bli[v][hli[hs]]; ls <= bli[v][hli2[hs]]; ++ls)
+			// Process all notes except for aux and pass (also second parts of suspensions)
+			if (msh[v][ls] > 0 || (sus[v][ls] )) { // && tivl[sus[v][ls]] > 0
+				s = fli[v][ls];
+				nt = c[v][s] % 7;
+				// Do not process notes that are not harmonic
+				if (nt != de1 && nt != de2 && nt != de3) continue;
+				if (hbcc[hs] <= cc[0][s]) continue;
+				if (nt == de3) {
+					if (beat[v][ls] <= 1) {
+						hbcc[hs] = cc[0][s];
+						hbc[hs] = c[0][s];
+						// Clear audible 64, because we have real 64 now
+						ha64[hs] = 0;
+					}
+					else {
+						int found = 0;
+						for (int ls2 = bli[v][hli[hs]]; ls2 <= bli[v][hli2[hs]]; ++ls2) if (ls2 != ls) {
+							if (cc[0][s] == cc[0][fli[v][ls2]]) found = 1;
+						}
+						// Set audible 6/4 for repeating 5th on upbeat
+						if (found) {
+							// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
+							ha64[hs] = 2;
+							habcc = cc[0][s];
+						}
+						// Set suggestive 6/4 for non-repeating 5th on upbeat
+						else {
+							// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
+							ha64[hs] = 1;
+							habcc = cc[0][s];
+						}
+					}
+				}
+				else {
+					hbcc[hs] = cc[0][s];
+					hbc[hs] = c[0][s];
+					// Clear audible 64 if current note is lower than it
+					if (ha64[hs] && cc[0][s] < habcc) ha64[hs] = 0;
+				}
+			}
+	}
 }
 

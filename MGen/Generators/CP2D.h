@@ -111,6 +111,10 @@ protected:
 
 	void GetSpVcVp();
 
+	void LoadHarmNotation();
+
+	CString GetHarmName(int pitch, int alter);
+
 	int max_rule = 0;
 	int av_cnt = 0;
 	int c_len = 0;
@@ -127,12 +131,19 @@ protected:
 	vector<int> nmaxd; // [v] diatonic
 	vector<int> fin; // [v] first note position in steps (after starting pause)
 	int npm;
+
+	// Indexes
 	int s, s0, s1, s2, s_1, s_2;
 	int v, v2, vi;
 	int ls;
 	int ms;
+	int hs;
 	int sp, vc, vp;
 	int fl; // Current flag id
+
+	// Local
+	int hrepeat_fired = 0; // Harmonic repeat in step
+	int hmiss_fired = 0; // Harmonic miss in step
 
 	// Key
 	int fifths = 0; // Number of alterations near key
@@ -223,12 +234,24 @@ protected:
 	vector<vector<vector<int>>> notes_picount3; // Maximum number of consecutive notes having low pitch count
 	vector<vector<vector<int>>> min_picount3; // Minimum allowed pitch count of notes_picount3 consecutive notes
 	vector<vector<vector<int>>> mea_per_sus; // Maximum measures per suspension
+	vector<vector<vector<int>>> repeat_letters_t; // Maximum repeated letters in a row of harmonies
+	vector<vector<vector<int>>> repeat_letters_d; // Maximum repeated letters in a row of harmonies
+	vector<vector<vector<int>>> repeat_letters_s; // Maximum repeated letters in a row of harmonies
+	vector<vector<vector<int>>> miss_letters_t; // Maximum steps with missed letters in a row of harmonies
+	vector<vector<vector<int>>> miss_letters_d; // Maximum steps with missed letters in a row of harmonies
+	vector<vector<vector<int>>> miss_letters_s; // Maximum steps with missed letters in a row of harmonies
+	vector<vector<vector<int>>> tonic_window_cp; // Number of harmonies that are searched for number of tonic chords
+	vector<vector<vector<int>>> tonic_max_cp; // Maximum number of tonic chords that can be contained in tonic window
+	vector<vector<vector<int>>> tonic_wei_inv; // Percent of weight for inverted tonic chord
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
 	int c4p_last_notes2; // Last notes that can have leap c4p compensated (corrected with regard to measures)
 	int lclimax_notes; // Number of adjacent notes to calculate local climax
 	int lclimax_mea; // Number of adjacent measures to calculate local climax
 
-	// Main variables
+	// Harmony notation
+	vector <CString> HarmName;
+	vector <CString> HarmName_m;
+	vector <CString> HarmName_ma;
 
 	// Main vectors
 	vector<int> vid; // [v] Voice id for each voice
@@ -293,6 +316,8 @@ protected:
 	vector<int> hbcc; // [hs] Bass note of each harmony (chromatic)
 	vector<int> hbc; // [hs] Bass note of each harmony (diatonic)
 	vector<int> bhli; // [s] Back links to first notes of each harmony
+	vector <int> chm; // [hs] Current harmonic meaning
+	vector <int> chm_alter; // [hs] Type of harmonic meaning
 
 	// Flags
 	vector<vector<vector<int>>> flag; // [v][s][] Note flags
