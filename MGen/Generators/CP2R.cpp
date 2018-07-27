@@ -2822,7 +2822,7 @@ int CP2R::FailBeat() {
 }
 
 // Take vector of diatonic notes and detect most possible chord
-void CP2R::GetHarm(vector<int> &chn) {
+void CP2R::GetHarm(vector<int> &chn, vector<int> &cchn) {
 	for (int x = 0; x < 7; ++x) {
 		// No root note
 		if (!chn[x]) continue;
@@ -2831,7 +2831,17 @@ void CP2R::GetHarm(vector<int> &chn) {
 		// IV note means other chord
 		if (chn[(x + 3) % 7]) continue;
 		chm[hs] = x;
-		return;
+		break;
+	}
+	if (mminor) {
+		// Detect altered chord if note is part of chord
+		if (((cchn[11] && chm[hs] && chm[hs] % 2 == 0) ||
+			(cchn[9] && chm[hs] % 2)))
+			chm_alter[hs] = 1;
+		// Detect unaltered chord if note is part of chord
+		if (((cchn[10] && chm[hs] && chm[hs] % 2 == 0) ||
+			(cchn[8] && chm[hs] % 2)))
+			chm_alter[hs] = -1;
 	}
 }
 
@@ -2885,6 +2895,8 @@ int CP2R::FailHarm() {
 				// For first suspension in measure, evaluate last step. In other cases - first step
 				if (fli[v][ls] <= mli[ms] && sus[v][ls]) {
 					s9 = fli2[v][ls];
+					// TODO: REMOVE
+					continue;
 					// For first suspended dissonance resolved note do not check msh
 					if (susres[v][ls]) continue;
 				}
@@ -2901,11 +2913,9 @@ int CP2R::FailHarm() {
 				// Record note
 				++chn[n];
 				++cchn[pcc[v][s9]];
-				// Detect harmony
-				GetHarm(chn);
 			}
 		}
-		GetHarm(chn);
+		GetHarm(chn, cchn);
 		RemoveHarmDuplicate();
 		if (ls2 && hli2.size()) hli2[hli2.size() - 1] = fli2[v][ls2];
 	}
