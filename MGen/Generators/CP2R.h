@@ -209,6 +209,7 @@ protected:
 	inline int FailNoteRepeat();
 	inline int FailNoteLen();
 	inline int FailBeat();
+	inline int FailRetrInside();
 	inline void GetHarm(vector<int>& chn, vector<int>& cchn);
 	inline int FailHarm();
 	inline int EvalHarm();

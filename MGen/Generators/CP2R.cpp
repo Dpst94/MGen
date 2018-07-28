@@ -44,6 +44,7 @@ int CP2R::EvaluateCP() {
 			if (FailFirstNotes()) return 1;
 			if (FailLastNotes()) return 1;
 		}
+		if (FailRetrInside()) return 1;
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
 		if (FailLocalPiCount(notes_picount2[sp][av_cnt][0], min_picount2[sp][av_cnt][0], 345)) return 1;
 		if (FailLocalPiCount(notes_picount3[sp][av_cnt][0], min_picount3[sp][av_cnt][0], 346)) return 1;
@@ -2795,6 +2796,18 @@ int CP2R::FailBeat() {
 			if (beat[v][ls] < 4) continue;
 			s = fli[v][ls];
 			FLAGV(515, s);
+		}
+	}
+	return 0;
+}
+
+// Detect retriggers inside measure
+int CP2R::FailRetrInside() {
+	for (ls = 0; ls < fli_size[v]; ++ls) {
+		if (!beat[v][ls]) continue;
+		s = fli[v][ls];
+		if (retr[v][s]) {
+			FLAGV(516, s);
 		}
 	}
 	return 0;
