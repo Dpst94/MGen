@@ -2823,15 +2823,24 @@ int CP2R::FailBeat() {
 
 // Take vector of diatonic notes and detect most possible chord
 void CP2R::GetHarm(vector<int> &chn, vector<int> &cchn) {
+	int max_rat = -10000;
 	for (int x = 0; x < 7; ++x) {
 		// No root note
 		if (!chn[x]) continue;
+		int rat = 0;
+		// Each chord note adds to rating
+		rat += chn[x] + chn[(x + 2) % 7] ? 1 : 0 + 
+			chn[(x + 4) % 7] ? 1 : 0;
 		// VI note means other chord
-		if (chn[(x + 5) % 7]) continue;
+		if (chn[(x + 5) % 7]) rat -= 100;
 		// IV note means other chord
-		if (chn[(x + 3) % 7]) continue;
-		chm[hs] = x;
-		break;
+		if (chn[(x + 3) % 7]) rat -= 100;
+		// II note means other chord
+		if (chn[(x + 1) % 7]) rat -= 100;
+		if (rat > max_rat) {
+			chm[hs] = x;
+			max_rat = rat;
+		}
 	}
 	if (mminor) {
 		// Detect altered chord if note is part of chord
@@ -2849,7 +2858,7 @@ int CP2R::FailHarm() {
 	CHECK_READY(DR_fli, DR_c, DR_pc);
 	SET_READY(DR_hli);
 	int s9;
-	int n, harm_conflict, hcount;
+	int n, hcount;
 	int last_b; // First harmony in measure has b
 	vector<int> chn, cchn;
 	int mea_end;
@@ -2907,7 +2916,62 @@ int CP2R::FailHarm() {
 				// Pitch class
 				n = pc[v][s9];
 				// Find harmonic conflict
-				if (s > mli[ms] && (chn[(n + 1) % 7] || chn[(n + 6) % 7])) {
+				if (s > mli[ms] && (chn[(n + 1) % 7] || chn[(n + 6) % 7] ||
+					(chn[n] && !cchn[pcc[v][s9]]))) {
+					GetHarm(chn, cchn);
+					RemoveHarmDuplicate();
+					// More than two harmonies
+					if (hcount) FLAGHL(40, s, mli[ms]);
+					else {
+						// Two harmonies penultimate
+						if (ms == mli.size() - 2) FLAGHL(306, s, mli[ms]);
+						else {
+							/*
+							// Stepwize resolution of 5th to 6th or 6th to 5th with two harmonies in measure
+							if ((sp == 4 ||
+								(sp == 5 && sus[ls1] && fli2[ls1] - sus[ls1] == 3 && rlen[ls1 + 1] >= 4)) && (
+								(ivlc[mli[ms]] == 4 && ivlc[s] == 5) ||
+									(ivlc[mli[ms]] == 5 && ivlc[s] == 4)) &&
+								abs(ac[cpv][mli[ms]] - ac[cpv][s]) < 2)
+								FLAG2L(329, s, mli[ms]);
+							else FLAG2L(307, s, mli[ms]);
+							*/
+							FLAGHL(307, s, mli[ms]);
+						}
+					}
+					fill(chn.begin(), chn.end(), 0);
+					fill(cchn.begin(), cchn.end(), 0);
+					hli.push_back(s);
+					hli2.push_back(0);
+					hs = hli.size() - 1;
+					if (hli2.size() > 1) hli2[hli2.size() - 2] = hli[hli.size() - 1] - 1;
+					chm.push_back(0);
+					ha64.push_back(0);
+					hbcc.push_back(127);
+					hbc.push_back(0);
+					chm_alter.push_back(0);
+					// Reinitialize chord notes
+					for (v2 = 0; v2 < av_cnt; ++v2) {
+						ls = bli[v][s];
+						// Skip pauses
+						if (!cc[v2][s9]) continue;
+						// For first suspension in measure, evaluate last step. In other cases - first step
+						if (fli[v][ls] <= mli[ms] && sus[v][ls]) {
+							// TODO: REMOVE
+							continue;
+							// For first suspended dissonance resolved note do not check msh
+							if (susres[v][ls]) continue;
+						}
+						else {
+							// For all other notes, check msh and iHarm4
+							if (msh[v][ls] <= 0) continue;
+						}
+						// Record note
+						++chn[pc[v][s9]];
+						++cchn[pcc[v][s9]];
+					}
+					// Next harmony counter
+					++hcount;
 				}
 				// Record note
 				++chn[n];
