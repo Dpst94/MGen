@@ -2968,7 +2968,7 @@ int CP2R::FailHarm() {
 		FLAGH(137, hli[0]);
 	}
 	if (EvalHarm()) return 1;
-	//if (FailTonicCP()) return 1;
+	if (FailTonicCP()) return 1;
 	return 0;
 }
 
