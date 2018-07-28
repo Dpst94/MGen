@@ -21,6 +21,18 @@ CString CP2Ly::GetLyNoteCP() {
 
 void CP2Ly::AddNLink(int f) {
 	GetFlag(f);
+	// Check if this shape is not allowed at hidden position
+	if (!viz_anyposition[ruleinfo[fl].viz]) {
+		// Note start is ok
+		// Downbeat is ok
+		if (s != fli[v][bli[v][s]] && s % npm) {
+			CString est;
+			est.Format("Detected flag at hidden position %d-%d voice %d: [%d] %s %s (%s)",
+				s, fsl[v][s][f], v, fl, accept[sp][vc][vp][fl] ? "+" : "-",
+				GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
+			WriteLog(5, est);
+		}
+	}
 	// Send comments and color only if rule is not ignored
 	if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) return;
 	// Send comments and color only if rule is not ignored
@@ -95,6 +107,7 @@ void CP2Ly::InitLyI() {
 		lyi[i].sht.resize(MAX_VIZ);
 	}
 	for (s = 0; s < c_len; ++s) {
+		ls = bli[v][s];
 		//if (!cc[v][s]) continue;
 		ParseNLinks();
 	}
@@ -427,10 +440,12 @@ void CP2Ly::SendLyMistakes() {
 	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
 	ly_ly_st += "      \\set stanza = #\" Flags:\"\n";
 	for (s = 0; s < c_len; ++s) {
+		ls = bli[v][s];
 		if (!lyi[s].nflags.size()) {
 			ly_ly_st += SendLySkips(1);
 			continue;
 		}
+		SaveLyComments();
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
 		int max_mist = lyi[s].nflags.size() - 1;
 		// Do not show too many mistakes
@@ -506,7 +521,7 @@ void CP2Ly::SaveLyComments() {
 			s / 8 + 1, (s % 8) / 2 + 1,
 			GetLyNoteVisualCP("\\raise #0.3 \\magnify #0.7 "));
 		if (fli[v][ls] != s)
-			st += " (slur)";
+			st += " (middle)";
 		note_st += st + "\n}\n";
 		found = 0;
 		for (int c = 0; c < lyi[s].nflags.size(); ++c) {
@@ -571,7 +586,6 @@ void CP2Ly::SendLyEvent(CString ev) {
 	SplitLyNote(s, llen[v][ls], la);
 	SplitLyNoteMeasure(s, llen[v][ls], la);
 	for (int lc = 0; lc < la.size(); ++lc) {
-		SaveLyComments();
 		SendLyViz(1);
 		ly_ly_st += ev + GetLyLen(la[lc]);
 		if (lc < la.size() - 1 && ev != "r") ly_ly_st += "~";

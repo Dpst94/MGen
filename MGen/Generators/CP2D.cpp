@@ -61,6 +61,62 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	if (*sN == "harm_notation") {
 		LoadHarmNotation();
 	}
+	// Load HSP
+	if (*sN == "hsp_file") {
+		++parameter_found;
+		LoadHSP("configs\\harm\\" + *sV);
+	}
+}
+
+// Load harmonic sequence penalties
+void CP2D::LoadHSP(CString fname)
+{
+	//SET_READY_PERSIST(DP_hsp);
+	CString st, est;
+	vector<CString> ast;
+	int i = 0;
+	hsp.resize(7);
+	ifstream fs;
+	// Check file exists
+	if (!fileExists(fname)) {
+		est.Format("LoadHSP cannot find file: %s", fname);
+		WriteLog(5, est);
+		error = 1;
+		return;
+	}
+	fs.open(fname);
+	char pch[2550];
+	// Load header
+	fs.getline(pch, 2550);
+	while (fs.good()) {
+		i++;
+		// Get line
+		fs.getline(pch, 2550);
+		st = pch;
+		st.Trim();
+		if (st.Find(";") != -1) {
+			Tokenize(st, ast, ";");
+			if (ast.size() != 9) {
+				est.Format("Wrong column count at line in hsp file %s: '%s'", fname, st);
+				WriteLog(5, est);
+				error = 1;
+				return;
+			}
+			if (i > 7) {
+				est.Format("Wrong line count at line %d in hsp file %s: '%s'", i, fname, st);
+				WriteLog(5, est);
+				error = 1;
+				return;
+			}
+			hsp[i - 1].clear();
+			for (int x = 0; x < 7; ++x) {
+				hsp[i - 1].push_back(atoi(ast[x + 1]));
+			}
+		}
+	}
+	fs.close();
+	est.Format("LoadHSP loaded %d lines from %s", i, fname);
+	WriteLog(0, est);
 }
 
 // Load rules

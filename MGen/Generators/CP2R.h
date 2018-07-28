@@ -171,7 +171,6 @@ protected:
 	inline int FailLeapFill(int late_leap, int leap_prev, int child_leap);
 	inline int FailLeapMDC();
 	void GetMelodyInterval(int step1, int step2);
-	void ValidateFlags();
 	inline int FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, int csel2, int flag1, int flag2, int flag3, int flag4, int first_run);
 	inline int FailStagnation(int steps, int notes, int fl);
 	inline int FailMultiCulm();

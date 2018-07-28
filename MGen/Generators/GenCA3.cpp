@@ -446,8 +446,13 @@ void CGenCA3::Generate() {
 	CString st;
 	LoadLyShapes("configs\\ly\\shapes.csv");
 	if (HarmName[0].IsEmpty()) {
-		WriteLog(5, "Harmonic notation not loaded please check harm_notation parameter in configuration file");
+		WriteLog(5, "Harmonic notation not loaded: please check harm_notation parameter in configuration file");
 		error = 11;
+		return;
+	}
+	if (!hsp.size()) {
+		WriteLog(5, "Harmonic sequence penalty not loaded: please check hsp_file parameter in configuration file");
+		error = 12;
 		return;
 	}
 	if (musicxml_file == "") {
@@ -482,7 +487,6 @@ void CGenCA3::Generate() {
 			FillPause(step0, full_len, v);
 		}
 		AnalyseCP();
-		ValidateFlags();
 		SendCP();
 		SaveLyCP();
 		step0 += full_len;

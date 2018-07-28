@@ -83,6 +83,7 @@ public:
 protected:
 	void LoadSpecies(CString st);
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
+	void LoadHSP(CString fname);
 	void LoadRules(CString fname);
 	void ResizeRuleVariantVector(vector<vector<vector<vector<int>>>>& ve);
 	void ResizeRuleVariantVectorNegative(vector<vector<vector<vector<int>>>>& ve);
@@ -161,6 +162,7 @@ protected:
 	vector<vector<vector<vector<int>>>> accept; // [sp][vc][vp][rid]
 	vector<vector<vector<vector<int>>>> severity; // [sp][vc][vp][rid]
 	vector<int>* vaccept;
+	vector <vector <int>> hsp; // [pc][pc] Harmonic sequence penalty
 
 	// Parameters
 	int show_allowed_flags = 0; // Show even allowed flags(bold in rules.xlsm)

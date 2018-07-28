@@ -1296,27 +1296,6 @@ void CP2R::GetMelodyInterval(int step1, int step2) {
 	nmaxd[v] = CC_C(nmax[v], bn, mode);
 }
 
-void CP2R::ValidateFlags() {
-	for (v = 0; v < av_cnt; ++v) {
-		for (s = 0; s < c_len; ++s) {
-			if (flag[v][s].size()) {
-				// Note start is ok
-				if (s == fli[v][bli[v][s]]) continue;
-				// Downbeat is ok
-				if (!(s % npm)) continue;
-				for (int f = 0; f < flag[v][s].size(); ++f) {
-					GetFlag(f);
-					CString est;
-					est.Format("Detected flag at hidden position %d/%d: [%d] %s %s (%s)",
-						s, fsl[v][s][f], fl, accept[sp][vc][vp][fl] ? "+" : "-",
-						GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
-					WriteLog(5, est);
-				}
-			}
-		}
-	}
-}
-
 // Check if too many leaps
 int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, int csel2,
 	int flag1, int flag2, int flag3, int flag4, int first_run) {
@@ -2950,7 +2929,7 @@ int CP2R::FailHarm() {
 					hbcc.push_back(127);
 					hbc.push_back(0);
 					chm_alter.push_back(0);
-					// Reinitialize chord notes
+					// Reinitialize chord notes for new chord
 					for (v2 = 0; v2 < av_cnt; ++v2) {
 						ls = bli[v][s];
 						// Skip pauses
@@ -2988,7 +2967,7 @@ int CP2R::FailHarm() {
 	if (chm.size() && (chm[0] || hbc[0])) {
 		FLAGH(137, hli[0]);
 	}
-	//if (EvalHarm()) return 1;
+	if (EvalHarm()) return 1;
 	//if (FailTonicCP()) return 1;
 	return 0;
 }
@@ -3004,6 +2983,7 @@ int CP2R::EvalHarm() {
 	int wscount = 0;
 	int wtcount = 0;
 	int harm_end, found;
+	v = 0;
 	for (int i = 0; i < chm.size(); ++i) {
 		s = hli[i];
 		ls = bli[v][s];
@@ -3045,7 +3025,6 @@ int CP2R::EvalHarm() {
 				}
 			}
 			// Check harmonic penalty	
-			/*
 			pen1 = hsp[chm[i - 1]][chm[i]];
 			if (pen1 == 1) FLAGVL(77, s, hli[i - 1]);
 			if (pen1 == 2) {
@@ -3069,7 +3048,6 @@ int CP2R::EvalHarm() {
 			else {
 				p3c = 0;
 			}
-			*/
 		}
 		// Check letter repeat and miss
 		hrepeat_fired = 0;
