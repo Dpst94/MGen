@@ -145,6 +145,8 @@ protected:
 	inline void CheckReadyPersist(int id, int id2);
 	inline void CheckReadyPersist(int id, int id2, int id3);
 	inline int EvaluateCP();
+	inline int FailCross();
+	inline int FailOneCross(int cross_start);
 	inline int FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int mleapsteps, int flag1, int flag2, int flag3, int flag4);
 	inline void ClearFlags(int step1, int step2);
 	inline void GetPitchClass(int step1, int step2);

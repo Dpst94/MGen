@@ -420,6 +420,16 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<int>>> &ve) {
 	}
 }
 
+void CP2D::ResizeRuleVariantVector(vector<vector<vector<float>>> &ve) {
+	ve.resize(MAX_SPECIES + 1);
+	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+		ve[sp].resize(MAX_VC + 1);
+		for (int vc = 1; vc <= MAX_VC; ++vc) {
+			ve[sp][vc].resize(MAX_VP + 1);
+		}
+	}
+}
+
 void CP2D::ResizeRuleVariantVector(vector<vector<vector<RuleInfo2>>> &ve) {
 	ve.resize(MAX_SPECIES + 1);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
@@ -602,6 +612,12 @@ int CP2D::GetRuleParam(int sp, int vc, int vp, int rid, int type, int id) {
 	}
 }
 
+float CP2D::GetRuleParamF(int sp, int vc, int vp, int rid, int type, int id) {
+	int i1 = GetRuleParam(sp, vc, vp, rid, type, id);
+	int i2 = GetRuleParam(sp, vc, vp, rid, type, id + 1);
+	return  i1 + i2 * 1.0 / pow(10, NumDigits(i2));
+}
+
 // Parse rules
 void CP2D::ParseRules() {
 	long long time_start = CGLib::time();
@@ -637,6 +653,17 @@ void CP2D::SetRuleParam(vector<vector<vector<int>>> &par, int rid, int type, int
 		for (int vc = 1; vc <= MAX_VC; ++vc) {
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
 				par[sp][vc][vp] = GetRuleParam(sp, vc, vp, rid, type, id);
+			}
+		}
+	}
+}
+
+void CP2D::SetRuleParam(vector<vector<vector<float>>> &par, int rid, int type, int id) {
+	ResizeRuleVariantVector(par);
+	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+		for (int vc = 1; vc <= MAX_VC; ++vc) {
+			for (int vp = 0; vp <= MAX_VP; ++vp) {
+				par[sp][vc][vp] = GetRuleParamF(sp, vc, vp, rid, type, id);
 			}
 		}
 	}
@@ -696,6 +723,8 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(tonic_max_cp, 310, rsSubName, 0);
 	SetRuleParam(tonic_window_cp, 310, rsSubName, 1);
 	SetRuleParam(tonic_wei_inv, 310, rsSubComment, 0);
+	SetRuleParam(cross_max_len, 518, rsSubName, 0);
+	SetRuleParam(cross_max_len2, 519, rsSubName, 0);
 	notes_lrange.resize(4);
 	for (int rt = 0; rt < 4; ++rt) {
 		SetRuleParam(notes_lrange[rt], 434 + rt, rsSubName, 0);

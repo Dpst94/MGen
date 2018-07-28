@@ -1193,3 +1193,13 @@ void CGLib::ClearBit(unsigned char &ch, int bit) {
 int CGLib::GetBit(unsigned char ch, int bit) {
 	return (ch >> bit) & 1U;
 }
+
+int CGLib::NumDigits(int number) {
+	int digits = 0;
+	if (number < 0) digits = 1; // remove this line if '-' counts as a digit
+	while (number) {
+		number /= 10;
+		digits++;
+	}
+	return digits;
+}

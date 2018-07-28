@@ -88,6 +88,7 @@ protected:
 	void ResizeRuleVariantVector(vector<vector<vector<vector<int>>>>& ve);
 	void ResizeRuleVariantVectorNegative(vector<vector<vector<vector<int>>>>& ve);
 	void ResizeRuleVariantVector(vector<vector<vector<int>>>& ve);
+	void ResizeRuleVariantVector(vector<vector<vector<float>>>& ve);
 	void ResizeRuleVariantVector(vector<vector<vector<RuleInfo2>>> &ve);
 	void ResizeRuleVariantVectors2();
 	inline void SaveRuleVariant(int sp, int vc, int vp, int rid, CString rule, CString subrule, CString rule_com, CString subrule_com);
@@ -100,9 +101,11 @@ protected:
 	inline void ParseRule(int rid, int type);
 	inline void ParseRule2(int sp, int vc, int vp, int rid, int type);
 	inline int GetRuleParam(int sp, int vc, int vp, int rid, int type, int id);
+	inline float GetRuleParamF(int sp, int vc, int vp, int rid, int type, int id);
 	void ParseRules();
 
 	inline void SetRuleParam(vector<vector<vector<int>>>& par, int rid, int type, int id);
+	inline void SetRuleParam(vector<vector<vector<float>>>& par, int rid, int type, int id);
 
 	void SetRuleParams();
 
@@ -245,6 +248,8 @@ protected:
 	vector<vector<vector<int>>> tonic_window_cp; // Number of harmonies that are searched for number of tonic chords
 	vector<vector<vector<int>>> tonic_max_cp; // Maximum number of tonic chords that can be contained in tonic window
 	vector<vector<vector<int>>> tonic_wei_inv; // Percent of weight for inverted tonic chord
+	vector<vector<vector<float>>> cross_max_len; // Maximum length of voice crossing in measures
+	vector<vector<vector<float>>> cross_max_len2; // Maximum length of voice crossing in measures (red)
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
 	int c4p_last_notes2; // Last notes that can have leap c4p compensated (corrected with regard to measures)
 	int lclimax_notes; // Number of adjacent notes to calculate local climax

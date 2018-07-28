@@ -45,6 +45,7 @@ int CP2R::EvaluateCP() {
 			if (FailLastNotes()) return 1;
 		}
 		if (FailRetrInside()) return 1;
+		if (FailCross()) return 1;
 		if (FailPauses()) return 1;
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
 		if (FailLocalPiCount(notes_picount2[sp][av_cnt][0], min_picount2[sp][av_cnt][0], 345)) return 1;
@@ -101,6 +102,64 @@ int CP2R::EvaluateCP() {
 		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
 	}
 	if (FailHarm()) return 1;
+	return 0;
+}
+
+int CP2R::FailCross() {
+	int cross_start = -1;
+	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		for (s = 0; s < c_len; ++s) {
+			// Check if there is voice crossing
+			int is_cross;
+			if (cc[v][s] && cc[v2][s] && cc[v2][s] < cc[v][s]) is_cross = 1;
+			else is_cross = 0;
+			// Search for start of crossing
+			if (cross_start == -1) {
+				if (!is_cross) continue;
+				cross_start = s;
+			}
+			// Search for end of crossing
+			else {
+				if (!is_cross) {
+					if (FailOneCross(cross_start)) return 1;
+					cross_start = -1;
+				}
+			}
+		}
+		if (cross_start > -1) {
+			s = c_len - 1;
+			if (FailOneCross(cross_start)) return 1;
+		}
+	}
+	return 0;
+}
+
+int CP2R::FailOneCross(int cross_start) {
+	// Check crossing length
+	int clen = (s - cross_start) * 1.0 / npm;
+	if (clen > cross_max_len[sp][av_cnt][0]) {
+		if (clen > cross_max_len2[sp][av_cnt][0]) {
+			FLAGVL(519, cross_start, s);
+		}
+		else {
+			FLAGVL(518, cross_start, s);
+		}
+	}
+	// Check which voices cross
+	if (v2 - v > 1) {
+		int found = 0;
+		for (int i = cross_start; i <= s; ++i) {
+			for (int v3 = v + 1; v3 < v2; ++v3) {
+				if (cc[v3][i]) {
+					found = 1;
+					break;
+				}
+			}
+		}
+		if (found) {
+			FLAGVL(520, cross_start, s);
+		}
+	}
 	return 0;
 }
 
