@@ -45,6 +45,7 @@ int CP2R::EvaluateCP() {
 			if (FailLastNotes()) return 1;
 		}
 		if (FailRetrInside()) return 1;
+		if (FailPauses()) return 1;
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
 		if (FailLocalPiCount(notes_picount2[sp][av_cnt][0], min_picount2[sp][av_cnt][0], 345)) return 1;
 		if (FailLocalPiCount(notes_picount3[sp][av_cnt][0], min_picount3[sp][av_cnt][0], 346)) return 1;
@@ -2696,6 +2697,14 @@ int CP2R::FailSusCount() {
 int CP2R::FailNoteRepeat() {
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		if (cc[v][fli[v][ls]] == cc[v][fli[v][ls + 1]]) FLAGV(30, fli[v][ls]);
+	}
+	return 0;
+}
+
+// Detect pauses
+int CP2R::FailPauses() {
+	for (ls = 1; ls < fli_size[v]; ++ls) {
+		if (!cc[v][fli[v][ls]]) FLAGV(517, fli[v][ls]);
 	}
 	return 0;
 }
