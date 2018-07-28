@@ -319,6 +319,12 @@ CString CP2Ly::SendLySkips(int count) {
 	return lst;
 }
 
+CString CP2Ly::GetRealNoteNameCP(int no) {
+	int no2, oct, alter;
+	GetRealNote(no, bn, mode == 9, no2, oct, alter);
+	return NoteName[no2] + GetAlterName(alter);
+}
+
 void CP2Ly::SendLyHarm() {
 	CString st, lst;
 	//if (!ly_flags) return;
@@ -343,6 +349,20 @@ void CP2Ly::SendLyHarm() {
 		}
 		lst += "  \\pad-markup #0.4 \n";
 		st = GetHarmName(chm[hs], chm_alter[hs]);;
+		if (show_harmony_bass && hbc[hs] % 7 != chm[hs]) {
+			if (show_harmony_bass == 1) {
+				st += "/" +
+					GetRealNoteNameCP(hbcc[hs] % 12);
+			}
+			else {
+				if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 2) {
+					st += "6";
+				}
+				else {
+					st += "6/4";
+				}
+			}
+		}
 		st.Replace("#", " \"#\" ");
 		st.Replace("b", " \\raise #0.3 \\magnify #0.5 \\flat ");
 		if (st.Right(1) == "6") {
@@ -351,7 +371,7 @@ void CP2Ly::SendLyHarm() {
 		}
 		else if (st.Right(3) == "6/4") {
 			lst += "  \\concat { \n";
-			lst += "    \\general-align #Y #0.5 \"" + st.Left(st.GetLength() - 3) + "\"\n";
+			lst += "    \\general-align #Y #0.5 {" + st.Left(st.GetLength() - 3) + "}\n";
 			lst += "    \\teeny\n";
 			lst += "    \\override #'(baseline-skip . 1.5) \n";
 			lst += "    \\override #'(line-width . 100)  \n";

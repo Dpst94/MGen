@@ -358,7 +358,7 @@ protected:
 	CString GetAlterName(int alter);
 	CString GetRealNoteName(int no, int key, int mi);
 	static void GetMovingMax(vector<int>& arr, int k, vector<int>& lmax);
-}; 
+};
 
 // Pop front vector elements
 template<typename T> void CGLib::vpop_front(vector<T> &v, int count) {

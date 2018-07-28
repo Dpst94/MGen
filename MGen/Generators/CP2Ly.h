@@ -29,6 +29,7 @@ protected:
 
 private:
 	CString SendLySkips(int count);
+	CString GetRealNoteNameCP(int no);
 	void SendLyHarm();
 	void SendLyNoteNames();
 	void SendLyMistakes();

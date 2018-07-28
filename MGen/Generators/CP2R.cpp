@@ -2848,7 +2848,6 @@ void CP2R::GetHarm(vector<int> &chn, vector<int> &cchn) {
 int CP2R::FailHarm() {
 	CHECK_READY(DR_fli, DR_c, DR_pc);
 	SET_READY(DR_hli);
-	int ls1, ls2 = 0;
 	int s9;
 	int n, harm_conflict, hcount;
 	int last_b; // First harmony in measure has b
@@ -2880,7 +2879,7 @@ int CP2R::FailHarm() {
 		if (hli2.size() > 1) hli2[hli2.size() - 2] = hli[hli.size() - 1] - 1;
 		ha64.push_back(0);
 		// Set harmony bass to random
-		hbcc.push_back(0);
+		hbcc.push_back(127);
 		hbc.push_back(0);
 		chm.push_back(0);
 		chm_alter.push_back(0);
@@ -2917,13 +2916,13 @@ int CP2R::FailHarm() {
 		}
 		GetHarm(chn, cchn);
 		RemoveHarmDuplicate();
-		if (ls2 && hli2.size()) hli2[hli2.size() - 1] = fli2[v][ls2];
+		if (hli2.size()) hli2[hli2.size() - 1] = mea_end;
 	}
 	GetBhli();
-	//GetHarmBass();
+	GetHarmBass();
 	// Check first harmony not T
 	if (chm.size() && (chm[0] || hbc[0])) {
-		FLAGV(137, hli[0]);
+		FLAGH(137, hli[0]);
 	}
 	//if (EvalHarm()) return 1;
 	//if (FailTonicCP()) return 1;
@@ -3048,7 +3047,7 @@ int CP2R::FailTonicCP() {
 						fpenalty += severity[sp][av_cnt][0][310] + 1;
 					}
 					else {
-						FLAGV(310, s);
+						FLAGH(310, s);
 						fired = 1;
 					}
 				}
@@ -3089,7 +3088,7 @@ int CP2R::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat
 	}
 	if (count > repeat_letters && !hrepeat_fired) {
 		if (count == repeat_letters + 1) {
-			FLAGVL(flagr, s, hli[i - count + 1]);
+			FLAGHL(flagr, s, hli[i - count + 1]);
 			hrepeat_fired = 1;
 		}
 		else {
@@ -3098,7 +3097,7 @@ int CP2R::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat
 	}
 	if (wcount > miss_letters && !hmiss_fired) {
 		if (wcount == miss_letters + 1) {
-			FLAGVL(flagm, s, hli[i - wcount + 1]);
+			FLAGHL(flagm, s, hli[i - wcount + 1]);
 			hmiss_fired = 1;
 		}
 		else {
@@ -3131,16 +3130,18 @@ void CP2R::GetHarmBass() {
 		// 5th for 6/4 count
 		int q_prev = -1;
 		// Init habcc - lowest harmonic note, including audible or suggested
-		int habcc = hbcc[hs];
+		int habcc = 1000;
 		// Loop inside harmony
-		for (ls = bli[v][hli[hs]]; ls <= bli[v][hli2[hs]]; ++ls)
-			// Process all notes except for aux and pass (also second parts of suspensions)
-			if (msh[v][ls] > 0 || (sus[v][ls] )) { // && tivl[sus[v][ls]] > 0
+		for (v = 0; v < min(av_cnt, 2); ++v) {
+			for (ls = bli[v][hli[hs]]; ls <= bli[v][hli2[hs]]; ++ls) {
 				s = fli[v][ls];
+				// Skip pauses
+				if (!cc[v][s]) continue;
 				nt = c[v][s] % 7;
 				// Do not process notes that are not harmonic
 				if (nt != de1 && nt != de2 && nt != de3) continue;
-				if (hbcc[hs] <= cc[0][s]) continue;
+				// Process only lower notes
+				if (hbcc[hs] <= cc[v][s]) continue;
 				if (nt == de3) {
 					if (beat[v][ls] <= 1) {
 						hbcc[hs] = cc[0][s];
@@ -3168,12 +3169,13 @@ void CP2R::GetHarmBass() {
 					}
 				}
 				else {
-					hbcc[hs] = cc[0][s];
-					hbc[hs] = c[0][s];
+					hbcc[hs] = cc[v][s];
+					hbc[hs] = c[v][s];
 					// Clear audible 64 if current note is lower than it
-					if (ha64[hs] && cc[0][s] < habcc) ha64[hs] = 0;
+					if (ha64[hs] && cc[v][s] < habcc) ha64[hs] = 0;
 				}
 			}
+		}
 	}
 }
 

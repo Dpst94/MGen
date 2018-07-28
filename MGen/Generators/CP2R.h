@@ -77,6 +77,24 @@
 #define pPDD 3 // Passing downbeat dissonance
 
 // Report violation and save link inside voice
+#define FLAGH(id, s) do { \
+  ASSERT_RULE(id);  \
+  if (skip_flags && !(*vaccept)[id]) return 1;  \
+	flag[0][s].push_back(id);  \
+	fsl[0][s].push_back(s);  \
+	fvl[0][s].push_back(0);  \
+} while (0)
+
+// Report violation and save link inside voice
+#define FLAGHL(id, s, s2) do { \
+  ASSERT_RULE(id);  \
+  if (skip_flags && !(*vaccept)[id]) return 1;  \
+	flag[0][s].push_back(id);  \
+	fsl[0][s].push_back(s2);  \
+	fvl[0][s].push_back(0);  \
+} while (0)
+
+// Report violation and save link inside voice
 #define FLAGV(id, s) do { \
   ASSERT_RULE(id);  \
   if (skip_flags && !(*vaccept)[id]) return 1;  \
