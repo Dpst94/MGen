@@ -2959,9 +2959,20 @@ int CP2R::FailHarm() {
 		}
 		GetHarm(chn, cchn);
 		RemoveHarmDuplicate();
+		// If penultimate measure
+		if (ms == mli.size() - 2 && hcount) {
+			// Prohibit D or DVII harmony in penultimate measure before non-D / DVII harmony
+			if (chm.size() > 1 && (chm[chm.size() - 2] == 4 || chm[chm.size() - 2] == 6) &&
+				(chm[chm.size() - 1] != 4 && chm[chm.size() - 1] != 6)) FLAGH(322, hli[chm.size() - 1]);
+		}
 		if (hli2.size()) hli2[hli2.size() - 1] = mea_end;
 	}
 	GetBhli();
+	// Check penultimate harmony not D / DVII
+	if (ep2 == c_len && hli.size() > 1) {
+		hs = hli.size() - 2;
+		if (chm[hs] != 4 && chm[hs] != 6) FLAGH(335, hli[hs]);
+	}
 	GetHarmBass();
 	// Check first harmony not T
 	if (chm.size() && (chm[0] || hbc[0])) {
