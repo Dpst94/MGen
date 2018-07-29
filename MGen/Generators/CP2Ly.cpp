@@ -15,7 +15,7 @@ CP2Ly::~CP2Ly() {
 
 CString CP2Ly::GetLyNoteCP() {
 	int no2, oct, alter;
-	GetRealNote(cc[v][s], bn, mode == 9, no2, oct, alter);
+	GetRealNote(cc[v][s], maj_bn, 0, no2, oct, alter);
 	return LyNoteSharp[no2] + GetLyAlter(alter) + LyOctave[oct];
 }
 
@@ -290,7 +290,7 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += "     \n";
 		//ly_ly_st += "    \\override #'(line-width . 100)  \n";
 		ly_ly_st += st;
-		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key " + LyMajorKey[(fifths * 7 + 12*12) % 12] + "\n";
+		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key " + LyMajorKey[maj_bn] + "\n";
 		ly_ly_st += "  \\major\n";
 		read_file_sv("configs\\ly\\staff.ly", sv);
 		for (int i = 0; i < sv.size(); ++i) {

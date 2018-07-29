@@ -541,7 +541,7 @@ void CGenCA3::GetCPKey() {
 		}
 	}
 	// Convert fifths with base note to mode
-	maj_bn = (fifths * 7) % 12;
+	maj_bn = (fifths * 7 + 12*12) % 12;
 	mode = (bn - maj_bn + 12) % 12;
 	// Find used notes
 	vector<int> unote;
