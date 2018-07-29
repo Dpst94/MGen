@@ -260,7 +260,10 @@ void CP2Ly::SaveLyCP() {
 		cp_id + 1, bname_from_path(musicxml_file));
 	ly_ly_st += st + " Key: " + key_visual;
 	ly_ly_st += " " + mode_name[mode];
-	//if (mode == 9) ly_ly_st += " minor";
+	if (mode == 9) {
+		if (mminor) ly_ly_st += " (melodic)";
+		else ly_ly_st += " (natural)";
+	}
 	//else if (mode == 0) ly_ly_st += " major";
 	/*
 	ly_ly_st += ", Species: ";
