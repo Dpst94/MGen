@@ -119,8 +119,10 @@ int CGenCA3::XML_to_CP() {
 	vector<vector<CString>> it; // Intermediate text vector
 	vector<int> ifi; // Intermediate fifths vector
 	vector<int> ibl; // Intermediate barlines vector
+	vector<vector<int>> ial; // Intermediate alterations vector
 
 	av_cnt = xfi.voice.size();
+	ial.resize(av_cnt);
 	InitAnalysis();
 	cp_tempo = 0;
 	vname.resize(av_cnt);
@@ -144,6 +146,7 @@ int CGenCA3::XML_to_CP() {
 				it[v].resize(pos + ln);
 				ifi.resize(pos + ln, 100);
 				cc[v].resize(pos + ln);
+				ial[v].resize(pos + ln);
 				retr[v].resize(pos + ln);
 				if (xfi.note[vi][m][ni].tempo && !cp_tempo)
 					cp_tempo = xfi.note[vi][m][ni].tempo;
@@ -159,6 +162,7 @@ int CGenCA3::XML_to_CP() {
 				}
 				for (int s = 0; s < ln; ++s) {
 					cc[v][pos + s] = xfi.note[vi][m][ni].pitch;
+					ial[v][pos + s] = xfi.note[vi][m][ni].alter;
 				}
 				// Get fifths
 				ifi[pos] = xfi.note[vi][m][ni].fifths;
@@ -206,6 +210,7 @@ int CGenCA3::XML_to_CP() {
 				while (!im[s1] && s1 > 0) --s1;
 				// Create new cp_id
 				cp.resize(cp_id + 1);
+				cp_alter.resize(cp_id + 1);
 				cp_retr.resize(cp_id + 1);
 				cp_vid.resize(cp_id + 1);
 				cp_mea.resize(cp_id + 1);
@@ -214,6 +219,7 @@ int CGenCA3::XML_to_CP() {
 				cp_error.resize(cp_id + 1);
 				// Fill new cp_id
 				cp[cp_id].resize(av_cnt);
+				cp_alter[cp_id].resize(av_cnt);
 				cp_retr[cp_id].resize(av_cnt);
 				cp_vid[cp_id].resize(av_cnt);
 				// Set measures
@@ -224,6 +230,7 @@ int CGenCA3::XML_to_CP() {
 				// Copy notes
 				for (int v = 0; v < av_cnt; ++v) {
 					cp[cp_id][v].resize(s2 - s1 + 1);
+					cp_alter[cp_id][v].resize(s2 - s1 + 1);
 					cp_retr[cp_id][v].resize(s2 - s1 + 1);
 					cp_vid[cp_id][v] = v;
 					for (int s3 = s1; s3 <= s2; ++s3) {
@@ -240,6 +247,7 @@ int CGenCA3::XML_to_CP() {
 							}
 						}
 						cp[cp_id][v][s3 - s1] = cc[v][s3];
+						cp_alter[cp_id][v][s3 - s1] = ial[v][s3];
 						cp_retr[cp_id][v][s3 - s1] = retr[v][s3];
 						if (!cp_text[cp_id].IsEmpty() && !it[v][s3].IsEmpty()) cp_text[cp_id] += ",";
 						cp_text[cp_id] += it[v][s3];
@@ -267,6 +275,7 @@ int CGenCA3::XML_to_CP() {
 		for (int v = av_cnt-1; v >= 0; --v) {
 			if (empty[v]) {
 				verase(cp[cp_id], v);
+				verase(cp_alter[cp_id], v);
 				verase(cp_retr[cp_id], v);
 				verase(cp_vid[cp_id], v);
 			}
@@ -322,6 +331,7 @@ int CGenCA3::GetCP() {
 	CString est;
 	av_cnt = cp[cp_id].size();
 	cc.resize(av_cnt);
+	src_alter.resize(av_cnt);
 	retr.resize(av_cnt);
 	c_len = cp[cp_id][0].size();
 	mli.clear();
@@ -351,10 +361,12 @@ int CGenCA3::GetCP() {
 	if (!npm) npm = c_len;
 	for (v = 0; v < av_cnt; ++v) {
 		cc[v].resize(c_len);
+		src_alter[v].resize(c_len);
 		retr[v].resize(c_len);
 		vid[v] = cp_vid[cp_id][v];
 		for (int s = 0; s < c_len; ++s) {
 			cc[v][s] = cp[cp_id][v][s];
+			src_alter[v][s] = cp_alter[cp_id][v][s];
 			retr[v][s] = cp_retr[cp_id][v][s];
 		}
 	}

@@ -15,7 +15,14 @@ CP2Ly::~CP2Ly() {
 
 CString CP2Ly::GetLyNoteCP() {
 	int no2, oct, alter;
-	GetRealNote(cc[v][s], maj_bn, 0, no2, oct, alter);
+	if (src_alter[v][s]) {
+		no2 = (cc[v][s] - src_alter[v][s]) % 12;
+		alter = src_alter[v][s];
+		oct = (cc[v][s] - src_alter[v][s]) / 12;
+	}
+	else {
+		GetRealNote(cc[v][s], maj_bn, 0, no2, oct, alter);
+	}
 	return LyNoteSharp[no2] + GetLyAlter(alter) + LyOctave[oct];
 }
 

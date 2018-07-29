@@ -24,6 +24,7 @@ private:
 	XFIn xfi;
 
 	vector<vector<vector<int>>> cp; // [cp_id][v][s]
+	vector<vector<vector<int>>> cp_alter; // [cp_id][v][s]
 	vector<vector<vector<int>>> cp_retr; // [cp_id][v][s]
 	vector<vector<int>> cp_mea; // [cp_id][s]
 	vector<vector<int>> cp_vid; // [cp_id][s] voice id

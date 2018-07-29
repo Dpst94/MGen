@@ -297,6 +297,7 @@ protected:
 	vector<float> decc; // [s] CC deviation
 	vector<float> decc2; // [s] CC deviation smoothed
 	vector<float> maw; // [] Moving average weight
+	vector<vector<int>> src_alter; // [v][s] Alteration for each note in source file
 
 	// FailLeap local variables
 	int leap_start; // Step where leap starts
