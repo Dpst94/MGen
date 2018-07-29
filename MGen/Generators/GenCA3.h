@@ -20,6 +20,8 @@ private:
 	int GetCPSpecies();
 	void SaveLy(CString dir, CString fname) override;
 	void GetCPKey();
+	void GetVocalRanges();
+	void GetPossibleVocalRanges(vector<int>& vocra_poss);
 	void AnalyseCP();
 
 	XFIn xfi;

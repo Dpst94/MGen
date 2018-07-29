@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../stdafx.h"
 #include "CP2D.h"
+#include "../GLibrary/CsvDb.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW 
@@ -26,6 +27,31 @@ CP2D::CP2D() {
 }
 
 CP2D::~CP2D() {
+}
+
+void CP2D::LoadVocalRanges(CString fname) {
+	CString est;
+	// Check file exists
+	if (!fileExists(fname)) {
+		est.Format("LoadVocalRanges cannot find file: %s", fname);
+		WriteLog(5, est);
+		error = 1;
+		return;
+	}
+	CCsvDb cdb;
+	est = cdb.Open(fname);
+	if (est != "") WriteLog(5, est);
+	est = cdb.Select();
+	if (est != "") WriteLog(5, est);
+	for (int i = 0; i < cdb.result.size(); ++i) {
+		int vr_id = atoi(cdb.result[i]["id"]);
+		vocra_info.resize(max(vocra_info.size(), vr_id + 1));
+		vocra_info[vr_id].name = cdb.result[i]["name"];
+		vocra_info[vr_id].max_cc = atoi(cdb.result[i]["max_cc"]);
+		vocra_info[vr_id].min_cc = atoi(cdb.result[i]["min_cc"]);
+		vocra_info[vr_id].high_cc = atoi(cdb.result[i]["high_cc"]);
+		vocra_info[vr_id].low_cc = atoi(cdb.result[i]["low_cc"]);
+	}
 }
 
 void CP2D::LoadSpecies(CString st) {
@@ -70,11 +96,15 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 		++parameter_found;
 		LoadHSP("configs\\harm\\" + *sV);
 	}
+	// Load vocal ranges
+	if (*sN == "vocal_ranges_file") {
+		++parameter_found;
+		LoadVocalRanges("configs\\" + *sV);
+	}
 }
 
 // Load harmonic sequence penalties
-void CP2D::LoadHSP(CString fname)
-{
+void CP2D::LoadHSP(CString fname) {
 	//SET_READY_PERSIST(DP_hsp);
 	CString st, est;
 	vector<CString> ast;

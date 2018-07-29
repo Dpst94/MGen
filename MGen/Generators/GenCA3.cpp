@@ -623,12 +623,96 @@ void CGenCA3::GetCPKey() {
 			mminor = 1;
 		}
 	}
-	// TODO: Select better key if alterations do not fit
+	// TODO: Select better key if alterations do not fit, while preserving bn
+}
+
+void CGenCA3::GetVocalRanges() {
+	CString est;
+	// Get vocal ranges from part names
+	vector<int> vocra_used;
+	vocra_used.resize(vocra_info.size());
+	vocra.clear();
+	vocra.resize(av_cnt);
+	vocra_detected.clear();
+	vocra_detected.resize(av_cnt);
+	for (v = 0; v < av_cnt; ++v) {
+		vi = vid[v];
+		CString st;
+		st = vname[vi];
+		st.MakeLower();
+		if (st == "soprano") {
+			vocra[v] = vrSop;
+			++vocra_used[vrSop];
+			vocra_detected[v] = 1;
+		}
+		if (st == "alto") {
+			vocra[v] = vrAlt;
+			++vocra_used[vrAlt];
+			vocra_detected[v] = 1;
+		}
+		if (st == "tenor") {
+			vocra[v] = vrTen;
+			++vocra_used[vrTen];
+			vocra_detected[v] = 1;
+		}
+		if (st == "bass") {
+			vocra[v] = vrBas;
+			++vocra_used[vrBas];
+			vocra_detected[v] = 1;
+		}
+	}
+	// Get note ranges
+	for (v = 0; v < av_cnt; ++v) {
+		GetMelodyInterval(0, c_len);
+	}
+	// Detect other vocal ranges
+	vector<int> vocra_poss;
+	for (v = 0; v < av_cnt; ++v) if (!vocra_detected[v]) {
+		if (av_cnt < vocra_info.size()) {
+			GetPossibleVocalRanges(vocra_poss);
+			for (int vr = 1; vr < vocra_info.size(); ++vr) {
+				if (vocra_poss[vr]) {
+					if (!vocra_used[vr]) {
+						vocra[v] = vr;
+						++vocra_used[vr];
+						vocra_detected[v] = 2;
+						break;
+					}
+				}
+			}
+			if (!vocra_detected[v]) {
+				for (int vr = 1; vr < vocra_info.size(); ++vr) {
+					if (vocra_poss[vr]) {
+						vocra[v] = vr;
+						++vocra_used[vr];
+						vocra_detected[v] = 2;
+						break;
+					}
+				}
+			}
+		}
+	}
+	for (v = 0; v < av_cnt; ++v) if (!vocra_detected[v]) {
+		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s. Please specify vocal range in instrument name in source file %s",
+			cp_id + 1, vid[v], vname[vid[v]], musicxml_file);
+		WriteLog(5, est);
+	}
+}
+
+void CGenCA3::GetPossibleVocalRanges(vector<int> &vocra_poss) {
+	vocra_poss.clear();
+	vocra_poss.resize(vocra_info.size());
+	for (int vr = 1; vr < vocra_info.size(); ++vr) {
+		if (nmin[v] >= vocra_info[vr].min_cc && nmax[v] <= vocra_info[vr].max_cc) {
+			vocra_poss[vr] = 1;
+		}
+	}
 }
 
 void CGenCA3::AnalyseCP() {
 	skip_flags = 0;
 	GetCPKey();
+	GetVocalRanges();
 	EvaluateCP();
 }
 

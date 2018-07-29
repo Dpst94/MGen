@@ -19,6 +19,13 @@
 #define rsComment 2 // Rule comment
 #define rsSubComment 3 // Subrule comment
 
+// Vocal ranges
+#define vrUndef 0 // Undefined
+#define vrBas 1 // Bass
+#define vrTen 2 // Tenor
+#define vrAlt 3 // Alto
+#define vrSop 4 // Soprano
+
 // Voice pair types
 #define vpExt 0 // Extreme voices (bass and highest)
 #define vpBas 1 // Bass + non-highest voice
@@ -37,6 +44,15 @@ const int sp_nlen[] = {
 	2, // 3
 	4, // 4
 	1 // 5
+};
+
+// Vocal range information
+struct VocalRangeInfo {
+	CString name;
+	int min_cc; // Absolute minimum
+	int max_cc; // Absolute maximum
+	int high_cc; // Above this cc is high range
+	int low_cc; // Below this cc is low range
 };
 
 // This information is specific to rule
@@ -79,6 +95,7 @@ public:
 	~CP2D();
 
 protected:
+	void LoadVocalRanges(CString fname);
 	void LoadSpecies(CString st);
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void LoadHSP(CString fname);
@@ -266,6 +283,9 @@ protected:
 
 	// Main vectors
 	vector<int> vid; // [v] Voice id for each voice
+	vector<int> vocra; // [v] Vocal range for each voice
+	vector<int> vocra_detected; // [v] 1 - detected by instrument name; 2 - detected by notes range
+	vector<VocalRangeInfo> vocra_info; // [v] Information loaded for each vocal range
 	vector<int> vca; // [s] Voice count for each step
 	vector<int> hva; // [s] Highest voice for this step
 	vector<int> lva; // [s] Lowest voice for this step
