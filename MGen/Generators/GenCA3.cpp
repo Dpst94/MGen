@@ -147,7 +147,8 @@ int CGenCA3::XML_to_CP() {
 				retr[v].resize(pos + ln);
 				if (xfi.note[vi][m][ni].tempo && !cp_tempo)
 					cp_tempo = xfi.note[vi][m][ni].tempo;
-				if (!xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].tie_stop) retr[v][pos] = 1;
+				if (pos && !xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].tie_stop &&
+					xfi.note[vi][m][ni].pitch == cc[v][pos - 1]) retr[v][pos] = 1;
 				// Check lowest note
 				if (!xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].pitch) {
 					CString est;
