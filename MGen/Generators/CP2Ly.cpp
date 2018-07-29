@@ -290,9 +290,8 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += "     \n";
 		//ly_ly_st += "    \\override #'(line-width . 100)  \n";
 		ly_ly_st += st;
-		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key " + key + "\n";
-		if (mode == 9) ly_ly_st += "  \\minor\n";
-		else ly_ly_st += "  \\major\n";
+		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key " + LyMajorKey[(fifths * 7 + 12*12) % 12] + "\n";
+		ly_ly_st += "  \\major\n";
 		read_file_sv("configs\\ly\\staff.ly", sv);
 		for (int i = 0; i < sv.size(); ++i) {
 			ly_ly_st += sv[i] + "\n";
