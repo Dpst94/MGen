@@ -515,7 +515,7 @@ void CP2R::GetDiatonic(int step1, int step2) {
 	for (int v = 0; v < av_cnt; ++v) {
 		for (int s = step1; s < step2; ++s) {
 			if (cc[v][s]) {
-				c[v][s] = CC_C(cc[v][s], bn, mode);
+				c[v][s] = cc_c[cc[v][s]];
 			}
 			else {
 				c[v][s] = 0;
@@ -1372,8 +1372,8 @@ void CP2R::GetMelodyInterval(int step1, int step2) {
 		if (cc[v][i] > nmax[v]) nmax[v] = cc[v][i];
 	}
 	// Calculate diatonic limits
-	nmind[v] = CC_C(nmin[v], bn, mode);
-	nmaxd[v] = CC_C(nmax[v], bn, mode);
+	nmind[v] = cc_c[nmin[v]];
+	nmaxd[v] = cc_c[nmax[v]];
 }
 
 // Check if too many leaps
@@ -2901,7 +2901,7 @@ int CP2R::FailRetrInside() {
 }
 
 // Take vector of diatonic notes and detect most possible chord
-void CP2R::GetHarm(vector<int> &chn, vector<int> &cchn) {
+void CP2R::GetHarm(vector<int> &chn, vector<int> &cchn, int &lchm, int &lchm_alter) {
 	int max_rat = -10000;
 	for (int x = 0; x < 7; ++x) {
 		// No root note
@@ -2917,19 +2917,20 @@ void CP2R::GetHarm(vector<int> &chn, vector<int> &cchn) {
 		// II note means other chord
 		if (chn[(x + 1) % 7]) rat -= 100;
 		if (rat > max_rat) {
-			chm[hs] = x;
+			lchm = x;
 			max_rat = rat;
 		}
 	}
+	lchm_alter = 0;
 	if (mminor) {
 		// Detect altered chord if note is part of chord
-		if (((cchn[11] && chm[hs] && chm[hs] % 2 == 0) ||
-			(cchn[9] && chm[hs] % 2)))
-			chm_alter[hs] = 1;
+		if (((cchn[11] && lchm && lchm % 2 == 0) ||
+			(cchn[9] && lchm % 2)))
+			lchm_alter = 1;
 		// Detect unaltered chord if note is part of chord
-		if (((cchn[10] && chm[hs] && chm[hs] % 2 == 0) ||
-			(cchn[8] && chm[hs] % 2)))
-			chm_alter[hs] = -1;
+		if (((cchn[10] && lchm && lchm % 2 == 0) ||
+			(cchn[8] && lchm % 2)))
+			lchm_alter = -1;
 	}
 }
 
@@ -2997,7 +2998,7 @@ int CP2R::FailHarm() {
 				// Find harmonic conflict
 				if (s > mli[ms] && (chn[(n + 1) % 7] || chn[(n + 6) % 7] ||
 					(chn[n] && !cchn[pcc[v][s9]]))) {
-					GetHarm(chn, cchn);
+					GetHarm(chn, cchn, chm[hs], chm_alter[hs]);
 					RemoveHarmDuplicate();
 					// More than two harmonies
 					if (hcount) FLAGHL(40, s, mli[ms]);
@@ -3057,7 +3058,7 @@ int CP2R::FailHarm() {
 				++cchn[pcc[v][s9]];
 			}
 		}
-		GetHarm(chn, cchn);
+		GetHarm(chn, cchn, chm[hs], chm_alter[hs]);
 		RemoveHarmDuplicate();
 		// If penultimate measure
 		if (ms == mli.size() - 2 && hcount) {

@@ -12,6 +12,7 @@ public:
 
 private:
 	void InitAnalysis();
+	void GetAnalysisVectors();
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	int XML_to_CP();
 	int CheckXML();

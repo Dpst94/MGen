@@ -108,6 +108,14 @@ void CGenCA3::InitAnalysis() {
 	}
 }
 
+// Init vectors needed for analysis
+void CGenCA3::GetAnalysisVectors() {
+	bn = 0;
+	mode = 0;
+	mminor = 0;
+	CreateLinks();
+}
+
 void CGenCA3::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	LoadVar(sN, sV, "musicxml_file", &musicxml_file);
 
@@ -494,7 +502,7 @@ void CGenCA3::Generate() {
 		int real_len = cc[0].size();
 		int full_len = floor((real_len + 1) / 8 + 1) * 8;
 		InitAnalysis();
-		CreateLinks();
+		GetAnalysisVectors();
 		if (GetCPSpecies()) continue;
 		for (int v = 0; v < v_cnt; ++v) {
 			FillPause(step0, full_len, v);
@@ -545,16 +553,37 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 void CGenCA3::GetCPKey() {
 	CString est;
 	fifths = cp_fi[cp_id];
+	// Detect major base note
+	maj_bn = (fifths * 7 + 12 * 12) % 12;
+	// Temporarily set base note to major base note for last chord detection
+	bn = maj_bn;
+	mode = 0;
+	BuildPitchConvert();
+	// Get diatonic pitch class for chord detection
+	GetDiatonic(0, c_len);
+	GetPitchClass(0, c_len);
 	// Get base note as last note in bass
 	for (s = c_len - 1; s >= 0; ++s) {
 		if (cc[0][s]) {
-			bn = cc[0][s] % 12;
+			//bn = cc[0][s] % 12;
+			// Collect notes from all voices
+			vector<int> chn, cchn;
+			chn.resize(7);
+			cchn.resize(12);
+			for (v = 0; v < av_cnt; ++v) {
+				++chn[pc[v][s]];
+				++cchn[pcc[v][s]];
+			}
+			int lchm;
+			int lchm_alter;
+			GetHarm(chn, cchn, lchm, lchm_alter);
+			bn = c_cc[lchm + 14] % 12;
 			break;
 		}
 	}
-	// Convert fifths with base note to mode
-	maj_bn = (fifths * 7 + 12*12) % 12;
+	// Set mode
 	mode = (bn - maj_bn + 12) % 12;
+	BuildPitchConvert();
 	// Find used notes
 	vector<int> unote;
 	unote.resize(12);

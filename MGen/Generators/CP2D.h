@@ -13,8 +13,6 @@
 // Voice pairs (0 = lowest + highest, 1 = lowest + non-highest, 2 = non-lowest + non-highest)
 #define MAX_VP 2
 
-#define CC_C(note, bn, mode) ( (chrom_to_dia[(note + 12 - bn + mode) % 12] - chrom_to_dia[mode] + 7) % 7 + ((note + 12 - bn) / 12) * 7)
-
 // Rule string types
 #define rsName 0 // Rule name
 #define rsSubName 1 // Subrule name
@@ -120,6 +118,10 @@ protected:
 	CString GetHarmName(int pitch, int alter);
 
 	static CString GetPrintKey(int lbn, int lmode, int mminor = -1);
+
+	void TestCC_C2();
+
+	void BuildPitchConvert();
 
 	int max_rule = 0;
 	int av_cnt = 0;
@@ -357,5 +359,9 @@ protected:
 	vector <vector <int>> g_leaped; // [s] Number or leaped notes in window
 
 	int cp_id = 0;
+
+	// Pitch convert
+	vector <int> cc_c;
+	vector <int> c_cc;
 };
 
