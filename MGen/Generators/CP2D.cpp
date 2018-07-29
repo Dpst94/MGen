@@ -858,3 +858,24 @@ CString CP2D::GetHarmName(int pitch, int alter) {
 	else return HarmName[pitch];
 }
 
+CString CP2D::GetPrintKey(int lbn, int lmode, int mminor) {
+	CString st, key, key_visual;
+	// Key
+	if (lmode == 9) {
+		key = LyMinorKey[lbn];
+	}
+	else {
+		key = LyMajorKey[lbn];
+	}
+	key_visual = key[0];
+	key_visual.MakeUpper();
+	if (key[1] == 'f') key_visual += "b";
+	if (key[1] == 's') key_visual += "#";
+	st = key_visual;
+	st += " " + mode_name[lmode];
+	if (mminor > -1) {
+		if (mminor) st += " (melodic)";
+		else st += " (natural)";
+	}
+	return st;
+}

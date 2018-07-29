@@ -530,6 +530,7 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 }
 
 void CGenCA3::GetCPKey() {
+	CString est;
 	fifths = cp_fi[cp_id];
 	// Get base note as last note in bass
 	for (s = c_len - 1; s >= 0; ++s) {
@@ -541,12 +542,46 @@ void CGenCA3::GetCPKey() {
 	// Convert fifths with base note to mode
 	maj_bn = (fifths * 7) % 12;
 	mode = (bn - maj_bn + 12) % 12;
-	// TODO: Find alterations
+	// Find used notes
+	vector<int> unote;
+	unote.resize(12);
+	mminor = 0;
+	int detected_mminor = 0;
+	int wrong_alt = 0;
+	for (int v = 0; v < av_cnt; ++v) {
+		for (int s = 0; s < c_len; ++s) {
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			// Count note stats
+			++unote[cc[v][s] % 12];
+			// Check if note is allowed
+			int maj_note = (cc[v][s] - bn + 12 + mode) % 12;
+			if (maj_note == 8 || maj_note == 6) {
+				detected_mminor = 1;
+			}
+			if (maj_note == 1 || maj_note == 3 || maj_note == 10) {
+				wrong_alt = 1;
+			}
+		}
+	}
+	// Detect chromatic collisions
+	if (wrong_alt) {
+		est.Format("In counterpoint %d specified key was %s, but detected alterations (major I#, II# or VI#) cannot be used in this key. Please check source file",
+			cp_id + 1, GetPrintKey(bn, mode));
+		WriteLog(5, est);
+	}
+	// Detect mminor
+	if (detected_mminor) {
+		if (mode != 9) {
+			est.Format("Detected melodic minor alterations in counterpoint %d (major IV# or V#), but specified key was %s. This is impossible. Please check source file",
+				cp_id + 1, GetPrintKey(bn, mode));
+			WriteLog(5, est);
+		}
+		else {
+			mminor = 1;
+		}
+	}
 	// TODO: Select better key if alterations do not fit
-	// TODO: If mode == 9, detect mminor using alterations
-	// Always select melodic minor if minor mode
-	if (mode == 9) mminor = 1;
-	else mminor = 0;
 }
 
 void CGenCA3::AnalyseCP() {

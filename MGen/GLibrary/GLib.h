@@ -53,7 +53,7 @@ const int int_meaning[] = { 0, -1, 0, -1, 0, 1, -1 };
 const int dia_to_chrom[] = { 0, 2, 4, 5, 7, 9, 11 };
 //                           C     D     E  F     G     A     B
 const int chrom_to_dia[] = { 0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6 };
-const int diatonic[] = { 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1 };
+const int diatonic[] =     { 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1 };
 const int m_dia_to_chrom[] = { 0, 2, 3, 5, 7, 8, 10 };
 //                             A     B  C     D     E  F     G
 const int m_chrom_to_dia[] = { 0, 0, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6 };

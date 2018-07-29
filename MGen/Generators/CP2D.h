@@ -119,6 +119,8 @@ protected:
 
 	CString GetHarmName(int pitch, int alter);
 
+	static CString GetPrintKey(int lbn, int lmode, int mminor = -1);
+
 	int max_rule = 0;
 	int av_cnt = 0;
 	int c_len = 0;

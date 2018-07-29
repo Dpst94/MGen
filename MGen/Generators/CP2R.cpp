@@ -36,17 +36,20 @@ int CP2R::EvaluateCP() {
 		sp = vsp[v];
 		vaccept = &accept[sp][av_cnt][0];
 		GetMelodyInterval(0, c_len);
+		// Analysis
 		FailStartPause();
+		if (FailRetrInside()) return 1;
+		if (FailMode()) return 1;
+		if (FailPauses()) return 1;
 		if (FailNoteLen()) return 1;
 		if (FailBeat()) return 1;
+
 		if (av_cnt == 1) {
 			if (FailNoteRepeat()) return 1;
 			if (FailFirstNotes()) return 1;
 			if (FailLastNotes()) return 1;
 		}
-		if (FailRetrInside()) return 1;
 		if (FailCross()) return 1;
-		if (FailPauses()) return 1;
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
 		if (FailLocalPiCount(notes_picount2[sp][av_cnt][0], min_picount2[sp][av_cnt][0], 345)) return 1;
 		if (FailLocalPiCount(notes_picount3[sp][av_cnt][0], min_picount3[sp][av_cnt][0], 346)) return 1;
@@ -102,6 +105,22 @@ int CP2R::EvaluateCP() {
 		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
 	}
 	if (FailHarm()) return 1;
+	return 0;
+}
+
+int CP2R::FailMode() {
+	for (ls = 0; ls < fli_size[v]; ++ls) {
+		s = fli[v][ls];
+		int maj_note = (cc[v][s] - bn + 12 + mode) % 12;
+		if (maj_note == 8 || maj_note == 6) {
+			if (!mminor) {
+				FLAGV(521, s);
+			}
+		}
+		if (maj_note == 1 || maj_note == 3 || maj_note == 10) {
+			FLAGV(521, s);
+		}
+	}
 	return 0;
 }
 
