@@ -691,9 +691,7 @@ void CGenCA3::ScanVocalRanges() {
 			continue;
 		}
 		if (need_exit) return;
-		LogVector("vpos", cp_id * 100 + sv, 0, av_cnt, vpos, "log\\temp.log");
-		//LogCantus("cc", 0, ep2, m_cc);
-		//LogCantus(chm);
+		//LogVector("vpos", cp_id * 100 + sv, 0, av_cnt, vpos, "log\\temp.log");
 		EvalVocalRanges();
 		if (min_penalty > vocra_penalty) {
 			best_vocra = vocra;
@@ -737,7 +735,7 @@ void CGenCA3::EvalVocalRanges() {
 	}
 	for (int vr = 1; vr < 5; ++vr) {
 		if (vocra_used[vr] > 1) {
-			vocra_penalty += vocra_used[vr] * vocra_used[vr] + (4 - vr);
+			vocra_penalty += vocra_used[vr] * vocra_used[vr] + (5 - vr);
 		}
 	}
 }
