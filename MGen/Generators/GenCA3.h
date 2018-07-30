@@ -22,6 +22,7 @@ private:
 	void GetCPKey();
 	void GetVocalRanges();
 	void ScanVocalRanges();
+	inline void EvalVocalRanges();
 	void GetPossibleVocalRanges();
 	void AnalyseCP();
 

@@ -676,18 +676,12 @@ void CGenCA3::GetVocalRanges() {
 void CGenCA3::ScanVocalRanges() {
 	int sv = 0;
 	int finished = 0;
-	int found = 0;
-	int hcycle = 0;
-	int last_flag = 0;
-	int last_flag2 = 0;
-	int max_p = 0;
-	int max_p2 = 0;
+	cycle = 0;
 	vector<int> vpos;
 	vector<int> best_vocra;
 	int min_penalty = 1000000;
 	vocra_penalty = 1000000;
 	vpos.resize(av_cnt);
-	//LogCantus(pc);
 	vocra[sv] = vocra_p[sv][vpos[sv]];
 	while (true) {
 	check:
@@ -700,7 +694,7 @@ void CGenCA3::ScanVocalRanges() {
 		LogVector("vpos", cp_id * 100 + sv, 0, av_cnt, vpos, "log\\temp.log");
 		//LogCantus("cc", 0, ep2, m_cc);
 		//LogCantus(chm);
-		//EvalVocalRanges(sv);
+		EvalVocalRanges();
 		if (min_penalty > vocra_penalty) {
 			best_vocra = vocra;
 			min_penalty = vocra_penalty;
@@ -722,15 +716,29 @@ void CGenCA3::ScanVocalRanges() {
 		// Increase rightmost element, which was not reset to minimum
 		++vpos[sv];
 		vocra[sv] = vocra_p[sv][vpos[sv]];
-		// Ignore variants with decreasing ranges
-		if (sv && vocra[sv] < vocra[sv - 1]) {
-			sv = av_cnt - 1;
-		}
-		else {
-			// Go to rightmost element
-			sv = av_cnt - 1;
-		}
+		// Go to rightmost element
+		sv = av_cnt - 1;
 		++cycle;
+	}
+	vocra = best_vocra;
+	for (v = 0; v < av_cnt; ++v) {
+		if (vocra_detected[v] == 0) vocra_detected[v] = 2;
+	}
+}
+
+void CGenCA3::EvalVocalRanges() {
+	vocra_penalty = 0;
+	fill(vocra_used.begin(), vocra_used.end(), 0);
+	for (v = 0; v < av_cnt; ++v) {
+		// Prohibit decreasing vocal ranges
+		if (v && vocra[v] < vocra[v - 1]) vocra_penalty += 100;
+		// Stats 
+		++vocra_used[vocra[v]];
+	}
+	for (int vr = 1; vr < 5; ++vr) {
+		if (vocra_used[vr] > 1) {
+			vocra_penalty += vocra_used[vr] * vocra_used[vr] + (4 - vr);
+		}
 	}
 }
 
