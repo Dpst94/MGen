@@ -76,6 +76,13 @@ void CP2Ly::AddNLinkForeign(int f) {
 				GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
 			WriteLog(5, est);
 		}
+		if (fsl[v][s][f] != fli[v][bli[v][fsl[v][s][f]]] && fsl[v][s][f] % npm) {
+			CString est;
+			est.Format("Detected flag at hidden position %d-%d voice %d counterpoint %d: [%d] %s %s (%s)",
+				s, fsl[v][s][f], v, cp_id + 1, fl, accept[sp][vc][vp][fl] ? "+" : "-",
+				GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
+			WriteLog(5, est);
+		}
 	}
 	int s3 = s;
 	int s4 = fsl[v][s][f];
