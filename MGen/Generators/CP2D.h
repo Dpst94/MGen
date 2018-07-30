@@ -140,6 +140,8 @@ protected:
 
 	void BuildPitchConvert();
 
+	void LogVector(CString print_st, int print_int, int x1, int x2, vector<int>& c, CString fname);
+
 	int max_rule = 0;
 	int av_cnt = 0;
 	int c_len = 0;
@@ -281,14 +283,19 @@ protected:
 	vector <CString> HarmName_m;
 	vector <CString> HarmName_ma;
 
-	// Main vectors
+	// Voice vectors
 	vector<int> vid; // [v] Voice id for each voice
 	vector<int> vocra; // [v] Vocal range for each voice
 	vector<int> vocra_detected; // [v] 1 - detected by instrument name; 2 - detected by notes range
+	vector<int> vocra_used; // [v] how many times vocal range is used
+	int vocra_penalty;
+	vector<vector<int>> vocra_p; // [v] if vocal range is possible, it is in vector
 	vector<VocalRangeInfo> vocra_info; // [v] Information loaded for each vocal range
 	vector<int> vca; // [s] Voice count for each step
 	vector<int> hva; // [s] Highest voice for this step
 	vector<int> lva; // [s] Lowest voice for this step
+
+	// Main vectors
 	vector<int> mli; // [s] Links to measure start step
 	vector<int> bmli; // [s] Links from step to measure
 	vector<vector<int>> c; // [v][s] Diatonic
@@ -310,8 +317,8 @@ protected:
 	vector<int> nstat; // [c]
 	vector<int> nstat2; // [c]
 	vector<int> nstat3; // [c]
-	vector<vector<int>> dtp; // [v] Distance to closest pause in notes
-	vector<vector<int>> dtp_s; // [v] Distance to closest pause in notes
+	vector<vector<int>> dtp; // [v][ls] Distance to closest pause in notes
+	vector<vector<int>> dtp_s; // [v][ls] Distance to closest pause in notes
 	vector<float> macc; // [s] CC moving average
 	vector<float> macc2; // [s] CC moving average smoothed
 	int macc_range = 0; // Steps outside window used to build macc
@@ -383,5 +390,8 @@ protected:
 	// Pitch convert
 	vector <int> cc_c;
 	vector <int> c_cc;
+
+	// Scan
+	long long cycle = 0; // Cycle number of full scan
 };
 

@@ -629,7 +629,6 @@ void CGenCA3::GetCPKey() {
 void CGenCA3::GetVocalRanges() {
 	CString est;
 	// Get vocal ranges from part names
-	vector<int> vocra_used;
 	vocra_used.resize(vocra_info.size());
 	vocra.clear();
 	vocra.resize(av_cnt);
@@ -665,33 +664,8 @@ void CGenCA3::GetVocalRanges() {
 	for (v = 0; v < av_cnt; ++v) {
 		GetMelodyInterval(0, c_len);
 	}
-	// Detect other vocal ranges
-	vector<int> vocra_poss;
-	for (v = 0; v < av_cnt; ++v) if (!vocra_detected[v]) {
-		if (av_cnt < vocra_info.size()) {
-			GetPossibleVocalRanges(vocra_poss);
-			for (int vr = 1; vr < vocra_info.size(); ++vr) {
-				if (vocra_poss[vr]) {
-					if (!vocra_used[vr]) {
-						vocra[v] = vr;
-						++vocra_used[vr];
-						vocra_detected[v] = 2;
-						break;
-					}
-				}
-			}
-			if (!vocra_detected[v]) {
-				for (int vr = 1; vr < vocra_info.size(); ++vr) {
-					if (vocra_poss[vr]) {
-						vocra[v] = vr;
-						++vocra_used[vr];
-						vocra_detected[v] = 2;
-						break;
-					}
-				}
-			}
-		}
-	}
+	GetPossibleVocalRanges();
+	ScanVocalRanges();
 	for (v = 0; v < av_cnt; ++v) if (!vocra_detected[v]) {
 		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s. Please specify vocal range in instrument name in source file %s",
 			cp_id + 1, vid[v], vname[vid[v]], musicxml_file);
@@ -699,12 +673,80 @@ void CGenCA3::GetVocalRanges() {
 	}
 }
 
-void CGenCA3::GetPossibleVocalRanges(vector<int> &vocra_poss) {
-	vocra_poss.clear();
-	vocra_poss.resize(vocra_info.size());
-	for (int vr = 1; vr < vocra_info.size(); ++vr) {
-		if (nmin[v] >= vocra_info[vr].min_cc && nmax[v] <= vocra_info[vr].max_cc) {
-			vocra_poss[vr] = 1;
+void CGenCA3::ScanVocalRanges() {
+	int sv = 0;
+	int finished = 0;
+	int found = 0;
+	int hcycle = 0;
+	int last_flag = 0;
+	int last_flag2 = 0;
+	int max_p = 0;
+	int max_p2 = 0;
+	vector<int> vpos;
+	vector<int> best_vocra;
+	int min_penalty = 1000000;
+	vocra_penalty = 1000000;
+	vpos.resize(av_cnt);
+	//LogCantus(pc);
+	vocra[sv] = vocra_p[sv][vpos[sv]];
+	while (true) {
+	check:
+		if (sv < av_cnt - 1) {
+			++sv;
+			vocra[sv] = vocra_p[sv][vpos[sv]];
+			continue;
+		}
+		if (need_exit) return;
+		LogVector("vpos", cp_id * 100 + sv, 0, av_cnt, vpos, "log\\temp.log");
+		//LogCantus("cc", 0, ep2, m_cc);
+		//LogCantus(chm);
+		//EvalVocalRanges(sv);
+		if (min_penalty > vocra_penalty) {
+			best_vocra = vocra;
+			min_penalty = vocra_penalty;
+		}
+	skip:
+		while (true) {
+			if (vpos[sv] < vocra_p[sv].size() - 1) break;
+			// If current element is max, make it minimum
+			vpos[sv] = 0;
+			vocra[sv] = vocra_p[sv][0];
+			// Move left one element
+			if (!sv) {
+				finished = 1;
+				break;
+			}
+			--sv;
+		} 
+		if (finished) break;
+		// Increase rightmost element, which was not reset to minimum
+		++vpos[sv];
+		vocra[sv] = vocra_p[sv][vpos[sv]];
+		// Ignore variants with decreasing ranges
+		if (sv && vocra[sv] < vocra[sv - 1]) {
+			sv = av_cnt - 1;
+		}
+		else {
+			// Go to rightmost element
+			sv = av_cnt - 1;
+		}
+		++cycle;
+	}
+}
+
+void CGenCA3::GetPossibleVocalRanges() {
+	vocra_p.resize(av_cnt);
+	for (v = 0; v < av_cnt; ++v) {
+		vocra_p[v].clear();
+		if (vocra_detected[v] == 1) {
+			vocra_p[v].push_back(vocra[v]);
+		}
+		else {
+			for (int vr = 1; vr < vocra_info.size(); ++vr) {
+				if (nmin[v] >= vocra_info[vr].min_cc && nmax[v] <= vocra_info[vr].max_cc) {
+					vocra_p[v].push_back(vr);
+				}
+			}
 		}
 	}
 }

@@ -1071,3 +1071,14 @@ void CP2D::BuildPitchConvert() {
 		if (!cc_c[cn]) cc_c[cn] = cc_c[cn - 1];
 	}
 }
+
+void CP2D::LogVector(CString print_st, int print_int, int x1, int x2, vector<int> &c, CString fname) {
+	CString st, st2;
+	st2.Format("%s %d: ", print_st, print_int);
+	for (int i = x1; i < x2; ++i) {
+		st.Format("%d ", c[i]);
+		st2 += st;
+	}
+	CGLib::AppendLineToFile(fname, st2 + " \n");
+}
+

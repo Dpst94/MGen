@@ -21,7 +21,8 @@ private:
 	void SaveLy(CString dir, CString fname) override;
 	void GetCPKey();
 	void GetVocalRanges();
-	void GetPossibleVocalRanges(vector<int>& vocra_poss);
+	void ScanVocalRanges();
+	void GetPossibleVocalRanges();
 	void AnalyseCP();
 
 	XFIn xfi;
