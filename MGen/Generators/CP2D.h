@@ -295,6 +295,10 @@ protected:
 	vector<int> hva; // [s] Highest voice for this step
 	vector<int> lva; // [s] Lowest voice for this step
 
+	// Intervals
+	int civl; // Chromatic interval between voices
+	int civlc; // Chromatic interval class between voices
+
 	// Main vectors
 	vector<int> mli; // [s] Links to measure start step
 	vector<int> bmli; // [s] Links from step to measure

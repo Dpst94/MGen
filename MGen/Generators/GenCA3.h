@@ -20,11 +20,11 @@ private:
 	int GetCPSpecies();
 	void SaveLy(CString dir, CString fname) override;
 	void GetCPKey();
-	void GetVocalRanges();
+	int GetVocalRanges();
 	void ScanVocalRanges();
 	inline void EvalVocalRanges();
 	void GetPossibleVocalRanges();
-	void AnalyseCP();
+	int AnalyseCP();
 
 	XFIn xfi;
 

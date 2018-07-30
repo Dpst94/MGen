@@ -97,6 +97,7 @@ int CP2R::EvaluateCP() {
 		}
 		GetBasicMsh();
 		ApplyFixedPat();
+		if (FailVIntervals()) return 1;
 		if (mminor) {
 			if (FailMinorStepwise()) return 1;
 		}
@@ -3371,3 +3372,45 @@ int CP2R::FailVocalRangesConflict() {
 	}
 	return 0;
 }
+
+int CP2R::FailVIntervals() {
+	CHECK_READY(DR_fli, DR_msh, DR_sus);
+	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		for (ls = 1; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			s2 = fli2[v][ls];
+			civl = abs(cc[v][s] - cc[v2][s]);
+			if (civl && civl % 12 == 0) civlc = 12;
+			else civlc = civl % 12;
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			if (FailPco()) return 1;
+		}
+	}
+	return 0;
+}
+
+int CP2R::FailPco() {
+	if (civlc == 7 || civlc == 12 || civlc == 0) {
+		// Prohibit leading tone octave
+		if (pcc[v][s] == 11 && pcc[v2][s] == 11) {
+			// Downbeat
+			if (!beat[v][ls]) FLAG(324, s, v2);
+			// Leaps
+			else if (s > 0 && (leap[v][s - 1] || leap[v2][s - 1])) FLAG(324, s, v2);
+			else if (ls < fli_size[v] - 1 && (leap[v][fli2[v][ls]] || leap[v2][fli2[v2][bli[v2][s]]]))
+				FLAG(324, s, v2);
+			// Suspension resolution
+			else if (mshb[v][ls] > 0 || mshb[v2][bli[v2][s]]) FLAG(324, s, v2);
+		}
+		// Do not prohibit parallel first - first (this is for sus notes, which starts are parallel)
+		// because they are detected as pco apart now
+		// Prohibit parallel last - first
+		if (civl == cc[v2][fli2[v2][bli[v2][s] - 1]] - cc[v][fli2[v][ls - 1]]) {
+			if (civlc == 7) FLAGL(84, isus[v][ls - 1], s, v2);
+			else FLAGL(481, isus[v][ls - 1], s, v2);
+		}
+	}
+	return 0;
+}
+

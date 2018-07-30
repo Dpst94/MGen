@@ -504,10 +504,10 @@ void CGenCA3::Generate() {
 		InitAnalysis();
 		GetAnalysisVectors();
 		if (GetCPSpecies()) continue;
+		if (AnalyseCP()) continue;
 		for (int v = 0; v < v_cnt; ++v) {
 			FillPause(step0, full_len, v);
 		}
-		AnalyseCP();
 		SendCP();
 		SaveLyCP();
 		step0 += full_len;
@@ -626,7 +626,7 @@ void CGenCA3::GetCPKey() {
 	// TODO: Select better key if alterations do not fit, while preserving bn
 }
 
-void CGenCA3::GetVocalRanges() {
+int CGenCA3::GetVocalRanges() {
 	CString est;
 	// Get vocal ranges from part names
 	vocra_used.resize(vocra_info.size());
@@ -665,12 +665,20 @@ void CGenCA3::GetVocalRanges() {
 		GetMelodyInterval(0, c_len);
 	}
 	GetPossibleVocalRanges();
+	for (v = 0; v < av_cnt; ++v) if (!vocra_p[v].size()) {
+		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s: too wide",
+			cp_id + 1, vid[v], vname[vid[v]]);
+		WriteLog(5, est);
+		error = 16;
+		return 1;
+	}
 	ScanVocalRanges();
 	for (v = 0; v < av_cnt; ++v) if (!vocra_detected[v]) {
 		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s. Please specify vocal range in instrument name in source file %s",
 			cp_id + 1, vid[v], vname[vid[v]], musicxml_file);
 		WriteLog(5, est);
 	}
+	return 0;
 }
 
 void CGenCA3::ScanVocalRanges() {
@@ -756,14 +764,21 @@ void CGenCA3::GetPossibleVocalRanges() {
 					vocra_p[v].push_back(vr);
 				}
 			}
+			if (!vocra_p[v].size()) {
+				if (nmin[v] < vocra_info[vrBas].min_cc && nmax[v] <= vocra_info[vrBas].max_cc)
+					vocra_p[v].push_back(vrBas);
+				else if (nmin[v] >= vocra_info[vrSop].min_cc && nmax[v] > vocra_info[vrSop].max_cc)
+					vocra_p[v].push_back(vrSop);
+			}
 		}
 	}
 }
 
-void CGenCA3::AnalyseCP() {
+int CGenCA3::AnalyseCP() {
 	skip_flags = 0;
 	GetCPKey();
-	GetVocalRanges();
+	if (GetVocalRanges()) return 1;
 	EvaluateCP();
+	return 0;
 }
 
