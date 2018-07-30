@@ -258,21 +258,19 @@ void CP2R::SendComment(int pos, int x, int i) {
 		if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) continue;
 		// Do not send if ignored
 		if (severity[sp][vc][vp][fl] < show_min_severity) continue;
-		if (!i) {
-			if (!accept[sp][vc][vp][fl]) st = "- ";
-			else if (accept[sp][vc][vp][fl] == -1) st = "$ ";
-			else st = "+ ";
-			com = st + GetRuleName(fl, sp, vc, vp) + " (" + GetSubRuleName(fl, sp, vc, vp) + ")";
-			if (show_severity) {
-				st.Format(" [%d/%d] (%d:%d)", fl, severity[sp][vc][vp][fl], fsl[v][x][f], fvl[v][x][f]);
-				com += st;
-			}
-			if (GetRuleComment(fl, sp, vc, vp) != "") com += ". " + GetRuleComment(fl, sp, vc, vp);
-			if (GetSubRuleComment(fl, sp, vc, vp) != "") com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
-			//com += ". ";
-			comment[pos][v].push_back(com);
-			ccolor[pos][v].push_back(sev_color[severity[sp][vc][vp][fl]]);
+		if (!accept[sp][vc][vp][fl]) st = "- ";
+		else if (accept[sp][vc][vp][fl] == -1) st = "$ ";
+		else st = "+ ";
+		com = st + GetRuleName(fl, sp, vc, vp) + " (" + GetSubRuleName(fl, sp, vc, vp) + ")";
+		if (show_severity) {
+			st.Format(" [%d/%d] (%d:%d)", fl, severity[sp][vc][vp][fl], fsl[v][x][f], fvl[v][x][f]);
+			com += st;
 		}
+		if (GetRuleComment(fl, sp, vc, vp) != "") com += ". " + GetRuleComment(fl, sp, vc, vp);
+		if (GetSubRuleComment(fl, sp, vc, vp) != "") com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
+		//com += ". ";
+		comment[pos][v].push_back(com);
+		ccolor[pos][v].push_back(sev_color[severity[sp][vc][vp][fl]]);
 		// Set note color if this is maximum flag severity
 		if (severity[sp][vc][vp][fl] > current_severity && severity[sp][vc][vp][fl] >= show_min_severity
 			&& ruleinfo[fl].viz != vHarm) {
@@ -3407,8 +3405,8 @@ int CP2R::FailPco() {
 		// because they are detected as pco apart now
 		// Prohibit parallel last - first
 		if (civl == cc[v2][fli2[v2][bli[v2][s] - 1]] - cc[v][fli2[v][ls - 1]]) {
-			if (civlc == 7) FLAGL(84, isus[v][ls - 1], s, v2);
-			else FLAGL(481, isus[v][ls - 1], s, v2);
+			if (civlc == 7) FLAGL(84, max(isus[v][ls - 1], isus[v2][bli[v2][s] - 1]), s, v2);
+			else FLAGL(481, max(isus[v][ls - 1], isus[v2][bli[v2][s] - 1]), s, v2);
 		}
 	}
 	return 0;

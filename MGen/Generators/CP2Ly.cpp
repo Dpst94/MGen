@@ -34,11 +34,15 @@ void CP2Ly::AddNLink(int f) {
 		// Downbeat is ok
 		if (s != fli[v][bli[v][s]] && s % npm) {
 			CString est;
-			est.Format("Detected flag at hidden position %d-%d voice %d: [%d] %s %s (%s)",
-				s, fsl[v][s][f], v, fl, accept[sp][vc][vp][fl] ? "+" : "-",
+			est.Format("Detected flag at hidden position %d-%d voice %d counterpoint %d: [%d] %s %s (%s)",
+				s, fsl[v][s][f], v, cp_id+1, fl, accept[sp][vc][vp][fl] ? "+" : "-",
 				GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
 			WriteLog(5, est);
 		}
+	}
+	int s2 = s;
+	if (ruleinfo[fl].viz == vGlis) {
+		s2 = isus[v][bli[v][s]];
 	}
 	// Send comments and color only if rule is not ignored
 	if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) return;
@@ -46,13 +50,13 @@ void CP2Ly::AddNLink(int f) {
 	if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) return;
 	// Do not send if ignored
 	if (severity[sp][vc][vp][fl] < show_min_severity) return;
-	lyi[s].nflags.push_back(fl);
-	lyi[s].fsev.push_back(severity[sp][vc][vp][fl]);
-	lyi[s].nfl.push_back(fsl[v][s][f] - s);
-	lyi[s].nfn.push_back(ly_flags + 1);
-	lyi[s].only_shape.push_back(0);
-	lyi[s].nfs.push_back(0);
-	lyi[s].nfc.push_back("");
+	lyi[s2].nflags.push_back(fl);
+	lyi[s2].fsev.push_back(severity[sp][vc][vp][fl]);
+	lyi[s2].nfl.push_back(fsl[v][s][f] - s2);
+	lyi[s2].nfn.push_back(ly_flags + 1);
+	lyi[s2].only_shape.push_back(0);
+	lyi[s2].nfs.push_back(0);
+	lyi[s2].nfc.push_back("");
 	++ly_flags;
 	++ly_vflags;
 }

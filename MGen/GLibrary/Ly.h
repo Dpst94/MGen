@@ -213,7 +213,7 @@ const int viz_space[MAX_VIZ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 };
 const int viz_singlenote[MAX_VIZ] = { 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1 };
 
 // For each visualisation, specify if it can go at any position or only at note start / measure start
-const int viz_anyposition[MAX_VIZ] = { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+const int viz_anyposition[MAX_VIZ] = { 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
 
 class CLy :
 	public MFOut
