@@ -37,7 +37,8 @@ private:
 	void SendLyViz(int phase);
 	void SaveLyComments();
 	CString GetLyNoteCP();
-	void AddNLink(int f);
+	inline void AddNLink(int f);
+	inline void AddNLinkForeign(int f);
 	void ParseNLinks();
 	void SetLyShape(int s1, int s2, int f, int fl, int sev, int vtype);
 	void ClearLyShape(int s1, int s2, int vtype);

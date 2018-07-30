@@ -35,14 +35,16 @@ void CP2Ly::AddNLink(int f) {
 		if (s != fli[v][bli[v][s]] && s % npm) {
 			CString est;
 			est.Format("Detected flag at hidden position %d-%d voice %d counterpoint %d: [%d] %s %s (%s)",
-				s, fsl[v][s][f], v, cp_id+1, fl, accept[sp][vc][vp][fl] ? "+" : "-",
+				s, fsl[v][s][f], v, cp_id + 1, fl, accept[sp][vc][vp][fl] ? "+" : "-",
 				GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
 			WriteLog(5, est);
 		}
 	}
-	int s2 = s;
+	int s3 = s;
+	int s4 = fsl[v][s][f];
 	if (ruleinfo[fl].viz == vGlis) {
-		s2 = isus[v][bli[v][s]];
+		s3 = isus[v][bli[v][s]];
+		s4 = isus[v][bli[v][fsl[v][s][f]]];
 	}
 	// Send comments and color only if rule is not ignored
 	if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) return;
@@ -50,15 +52,50 @@ void CP2Ly::AddNLink(int f) {
 	if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) return;
 	// Do not send if ignored
 	if (severity[sp][vc][vp][fl] < show_min_severity) return;
-	lyi[s2].nflags.push_back(fl);
-	lyi[s2].fsev.push_back(severity[sp][vc][vp][fl]);
-	lyi[s2].nfl.push_back(fsl[v][s][f] - s2);
-	lyi[s2].nfn.push_back(ly_flags + 1);
-	lyi[s2].only_shape.push_back(0);
-	lyi[s2].nfs.push_back(0);
-	lyi[s2].nfc.push_back("");
+	lyi[s3].nflags.push_back(fl);
+	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
+	lyi[s3].nfl.push_back(s4 - s3);
+	lyi[s3].nfn.push_back(ly_flags + 1);
+	lyi[s3].only_shape.push_back(0);
+	lyi[s3].nfs.push_back(0);
+	lyi[s3].nfc.push_back("");
 	++ly_flags;
 	++ly_vflags;
+}
+
+void CP2Ly::AddNLinkForeign(int f) {
+	GetFlag(f);
+	// Check if this shape is not allowed at hidden position
+	if (!viz_anyposition[ruleinfo[fl].viz]) {
+		// Note start is ok
+		// Downbeat is ok
+		if (s != fli[v][bli[v][s]] && s % npm) {
+			CString est;
+			est.Format("Detected flag at hidden position %d-%d voice %d counterpoint %d: [%d] %s %s (%s)",
+				s, fsl[v][s][f], v, cp_id + 1, fl, accept[sp][vc][vp][fl] ? "+" : "-",
+				GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
+			WriteLog(5, est);
+		}
+	}
+	int s3 = s;
+	int s4 = fsl[v][s][f];
+	if (ruleinfo[fl].viz == vGlis) {
+		s3 = isus[v2][bli[v2][s]];
+		s4 = isus[v2][bli[v2][fsl[v][s][f]]];
+	}
+	// Send comments and color only if rule is not ignored
+	if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) return;
+	// Send comments and color only if rule is not ignored
+	if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) return;
+	// Do not send if ignored
+	if (severity[sp][vc][vp][fl] < show_min_severity) return;
+	lyi[s3].nflags.push_back(fl);
+	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
+	lyi[s3].nfl.push_back(s4 - s3);
+	lyi[s3].nfn.push_back(0);
+	lyi[s3].only_shape.push_back(0);
+	lyi[s3].nfs.push_back(0);
+	lyi[s3].nfc.push_back("");
 }
 
 void CP2Ly::ParseNLinks() {
@@ -66,6 +103,14 @@ void CP2Ly::ParseNLinks() {
 	for (int f = 0; f < flag[v][s].size(); ++f) {
 		AddNLink(f);
 	}
+	v2 = v;
+	for (v = 0; v < av_cnt; ++v) if (v != v2) {
+		for (int f = 0; f < flag[v][s].size(); ++f) {
+			if (fvl[v][s][f] != v2) continue;
+			AddNLinkForeign(f);
+		}
+	}
+	v = v2;
 }
 
 void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype) {
@@ -471,6 +516,7 @@ void CP2Ly::SendLyMistakes() {
 			ly_ly_st += "...\n";
 		}
 		for (int f = max_mist; f >= 0; --f) {
+			if (!lyi[s].nfn[f]) continue;
 			int fl = lyi[s].nflags[f];
 			int sev = lyi[s].fsev[f];
 			st.Format("        \\with-color #(rgb-color " +
@@ -542,6 +588,7 @@ void CP2Ly::SaveLyComments() {
 		note_st += st + "\n}\n";
 		found = 0;
 		for (int c = 0; c < lyi[s].nflags.size(); ++c) {
+			if (!lyi[s].nfn[c]) continue;
 			// Do not process foreign flags
 			if (lyi[s].only_shape[c]) break;
 			int fl = lyi[s].nflags[c];
