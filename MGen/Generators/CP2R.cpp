@@ -32,6 +32,7 @@ int CP2R::EvaluateCP() {
 	GetVca();
 	GetLClimax();
 	GetLeapSmooth();
+	if (FailVocalRanges()) return 1;
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		vaccept = &accept[sp][av_cnt][0];
@@ -44,6 +45,7 @@ int CP2R::EvaluateCP() {
 		if (FailNoteLen()) return 1;
 		if (FailBeat()) return 1;
 
+		if (FailVocalRangesConflict()) return 1;
 		if (av_cnt == 1) {
 			if (FailNoteRepeat()) return 1;
 			if (FailFirstNotes()) return 1;
@@ -261,7 +263,7 @@ void CP2R::SendComment(int pos, int x, int i) {
 			else st = "+ ";
 			com = st + GetRuleName(fl, sp, vc, vp) + " (" + GetSubRuleName(fl, sp, vc, vp) + ")";
 			if (show_severity) {
-				st.Format(" [%d/%d]", fl, severity[sp][vc][vp][fl]);
+				st.Format(" [%d/%d] (%d:%d)", fl, severity[sp][vc][vp][fl], fsl[v][x][f], fvl[v][x][f]);
 				com += st;
 			}
 			if (GetRuleComment(fl, sp, vc, vp) != "") com += ". " + GetRuleComment(fl, sp, vc, vp);
@@ -3333,3 +3335,39 @@ void CP2R::GetHarmBass() {
 	}
 }
 
+int CP2R::FailVocalRanges() {
+	for (v = 0; v < av_cnt; ++v) {
+		// Prohibit decreasing vocal ranges
+		if (v && vocra[v] < vocra[v - 1]) FLAGV(523, 0);
+	}
+	return 0;
+}
+
+int CP2R::FailVocalRangesConflict() {
+	int conf_start = -1;
+	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		for (s = 0; s < c_len; ++s) {
+			// Check if there is range conflict
+			int is_conf = 0;
+			if (cc[v][s] > vocra_info[vocra[v]].high_cc && cc[v2][s] < vocra_info[vocra[v2]].low_cc) is_conf = 1;
+			else if (cc[v2][s] > vocra_info[vocra[v2]].high_cc && cc[v][s] < vocra_info[vocra[v]].low_cc) is_conf = 1;
+			// Search for start of conflict
+			if (conf_start == -1) {
+				if (!is_conf) continue;
+				conf_start = s;
+			}
+			// Search for end of conflict
+			else {
+				if (!is_conf) {
+					FLAGL(524, fli[v][bli[v][conf_start]], fli[v][bli[v][s - 1]], v2);
+					conf_start = -1;
+				}
+			}
+		}
+		if (conf_start > -1) {
+			s = c_len - 1;
+			FLAGL(524, fli[v][bli[v][conf_start]], fli[v][bli[v][s - 1]], v2);
+		}
+	}
+	return 0;
+}

@@ -112,6 +112,24 @@
 	fvl[v][s].push_back(v);  \
 } while (0)
 
+// Report violation and save link inside voice
+#define FLAG(id, s, v2) do { \
+  ASSERT_RULE(id);  \
+  if (skip_flags && !(*vaccept)[id]) return 1;  \
+	flag[v][s].push_back(id);  \
+	fsl[v][s].push_back(s);  \
+	fvl[v][s].push_back(v2);  \
+} while (0)
+
+// Report violation and save link inside voice
+#define FLAGL(id, s, s2, v2) do { \
+  ASSERT_RULE(id);  \
+  if (skip_flags && !(*vaccept)[id]) return 1;  \
+	flag[v][s].push_back(id);  \
+	fsl[v][s].push_back(s2);  \
+	fvl[v][s].push_back(v2);  \
+} while (0)
+
 class CP2R :
 	public CP2D
 {
@@ -222,5 +240,7 @@ protected:
 	inline int FailHarmStep(int i, const int * hv, int & count, int & wcount, int repeat_letters, int miss_letters, int flagr, int flagm);
 	inline void GetBhli();
 	inline void GetHarmBass();
+	inline int FailVocalRanges();
+	inline int FailVocalRangesConflict();
 };
 

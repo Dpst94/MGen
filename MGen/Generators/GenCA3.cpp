@@ -718,9 +718,12 @@ void CGenCA3::ScanVocalRanges() {
 		sv = av_cnt - 1;
 		++cycle;
 	}
+	// Recalculate vocal ranges
 	vocra = best_vocra;
+	fill(vocra_used.begin(), vocra_used.end(), 0);
 	for (v = 0; v < av_cnt; ++v) {
 		if (vocra_detected[v] == 0) vocra_detected[v] = 2;
+		++vocra_used[vocra[v]];
 	}
 }
 
