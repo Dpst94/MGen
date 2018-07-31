@@ -201,7 +201,7 @@ void CP2Ly::InitLyI() {
 			}
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
 			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
-			// Set interval
+			// Set interval if not debugexpect. If debugexpect, do not set for red flags
 			if (!ly_debugexpect || sev != 100) {
 				if (ruleinfo[fl].viz_int == 1) {
 					SetLyShape(s1, s2, f, fl, sev, vInterval);
@@ -211,6 +211,15 @@ void CP2Ly::InitLyI() {
 				}
 				if (ruleinfo[fl].viz_int == 3) {
 					SetLyShape(s2, s2, f, fl, sev, vInterval);
+				}
+				if (ruleinfo[fl].viz_harm == 1) {
+					SetLyShape(s1, s2, f, fl, sev, vHarm);
+				}
+				if (ruleinfo[fl].viz_harm == 2) {
+					SetLyShape(s1, s1, f, fl, sev, vHarm);
+				}
+				if (ruleinfo[fl].viz_harm == 3) {
+					SetLyShape(s2, s2, f, fl, sev, vHarm);
 				}
 			}
 			if (!viz_can_overlap[vtype]) {
@@ -377,6 +386,9 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += "\n  }\n";
 		ly_ly_st += "}\n";
 		SendLyMistakes();
+		if (v == av_cnt - 1) {
+			SendLySeparate();
+		}
 		SendLyNoteNames();
 		//SendLyIntervals();
 	}
@@ -391,6 +403,10 @@ void CP2Ly::SaveLyCP() {
 	}
 	if (ly_st.size() <= cp_id) ly_st.resize(cp_id + 1);
 	ly_st[cp_id] = ly_ly_st;
+}
+
+void CP2Ly::SendLySeparate() {
+
 }
 
 CString CP2Ly::SendLySkips(int count) {

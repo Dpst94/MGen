@@ -25,6 +25,7 @@ protected:
 	CP2Ly();
 	~CP2Ly();
 	void SaveLyCP();
+	void SendLySeparate();
 	vector<CString> ly_st; // Resulting text for each counterpoint
 
 private:
