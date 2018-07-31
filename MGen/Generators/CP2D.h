@@ -60,7 +60,8 @@ struct RuleInfo {
 	CString RuleClass;
 	CString RuleGroup;
 	int viz;
-	int viz_v2;
+	int viz_harm;
+	int viz_sep;
 	int viz_int;
 	CString viz_text;
 	int false_positives_global;

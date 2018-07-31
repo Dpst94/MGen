@@ -187,7 +187,7 @@ void CP2D::LoadRules(CString fname) {
 		st.Trim();
 		if (st.Find(";") != -1) {
 			Tokenize(st, ast, ";");
-			if (ast.size() != 25) {
+			if (ast.size() != 26) {
 				est.Format("Wrong column count at line %d in rules file %s: '%s'", i, fname, st);
 				WriteLog(5, est);
 				error = 1;
@@ -215,23 +215,24 @@ void CP2D::LoadRules(CString fname) {
 			//if (m_testing && flag == -1) flag = 1;
 			ruleinfo[rid].viz = atoi(ast[12]);
 			ruleinfo[rid].viz_int = atoi(ast[13]);
-			ruleinfo[rid].viz_v2 = atoi(ast[14]);
-			ruleinfo[rid].viz_text = ast[15];
-			ruleinfo[rid].false_positives_global = atoi(ast[18]);
-			ruleinfo[rid].false_positives_ignore = atoi(ast[19]);
-			ruleinfo[rid].sas_emulator_max_delay = atoi(ast[20]);
-			ruleinfo[rid].sas_emulator_move_ignore = atoi(ast[21]);
-			if (!ast[22].IsEmpty()) {
-				Tokenize(ast[22], ast2, ",");
+			ruleinfo[rid].viz_harm = atoi(ast[14]);
+			ruleinfo[rid].viz_sep = atoi(ast[15]);
+			ruleinfo[rid].viz_text = ast[16];
+			ruleinfo[rid].false_positives_global = atoi(ast[19]);
+			ruleinfo[rid].false_positives_ignore = atoi(ast[20]);
+			ruleinfo[rid].sas_emulator_max_delay = atoi(ast[21]);
+			ruleinfo[rid].sas_emulator_move_ignore = atoi(ast[22]);
+			if (!ast[23].IsEmpty()) {
+				Tokenize(ast[23], ast2, ",");
 				for (int x = 0; x < ast2.size(); ++x) {
 					int fl = atoi(ast2[x]);
 					if (fl >= ruleinfo.size()) ruleinfo.resize(fl + 1);
 					if (fl) ruleinfo[fl].sas_emulator_replace.push_back(rid);
 				}
 			}
-			ruleinfo[rid].sas_emulator_unstable = atoi(ast[23]);
-			if (!ast[24].IsEmpty()) {
-				Tokenize(ast[24], ast2, ",");
+			ruleinfo[rid].sas_emulator_unstable = atoi(ast[24]);
+			if (!ast[25].IsEmpty()) {
+				Tokenize(ast[25], ast2, ",");
 				for (int x = 0; x < ast2.size(); ++x) {
 					int fl = atoi(ast2[x]);
 					if (fl >= ruleinfo.size()) ruleinfo.resize(fl + 1);
