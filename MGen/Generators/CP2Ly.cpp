@@ -29,17 +29,6 @@ CString CP2Ly::GetLyNoteCP() {
 void CP2Ly::AddNLink(int f) {
 	GetFlag(f);
 	// Check if this shape is not allowed at hidden position
-	if (!viz_anyposition[ruleinfo[fl].viz]) {
-		// Note start is ok
-		// Downbeat is ok
-		if (s != fli[v][bli[v][s]] && s % npm) {
-			CString est;
-			est.Format("Detected flag at hidden position %d-%d voice %d counterpoint %d: [%d] %s %s (%s)",
-				s, fsl[v][s][f], v, cp_id + 1, fl, accept[sp][vc][vp][fl] ? "+" : "-",
-				GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
-			WriteLog(5, est);
-		}
-	}
 	int s3 = s;
 	int s4 = fsl[v][s][f];
 	if (ruleinfo[fl].viz == vGlis) {
@@ -65,25 +54,6 @@ void CP2Ly::AddNLink(int f) {
 
 void CP2Ly::AddNLinkForeign(int f) {
 	GetFlag(f);
-	// Check if this shape is not allowed at hidden position
-	if (!viz_anyposition[ruleinfo[fl].viz]) {
-		// Note start is ok
-		// Downbeat is ok
-		if (s != fli[v][bli[v][s]] && s % npm) {
-			CString est;
-			est.Format("Detected flag at hidden position %d-%d voice %d counterpoint %d: [%d] %s %s (%s)",
-				s, fsl[v][s][f], v, cp_id + 1, fl, accept[sp][vc][vp][fl] ? "+" : "-",
-				GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
-			WriteLog(5, est);
-		}
-		if (fsl[v][s][f] != fli[v][bli[v][fsl[v][s][f]]] && fsl[v][s][f] % npm) {
-			CString est;
-			est.Format("Detected flag at hidden position %d-%d voice %d counterpoint %d: [%d] %s %s (%s)",
-				s, fsl[v][s][f], v, cp_id + 1, fl, accept[sp][vc][vp][fl] ? "+" : "-",
-				GetRuleName(fl, sp, vc, vp), GetSubRuleName(fl, sp, vc, vp));
-			WriteLog(5, est);
-		}
-	}
 	int s3 = s;
 	int s4 = fsl[v][s][f];
 	if (ruleinfo[fl].viz == vGlis) {
@@ -114,6 +84,7 @@ void CP2Ly::ParseNLinks() {
 	for (v = 0; v < av_cnt; ++v) if (v != v2) {
 		for (int f = 0; f < flag[v][s].size(); ++f) {
 			if (fvl[v][s][f] != v2) continue;
+			if (ruleinfo[flag[v][s][f]].viz != vGlis) continue;
 			AddNLinkForeign(f);
 		}
 	}
@@ -122,6 +93,19 @@ void CP2Ly::ParseNLinks() {
 
 void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype) {
 	if (lyi[st1].shse[vtype] <= sev) {
+		if (!viz_anyposition[vtype]) {
+			// Note start is ok
+			// Downbeat is ok
+			if ((st1 != fli[v][bli[v][st1]] && st1 % npm) ||
+				(st2 != fli[v][bli[v][st2]] && st2 % npm)) {
+				CString est;
+				est.Format("Detected shape at hidden position %d-%d (instead of %d-%d), voice %d counterpoint %d: [%d] %s (%s). Shape replaced with default",
+					st1, st2, fli[v][bli[v][st1]], fli[v][bli[v][st2]], v, cp_id + 1, fl,
+					ruleinfo[fl].RuleName, ruleinfo[fl].SubRuleName);
+				WriteLog(5, est);
+				vtype = 0;
+			}
+		}
 		// Start
 		lyi[st1].shs[vtype] = 1;
 		// Finish
@@ -386,12 +370,10 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += "\n  }\n";
 		ly_ly_st += "}\n";
 		SendLyMistakes();
-		if (v == av_cnt - 1) {
-			SendLySeparate();
-		}
 		SendLyNoteNames();
 		//SendLyIntervals();
 	}
+	//SendLySeparate();
 	SendLyHarm();
 	ly_ly_st += ">>\n";
 	//if (st3 != "") ly_ly_st += "\\markup { " + st3 + " }\n";
@@ -406,7 +388,16 @@ void CP2Ly::SaveLyCP() {
 }
 
 void CP2Ly::SendLySeparate() {
+	vector<CString> sv;
+	ly_ly_st += "\\new Staff = \"staffs\" \\with {\n";
+	read_file_sv("configs\\ly\\separate-staff.ly", sv);
+	for (int i = 0; i < sv.size(); ++i) {
+		ly_ly_st += sv[i] + "\n";
+	}
+	ly_ly_st += "  { \n";
+	ly_ly_st += "  \\set Staff.pedalSustainStyle = #'mixed\n";
 
+	ly_ly_st += "\n  }\n";
 }
 
 CString CP2Ly::SendLySkips(int count) {
@@ -425,6 +416,7 @@ CString CP2Ly::GetRealNoteNameCP(int no) {
 
 void CP2Ly::SendLyHarm() {
 	CString st, lst;
+	if (av_cnt < 2) return;
 	//if (!ly_flags) return;
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", 0);
 	lst += st;

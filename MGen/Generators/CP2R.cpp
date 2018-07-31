@@ -2938,6 +2938,7 @@ void CP2R::GetHarm(vector<int> &chn, vector<int> &cchn, int &lchm, int &lchm_alt
 int CP2R::FailHarm() {
 	CHECK_READY(DR_fli, DR_c, DR_pc);
 	SET_READY(DR_hli);
+	if (av_cnt < 2) return 0;
 	int s9;
 	int n, hcount;
 	int last_b; // First harmony in measure has b
@@ -3382,6 +3383,8 @@ int CP2R::FailVIntervals() {
 			else civlc = civl % 12;
 			// Skip pauses
 			if (!cc[v][s]) continue;
+			// Skip first note in second voice
+			if (!bli[v2][s]) continue;
 			if (FailPco()) return 1;
 		}
 	}
