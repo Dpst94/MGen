@@ -10,6 +10,7 @@ struct LY_IntermediateCP {
 	vector<int> shse; // [shape_type] Highest severity of starting shape
 	vector<CString> sht; // [shape_type] Starting shape text
 	vector<int> nflags; // [] Current flags
+	vector<int> fhide; // [] If flag shape should not be displayed (if sent to separate staff)
 	vector<int> fsev; // [] Severity for each flag
 	vector<int> nfl; // [] Current flags links
 	vector<int> nfn; // [] Note flag number
@@ -24,6 +25,7 @@ class CP2Ly :
 protected:
 	CP2Ly();
 	~CP2Ly();
+	void InitFSep();
 	void SaveLyCP();
 	void SendLySeparate();
 	vector<CString> ly_st; // Resulting text for each counterpoint
@@ -40,17 +42,22 @@ private:
 	CString GetLyNoteCP();
 	inline void AddNLink(int f);
 	inline void AddNLinkForeign(int f);
+	void AddNLinkSep(int f);
 	void ParseNLinks();
+	void ParseNLinksSep();
 	void SetLyShape(int s1, int s2, int f, int fl, int sev, int vtype);
 	void ClearLyShape(int s1, int s2, int vtype);
 	void InitLyI();
-	void SendLyEvent(CString ev);
+	void SendLyEvent(CString ev, int leng);
 	void CheckLyCP();
+	void ParseLyI();
+	void ParseLyISep();
 	void ExportLyI();
 
 	CString ly_com_st; // Comments
 	CString ly_ly_st; // Lyrics
-	vector<LY_IntermediateCP> lyi;
+	vector<LY_IntermediateCP> lyi; // Current voice
+	vector<LY_IntermediateCP> slyi; // Separate staff
 	int ly_flags = 0; // Number of flags sent
 	int ly_vflags = 0; // Number of flags in current voice
 	int ly_notenames = 0; // Number of note names in current melody
