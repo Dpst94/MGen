@@ -45,6 +45,7 @@ int CP2R::EvaluateCP() {
 		if (FailNoteLen()) return 1;
 		if (FailBeat()) return 1;
 
+		if (FailVRLimit()) return 1;
 		if (FailVocalRangesConflict()) return 1;
 		if (av_cnt == 1) {
 			if (FailNoteRepeat()) return 1;
@@ -3411,6 +3412,32 @@ int CP2R::FailPco() {
 			if (civlc == 7) FLAGL(84, max(isus[v][ls - 1], isus[v2][bli[v2][s] - 1]), s, v2);
 			else FLAGL(481, max(isus[v][ls - 1], isus[v2][bli[v2][s] - 1]), s, v2);
 		}
+	}
+	return 0;
+}
+
+// Check vocal ranges limits
+int CP2R::FailVRLimit() {
+	CHECK_READY(DR_fli);
+	int out_s = -1;
+	for (ls = 0; ls < fli_size[v]; ++ls) {
+		s = fli[v][ls];
+		if (!cc[v][s]) continue;
+		// Record
+		if (cc[v][s] > vocra_info[vocra[v]].max_cc || cc[v][s] < vocra_info[vocra[v]].min_cc) {
+			out_s = s;
+		}
+		else {
+			if (out_s > -1) {
+				FLAGVL(522, out_s, s);
+				fpenalty += s - out_s;
+				out_s = -1;
+			}
+		}
+	}
+	if (out_s > -1) {
+		FLAGVL(522, out_s, s);
+		fpenalty += s - out_s;
 	}
 	return 0;
 }

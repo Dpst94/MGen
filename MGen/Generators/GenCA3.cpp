@@ -755,20 +755,33 @@ void CGenCA3::GetPossibleVocalRanges() {
 	vocra_p.resize(av_cnt);
 	for (v = 0; v < av_cnt; ++v) {
 		vocra_p[v].clear();
+		// Set single possible vocal range if it was specified in instrument name
 		if (vocra_detected[v] == 1) {
 			vocra_p[v].push_back(vocra[v]);
 		}
 		else {
+			// Get all exact matches of vocal ranges if it was not specified in instrument name
 			for (int vr = 1; vr < vocra_info.size(); ++vr) {
 				if (nmin[v] >= vocra_info[vr].min_cc && nmax[v] <= vocra_info[vr].max_cc) {
 					vocra_p[v].push_back(vr);
 				}
 			}
+			// If voice does not match any of ranges exactly, get closest vocal range
 			if (!vocra_p[v].size()) {
-				if (nmin[v] < vocra_info[vrBas].min_cc && nmax[v] <= vocra_info[vrBas].max_cc)
-					vocra_p[v].push_back(vrBas);
-				else if (nmin[v] >= vocra_info[vrSop].min_cc && nmax[v] > vocra_info[vrSop].max_cc)
-					vocra_p[v].push_back(vrSop);
+				int nmed = (nmin[v] + nmax[v]) / 2;
+				int best_vr = -1;
+				int best_dif = 1000000;
+				for (int vr = 1; vr < vocra_info.size(); ++vr) {
+					int vrmed = (vocra_info[vr].min_cc + vocra_info[vr].max_cc) / 2;
+					int ndif = abs(vrmed - nmed);
+					if (ndif < best_dif) {
+						best_dif = ndif;
+						best_vr = vr;
+					}
+				}
+				if (best_vr > 0) {
+					//vocra_p[v].push_back(best_vr);
+				}
 			}
 		}
 	}

@@ -244,5 +244,6 @@ protected:
 	inline int FailVocalRangesConflict();
 	inline int FailVIntervals();
 	inline int FailPco();
+	inline int FailVRLimit();
 };
 
