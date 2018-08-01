@@ -14,7 +14,6 @@ struct LY_IntermediateCP {
 	vector<int> fsev; // [] Severity for each flag
 	vector<int> nfl; // [] Current flags links
 	vector<int> nfn; // [] Note flag number
-	vector<int> only_shape; // [] If note flag number should not be shown
 	vector<int> nfs; // [] Note flag shape
 	vector<CString> nfc; // [] Note flag comment
 };

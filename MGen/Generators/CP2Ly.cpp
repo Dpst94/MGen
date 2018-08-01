@@ -61,7 +61,6 @@ void CP2Ly::AddNLink(int f) {
 	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
 	lyi[s3].nfl.push_back(s4 - s3);
 	lyi[s3].nfn.push_back(ly_flags + 1);
-	lyi[s3].only_shape.push_back(0);
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
 	++ly_flags;
@@ -101,7 +100,6 @@ void CP2Ly::AddNLinkForeign(int f) {
 	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
 	lyi[s3].nfl.push_back(s4 - s3);
 	lyi[s3].nfn.push_back(0);
-	lyi[s3].only_shape.push_back(0);
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
 }
@@ -121,7 +119,6 @@ void CP2Ly::AddNLinkSep(int f) {
 	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
 	lyi[s3].nfl.push_back(s4 - s3);
 	lyi[s3].nfn.push_back(0);
-	lyi[s3].only_shape.push_back(0);
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
 	++ly_flags;
@@ -227,10 +224,6 @@ void CP2Ly::ParseLyI() {
 			// Get flag start/stop
 			s1 = min(s, s + link);
 			s2 = max(s, s + link);
-			if (lyi[s].only_shape[f]) {
-				s1 = min(s, link_note_step);
-				s2 = max(s, link_note_step);
-			}
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
 			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
 			// Set interval if not debugexpect. If debugexpect, do not set for red flags
@@ -323,10 +316,6 @@ void CP2Ly::ParseLyISep() {
 			// Get flag start/stop
 			s1 = min(s, s + link);
 			s2 = max(s, s + link);
-			if (lyi[s].only_shape[f]) {
-				s1 = min(s, link_note_step);
-				s2 = max(s, link_note_step);
-			}
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
 			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
 			// Set interval if not debugexpect. If debugexpect, do not set for red flags
@@ -757,8 +746,6 @@ void CP2Ly::SaveLyComments() {
 		found = 0;
 		for (int c = 0; c < lyi[s].nflags.size(); ++c) {
 			if (!lyi[s].nfn[c]) continue;
-			// Do not process foreign flags
-			if (lyi[s].only_shape[c]) break;
 			int fl = lyi[s].nflags[c];
 			int sev = lyi[s].fsev[c];
 			if (!accept[sp][vc][vp][fl]) st = "- ";
