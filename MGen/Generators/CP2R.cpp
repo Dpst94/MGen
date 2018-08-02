@@ -3081,7 +3081,7 @@ int CP2R::FailHarm() {
 	}
 	GetHarmBass();
 	// Check first harmony not T
-	if (chm.size() && (chm[0] || hbc[0])) {
+	if (chm.size() && (chm[0] || hbc[0] % 7)) {
 		FLAGH(137, hli[0]);
 	}
 	if (EvalHarm()) return 1;
