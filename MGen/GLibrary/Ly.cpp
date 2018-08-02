@@ -134,7 +134,12 @@ void CLy::LoadLyShapes(CString fname) {
 			if (ast[2] == "ts") shape = vTS;
 			if (ast[2] == "ottava") shape = vOttava;
 			if (ast[2] == "pedal") shape = vPedal;
-			if (ast[2] == "notename") shape = vNoteName;
+			if (ast[2] == "stac") shape = vStac;
+			if (ast[2] == "staco") shape = vStaco;
+			if (ast[2] == "notecolor") shape = vNoteColor;
+			if (ast[2] == "petrucci") shape = vPetrucci;
+			if (ast[2] == "cross") shape = vCross;
+			if (ast[2] == "circle") shape = vCircle;
 			if (shape == -1) {
 				est.Format("Wrong shape at line %d in shapes file %s: '%s'", i, fname, st);
 				WriteLog(5, est);

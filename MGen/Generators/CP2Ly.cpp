@@ -806,9 +806,11 @@ void CP2Ly::SendLyEvent(CString ev, int leng) {
 	SplitLyNoteMeasure(s, leng, la);
 	for (int lc = 0; lc < la.size(); ++lc) {
 		SendLyViz(1);
+		SendLyViz(2);
 		ly_ly_st += ev + GetLyLen(la[lc]);
 		if (lc < la.size() - 1 && ev != "r") ly_ly_st += "~";
 		ly_ly_st += "\n";
+		SendLyViz(8);
 		SendLyViz(9);
 		SendLyViz(10);
 		SendLyViz(11);

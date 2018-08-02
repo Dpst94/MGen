@@ -192,7 +192,13 @@ const CString mode_name2[] = {
 #define vOttava 11
 #define vPedal 12
 #define vNoteName 13
-#define MAX_VIZ 14
+#define vStac 14
+#define vStaco 15
+#define vNoteColor 16
+#define vPetrucci 17
+#define vCross 18
+#define vCircle 19
+#define MAX_VIZ 20
 
 // Visualisation types
 #define vtPoint 1 // Can link only to one note
@@ -201,22 +207,22 @@ const CString mode_name2[] = {
 #define vtLink 4 // Cannot mark less than two notes
 #define vtGroup 5 // Cannot mark less than two notes, borders cannot overlap
 
-const int viz_type[MAX_VIZ] = { 1, 1, 1, 2, 3, 4, 4, 4, 5, 5, 4, 5, 5, 3 };
+const int viz_type[MAX_VIZ] = { 1, 1, 1, 2, 3, 4, 4, 4, 5, 5, 4, 5, 5, 3, 1, 1, 1, 1, 1, 1 };
 
 // For each visualisation, specify if it can overlap
-const int viz_can_overlap[MAX_VIZ] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+const int viz_can_overlap[MAX_VIZ] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 };
 
 // For each visualisation, specify if empty string should be replaced with space
-const int viz_space[MAX_VIZ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 };
+const int viz_space[MAX_VIZ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 // For each visualisation, specify if single note can be marked
-const int viz_singlenote[MAX_VIZ] = { 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1 };
+const int viz_singlenote[MAX_VIZ] = { 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1 };
 
 // For each visualisation, specify if it can go at any position or only at note start / measure start
-const int viz_anyposition[MAX_VIZ] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+const int viz_anyposition[MAX_VIZ] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 // For each visualisation, specify if it can be shown in separate staff
-const int viz_can_separate[MAX_VIZ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 };
+const int viz_can_separate[MAX_VIZ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
 
 class CLy :
 	public MFOut
