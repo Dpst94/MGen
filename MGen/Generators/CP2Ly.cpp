@@ -59,7 +59,9 @@ void CP2Ly::AddNLink(int f) {
 	}
 	lyi[s3].nflags.push_back(fl);
 	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
-	lyi[s3].nfl.push_back(s4 - s3);
+	lyi[s3].fsl.push_back(s4 - s3);
+	lyi[s3].fv.push_back(v);
+	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	lyi[s3].nfn.push_back(ly_flags + 1);
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
@@ -98,7 +100,9 @@ void CP2Ly::AddNLinkForeign(int f) {
 	if (severity[sp][vc][vp][fl] < show_min_severity) return;
 	lyi[s3].nflags.push_back(fl);
 	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
-	lyi[s3].nfl.push_back(s4 - s3);
+	lyi[s3].fsl.push_back(s4 - s3);
+	lyi[s3].fv.push_back(v);
+	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	lyi[s3].nfn.push_back(0);
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
@@ -117,7 +121,9 @@ void CP2Ly::AddNLinkSep(int f) {
 	int s4 = fsl[v][s][f];
 	lyi[s3].nflags.push_back(fl);
 	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
-	lyi[s3].nfl.push_back(s4 - s3);
+	lyi[s3].fsl.push_back(s4 - s3);
+	lyi[s3].fv.push_back(v);
+	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	lyi[s3].nfn.push_back(0);
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
@@ -133,7 +139,7 @@ void CP2Ly::ParseNLinks() {
 	for (v = 0; v < av_cnt; ++v) if (v != v2) {
 		for (int f = 0; f < flag[v][s].size(); ++f) {
 			if (fvl[v][s][f] != v2) continue;
-			if (ruleinfo[flag[v][s][f]].viz != vGlis) continue;
+			//if (ruleinfo[flag[v][s][f]].viz != vGlis) continue;
 			AddNLinkForeign(f);
 		}
 	}
@@ -212,7 +218,8 @@ void CP2Ly::ParseLyI() {
 		// Parse flags
 		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
 			int fl = lyi[s].nflags[f];
-			int link = lyi[s].nfl[f];
+			int link = lyi[s].fsl[f];
+			int vlink = lyi[s].fvl[f];
 			int vtype = ruleinfo[fl].viz;
 			int sev = lyi[s].fsev[f];
 			int skip_shape = 0;
@@ -226,6 +233,15 @@ void CP2Ly::ParseLyI() {
 			s2 = max(s, s + link);
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
 			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
+			// Highlight notes if flag is multivoice and is not gliss (gliss does not need note color)
+			if (vlink != lyi[s].fv[f] && vtype != vGlis) {
+				for (ls = bli[v][s1]; ls <= bli[v][s2]; ++ls) {
+					SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor);
+				}
+				SetLyShape(link_note_step, link_note_step, f, fl, sev, vNoteColor);
+			}
+			// Skip all foreign shapes (show only note color)
+			if (v != lyi[s].fv[f] && vtype != vGlis) continue;
 			// Set interval if not debugexpect. If debugexpect, do not set for red flags
 			if (!ly_debugexpect || sev != 100) {
 				if (ruleinfo[fl].viz_int == 1) {
@@ -306,7 +322,8 @@ void CP2Ly::ParseLyISep() {
 		// Parse flags
 		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
 			int fl = lyi[s].nflags[f];
-			int link = lyi[s].nfl[f];
+			int link = lyi[s].fsl[f];
+			int vlink = lyi[s].fvl[f];
 			int vtype = ruleinfo[fl].viz;
 			int sev = lyi[s].fsev[f];
 			int skip_shape = 0;

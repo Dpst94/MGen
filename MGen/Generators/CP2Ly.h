@@ -12,7 +12,9 @@ struct LY_IntermediateCP {
 	vector<int> nflags; // [] Current flags
 	vector<int> fhide; // [] If flag shape should not be displayed (if sent to separate staff)
 	vector<int> fsev; // [] Severity for each flag
-	vector<int> nfl; // [] Current flags links
+	vector<int> fsl; // [] Current flag step links
+	vector<int> fv; // [] Current flag source voice
+	vector<int> fvl; // [] Current flag voice links
 	vector<int> nfn; // [] Note flag number
 	vector<int> nfs; // [] Note flag shape
 	vector<CString> nfc; // [] Note flag comment

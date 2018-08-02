@@ -666,8 +666,8 @@ int CGenCA3::GetVocalRanges() {
 	}
 	GetPossibleVocalRanges();
 	for (v = 0; v < av_cnt; ++v) if (!vocra_p[v].size()) {
-		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s: too wide",
-			cp_id + 1, vid[v], vname[vid[v]]);
+		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s",
+			cp_id + 1, vid[v] + 1, vname[vid[v]]);
 		WriteLog(5, est);
 		error = 16;
 		return 1;
@@ -675,7 +675,7 @@ int CGenCA3::GetVocalRanges() {
 	ScanVocalRanges();
 	for (v = 0; v < av_cnt; ++v) if (!vocra_detected[v]) {
 		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s. Please specify vocal range in instrument name in source file %s",
-			cp_id + 1, vid[v], vname[vid[v]], musicxml_file);
+			cp_id + 1, vid[v] + 1, vname[vid[v]], musicxml_file);
 		WriteLog(5, est);
 	}
 	return 0;
@@ -780,7 +780,7 @@ void CGenCA3::GetPossibleVocalRanges() {
 					}
 				}
 				if (best_vr > 0) {
-					//vocra_p[v].push_back(best_vr);
+					vocra_p[v].push_back(best_vr);
 				}
 			}
 		}
