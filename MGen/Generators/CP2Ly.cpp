@@ -48,13 +48,17 @@ void CP2Ly::AddNLink(int f) {
 		// Downbeat is ok
 		if ((s3 != fli[v][bli[v][s3]] && s3 % npm) ||
 			(s4 != fli[v][bli[v][s4]] && s4 % npm)) {
-			CString est;
-			est.Format("Detected shape at hidden position %d-%d (instead of %d-%d), voice %d counterpoint %d: [%d] %s (%s). Shape replaced with default",
-				s3, s4, isus[v][bli[v][s3]], isus[v][bli[v][s4]], v, cp_id + 1, fl,
-				ruleinfo[fl].RuleName, ruleinfo[fl].SubRuleName);
-			WriteLog(1, est);
 			lyi[s3].fhide[lyi[s3].fhide.size() - 1] = 1;
-			fsep[v][s][f] = 1;
+			if (viz_can_separate[ruleinfo[fl].viz]) {
+				fsep[v][s][f] = 1;
+			}
+			else {
+				CString est;
+				est.Format("Detected shape at hidden position %d-%d (instead of %d-%d), voice %d counterpoint %d: [%d] %s (%s). Cannot send this type of shapes to separate staff",
+					s3, s4, isus[v][bli[v][s3]], isus[v][bli[v][s4]], v, cp_id + 1, fl,
+					ruleinfo[fl].RuleName, ruleinfo[fl].SubRuleName);
+				WriteLog(5, est);
+			}
 		}
 	}
 	lyi[s3].nflags.push_back(fl);
@@ -69,6 +73,7 @@ void CP2Ly::AddNLink(int f) {
 	++ly_vflags;
 }
 
+// Parse foreign flags from other voices: gliss and notecolor
 void CP2Ly::AddNLinkForeign(int f) {
 	GetFlag(f);
 	int s3 = s;
@@ -78,20 +83,7 @@ void CP2Ly::AddNLinkForeign(int f) {
 		s4 = isus[v2][bli[v2][fsl[v][s][f]]];
 	}
 	lyi[s3].fhide.push_back(0);
-	// Check if this shape is not allowed at hidden position
-	if (!viz_anyposition[ruleinfo[fl].viz]) {
-		// Note start is ok
-		// Downbeat is ok
-		if ((s3 != fli[v2][bli[v2][s3]] && s3 % npm) ||
-			(s4 != fli[v2][bli[v2][s4]] && s4 % npm)) {
-			CString est;
-			est.Format("Detected shape at hidden position %d-%d (instead of %d-%d), voice %d counterpoint %d: [%d] %s (%s). Shape replaced with default",
-				s3, s4, isus[v2][bli[v2][s3]], isus[v2][bli[v2][s4]], v2, cp_id + 1, fl,
-				ruleinfo[fl].RuleName, ruleinfo[fl].SubRuleName);
-			WriteLog(5, est);
-			lyi[s3].fhide[lyi[s3].fhide.size() - 1] = 1;
-		}
-	}
+	// Do not check for hidden positions, because gliss pos is corrected and notecolor pos will be corrected
 	// Send comments and color only if rule is not ignored
 	if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) return;
 	// Send comments and color only if rule is not ignored
