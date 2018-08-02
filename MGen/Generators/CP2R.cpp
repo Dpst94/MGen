@@ -3432,7 +3432,7 @@ int CP2R::FailVRLimit() {
 		if (!cc[v][s]) continue;
 		// Record
 		if (cc[v][s] > vocra_info[vocra[v]].max_cc || cc[v][s] < vocra_info[vocra[v]].min_cc) {
-			out_s = s;
+			if (out_s == -1) out_s = s;
 		}
 		else {
 			if (out_s > -1) {
