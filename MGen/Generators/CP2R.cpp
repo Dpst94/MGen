@@ -3378,12 +3378,16 @@ int CP2R::FailVIntervals() {
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (ls = 1; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
+			// Skip oblique motion
+			if (s != fli[v2][bli[v2][s]]) continue;
+			// Prepare data
 			s2 = fli2[v][ls];
 			civl = abs(cc[v][s] - cc[v2][s]);
 			if (civl && civl % 12 == 0) civlc = 12;
 			else civlc = civl % 12;
 			// Skip pauses
 			if (!cc[v][s]) continue;
+			if (!cc[v2][s]) continue;
 			// Skip first note in second voice
 			if (!bli[v2][s]) continue;
 			if (FailPco()) return 1;
