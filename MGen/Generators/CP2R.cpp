@@ -2823,6 +2823,7 @@ int CP2R::FailNoteLen() {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
 			if (llen[v][ls] == 2) continue;
+			if (llen[v][ls] == 8 && ls == fli_size[v] - 1) continue;
 			FLAGV(514, s);
 		}
 	}
