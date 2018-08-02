@@ -1505,6 +1505,7 @@ int CP2R::FailStagnation(int steps, int notes, int fl) {
 	if (task != tEval && accept[sp][av_cnt][0][fl] == -1) return 0;
 	// Clear nstat
 	for (int i = nmin[v]; i <= nmax[v]; ++i) nstat[i] = 0;
+	nstat[0] = 0;
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
 		// Add new note to stagnation array
@@ -1512,7 +1513,8 @@ int CP2R::FailStagnation(int steps, int notes, int fl) {
 		// Subtract old note
 		if (ls >= steps) --nstat[cc[v][fli[v][ls - steps]]];
 		// Check if too many repeating notes
-		if (nstat[cc[v][s]] > notes) FLAGVL(fl, s, fli[v][max(0, ls - steps)]);
+		if (nstat[cc[v][s]] > notes) 
+			FLAGVL(fl, s, fli[v][max(0, ls - steps)]);
 	}
 	return 0;
 }
