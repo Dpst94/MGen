@@ -255,6 +255,9 @@ void CP2Ly::ParseLyI() {
 					SetLyShape(s2, s2, f, fl, sev, vHarm);
 				}
 			}
+			if (vtype == vPedal) {
+				if (bli[v][s1] == fli_size[v] - 1 && s1 == s2) continue;
+			}
 			if (!viz_can_overlap[vtype]) {
 				// Check that flag overlaps
 				int overlap1 = -1;
