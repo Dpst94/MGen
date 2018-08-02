@@ -264,7 +264,8 @@ void CP2R::SendComment(int pos, int x, int i) {
 		else st = "+ ";
 		com = st + GetRuleName(fl, sp, vc, vp) + " (" + GetSubRuleName(fl, sp, vc, vp) + ")";
 		if (show_severity) {
-			st.Format(" [%d/%d] (%d:%d)", fl, severity[sp][vc][vp][fl], fsl[v][x][f], fvl[v][x][f]);
+			st.Format(" [%d/%d] (%d-%d|%d)", fl, 
+				severity[sp][vc][vp][fl], x, fsl[v][x][f], fvl[v][x][f]);
 			com += st;
 		}
 		if (GetRuleComment(fl, sp, vc, vp) != "") com += ". " + GetRuleComment(fl, sp, vc, vp);
@@ -3348,10 +3349,12 @@ int CP2R::FailVocalRangesConflict() {
 	int conf_start = -1;
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (s = 0; s < c_len; ++s) {
+			if (!cc[v][s]) continue;
+			if (!cc[v2][s]) continue;
 			// Check if there is range conflict
 			int is_conf = 0;
 			if (cc[v][s] > vocra_info[vocra[v]].high_cc && cc[v2][s] < vocra_info[vocra[v2]].low_cc) is_conf = 1;
-			else if (cc[v2][s] > vocra_info[vocra[v2]].high_cc && cc[v][s] < vocra_info[vocra[v]].low_cc) is_conf = 1;
+			else if (cc[v][s] < vocra_info[vocra[v]].low_cc && cc[v2][s] > vocra_info[vocra[v2]].high_cc) is_conf = 1;
 			// Search for start of conflict
 			if (conf_start == -1) {
 				if (!is_conf) continue;
@@ -3360,14 +3363,14 @@ int CP2R::FailVocalRangesConflict() {
 			// Search for end of conflict
 			else {
 				if (!is_conf) {
-					FLAGL(524, fli[v][bli[v][conf_start]], fli[v][bli[v][s - 1]], v2);
+					FLAGL(524, conf_start, s - 1, v2);
 					conf_start = -1;
 				}
 			}
 		}
 		if (conf_start > -1) {
 			s = c_len - 1;
-			FLAGL(524, fli[v][bli[v][conf_start]], fli[v][bli[v][s - 1]], v2);
+			FLAGL(524, conf_start, s - 1, v2);
 		}
 	}
 	return 0;
