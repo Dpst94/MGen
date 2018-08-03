@@ -355,7 +355,7 @@ void XFIn::ValidateXML() {
 				error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d: %d notes. Need %.3f time but got %.3f",
 					m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 					mea[m].beats, mea[m].beat_type, note[vi][m].size(),
-					mea[m].beats * 100.0 / mea[m].beat_type, stack);
+					mea[m].len, stack);
 				return;
 			}
 		}

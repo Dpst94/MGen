@@ -240,9 +240,6 @@ protected:
 	CString GetLyNote(int i, int v);
 	CString GetLyNoteVisual(int i, int v, CString sz);
 	CString GetLyLen(int length);
-	void SplitLyNote5(int pos, vector<int>& la);
-	void SplitLyNoteMeasure(int pos, int le, vector<int>& la);
-	void SplitLyNote(int pos, int le, vector<int>& la);
 	CString GetLyColor(int sev);
 	CString GetLyMarkColor(int sev);
 	CString GetRealIntName(int s, int v1, int v2);

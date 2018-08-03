@@ -26,6 +26,12 @@ public:
 	~CF1Ly();
 	void SaveLy(CString dir, CString fname);
 
+	void SplitLyNoteMeasure(int pos, int le, vector<int>& la);
+
+	void SplitLyNote(int pos, int le, vector<int>& la);
+
+	void SplitLyNote5(int pos, vector<int>& la);
+
 protected:
 	void GetLyRange(int step1, int step2, vector<int>& vm_min, vector<int>& vm_max);
 	void GetLyVcnt(int step1, int step2, vector<int>& vm_max);

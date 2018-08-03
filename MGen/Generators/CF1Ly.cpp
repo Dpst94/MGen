@@ -874,3 +874,75 @@ void CF1Ly::SaveLy(CString dir, CString fname) {
 	ly_saved = 1;
 }
 
+// Split note at first measure border
+void CF1Ly::SplitLyNoteMeasure(int pos, int le, vector<int> &la) {
+	int left = 8 - (pos % 8);
+	if (la[0] > left) {
+		// Convert first part to second
+		la[0] = la[0] - left;
+		// Add first part
+		vpush_front(la, left, 1);
+	}
+}
+
+// Create la array of common lengths if note is too long for single note
+void CF1Ly::SplitLyNote(int pos, int le, vector<int> &la) {
+	la.clear();
+	if (le < 5 || le == 6 || le == 7 || le == 8) {
+		la.push_back(le);
+		return;
+	}
+	if (le == 5) {
+		SplitLyNote5(pos, la);
+	}
+	// All other lengths starting from 9
+	else {
+		// Get first length
+		if (pos % 8 == 3) {
+			la.push_back(1);
+			la.push_back(4);
+			le -= 5;
+			pos += 5;
+		}
+		else {
+			la.push_back(8 - pos % 8);
+			le -= 8 - pos % 8;
+			pos += 8 - pos % 8;
+		}
+		// Create middle lengths
+		while (le > 8) {
+			la.push_back(8);
+			le -= 8;
+			pos += 8;
+		}
+		// Get last length
+		if (le == 5) {
+			la.push_back(4);
+			la.push_back(1);
+		}
+		else {
+			if (le) la.push_back(le);
+		}
+	}
+}
+
+// Split note of length 5
+void CF1Ly::SplitLyNote5(int pos, vector<int> &la) {
+	if (pos % 4 == 0) {
+		la.push_back(4);
+		la.push_back(1);
+	}
+	else if (pos % 4 == 1) {
+		la.push_back(3);
+		la.push_back(2);
+	}
+	else if (pos % 4 == 2) {
+		la.push_back(2);
+		la.push_back(3);
+	}
+	else if (pos % 4 == 3) {
+		la.push_back(1);
+		la.push_back(4);
+	}
+}
+

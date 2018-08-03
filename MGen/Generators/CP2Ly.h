@@ -51,6 +51,12 @@ private:
 	void InitLyI();
 	void SendLyEvent(CString ev, int leng);
 	void CheckLyCP();
+	void SplitLyNoteMeasure(int pos, vector<int>& la);
+	void SplitLyNote5(int pos, int i, vector<int>& la);
+	void SplitLyNote9(int pos, int i, vector<int>& la);
+	void SplitLyNote10(int pos, int i, vector<int>& la);
+	void SplitLyNote11(int pos, int i, vector<int>& la);
+	void SplitLyNote(int pos, vector<int>& la);
 	void ParseLyI();
 	void ParseLyISep();
 	void ExportLyI();

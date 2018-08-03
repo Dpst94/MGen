@@ -199,81 +199,13 @@ CString CLy::GetLyLen(int length) {
 	else if (length == 6) return "2.";
 	else if (length == 7) return "2..";
 	else if (length == 8) return "1";
+	else if (length == 9) return "1"; // This is wrong length
+	else if (length == 10) return "1"; // This is wrong length
+	else if (length == 11) return "1"; // This is wrong length
+	else if (length == 12) return "1.";
 	//else if (length == 16) return "\\breve";
 	//else if (length == 32) return "\\longa";
 	else return "";
-}
-
-// Split note of length 5
-void CLy::SplitLyNote5(int pos, vector<int> &la) {
-	if (pos % 4 == 0) {
-		la.push_back(4);
-		la.push_back(1);
-	}
-	else if (pos % 4 == 1) {
-		la.push_back(3);
-		la.push_back(2);
-	}
-	else if (pos % 4 == 2) {
-		la.push_back(2);
-		la.push_back(3);
-	}
-	else if (pos % 4 == 3) {
-		la.push_back(1);
-		la.push_back(4);
-	}
-}
-
-// Split note at first measure border
-void CLy::SplitLyNoteMeasure(int pos, int le, vector<int> &la) {
-	int left = 8 - (pos % 8);
-	if (la[0] > left) {
-		// Convert first part to second
-		la[0] = la[0] - left;
-		// Add first part
-		vpush_front(la, left, 1);
-	}
-}
-
-// Create la array of common lengths if note is too long for single note
-void CLy::SplitLyNote(int pos, int le, vector<int> &la) {
-	la.clear();
-	if (le < 5 || le == 6 || le == 7 || le == 8) {
-		la.push_back(le);
-		return;
-	}
-	if (le == 5) {
-		SplitLyNote5(pos, la);
-	}
-	// All other lengths starting from 9
-	else {
-		// Get first length
-		if (pos % 8 == 3) {
-			la.push_back(1);
-			la.push_back(4);
-			le -= 5;
-			pos += 5;
-		}
-		else {
-			la.push_back(8 - pos % 8);
-			le -= 8 - pos % 8;
-			pos += 8 - pos % 8;
-		}
-		// Create middle lengths
-		while (le > 8) {
-			la.push_back(8);
-			le -= 8;
-			pos += 8;
-		}
-		// Get last length
-		if (le == 5) {
-			la.push_back(4);
-			la.push_back(1);
-		}
-		else {
-			if (le) la.push_back(le);
-		}
-	}
 }
 
 CString CLy::GetLyColor(int sev) {

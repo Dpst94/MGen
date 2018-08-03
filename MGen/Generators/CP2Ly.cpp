@@ -819,8 +819,9 @@ void CP2Ly::SaveLyComments() {
 void CP2Ly::SendLyEvent(CString ev, int leng) {
 	// Length array
 	vector<int> la;
-	SplitLyNote(s, leng, la);
-	SplitLyNoteMeasure(s, leng, la);
+	la.push_back(leng);
+	SplitLyNoteMeasure(s, la);
+	SplitLyNote(s, la);
 	for (int lc = 0; lc < la.size(); ++lc) {
 		SendLyViz(1);
 		SendLyViz(2);
@@ -845,6 +846,103 @@ void CP2Ly::CheckLyCP() {
 		for (int v = 0; v < av_cnt; ++v) {
 			ly_flags += flag[v][s].size();
 		}
+	}
+}
+
+// Split note at first measure border
+void CP2Ly::SplitLyNoteMeasure(int pos, vector<int> &la) {
+	int inpos = pos % npm;
+	while (inpos + la[0] > npm) {
+		// Remove last short note part
+		int left = ((inpos + la[0]) / npm) * npm - inpos;
+		// If there is no short note part, remove whole measure
+		if (left == la[0]) left = npm;
+		// Convert first part to second
+		la[0] = la[0] - left;
+		// Add first part
+		vpush_front(la, left, 1);
+	}
+}
+
+// Split note of length 5
+void CP2Ly::SplitLyNote5(int pos, int i, vector<int> &la) {
+	if (pos % 4 == 0) {
+		la[i] = 1;
+		la.insert(la.begin() + i, 4);
+	}
+	else if (pos % 4 == 1) {
+		la[i] = 2;
+		la.insert(la.begin() + i, 3);
+	}
+	else if (pos % 4 == 2) {
+		la[i] = 3;
+		la.insert(la.begin() + i, 2);
+	}
+	else if (pos % 4 == 3) {
+		la[i] = 4;
+		la.insert(la.begin() + i, 1);
+	}
+}
+
+// Split note of length 9
+void CP2Ly::SplitLyNote9(int pos, int i, vector<int> &la) {
+	if (pos % 4 == 0) {
+		la[i] = 1;
+		la.insert(la.begin() + i, 8);
+	}
+	else if (pos % 4 == 1) {
+		la[i] = 8;
+		la.insert(la.begin() + i, 1);
+	}
+	else if (pos % 4 == 2) {
+		la[i] = 1;
+		la.insert(la.begin() + i, 8);
+	}
+	else if (pos % 4 == 3) {
+		la[i] = 8;
+		la.insert(la.begin() + i, 1);
+	}
+}
+
+// Split note of length 10
+void CP2Ly::SplitLyNote10(int pos, int i, vector<int> &la) {
+	if (pos % 4 == 0) {
+		la[i] = 2;
+		la.insert(la.begin() + i, 8);
+	}
+	else if (pos % 4 == 1) {
+		la[i] = 1;
+		la.insert(la.begin() + i, 8);
+		la.insert(la.begin() + i, 1);
+	}
+	else if (pos % 4 == 2) {
+		la[i] = 8;
+		la.insert(la.begin() + i, 2);
+	}
+}
+
+// Split note of length 11
+void CP2Ly::SplitLyNote11(int pos, int i, vector<int> &la) {
+	if (pos % 4 == 0) {
+		la[i] = 3;
+		la.insert(la.begin() + i, 8);
+	}
+	else if (pos % 4 == 1) {
+		la[i] = 2;
+		la.insert(la.begin() + i, 8);
+		la.insert(la.begin() + i, 1);
+	}
+}
+
+// Create la array of common lengths if note is too long for single note
+void CP2Ly::SplitLyNote(int pos, vector<int> &la) {
+	int curpos = pos;
+	for (int i = 0; i < la.size(); ++i) {
+		if (la[i] == 5) SplitLyNote5(curpos % npm, i, la);
+		if (la[i] == 9) SplitLyNote9(curpos % npm, i, la);
+		if (la[i] == 10) SplitLyNote10(curpos % npm, i, la);
+		if (la[i] == 11) SplitLyNote11(curpos % npm, i, la);
+		curpos = pos + la[i];
 	}
 }
 
