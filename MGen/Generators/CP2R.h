@@ -245,5 +245,6 @@ protected:
 	inline int FailVIntervals();
 	inline int FailPco();
 	inline int FailVRLimit();
+	inline int FailMeasureLen();
 };
 

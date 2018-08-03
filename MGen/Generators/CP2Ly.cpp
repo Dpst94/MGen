@@ -491,12 +491,14 @@ void CP2Ly::SaveLyCP() {
 		if (vocra_detected[v] == 2) {
 			vocra_st = " \"[" + vocra_info[vocra[v]].name + "]\"";
 		}
-		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" \"[%s]\"%s } }\n", vname2[vi], st3, vocra_st);
 		ly_ly_st += "     \n";
+		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" \"[%s]\"%s } }\n", vname2[vi], st3, vocra_st);
 		//ly_ly_st += "    \\override #'(line-width . 100)  \n";
 		ly_ly_st += st;
 		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key " + LyMajorKey[maj_bn] + "\n";
 		ly_ly_st += "  \\major\n";
+		st.Format("  \\time %d/4\n", npm / 2);
+		ly_ly_st += st;
 		read_file_sv("configs\\ly\\staff.ly", sv);
 		for (int i = 0; i < sv.size(); ++i) {
 			ly_ly_st += sv[i] + "\n";
@@ -535,6 +537,7 @@ void CP2Ly::SaveLyCP() {
 void CP2Ly::SendLySeparate() {
 	ly_flags = 0;
 	vector<CString> sv;
+	CString st;
 	InitLyI();
 	for (s = 0; s < c_len; ++s) {
 		ParseNLinksSep();
@@ -542,6 +545,8 @@ void CP2Ly::SendLySeparate() {
 	if (!ly_flags) return;
 	ParseLyISep();
 	ly_ly_st += "\\new Staff = \"staffs\" \\with {\n";
+	st.Format("  \\time %d/4\n", npm / 2);
+	ly_ly_st += st;
 	read_file_sv("configs\\ly\\separate-staff.ly", sv);
 	for (int i = 0; i < sv.size(); ++i) {
 		ly_ly_st += sv[i] + "\n";

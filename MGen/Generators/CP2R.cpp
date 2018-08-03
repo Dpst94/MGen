@@ -33,6 +33,7 @@ int CP2R::EvaluateCP() {
 	GetLClimax();
 	GetLeapSmooth();
 	if (FailVocalRanges()) return 1;
+	if (FailMeasureLen()) return 1;
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		vaccept = &accept[sp][av_cnt][0];
@@ -2982,6 +2983,7 @@ int CP2R::FailHarm() {
 		hcount = 0;
 		for (s = mli[ms]; s <= mea_end; ++s) {
 			for (v = 0; v < av_cnt; ++v) {
+				sp = vsp[v];
 				ls = bli[v][s];
 				// Skip if not note start or sus
 				if (fli[v][ls] != s && sus[v][ls] != s) continue;
@@ -3452,3 +3454,18 @@ int CP2R::FailVRLimit() {
 	return 0;
 }
 
+int CP2R::FailMeasureLen() {
+	for (v = 0; v < av_cnt; ++v) {
+		sp = vsp[v];
+		if (npm == 8) continue;
+		if (sp == 3 || sp == 1 || sp == 0) {
+			if (npm == 6) continue;
+			if (npm == 10) continue;
+		}
+		if (sp == 3 || sp == 2 || sp == 1 || sp == 0) {
+			if (npm == 12) continue;
+		}
+		FLAGV(525, 0);
+	}
+	return 0;
+}
