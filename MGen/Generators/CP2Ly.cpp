@@ -66,7 +66,10 @@ void CP2Ly::AddNLink(int f) {
 	lyi[s3].fsl.push_back(s4 - s3);
 	lyi[s3].fv.push_back(v);
 	lyi[s3].fvl.push_back(fvl[v][s][f]);
-	lyi[s3].nfn.push_back(ly_flags + 1);
+	// Check that this flag was already sent at this step
+	pair<set<int>::iterator, bool> ufl_p = ly_ufl.insert(fl);
+	if (!ufl_p.second) lyi[s3].nfn.push_back(0);
+	else lyi[s3].nfn.push_back(ly_flags + 1);
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
 	++ly_flags;
@@ -124,6 +127,7 @@ void CP2Ly::AddNLinkSep(int f) {
 
 void CP2Ly::ParseNLinks() {
 	CString com;
+	ly_ufl.clear();
 	for (int f = 0; f < flag[v][s].size(); ++f) {
 		AddNLink(f);
 	}
