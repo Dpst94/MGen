@@ -2432,9 +2432,9 @@ int CP2R::FailRhythm3() {
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
 		// 1/4 syncope (not for last 1/4 because it is applied with anticipation or sus)
-		if (beat[v][ls] == 4 && llen[v][ls] > 2) FLAGV(235, s);
+		if (beat[v][ls] == 4 && llen[v][ls] > 2 && cc[v][s]) FLAGV(235, s);
 		// 1/2 after 1/4
-		if (ls > 0 && beat[v][ls] == 1 && llen[v][ls] > 2 && llen[v][ls - 1] == 2) {
+		if (ls > 0 && beat[v][ls] == 1 && llen[v][ls] > 2 && llen[v][ls - 1] == 2 && cc[v][s]) {
 			if (bmli[s] >= mli.size() - 2) FLAGVL(238, s, mli[bmli[s]]);
 			// Flag slurred if sus or note is cut by scan window
 			else if (sus[v][ls] || (ls == fli_size[v] - 1 && c_len > ep2)) FLAGVL(239, s, mli[bmli[s]]);
@@ -2498,13 +2498,13 @@ int CP2R::FailRhythm5() {
 			// Do not process last note if not full melody generated
 			if (ep2 != c_len && ls2 == fli_size[v] - 1) {
 				// Last measure without whole note
-				if (ms == mli.size() - 1 && l_len.size()) FLAGV(267, fli[v][fli_size[v] - 1]);
+				if (ms == mli.size() - 1 && l_len.size() && cc[v][fli[v][ls2]]) FLAGV(267, fli[v][fli_size[v] - 1]);
 				// Whole inside if it starts not from first measure, from first step and is not a suspension
-				if (llen[v][ls2] >= 8 && ms && !pos && !sus[v][ls2]) FLAGV(236, s);
+				if (llen[v][ls2] >= 8 && ms && !pos && !sus[v][ls2] && cc[v][fli[v][ls2]]) FLAGV(236, s);
 				// 1/8 syncope
 				else if (llen[v][ls2] > 1 && pos % 2) FLAGV(232, fli[v][ls2]);
 				// 1/4 syncope (not last, because it is flagged in suspension)
-				else if (llen[v][ls2] > 2 && pos == 2) FLAGV(235, fli[v][ls2]);
+				else if (llen[v][ls2] > 2 && pos == 2 && cc[v][fli[v][ls2]]) FLAGV(235, fli[v][ls2]);
 				full_measure = 0;
 				break;
 			}
@@ -2598,8 +2598,7 @@ int CP2R::FailRhythm5() {
 				// 1/8 syncope
 				if (pos % 2) FLAGV(232, s2);
 				// 1/4 syncope
-				else if (l_len[lp] > 2 && pos == 2) FLAGV(235, s2);
-				//else if (l_len[lp] == 2 && pos == 6 && slur2) FLAGV(235, s2);
+				else if (l_len[lp] > 2 && pos == 2 && cc[v][s2]) FLAGV(235, s2);
 			}
 			// Uneven starting rhythm
 			if (!ms && lp > 0 && l_len[lp] != l_len[lp - 1] && !uneven_start_fired) {
@@ -2630,18 +2629,20 @@ int CP2R::FailRhythm5() {
 			if (l_len.size() > 1 && l_len[0] == fin[v] && l_len[0] != l_len[1]) FLAGV(237, s);
 		}
 		// Whole inside
-		if (l_len[0] >= 8 && ms < mli.size() - 1 && ms) FLAGV(236, s);
+		if (l_len[0] >= 8 && ms < mli.size() - 1 && ms && cc[v][s]) FLAGV(236, s);
 		// 1/2.
-		else if (l_len[0] == 6 && !slur1) FLAGV(233, s);
-		else if (l_len.size() > 1 && l_len[1] == 6) FLAGV(234, fli[v][l_ls[1]], fli[v][l_ls[0]]);
-		else if (l_len.size() > 2 && l_len[2] == 6) FLAGV(234, fli[v][l_ls[2]], fli[v][l_ls[0]]);
+		else if (l_len[0] == 6 && !slur1 && cc[v][s]) FLAGV(233, s);
+		else if (l_len.size() > 1 && l_len[1] == 6 && cc[v][fli[v][l_ls[1]]]) FLAGV(234, fli[v][l_ls[1]], fli[v][l_ls[0]]);
+		else if (l_len.size() > 2 && l_len[2] == 6 && cc[v][fli[v][l_ls[1]]]) FLAGV(234, fli[v][l_ls[2]], fli[v][l_ls[0]]);
 		// 1/2 after 1/4 or 1/8 in measure
 		else if (full_measure && l_len[l_len.size() - 1] == 4 && l_len[0] != 4) {
 			s3 = fli[v][l_ls[l_ls.size() - 1]];
-			if (ms >= mli.size() - 2) FLAGVL(238, s3, s);
-			else if (slur2 != 0) FLAGVL(239, s3, s);
-			else if (slur1 != 0) FLAGVL(278, s3, s);
-			else FLAGVL(240, s3, s);
+			if (cc[v][s3]) {
+				if (ms >= mli.size() - 2) FLAGVL(238, s3, s);
+				else if (slur2 != 0) FLAGVL(239, s3, s);
+				else if (slur1 != 0) FLAGVL(278, s3, s);
+				else FLAGVL(240, s3, s);
+			}
 		}
 		// Many notes in measure
 		if (l_len.size() == 5) {
@@ -2650,11 +2651,13 @@ int CP2R::FailRhythm5() {
 		}
 		else if (l_len.size() > 5) FLAGVL(246, s, fli[v][bli[v][s + npm - 1]]);
 		// Suspensions
-		if (slur1 == 4 && l_len[0] == 2) FLAGV(241, s);
-		else if (slur1 == 4 && l_len[0] == 4) FLAGV(242, s);
-		//else if (slur1 == 2) FLAGV(251, s)
-		if (slur1 && l_len[0] == 6) FLAGV(243, s);
-		if (slur1 == 6) FLAGV(244, s);
+		if (cc[v][s]) {
+			if (slur1 == 4 && l_len[0] == 2) FLAGV(241, s);
+			else if (slur1 == 4 && l_len[0] == 4) FLAGV(242, s);
+			//else if (slur1 == 2) FLAGV(251, s)
+			if (slur1 && l_len[0] == 6) FLAGV(243, s);
+			if (slur1 == 6) FLAGV(244, s);
+		}
 	}
 	return 0;
 }
@@ -3353,7 +3356,9 @@ int CP2R::FailVocalRanges() {
 int CP2R::FailVocalRangesConflict() {
 	int conf_start = -1;
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		GetVp();
 		for (s = 0; s < c_len; ++s) {
+			vc = vca[s];
 			if (!cc[v][s]) continue;
 			if (!cc[v2][s]) continue;
 			// Check if there is range conflict
