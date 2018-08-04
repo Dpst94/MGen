@@ -410,6 +410,7 @@ void CP2Ly::ExportLyI() {
 
 // Init flags separate staff
 void CP2Ly::InitFSep() {
+	fsep.clear();
 	fsep.resize(av_cnt);
 	for (v = 0; v < av_cnt; ++v) {
 		fsep[v].resize(c_len);
