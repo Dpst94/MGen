@@ -3384,8 +3384,10 @@ int CP2R::FailVocalRangesConflict() {
 int CP2R::FailVIntervals() {
 	CHECK_READY(DR_fli, DR_msh, DR_sus);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		GetVp();
 		for (ls = 1; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
+			vc = vca[s];
 			// Skip oblique motion
 			if (s != fli[v2][bli[v2][s]]) continue;
 			// Prepare data

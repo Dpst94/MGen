@@ -342,6 +342,7 @@ int CGenCA3::GetCP() {
 	src_alter.resize(av_cnt);
 	retr.resize(av_cnt);
 	c_len = cp[cp_id][0].size();
+	InitAnalysis();
 	mli.clear();
 	bmli.resize(c_len);
 	npm = 0;
@@ -501,7 +502,6 @@ void CGenCA3::Generate() {
 		if (GetCP()) continue;
 		int real_len = cc[0].size();
 		int full_len = floor((real_len + 1) / 8 + 1) * 8;
-		InitAnalysis();
 		GetAnalysisVectors();
 		if (GetCPSpecies()) continue;
 		if (AnalyseCP()) continue;

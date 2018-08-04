@@ -115,7 +115,7 @@
 // Report violation and save link inside voice
 #define FLAG(id, s, v2) do { \
   ASSERT_RULE(id);  \
-  if (skip_flags && !(*vaccept)[id]) return 1;  \
+  if (skip_flags && !accept[sp][vc][vp][id]) return 1;  \
 	flag[v][s].push_back(id);  \
 	fsl[v][s].push_back(s);  \
 	fvl[v][s].push_back(v2);  \
@@ -124,7 +124,7 @@
 // Report violation and save link inside voice
 #define FLAGL(id, s, s2, v2) do { \
   ASSERT_RULE(id);  \
-  if (skip_flags && !(*vaccept)[id]) return 1;  \
+  if (skip_flags && !accept[sp][vc][vp][id]) return 1;  \
 	flag[v][s].push_back(id);  \
 	fsl[v][s].push_back(s2);  \
 	fvl[v][s].push_back(v2);  \

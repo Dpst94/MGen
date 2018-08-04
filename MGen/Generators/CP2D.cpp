@@ -304,9 +304,6 @@ void CP2D::LoadRules(CString fname) {
 			for (int i = 0; i <= MAX_VP; ++i) if (nvp[i]) found = 1;
 			if (!found) for (int i = 0; i <= MAX_VP; ++i) nvp[i] = 1;
 			// Detect if rule is detailed
-			if (rid == 324) {
-				WriteLog(5, "WOW");
-			}
 			if (spec == "" && voices == "") {
 				if (rdetailed[rid] == 1) {
 					est.Format("Rule %d tries to combine detailed and non-detailed approaches",
