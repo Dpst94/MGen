@@ -683,7 +683,11 @@ void CP2Ly::SendLyMistakes() {
 		}
 		SaveLyComments();
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
-		int max_mist = lyi[s].nflags.size() - 1;
+		int max_mist = -1;
+		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
+			if (!lyi[s].nfn[f]) break;
+			++max_mist;
+		}
 		// Do not show too many mistakes
 		if (max_mist > 2) {
 			max_mist = 1;
