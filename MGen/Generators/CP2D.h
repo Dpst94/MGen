@@ -122,25 +122,16 @@ protected:
 
 	inline void SetRuleParam(vector<vector<vector<int>>>& par, int rid, int type, int id);
 	inline void SetRuleParam(vector<vector<vector<float>>>& par, int rid, int type, int id);
-
 	void SetRuleParams();
-
 	void FillPause(int start, int length, int v);
-
 	void GetFlag(int f);
-
-	void GetSpVcVp();
-
+	inline void GetSpVcVp();
+	inline void GetVp();
 	void LoadHarmNotation();
-
 	CString GetHarmName(int pitch, int alter);
-
 	static CString GetPrintKey(int lbn, int lmode, int mminor = -1);
-
 	void TestCC_C2();
-
 	void BuildPitchConvert();
-
 	void LogVector(CString print_st, int print_int, int x1, int x2, vector<int>& c, CString fname);
 
 	int max_rule = 0;

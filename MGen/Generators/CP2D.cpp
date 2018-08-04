@@ -291,8 +291,8 @@ void CP2D::LoadRules(CString fname) {
 				nvc[atoi(voices.Mid(0, 1))] = 1;
 			}
 			if (voices.Find("E") != -1) nvp[vpExt] = 1;
-			else if (voices.Find("B") != -1) nvp[vpBas] = 1;
-			else if (voices.Find("N") != -1) nvp[vpNbs] = 1;
+			if (voices.Find("B") != -1) nvp[vpBas] = 1;
+			if (voices.Find("N") != -1) nvp[vpNbs] = 1;
 			// Set if empty
 			int found = 0;
 			for (int i = 0; i <= MAX_SPECIES; ++i) if (nsp[i]) found = 1;
@@ -304,6 +304,9 @@ void CP2D::LoadRules(CString fname) {
 			for (int i = 0; i <= MAX_VP; ++i) if (nvp[i]) found = 1;
 			if (!found) for (int i = 0; i <= MAX_VP; ++i) nvp[i] = 1;
 			// Detect if rule is detailed
+			if (rid == 324) {
+				WriteLog(5, "WOW");
+			}
 			if (spec == "" && voices == "") {
 				if (rdetailed[rid] == 1) {
 					est.Format("Rule %d tries to combine detailed and non-detailed approaches",
@@ -817,6 +820,20 @@ void CP2D::GetFlag(int f) {
 void CP2D::GetSpVcVp() {
 	sp = vsp[v];
 	vc = vca[s];
+	GetVp();
+	if (v2 == v) {
+		if (v == hva[s]) vp = vpExt;
+		else if (v == lva[s]) vp = vpBas;
+		else vp = vpNbs;
+	}
+	else {
+		if (v == lva[s] && v2 == hva[s]) vp = vpExt;
+		else if (v == lva[s] && v2 != hva[s]) vp = vpBas;
+		else vp = vpNbs;
+	}
+}
+
+void CP2D::GetVp() {
 	if (v2 == v) {
 		if (v == hva[s]) vp = vpExt;
 		else if (v == lva[s]) vp = vpBas;
@@ -914,71 +931,6 @@ CString CP2D::GetPrintKey(int bn, int mode, int mminor) {
 	}
 	return st;
 }
-
-/*
-void CP2D::TestCC_C() {
-	CString fname;
-	CString st;
-	ofstream outfile;
-
-	fname = "log\\testc_cc.csv";
-	DeleteFile(fname);
-	outfile.open(fname, ios_base::app);
-	outfile << "Mname;Mode;Bn;Dno;Dno % 7;Cno;Dno2;Match;dno_Gradual;cno_Gradual;\n";
-	// Test diatonic notes
-	for (mode = 0; mode < 12; ++mode) {
-		for (bn = 0; bn < 12; ++bn) {
-			vector<int> cno;
-			cno.resize(75);
-			vector<int> dno2;
-			dno2.resize(75);
-			for (int dno = 0; dno < 75; ++dno) {
-				cno[dno] = C_CC2(dno, bn, mode);
-				dno2[dno] = CC_C2(cno[dno], bn, mode);
-				int test_dno_match = 0;
-				if (dno == dno2[dno]) test_dno_match = 1;
-				int test_dno_gradual = 0;
-				if (!dno || (dno2[dno] - dno2[dno - 1] == 1)) test_dno_gradual = 1;
-				int test_cno_gradual = 0;
-				if (!dno || (cno[dno] - cno[dno - 1] < 3 && cno[dno] - cno[dno - 1] > 0)) test_cno_gradual = 1;
-				st.Format("%s;%d;%d;%d;%d;%d;%d;%d;%d;%d\n",
-					GetPrintKey(bn, mode), mode, bn, dno, dno % 7,
-					cno[dno], dno2[dno], test_dno_match, test_dno_gradual, test_cno_gradual);
-				outfile << st;
-			}
-		}
-	}
-	outfile.close();
-
-	fname = "log\\testcc_c.csv";
-	DeleteFile(fname);
-	outfile.open(fname, ios_base::app);
-	outfile << "Mode;Bn;Cno;Dno;Cno2;Match;dno_Gradual;cno_Gradual;\n";
-	// Test chromatic notes
-	for (mode = 0; mode < 12; ++mode) {
-		for (bn = 0; bn < 12; ++bn) {
-			vector<int> dno;
-			dno.resize(128);
-			vector<int> cno2;
-			cno2.resize(128);
-			for (int cno = 0; cno < 128; ++cno) {
-				dno[cno] = CC_C2(cno, bn, mode);
-				cno2[cno] = C_CC2(dno[cno], bn, mode);
-				int test_cno_match = 0;
-				if (cno == cno2[cno]) test_cno_match = 1;
-				int test_dno_gradual = 0;
-				if (!cno || (dno[cno] - dno[cno - 1] < 2 && dno[cno] - dno[cno - 1] >= 0)) test_dno_gradual = 1;
-				int test_cno_gradual = 0;
-				if (!cno || (cno2[cno] - cno2[cno - 1] < 3 && dno[cno] - dno[cno - 1] >= 0)) test_cno_gradual = 1;
-				st.Format("%d;%d;%d;%d;%d;%d;%d;%d\n",
-					mode, bn, cno, dno[cno], cno2[cno], test_cno_match, test_dno_gradual, test_cno_gradual);
-				outfile << st;
-			}
-		}
-	}
-	outfile.close();
-}
-*/
 
 void CP2D::TestCC_C2() {
 	CString fname;
