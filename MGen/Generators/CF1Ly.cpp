@@ -702,7 +702,7 @@ void CF1Ly::SendLyHarm() {
 			}
 			else if (st.Right(3) == "6/4") {
 				lst += "  \\concat { \n";
-				lst += "    \\general-align #Y #0.5 \"" + st.Left(st.GetLength() - 3) + "\"\n";
+				lst += "    \\general-align #Y #0.5 {" + st.Left(st.GetLength() - 3) + "}\n";
 				lst += "    \\teeny\n";
 				lst += "    \\override #'(baseline-skip . 1.5) \n";
 				lst += "    \\override #'(line-width . 100)  \n";
