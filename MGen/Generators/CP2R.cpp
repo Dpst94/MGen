@@ -2982,6 +2982,17 @@ int CP2R::FailHarm() {
 		chm.push_back(0);
 		chm_alter.push_back(0);
 		hcount = 0;
+		// Make last leading tone in penultimate measure harmonic
+		if (ms == mli.size() - 2) {
+			for (v = 0; v < av_cnt; ++v) {
+				if (fli_size[v] < 2) continue;
+				int s9 = fli[v][fli_size[v] - 2];
+				if (pcc[v][s9] == 11 && msh[v][fli_size[v] - 2] < 0) {
+					msh[v][fli_size[v] - 2] = pLastLT;
+				}
+			}
+		}
+		// Loop inside measure
 		for (s = mli[ms]; s <= mea_end; ++s) {
 			for (v = 0; v < av_cnt; ++v) {
 				sp = vsp[v];
