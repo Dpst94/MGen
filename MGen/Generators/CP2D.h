@@ -290,6 +290,7 @@ protected:
 	// Intervals
 	int civl; // Chromatic interval between voices
 	int civlc; // Chromatic interval class between voices
+	vector<vector<int>> hdb; // [v][ms] If in this voice measure starts with harmonic note
 
 	// Main vectors
 	vector<int> mli; // [s] Links to measure start step

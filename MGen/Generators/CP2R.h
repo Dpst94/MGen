@@ -243,6 +243,8 @@ protected:
 	inline int FailVocalRanges();
 	inline int FailVocalRangesConflict();
 	inline int FailVIntervals();
+	inline int FailMsh();
+	inline int FailDownbeat();
 	inline int FailPco();
 	inline int FailVRLimit();
 	inline int FailMeasureLen();
