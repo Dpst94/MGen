@@ -34,12 +34,12 @@ int CP2R::EvaluateCP() {
 	GetLeapSmooth();
 	if (FailVocalRanges()) return 1;
 	if (FailMeasureLen()) return 1;
+	FailStartPause();
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		vaccept = &accept[sp][av_cnt][0];
 		GetMelodyInterval(0, c_len);
 		// Analysis
-		FailStartPause();
 		if (FailRetrInside()) return 1;
 		if (FailMode()) return 1;
 		if (FailPauses()) return 1;
@@ -2421,7 +2421,7 @@ int CP2R::FailRhythm4() {
 // Fail rhythm for species 3
 int CP2R::FailRhythm3() {
 	// Check uneven pause
-	if (fli_size[v] > 2 && !cc[v][0] && llen[v][0] != llen[v][1]) FLAGV(237, 0);
+	if (fli_size[v] > 2 && !cc[v][0] && llen[v][0] % npm != llen[v][1]) FLAGV(237, 0);
 	// Last measure not whole
 	if (c_len - fli[v][fli_size[v] - 1] < npm) {
 		FLAGV(267, fli[v][fli_size[v] - 1]);
@@ -2476,8 +2476,6 @@ int CP2R::FailRhythm5() {
 	// Length sum
 	int suml = 0;
 	int ls2 = 0;
-	// Check pause length
-	if (!cc[v][0] && llen[v][0] > 4) FLAGV(197, 0);
 	for (ms = 0; ms < mli.size(); ++ms) {
 		s = mli[ms];
 		if (s >= ep2) break;
@@ -2710,8 +2708,6 @@ int CP2R::FailSlurs() {
 	int cnt, max_count = 0;
 	int max_ls = 0;
 	int stl = sp_nlen[sp];
-	// Check pause length
-	if (!cc[v][0] && llen[v][0] > 4) FLAGV(197, 0);
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		if (!ls && !cc[v][0]) continue;
 		// Subtract old slur
@@ -2731,16 +2727,6 @@ int CP2R::FailSlurs() {
 	else if (max_count > 2) {
 		FLAGV(95, fli[v][max_ls]);
 		if (!accept[sp][av_cnt][0][95]) fpenalty += (max_count - 2) * 50;
-	}
-	return 0;
-}
-
-int CP2R::FailStartPause() {
-	if (sp <= 1 && fin[v]) {
-		FLAGV(138, 0);
-	}
-	else if (sp > 1 && !fin[v]) {
-		FLAGV(273, 0);
 	}
 	return 0;
 }
@@ -3451,11 +3437,13 @@ int CP2R::FailVIntervals() {
 			civl = abs(cc[v][s] - cc[v2][s]);
 			if (civl && civl % 12 == 0) civlc = 12;
 			else civlc = civl % 12;
+			// Skip first note in second voice
+			if (!bli[v2][s]) continue;
 			// Skip pauses
 			if (!cc[v][s]) continue;
 			if (!cc[v2][s]) continue;
-			// Skip first note in second voice
-			if (!bli[v2][s]) continue;
+			if (!cc[v][fli[v][ls - 1]]) continue;
+			if (!cc[v2][fli[v2][bli[v2][s] - 1]]) continue;
 			if (FailPco()) return 1;
 		}
 	}
@@ -3526,3 +3514,92 @@ int CP2R::FailPco() {
 	return 0;
 }
 
+int CP2R::FailStartPause() {
+	// Last measure with starting voice
+	int last_start = 0;
+	// How many voices start in this measure
+	vector<int> mstarts;
+	// How many voices start in this measure
+	vector<int> vstarts;
+	mstarts.resize(mli.size());
+	vstarts.resize(mli.size());
+	// Prohibit start at the same step
+	for (v = 0; v < av_cnt; ++v) {
+		sp = vsp[v];
+		int count3 = 0;
+		if (sp > 1) {
+			ms = bmli[fin[v]];
+			++mstarts[ms];
+			vstarts[ms] = v;
+			last_start = max(last_start, ms);
+		}
+		if (sp == 2 || sp == 4) {
+			int count2 = 0;
+			for (v2 = v + 1; v2 < av_cnt; ++v2) {
+				// Skip other steps
+				if (fin[v] != fin[v2]) continue;
+				sp2 = vsp[v2];
+				if (sp2 == 2 || sp2 == 4) {
+					++count2;
+					// More than 2 voices in sp2/4 start at same step
+					if (count2 > 1) FLAGV(530, fin[v]);
+				}
+				else {
+					// Voices start at same step
+					FLAGV(530, fin[v]);
+				}
+			}
+		}
+		else if (sp == 3 || sp == 5) {
+			for (v2 = v + 1; v2 < av_cnt; ++v2) {
+				// Skip other steps
+				if (fin[v] != fin[v2]) continue;
+				// Voices start at same step
+				FLAGV(530, fin[v]);
+			}
+		}
+	}
+	v = 0;
+	int late_entrance = 0;
+	for (ms = 0; ms < mli.size(); ++ms) {
+		if (!mstarts[ms]) {
+			// Detect empty measure
+			if (ms < last_start) late_entrance = 1; 
+		}
+		else {
+			if (late_entrance) {
+				late_entrance = 0;
+				v = vstarts[ms];
+				FLAGV(527, mli[ms]);
+			}
+			if (mstarts[ms] > 2) {
+				// Too many voices start
+				v = vstarts[ms];
+				FLAGV(529, mli[ms]);
+			}
+			else if (mstarts[ms] == 1 && last_start > ms) {
+				// Only one voice starts, although there are more voices to start
+				v = vstarts[ms];
+				FLAGV(528, mli[ms]);
+			}
+		}
+	}
+	// Prohibit wrong pause length in measure
+	for (v = 0; v < av_cnt; ++v) {
+		sp = vsp[v];
+		if (sp == 0 || sp == 1) {
+			// Pauses are prohibited in this species
+			if (fin[v] > 0) FLAGV(138, fin[v]);
+		}
+		else if (sp == 2 || sp == 4) {
+			// Only halfnote pause is allowed
+			if (fin[v] % npm != 4) FLAGV(138, fin[v]);
+		}
+		else if (sp == 3 || sp == 5) {
+			// Only particular pauses are allowed
+			if (fin[v] % npm != 2 && fin[v] % npm != 4 &&
+				fin[v] % npm != 6) FLAGV(138, fin[v]);
+		}
+	}
+	return 0;
+}

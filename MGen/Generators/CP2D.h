@@ -157,7 +157,7 @@ protected:
 	int ls;
 	int ms;
 	int hs;
-	int sp, vc, vp;
+	int sp, sp2, vc, vp;
 	int fl; // Current flag id
 
 	// Local
