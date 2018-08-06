@@ -232,7 +232,7 @@ protected:
 	inline int FailNoteLen();
 	inline int FailBeat();
 	inline int FailRetrInside();
-	inline void GetHarm(vector<int>& chn, vector<int>& cchn, int &lchm, int &lchm_alter);
+	inline void GetHarm(int found_gis, int found_fis, vector<int>& chn, vector<int>& cchn, int & lchm, int & lchm_alter);
 	inline int FailHarm();
 	inline int EvalHarm();
 	inline int FailTonicCP();

@@ -576,7 +576,7 @@ void CGenCA3::GetCPKey() {
 			}
 			int lchm;
 			int lchm_alter;
-			GetHarm(chn, cchn, lchm, lchm_alter);
+			GetHarm(0, 0, chn, cchn, lchm, lchm_alter);
 			bn = c_cc[lchm + 14] % 12;
 			break;
 		}

@@ -2895,7 +2895,7 @@ int CP2R::FailRetrInside() {
 }
 
 // Take vector of diatonic notes and detect most possible chord
-void CP2R::GetHarm(vector<int> &chn, vector<int> &cchn, int &lchm, int &lchm_alter) {
+void CP2R::GetHarm(int found_gis, int found_fis, vector<int> &chn, vector<int> &cchn, int &lchm, int &lchm_alter) {
 	int max_rat = -10000;
 	for (int x = 0; x < 7; ++x) {
 		// No root note
@@ -2917,14 +2917,20 @@ void CP2R::GetHarm(vector<int> &chn, vector<int> &cchn, int &lchm, int &lchm_alt
 	}
 	lchm_alter = 0;
 	if (mminor) {
-		// Detect altered chord if note is part of chord
-		if (((cchn[11] && lchm && lchm % 2 == 0) ||
-			(cchn[9] && lchm % 2)))
-			lchm_alter = 1;
-		// Detect unaltered chord if note is part of chord
-		if (((cchn[10] && lchm && lchm % 2 == 0) ||
-			(cchn[8] && lchm % 2)))
-			lchm_alter = -1;
+		// Check chords with G or G#
+		if (lchm && lchm % 2 == 0) {
+			if (cchn[11]) lchm_alter = 1;
+			else if (cchn[10]) lchm_alter = -1;
+			else if (found_gis == 1) lchm_alter = 1;
+			else if (found_gis == -1) lchm_alter = -1;
+		}
+		// Check chords with F or F#
+		else if (lchm % 2) {
+			if (cchn[9]) lchm_alter = 1;
+			else if (cchn[8]) lchm_alter = -1;
+			else if (found_fis == 1) lchm_alter = 1;
+			else if (found_fis == -1) lchm_alter = -1;
+		}
 	}
 }
 
@@ -2935,6 +2941,7 @@ int CP2R::FailHarm() {
 	int s9;
 	int n, hcount;
 	int last_b; // First harmony in measure has b
+	int found_gis, found_fis;
 	vector<int> chn, cchn;
 	int mea_end;
 	chn.resize(7);
@@ -2967,6 +2974,8 @@ int CP2R::FailHarm() {
 		hbc.push_back(0);
 		chm.push_back(0);
 		chm_alter.push_back(0);
+		found_gis = 0;
+		found_fis = 0;
 		hcount = 0;
 		// Make last leading tone in penultimate measure harmonic
 		if (ms == mli.size() - 2) {
@@ -2987,6 +2996,11 @@ int CP2R::FailHarm() {
 				if (fli[v][ls] != s && sus[v][ls] != s) continue;
 				// Skip pauses
 				if (!cc[v][s]) continue;
+				// At this point all notes are checked for alterations
+				if (pcc[v][s] == 11) found_gis = 1;
+				else if (pcc[v][s] == 10) found_gis = -1;
+				else if (pcc[v][s] == 9) found_fis = 1;
+				else if (pcc[v][s] == 8) found_fis = -1;
 				// For first suspension in measure, evaluate last step. In other cases - first step
 				if (fli[v][ls] <= mli[ms] && sus[v][ls]) {
 					s9 = fli2[v][ls];
@@ -3005,7 +3019,7 @@ int CP2R::FailHarm() {
 				// Find harmonic conflict
 				if (s > mli[ms] && (chn[(n + 1) % 7] || chn[(n + 6) % 7] ||
 					(chn[n] && !cchn[pcc[v][s9]]))) {
-					GetHarm(chn, cchn, chm[hs], chm_alter[hs]);
+					GetHarm(found_gis, found_fis, chn, cchn, chm[hs], chm_alter[hs]);
 					RemoveHarmDuplicate();
 					// More than two harmonies
 					if (hcount) FLAGHL(40, s, mli[ms]);
@@ -3036,6 +3050,8 @@ int CP2R::FailHarm() {
 					ha64.push_back(0);
 					hbcc.push_back(127);
 					hbc.push_back(0);
+					found_gis = 0;
+					found_fis = 0;
 					chm_alter.push_back(0);
 					// Reinitialize chord notes for new chord
 					for (v2 = 0; v2 < av_cnt; ++v2) {
@@ -3065,7 +3081,7 @@ int CP2R::FailHarm() {
 				++cchn[pcc[v][s9]];
 			}
 		}
-		GetHarm(chn, cchn, chm[hs], chm_alter[hs]);
+		GetHarm(found_gis, found_fis, chn, cchn, chm[hs], chm_alter[hs]);
 		RemoveHarmDuplicate();
 		// If penultimate measure
 		if (ms == mli.size() - 2 && hcount) {
