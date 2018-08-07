@@ -49,6 +49,7 @@ const int sp_nlen[] = {
 // Vocal range information
 struct VocalRangeInfo {
 	CString name;
+	CString clef;
 	int min_cc; // Absolute minimum
 	int max_cc; // Absolute maximum
 	int high_cc; // Above this cc is high range
@@ -280,7 +281,7 @@ protected:
 	// Voice vectors
 	vector<int> vid; // [v] Voice id for each voice
 	vector<int> vocra; // [v] Vocal range for each voice
-	vector<int> vocra_detected; // [v] 1 - detected by instrument name; 2 - detected by notes range
+	vector<int> vocra_detected; // [v] 0 - not detected, 1 - detected by instrument name; 2 - detected by notes range
 	vector<int> vocra_used; // [v] how many times vocal range is used
 	int vocra_penalty;
 	vector<vector<int>> vocra_p; // [v] if vocal range is possible, it is in vector

@@ -522,6 +522,9 @@ void CP2Ly::SaveLyCP() {
 		if (vocra_detected[v] == 2) {
 			vocra_st = " \"[" + vocra_info[vocra[v]].name + "]\"";
 		}
+		if (vocra_detected[v]) {
+			clef = vocra_info[vocra[v]].clef;
+		}
 		ly_ly_st += "     \n";
 		st.Format("  \\set Staff.instrumentName = \\markup { \\tiny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" \"[%s]\"%s } }\n", vname2[vi], st3, vocra_st);
 		//ly_ly_st += "    \\override #'(line-width . 100)  \n";

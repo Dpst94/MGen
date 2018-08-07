@@ -47,6 +47,7 @@ void CP2D::LoadVocalRanges(CString fname) {
 		int vr_id = atoi(cdb.result[i]["id"]);
 		vocra_info.resize(max(vocra_info.size(), vr_id + 1));
 		vocra_info[vr_id].name = cdb.result[i]["name"];
+		vocra_info[vr_id].clef = cdb.result[i]["clef"];
 		vocra_info[vr_id].max_cc = atoi(cdb.result[i]["max_cc"]);
 		vocra_info[vr_id].min_cc = atoi(cdb.result[i]["min_cc"]);
 		vocra_info[vr_id].high_cc = atoi(cdb.result[i]["high_cc"]);
