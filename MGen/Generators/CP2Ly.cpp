@@ -126,27 +126,12 @@ void CP2Ly::AddNLinkSep(int f) {
 	lyi[s3].nfn.push_back(0);
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
+	++ly_flags;
 }
 
 void CP2Ly::ParseNLinks() {
 	CString com;
 	ly_ufl.clear();
-	/*
-	// Sort flags by severity
-	vector<pair<int, int>> fss; // []<f, sev> Flag severity sequence
-	for (int f = 0; f < flag[v][s].size(); ++f) {
-		GetFlag(f);
-		fss.push_back(make_pair(severity[sp][vc][vp][fl], f));
-	}
-	if (fss.size() > 2) {
-		WriteLog(1, "WOW");
-	}
-	sort(fss.rbegin(), fss.rend());
-	// Parse flags
-	for (int ff = 0; ff < fss.size(); ++ff) {
-		int f = fss[ff].second;
-	}
-	*/
 	for (int f = 0; f < flag[v][s].size(); ++f) {
 		AddNLink(f);
 	}
@@ -300,7 +285,13 @@ void CP2Ly::ParseLyI() {
 						overlap1 = x + lyi[x].shsl[vtype];
 						if (overlap1 < s2 + overlap_border) {
 							// Choose highest severity
-							if (sev <= lyi[overlap1].shse[vtype]) {
+							if (sev < lyi[overlap1].shse[vtype]) {
+								// Skip shape
+								skip_shape = 1;
+								break;
+							}
+							// Choose same severity, but longer shape
+							if (sev == lyi[overlap1].shse[vtype] && abs(link) <= abs(lyi[x].shsl[vtype])) {
 								// Skip shape
 								skip_shape = 1;
 								break;
@@ -317,6 +308,10 @@ void CP2Ly::ParseLyI() {
 						if (overlap1 < s2 + overlap_border) {
 							// Choose highest severity
 							if (sev > lyi[overlap1].shse[vtype]) {
+								ClearLyShape(overlap1, overlap2, vtype);
+							}
+							// Choose same severity, but longer shape
+							if (sev == lyi[overlap1].shse[vtype] && abs(link) > abs(lyi[x].shsl[vtype])) {
 								ClearLyShape(overlap1, overlap2, vtype);
 							}
 						}
@@ -373,7 +368,13 @@ void CP2Ly::ParseLyISep() {
 						overlap1 = x + lyi[x].shsl[vtype];
 						if (overlap1 < s2 + overlap_border) {
 							// Choose highest severity
-							if (sev <= lyi[overlap1].shse[vtype]) {
+							if (sev < lyi[overlap1].shse[vtype]) {
+								// Skip shape
+								skip_shape = 1;
+								break;
+							}
+							// Choose same severity, but longer shape
+							if (sev == lyi[overlap1].shse[vtype] && abs(link) <= abs(lyi[x].shsl[vtype])) {
 								// Skip shape
 								skip_shape = 1;
 								break;
@@ -390,6 +391,10 @@ void CP2Ly::ParseLyISep() {
 						if (overlap1 < s2 + overlap_border) {
 							// Choose highest severity
 							if (sev > lyi[overlap1].shse[vtype]) {
+								ClearLyShape(overlap1, overlap2, vtype);
+							}
+							// Choose same severity, but longer shape
+							if (sev == lyi[overlap1].shse[vtype] && abs(link) > abs(lyi[x].shsl[vtype])) {
 								ClearLyShape(overlap1, overlap2, vtype);
 							}
 						}
@@ -829,7 +834,8 @@ void CP2Ly::SaveLyComments() {
 				com += ". " + GetRuleComment(fl, sp, vc, vp);
 			if (ly_rule_verbose > 1 && !GetSubRuleComment(fl, sp, vc, vp).IsEmpty())
 				com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
-			com += " " + lyi[s].nfc[c];
+			st.Format("%d", lyi[s].fvl[c]);
+			com += " " + st;
 			// Send note number with first comment
 			if (!found) {
 				found = 1;
