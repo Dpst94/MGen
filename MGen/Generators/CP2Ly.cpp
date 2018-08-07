@@ -131,6 +131,22 @@ void CP2Ly::AddNLinkSep(int f) {
 void CP2Ly::ParseNLinks() {
 	CString com;
 	ly_ufl.clear();
+	/*
+	// Sort flags by severity
+	vector<pair<int, int>> fss; // []<f, sev> Flag severity sequence
+	for (int f = 0; f < flag[v][s].size(); ++f) {
+		GetFlag(f);
+		fss.push_back(make_pair(severity[sp][vc][vp][fl], f));
+	}
+	if (fss.size() > 2) {
+		WriteLog(1, "WOW");
+	}
+	sort(fss.rbegin(), fss.rend());
+	// Parse flags
+	for (int ff = 0; ff < fss.size(); ++ff) {
+		int f = fss[ff].second;
+	}
+	*/
 	for (int f = 0; f < flag[v][s].size(); ++f) {
 		AddNLink(f);
 	}
@@ -687,30 +703,31 @@ void CP2Ly::SendLyMistakes() {
 	ly_ly_st += "      \\set stanza = #\" Flags:\"\n";
 	for (s = 0; s < c_len; ++s) {
 		ls = bli[v][s];
-		if (!lyi[s].nflags.size()) {
+		vector<pair<int, int>> flink;
+		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
+			if (!lyi[s].nfn[f]) continue;
+			flink.push_back(make_pair(lyi[s].fsev[f], f));
+		}
+		if (!flink.size()) {
 			ly_ly_st += SendLySkips(1);
 			continue;
 		}
+		int first_flag = lyi[s].nfn[0];
+		sort(flink.rbegin(), flink.rend());
 		SaveLyComments();
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
-		vector<int> flink;
-		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
-			if (!lyi[s].nfn[f]) continue;
-			flink.push_back(f);
-		}
 		// Do not show too many mistakes
 		if (flink.size() > 3) {
 			flink.resize(2);
 			ly_ly_st += "...\n";
 		}
 		for (int ff = flink.size() - 1; ff >= 0; --ff) {
-			int f = flink[ff];
-			if (!lyi[s].nfn[f]) continue;
+			int f = flink[ff].second;
 			int fl = lyi[s].nflags[f];
 			int sev = lyi[s].fsev[f];
 			st.Format("        \\with-color #(rgb-color " +
 				GetLyColor(sev) + ") %s %d\n", // \\circle 
-				lyi[s].nfs[f] || lyi[s].fhide[f] ? "\\underline" : "", lyi[s].nfn[f]);
+				lyi[s].nfs[f] || lyi[s].fhide[f] ? "\\underline" : "", first_flag + ff);
 			// \override #'(offset . 5) \override #'(thickness . 2) 
 			ly_ly_st += st;
 		}
