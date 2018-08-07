@@ -3384,14 +3384,28 @@ int CP2R::FailVocalRangesConflict() {
 			// Search for end of conflict
 			else {
 				if (!is_conf) {
-					FLAGL(524, conf_start, s - 1, v2);
+					if (s - conf_start > vocra_disbal_yel[sp][vc][vp] * 2) {
+						if (s - conf_start > vocra_disbal_red[sp][vc][vp] * 2) {
+							FLAGL(526, conf_start, s - 1, v2);
+						}
+						else {
+							FLAGL(524, conf_start, s - 1, v2);
+						}
+					}
 					conf_start = -1;
 				}
 			}
 		}
 		if (conf_start > -1) {
-			s = c_len - 1;
-			FLAGL(524, conf_start, s - 1, v2);
+			s = c_len;
+			if (s - conf_start > vocra_disbal_yel[sp][vc][vp] * 2) {
+				if (s - conf_start > vocra_disbal_red[sp][vc][vp] * 2) {
+					FLAGL(526, conf_start, s - 1, v2);
+				}
+				else {
+					FLAGL(524, conf_start, s - 1, v2);
+				}
+			}
 		}
 	}
 	return 0;

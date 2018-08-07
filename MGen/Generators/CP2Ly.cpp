@@ -834,8 +834,8 @@ void CP2Ly::SaveLyComments() {
 				com += ". " + GetRuleComment(fl, sp, vc, vp);
 			if (ly_rule_verbose > 1 && !GetSubRuleComment(fl, sp, vc, vp).IsEmpty())
 				com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
-			st.Format("%d", lyi[s].fvl[c]);
-			com += " " + st;
+			//st.Format("%d", lyi[s].fvl[c]);
+			//com += " " + st;
 			// Send note number with first comment
 			if (!found) {
 				found = 1;

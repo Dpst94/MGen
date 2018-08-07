@@ -263,6 +263,8 @@ protected:
 	vector<vector<vector<int>>> tonic_window_cp; // Number of harmonies that are searched for number of tonic chords
 	vector<vector<vector<int>>> tonic_max_cp; // Maximum number of tonic chords that can be contained in tonic window
 	vector<vector<vector<int>>> tonic_wei_inv; // Percent of weight for inverted tonic chord
+	vector<vector<vector<int>>> vocra_disbal_yel; // Minimum disbalance length to flag (yellow)
+	vector<vector<vector<int>>> vocra_disbal_red; // Minimum disbalance length to flag (red)
 	vector<vector<vector<float>>> cross_max_len; // Maximum length of voice crossing in measures
 	vector<vector<vector<float>>> cross_max_len2; // Maximum length of voice crossing in measures (red)
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)

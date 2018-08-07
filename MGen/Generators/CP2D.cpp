@@ -782,6 +782,8 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(notes_picount3, 346, rsSubName, 0);
 	SetRuleParam(min_picount3, 346, rsSubName, 1);
 	SetRuleParam(mea_per_sus, 341, rsSubName, 0);
+	SetRuleParam(vocra_disbal_yel, 524, rsSubName, 0);
+	SetRuleParam(vocra_disbal_red, 526, rsSubName, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;
