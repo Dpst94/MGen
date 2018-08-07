@@ -68,12 +68,16 @@ void CP2Ly::AddNLink(int f) {
 	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	// Check that this flag was already sent at this step
 	pair<set<int>::iterator, bool> ufl_p = ly_ufl.insert(fl);
-	if (!ufl_p.second) lyi[s3].nfn.push_back(0);
-	else lyi[s3].nfn.push_back(ly_flags + 1);
+	if (!ufl_p.second) {
+		lyi[s3].nfn.push_back(0);
+	}
+	else {
+		lyi[s3].nfn.push_back(ly_flags + 1);
+		++ly_flags;
+		++ly_vflags;
+	}
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
-	++ly_flags;
-	++ly_vflags;
 }
 
 // Parse foreign flags from other voices: gliss and notecolor
@@ -122,7 +126,6 @@ void CP2Ly::AddNLinkSep(int f) {
 	lyi[s3].nfn.push_back(0);
 	lyi[s3].nfs.push_back(0);
 	lyi[s3].nfc.push_back("");
-	++ly_flags;
 }
 
 void CP2Ly::ParseNLinks() {
@@ -690,17 +693,18 @@ void CP2Ly::SendLyMistakes() {
 		}
 		SaveLyComments();
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
-		int max_mist = -1;
+		vector<int> flink;
 		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
-			if (!lyi[s].nfn[f]) break;
-			++max_mist;
+			if (!lyi[s].nfn[f]) continue;
+			flink.push_back(f);
 		}
 		// Do not show too many mistakes
-		if (max_mist > 2) {
-			max_mist = 1;
+		if (flink.size() > 3) {
+			flink.resize(2);
 			ly_ly_st += "...\n";
 		}
-		for (int f = max_mist; f >= 0; --f) {
+		for (int ff = flink.size() - 1; ff >= 0; --ff) {
+			int f = flink[ff];
 			if (!lyi[s].nfn[f]) continue;
 			int fl = lyi[s].nflags[f];
 			int sev = lyi[s].fsev[f];
