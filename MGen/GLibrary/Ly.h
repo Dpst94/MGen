@@ -242,7 +242,6 @@ protected:
 	CString GetLyLen(int length);
 	CString GetLyColor(int sev);
 	CString GetLyMarkColor(int sev);
-	CString GetRealIntName(int s, int v1, int v2);
 	CString GetIntName(int iv);
 	CString DetectLyClef(int vmin, int vmax);
 

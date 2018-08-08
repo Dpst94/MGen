@@ -64,6 +64,8 @@ void CP2Ly::AddNLink(int f) {
 	lyi[s3].nflags.push_back(fl);
 	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
 	lyi[s3].fsl.push_back(s4 - s3);
+	lyi[s3].fs_src.push_back(s);
+	lyi[s3].fsl_src.push_back(fsl[v][s][f]);
 	lyi[s3].fv.push_back(v);
 	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	// Check that this flag was already sent at this step
@@ -100,6 +102,8 @@ void CP2Ly::AddNLinkForeign(int f) {
 	lyi[s3].nflags.push_back(fl);
 	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
 	lyi[s3].fsl.push_back(s4 - s3);
+	lyi[s3].fs_src.push_back(s);
+	lyi[s3].fsl_src.push_back(fsl[v][s][f]);
 	lyi[s3].fv.push_back(v);
 	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	lyi[s3].nfn.push_back(0);
@@ -121,6 +125,8 @@ void CP2Ly::AddNLinkSep(int f) {
 	lyi[s3].nflags.push_back(fl);
 	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
 	lyi[s3].fsl.push_back(s4 - s3);
+	lyi[s3].fs_src.push_back(s);
+	lyi[s3].fsl_src.push_back(fsl[v][s][f]);
 	lyi[s3].fv.push_back(v);
 	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	lyi[s3].nfn.push_back(0);
@@ -244,14 +250,17 @@ void CP2Ly::ParseLyI() {
 			if (v != lyi[s].fv[f] && vtype != vGlis) continue;
 			// Set interval if not debugexpect. If debugexpect, do not set for red flags
 			if (!ly_debugexpect || sev != 100) {
+				// Source positions
+				int s3 = min(lyi[s].fs_src[f], lyi[s].fsl_src[f]);
+				int s4 = max(lyi[s].fs_src[f], lyi[s].fsl_src[f]);
 				if (ruleinfo[fl].viz_int == 1) {
-					SetLyShape(s1, s2, f, fl, sev, vInterval);
+					SetLyShape(s3, s4, f, fl, sev, vInterval);
 				}
 				if (ruleinfo[fl].viz_int == 2) {
-					SetLyShape(s1, s1, f, fl, sev, vInterval);
+					SetLyShape(s3, s3, f, fl, sev, vInterval);
 				}
 				if (ruleinfo[fl].viz_int == 3) {
-					SetLyShape(s2, s2, f, fl, sev, vInterval);
+					SetLyShape(s4, s4, f, fl, sev, vInterval);
 				}
 				if (ruleinfo[fl].viz_harm == 1) {
 					SetLyShape(s1, s2, f, fl, sev, vHarm);
@@ -552,7 +561,7 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += "}\n";
 		SendLyMistakes();
 		SendLyNoteNames();
-		//SendLyIntervals();
+		SendLyIntervals();
 	}
 	SendLyHarm();
 	SendLySeparate();
@@ -605,6 +614,38 @@ CString CP2Ly::GetRealNoteNameCP(int no) {
 	int no2, oct, alter;
 	GetRealNote(no, bn, mode == 9, no2, oct, alter);
 	return NoteName[no2] + GetAlterName(alter);
+}
+
+void CP2Ly::SendLyIntervals() {
+	CString st;
+	if (!ly_flags) return;
+	if (av_cnt != 2) return;
+	if (v) return;
+	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", 0);
+	ly_ly_st += st;
+	ly_ly_st += "    \\lyricmode {\n";
+	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
+	ly_ly_st += "      \\set stanza = #\" Interval:\"\n";
+	ly_ly_st += "      \\override InstrumentName #'X-offset = #1\n";
+	ly_ly_st += "      \\override InstrumentName #'font-series = #'bold\n";
+	ly_ly_st += "      \\override InstrumentName.font-size = #-2\n";
+	ly_ly_st += "      \\set shortVocalName = \"I:\"\n";
+	for (s = 0; s < c_len; ++s) {
+		if (!lyi[s].shs[vInterval] && !lyi[s].shf[vInterval]) {
+			ly_ly_st += SendLySkips(1);
+			continue;
+		}
+		CString st = GetRealIntName(s, 0, 1);
+		ly_ly_st += "\\markup{ ";
+		ly_ly_st += "\\teeny ";
+		if (lyi[s].shse[vInterval] > -1) {
+			ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor(lyi[s].shse[vInterval]) + ") ";
+		}
+		ly_ly_st += " \\pad-markup #0.4 \\concat { " + st + " ";
+		ly_ly_st += "} }\n";
+	}
+	ly_ly_st += "    }\n";
+	ly_ly_st += "  }\n";
 }
 
 void CP2Ly::SendLyHarm() {
@@ -985,5 +1026,60 @@ void CP2Ly::SplitLyNote(int pos, vector<int> &la) {
 		if (la[i] == 11) SplitLyNote11(curpos % npm, i, la);
 		curpos = pos + la[i];
 	}
+}
+
+CString CP2Ly::GetRealIntName(int s, int v1, int v2) {
+	// Exact interval
+	int in = abs(cc[v2][s] - cc[v][s]);
+	if (in > 14) {
+		in = in % 12;
+		if (in < 3) in += 12;
+	}
+	// Interval between base notes
+	int no, oct, alter;
+	int no2, oct2, alter2;
+	GetRealNote(cc[v][s], maj_bn, 0, no, oct, alter);
+	GetRealNote(cc[v2][s], maj_bn, 0, no2, oct2, alter2);
+	int fno = no + oct * 12;
+	int fno2 = no2 + oct2 * 12;
+	int bin = abs(fno - fno2);
+	if (bin > 14) {
+		bin = bin % 12;
+		if (bin < 3) bin += 12;
+	}
+	// Diatonic interval
+	int din = CC_C(abs(cc[v][s] - cc[v2][s]), 0, 0) - 7;
+	// Base diatonic interval
+	int bdin = CC_C(abs(fno - fno2), 0, 0) - 7;
+	int bdin2 = bdin;
+	if (bdin2 > 8) {
+		bdin2 = bdin2 % 7;
+		if (bdin2 < 3) bdin2 += 7;
+	}
+	// Build string
+	// Diatonic did not change or triton / triton base
+	if (din == bdin || in == 6 || bin == 6) {
+		if (in == 0) return "1";
+		else if (in == 1) return "m2";
+		else if (in == 2) return "M2";
+		else if (in == 3) return "m3";
+		else if (in == 4) return "M3";
+		else if (in == 5) return "4";
+		else if (in == 6) return "tri";
+		else if (in == 7) return "5";
+		else if (in == 8) return "m6";
+		else if (in == 9) return "M6";
+		else if (in == 10) return "m7";
+		else if (in == 11) return "M7";
+		else if (in == 12) return "8";
+		else if (in == 13) return "m9";
+		else if (in == 14) return "M9";
+	}
+	// Diatonic changed
+	CString st;
+	st.Format("%d", bdin2 + 1);
+	if (din < bdin) st = "dim" + st;
+	else st = "aug" + st;
+	return st;
 }
 

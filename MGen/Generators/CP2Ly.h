@@ -13,6 +13,8 @@ struct LY_IntermediateCP {
 	vector<int> fhide; // [] If flag shape should not be displayed (if sent to separate staff)
 	vector<int> fsev; // [] Severity for each flag
 	vector<int> fsl; // [] Current flag step links
+	vector<int> fs_src; // [] Source flag positions
+	vector<int> fsl_src; // [] Source flag links
 	vector<int> fv; // [] Current flag source voice
 	vector<int> fvl; // [] Current flag voice links
 	vector<int> nfn; // [] Note flag number
@@ -28,6 +30,7 @@ protected:
 	~CP2Ly();
 	void InitFSep();
 	void SaveLyCP();
+	void SendLyIntervals();
 	void SendLySeparate();
 	vector<CString> ly_st; // Resulting text for each counterpoint
 
@@ -57,6 +60,7 @@ private:
 	void SplitLyNote10(int pos, int i, vector<int>& la);
 	void SplitLyNote11(int pos, int i, vector<int>& la);
 	void SplitLyNote(int pos, vector<int>& la);
+	CString GetRealIntName(int s, int v1, int v2);
 	void ParseLyI();
 	void ParseLyISep();
 	void ExportLyI();

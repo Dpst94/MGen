@@ -946,3 +946,58 @@ void CF1Ly::SplitLyNote5(int pos, vector<int> &la) {
 	}
 }
 
+CString CF1Ly::GetRealIntName(int s, int v1, int v2) {
+	// Exact interval
+	int in = abs(note[s][v2] - note[s][v1]);
+	if (in > 14) {
+		in = in % 12;
+		if (in < 3) in += 12;
+	}
+	// Interval between base notes
+	int no, oct, alter;
+	int no2, oct2, alter2;
+	GetRealNote(note[s][v1], tonic[s][v1], minor[s][v1], no, oct, alter);
+	GetRealNote(note[s][v2], tonic[s][v2], minor[s][v2], no2, oct2, alter2);
+	int fno = no + oct * 12;
+	int fno2 = no2 + oct2 * 12;
+	int bin = abs(fno - fno2);
+	if (bin > 14) {
+		bin = bin % 12;
+		if (bin < 3) bin += 12;
+	}
+	// Diatonic interval
+	int din = CC_C(abs(note[s][v1] - note[s][v2]), 0, 0) - 7;
+	// Base diatonic interval
+	int bdin = CC_C(abs(fno - fno2), 0, 0) - 7;
+	int bdin2 = bdin;
+	if (bdin2 > 8) {
+		bdin2 = bdin2 % 7;
+		if (bdin2 < 3) bdin2 += 7;
+	}
+	// Build string
+	// Diatonic did not change or triton / triton base
+	if (din == bdin || in == 6 || bin == 6) {
+		if (in == 0) return "1";
+		else if (in == 1) return "m2";
+		else if (in == 2) return "M2";
+		else if (in == 3) return "m3";
+		else if (in == 4) return "M3";
+		else if (in == 5) return "4";
+		else if (in == 6) return "tri";
+		else if (in == 7) return "5";
+		else if (in == 8) return "m6";
+		else if (in == 9) return "M6";
+		else if (in == 10) return "m7";
+		else if (in == 11) return "M7";
+		else if (in == 12) return "8";
+		else if (in == 13) return "m9";
+		else if (in == 14) return "M9";
+	}
+	// Diatonic changed
+	CString st;
+	st.Format("%d", bdin2 + 1);
+	if (din < bdin) st = "dim" + st;
+	else st = "aug" + st;
+	return st;
+}
+

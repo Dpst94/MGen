@@ -32,6 +32,8 @@ public:
 
 	void SplitLyNote5(int pos, vector<int>& la);
 
+	CString GetRealIntName(int s, int v1, int v2);
+
 protected:
 	void GetLyRange(int step1, int step2, vector<int>& vm_min, vector<int>& vm_max);
 	void GetLyVcnt(int step1, int step2, vector<int>& vm_max);
