@@ -72,6 +72,7 @@ private:
 	int ly_flags = 0; // Number of flags sent
 	int ly_vflags = 0; // Number of flags in current voice
 	int ly_notenames = 0; // Number of note names in current melody
+	int ly_intervals = 0; // Number of interval flags in current melody
 
 	// Unique flags
 	set<int> ly_ufl; // Unique flag checker

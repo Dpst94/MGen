@@ -176,6 +176,7 @@ void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype) {
 				lyi[st2].shse[vtype] = sev;
 			}
 			if (vtype == vNoteName) ++ly_notenames;
+			if (vtype == vInterval) ++ly_intervals;
 		}
 		lyi[st1].sht[vtype] = ruleinfo[fl].viz_text;
 		// Save flag shape (step depends if link is forward or backward)
@@ -199,6 +200,7 @@ void CP2Ly::ClearLyShape(int st1, int st2, int vtype) {
 void CP2Ly::InitLyI() {
 	ly_vflags = 0;
 	ly_notenames = 0;
+	ly_intervals = 0;
 	lyi.clear();
 	lyi.resize(c_len + 1);
 	for (int i = 0; i < lyi.size(); ++i) {
@@ -618,7 +620,7 @@ CString CP2Ly::GetRealNoteNameCP(int no) {
 
 void CP2Ly::SendLyIntervals() {
 	CString st;
-	if (!ly_flags) return;
+	if (!ly_intervals) return;
 	if (av_cnt != 2) return;
 	if (v) return;
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", 0);
