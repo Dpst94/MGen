@@ -546,6 +546,7 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 	ly_fs << APP_VERSION << " at " << CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S") << "\"}\n";
 	read_file_sv("configs\\ly\\footer.ly", sv);
 	write_file_sv(ly_fs, sv);
+	ly_fs << "\\markup { \\vspace #1.5\n Harmonic notation: " + harm_notation_name[harm_notation] + " }\n";
 	ly_fs.close();
 	ly_saved = 1;
 }

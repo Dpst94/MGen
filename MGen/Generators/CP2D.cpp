@@ -869,7 +869,14 @@ void CP2D::LoadHarmNotation() {
 		st = pch;
 		// Skip comments
 		pos = st.Find("#");
-		if (pos == 0)	continue;
+		if (pos == 0) {
+			pos = st.Find(" - ");
+			st = st.Mid(pos + 3);
+			st.Trim();
+			harm_notation_name.resize(cur_nid + 2);
+			harm_notation_name[cur_nid + 1] = st;
+			continue;
+		}
 		st.Trim();
 		pos = 0;
 		if (st.Find(";") != -1) {

@@ -277,6 +277,7 @@ protected:
 	vector <CString> HarmName;
 	vector <CString> HarmName_m;
 	vector <CString> HarmName_ma;
+	vector <CString> harm_notation_name;
 
 	// Voice vectors
 	vector<int> vid; // [v] Voice id for each voice
