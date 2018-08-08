@@ -754,31 +754,31 @@ void CP2Ly::SendLyMistakes() {
 	ly_ly_st += "      \\set stanza = #\" Flags:\"\n";
 	for (s = 0; s < c_len; ++s) {
 		ls = bli[v][s];
-		vector<pair<int, int>> flink;
+		fss.clear();
 		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
 			if (!lyi[s].nfn[f]) continue;
-			flink.push_back(make_pair(lyi[s].fsev[f], f));
+			fss.push_back(make_pair(lyi[s].fsev[f], f));
 		}
-		if (!flink.size()) {
+		if (!fss.size()) {
 			ly_ly_st += SendLySkips(1);
 			continue;
 		}
-		int first_flag = lyi[s].nfn[0];
-		sort(flink.rbegin(), flink.rend());
+		ly_first_flag = lyi[s].nfn[0];
+		sort(fss.rbegin(), fss.rend());
 		SaveLyComments();
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
 		// Do not show too many mistakes
-		if (flink.size() > 3) {
-			flink.resize(2);
+		if (fss.size() > 3) {
+			fss.resize(2);
 			ly_ly_st += "...\n";
 		}
-		for (int ff = flink.size() - 1; ff >= 0; --ff) {
-			int f = flink[ff].second;
+		for (int ff = fss.size() - 1; ff >= 0; --ff) {
+			int f = fss[ff].second;
 			int fl = lyi[s].nflags[f];
 			int sev = lyi[s].fsev[f];
 			st.Format("        \\with-color #(rgb-color " +
 				GetLyColor(sev) + ") %s %d\n", // \\circle 
-				lyi[s].nfs[f] || lyi[s].fhide[f] ? "\\underline" : "", first_flag + ff);
+				lyi[s].nfs[f] || lyi[s].fhide[f] ? "\\underline" : "", ly_first_flag + ff);
 			// \override #'(offset . 5) \override #'(thickness . 2) 
 			ly_ly_st += st;
 		}
@@ -830,72 +830,71 @@ void CP2Ly::SaveLyComments() {
 	CString st, com, note_st;
 	int pos1, pos2, found;
 	if (!lyi.size()) return;
-	if (lyi[s].nflags.size()) {
-		note_st = "\\markup \\wordwrap \\tiny \\bold {\n  ";
-		// Show voice number if more than 1 voice
-		if (av_cnt > 1) {
-			//st.Format("%d. %s", av_cnt - v, vname[vid[v]]);
-			note_st += vname2[vid[v]];
+	if (!fss.size()) return;
+	note_st = "\\markup \\wordwrap \\tiny \\bold {\n  ";
+	// Show voice number if more than 1 voice
+	if (av_cnt > 1) {
+		//st.Format("%d. %s", av_cnt - v, vname[vid[v]]);
+		note_st += vname2[vid[v]];
+	}
+	st.Format(" [bar %d, beat %d] note %s", // ly_nnum
+		s / 8 + 1, (s % 8) / 2 + 1,
+		GetLyNoteVisualCP("\\raise #0.3 \\magnify #0.7 "));
+	if (fli[v][ls] != s)
+		st += " (middle)";
+	note_st += st + "\n}\n";
+	found = 0;
+	for (int ff = 0; ff < fss.size(); ++ff) {
+		int f = fss[ff].second;
+		int fl = lyi[s].nflags[f];
+		int sev = lyi[s].fsev[f];
+		if (!accept[sp][vc][vp][fl]) st = "- ";
+		else if (accept[sp][vc][vp][fl] == -1) st = "$ ";
+		else st = "+ ";
+		CString rule_name = GetRuleName(fl, sp, vc, vp);
+		//rule_name.SetAt(0, rule_name.Left(1).MakeLower().GetAt(0));
+		if (ly_debugexpect) {
+			CString st2;
+			st2.Format("[%d/%d] ", fl, s + 1);
+			rule_name = st2 + rule_name;
 		}
-		st.Format(" [bar %d, beat %d] note %s", // ly_nnum
-			s / 8 + 1, (s % 8) / 2 + 1,
-			GetLyNoteVisualCP("\\raise #0.3 \\magnify #0.7 "));
-		if (fli[v][ls] != s)
-			st += " (middle)";
-		note_st += st + "\n}\n";
-		found = 0;
-		for (int c = 0; c < lyi[s].nflags.size(); ++c) {
-			if (!lyi[s].nfn[c]) continue;
-			int fl = lyi[s].nflags[c];
-			int sev = lyi[s].fsev[c];
-			if (!accept[sp][vc][vp][fl]) st = "- ";
-			else if (accept[sp][vc][vp][fl] == -1) st = "$ ";
-			else st = "+ ";
-			CString rule_name = GetRuleName(fl, sp, vc, vp);
-			//rule_name.SetAt(0, rule_name.Left(1).MakeLower().GetAt(0));
-			if (ly_debugexpect) {
-				CString st2;
-				st2.Format("[%d/%d] ", fl, s + 1);
-				rule_name = st2 + rule_name;
-			}
-			else {
-				if (!ly_rule_verbose) {
-					if (rule_name.Find(":") != -1) {
-						rule_name = rule_name.Left(rule_name.Find(":"));
-					}
-				}
-			}
-			com = st + ruleinfo[fl].RuleClass + ": " + rule_name;
-			CString subrule_name = GetSubRuleName(fl, sp, vc, vp);
+		else {
 			if (!ly_rule_verbose) {
-				if (subrule_name.Left(1) != ":") subrule_name.Empty();
-			}
-			if (!subrule_name.IsEmpty()) {
-				if (subrule_name.Left(1) == ":") {
-					subrule_name = subrule_name.Mid(1);
+				if (rule_name.Find(":") != -1) {
+					rule_name = rule_name.Left(rule_name.Find(":"));
 				}
-				com += " (" + subrule_name + ")";
 			}
-			if (ly_rule_verbose > 1 && !GetRuleComment(fl, sp, vc, vp).IsEmpty())
-				com += ". " + GetRuleComment(fl, sp, vc, vp);
-			if (ly_rule_verbose > 1 && !GetSubRuleComment(fl, sp, vc, vp).IsEmpty())
-				com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
-			//st.Format("%d", lyi[s].fvl[c]);
-			//com += " " + st;
-			// Send note number with first comment
-			if (!found) {
-				found = 1;
-				ly_com_st += note_st;
-			}
-			ly_com_st += "\\markup \\smaller \\wordwrap \\with-color #(rgb-color " +
-				GetLyColor(sev) + ") {\n  ";
-			com.Replace("\"", "\\\"");
-			com.Replace(" ", "\" \"");
-			st.Format("%d \"", lyi[s].nfn[c]); // \\teeny \\raise #0.2 \\circle
-			ly_com_st += st;
-			ly_com_st += com + "\"\n";
-			ly_com_st += "\n}\n";
 		}
+		com = st + ruleinfo[fl].RuleClass + ": " + rule_name;
+		CString subrule_name = GetSubRuleName(fl, sp, vc, vp);
+		if (!ly_rule_verbose) {
+			if (subrule_name.Left(1) != ":") subrule_name.Empty();
+		}
+		if (!subrule_name.IsEmpty()) {
+			if (subrule_name.Left(1) == ":") {
+				subrule_name = subrule_name.Mid(1);
+			}
+			com += " (" + subrule_name + ")";
+		}
+		if (ly_rule_verbose > 1 && !GetRuleComment(fl, sp, vc, vp).IsEmpty())
+			com += ". " + GetRuleComment(fl, sp, vc, vp);
+		if (ly_rule_verbose > 1 && !GetSubRuleComment(fl, sp, vc, vp).IsEmpty())
+			com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
+		//st.Format("%d", lyi[s].fvl[f]);
+		//com += " " + st;
+		// Send note number with first comment
+		if (!found) {
+			found = 1;
+			ly_com_st += note_st;
+		}
+		ly_com_st += "\\markup \\smaller \\wordwrap \\with-color #(rgb-color " +
+			GetLyColor(sev) + ") {\n  ";
+		com.Replace("\"", "\\\"");
+		com.Replace(" ", "\" \"");
+		st.Format("%d \"", ly_first_flag + ff); // \\teeny \\raise #0.2 \\circle
+		ly_com_st += st;
+		ly_com_st += com + "\"\n";
+		ly_com_st += "\n}\n";
 	}
 }
 

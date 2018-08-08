@@ -73,6 +73,8 @@ private:
 	int ly_vflags = 0; // Number of flags in current voice
 	int ly_notenames = 0; // Number of note names in current melody
 	int ly_intervals = 0; // Number of interval flags in current melody
+	vector<pair<int, int>> fss; // Flag severity sequence 
+	int ly_first_flag; // For fss
 
 	// Unique flags
 	set<int> ly_ufl; // Unique flag checker
