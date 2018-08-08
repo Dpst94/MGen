@@ -144,6 +144,8 @@ protected:
 	void SendComment(int pos, int x, int i);
 	void SendLining(int pos, int x, int i);
 	void SendCP();
+	void SendHarmMarks();
+	void SendHarmColor();
 	
 	// Check data ready
 	inline void ClearReady();

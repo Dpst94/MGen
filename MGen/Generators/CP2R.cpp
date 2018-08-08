@@ -318,6 +318,7 @@ void CP2R::SendCP() {
 				SendLining(step0 + fli[v][ls], s, s - fli[v][ls]);
 			}
 		}
+		if (!v) SendHarmMarks();
 		MergeNotes(step0, step0 + full_len - 1);
 		st.Format("#%d (from %s)",
 			cp_id + 1, bname_from_path(musicxml_file));
@@ -332,6 +333,42 @@ void CP2R::SendCP() {
 	Adapt(step0, t_generated);
 	t_sent = t_generated;
 }
+
+void CP2R::SendHarmMarks() {
+	for (hs = 0; hs < hli.size(); ++hs) {
+		s = hli[hs];
+		mark[step0 + s][vi] = GetHarmName(chm[hs], chm_alter[hs]);
+		if (show_harmony_bass && hbc[hs] % 7 != chm[hs]) {
+			if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 2) {
+				mark[step0 + s][vi] += "6";
+			}
+			else {
+				mark[step0 + s][vi] += "6/4";
+			}
+		}
+		SendHarmColor();
+	}
+}
+
+void CP2R::SendHarmColor() {
+	DWORD fc;
+	mark_color[step0 + s][vi] = MakeColor(255, 170, 170, 170);
+	// Scan flags
+	int max_severity = -1;
+	int fl;
+	for (int f = 0; f < flag[v][s].size(); ++f) {
+		fl = flag[v][s][f];
+		if (ruleinfo[fl].viz == vHarm && !accept[0][av_cnt][0][fl] && severity[0][av_cnt][0][fl] >= show_min_severity) {
+			if (severity[0][av_cnt][0][fl] > max_severity) max_severity = severity[0][av_cnt][0][fl];
+		}
+	}
+	if (max_severity > -1) {
+		fc = sev_color[max_severity];
+		mark_color[step0 + s][vi] = MakeColor(GetAlpha(fc), GetRed(fc),
+			GetGreen(fc) / 1.5, GetBlue(fc));
+	}
+}
+
 
 inline void CP2R::ClearReady() {
 	fill(data_ready.begin(), data_ready.end(), 0);
