@@ -72,7 +72,7 @@ void CGenCA3::InitAnalysis() {
 	decc.resize(c_len);
 	decc2.resize(c_len);
 	maw.resize(c_len);
-	for (int v = 0; v < av_cnt; ++v) {
+	for (v = 0; v < av_cnt; ++v) {
 		fli[v].resize(c_len);
 		fli2[v].resize(c_len);
 		bli[v].resize(c_len);
@@ -168,7 +168,7 @@ int CGenCA3::XML_to_CP() {
 						xfi.mea[m].beats, xfi.mea[m].beat_type, ni + 1, xfi.note[vi][m].size());
 					WriteLog(5, est);
 				}
-				for (int s = 0; s < ln; ++s) {
+				for (s = 0; s < ln; ++s) {
 					cc[v][pos + s] = xfi.note[vi][m][ni].pitch;
 					ial[v][pos + s] = xfi.note[vi][m][ni].alter;
 				}
@@ -191,11 +191,11 @@ int CGenCA3::XML_to_CP() {
 	// Explode music into separate exercises
 	// State: 0 - find note, 1 - find pause
 	int state = 0;
-	int s1 = 0;
+	s1 = 0;
 	cp_id = 0;
-	for (int s = 0; s < c_len; ++s) {
+	for (s = 0; s < c_len; ++s) {
 		int is_pause = 1;
-		for (int v = 0; v < av_cnt; ++v) {
+		for (v = 0; v < av_cnt; ++v) {
 			if (cc[v][s]) {
 				is_pause = 0;
 				break;
@@ -211,7 +211,6 @@ int CGenCA3::XML_to_CP() {
 		// Find pause
 		else {
 			if (is_pause || s == c_len - 1 || ibl[s]) {
-				int s2;
 				if (!is_pause) s2 = s;
 				else s2 = s - 1;
 				// Move left to measure
@@ -236,7 +235,7 @@ int CGenCA3::XML_to_CP() {
 					cp_mea[cp_id][s3 - s1] = im[s3];
 				}
 				// Copy notes
-				for (int v = 0; v < av_cnt; ++v) {
+				for (v = 0; v < av_cnt; ++v) {
 					cp[cp_id][v].resize(s2 - s1 + 1);
 					cp_alter[cp_id][v].resize(s2 - s1 + 1);
 					cp_retr[cp_id][v].resize(s2 - s1 + 1);
@@ -272,15 +271,15 @@ int CGenCA3::XML_to_CP() {
 	for (cp_id = 0; cp_id < cp.size(); ++cp_id) {
 		vector<int> empty;
 		empty.resize(av_cnt, 1);
-		for (int v = 0; v < av_cnt; ++v) {
-			for (int s = 0; s < cp[cp_id][v].size(); ++s) {
+		for (v = 0; v < av_cnt; ++v) {
+			for (s = 0; s < cp[cp_id][v].size(); ++s) {
 				if (cp[cp_id][v][s]) {
 					empty[v] = 0;
 					break;
 				}
 			}
 		}
-		for (int v = av_cnt-1; v >= 0; --v) {
+		for (v = av_cnt-1; v >= 0; --v) {
 			if (empty[v]) {
 				verase(cp[cp_id], v);
 				verase(cp_alter[cp_id], v);
@@ -296,7 +295,9 @@ int CGenCA3::XML_to_CP() {
 		for (v2 = v - 1; v2 >= 0; --v2) {
 			if (vname2[v2] == vname2[v]) {
 				++dupl;
-				vname2[v2].Format("%s (%d)", vname2[v2], dupl);
+				CString st;
+				st.Format("%s (%d)", vname2[v2], dupl);
+				vname2[v2] = st;
 			}
 		}
 	}

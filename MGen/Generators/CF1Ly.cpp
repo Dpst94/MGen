@@ -29,7 +29,7 @@ void CF1Ly::GetLyRange(int step1, int step2, vector<int> &vm_min, vector<int> &v
 			ly_flags += nlink[s][v].size();
 			if (lining[s][v]) {
 				//CString est;
-				//est.Format("Detected lining at step %d voice %d", s, v);
+				//est.Format("Detected lining at stp %d voice %d", s, v);
 				//WriteLog(1, est);
 				ly_has_lining = 1;
 			}
@@ -946,9 +946,9 @@ void CF1Ly::SplitLyNote5(int pos, vector<int> &la) {
 	}
 }
 
-CString CF1Ly::GetRealIntName(int s, int v1, int v2) {
+CString CF1Ly::GetRealIntName(int stp, int v1, int v2) {
 	// Exact interval
-	int in = abs(note[s][v2] - note[s][v1]);
+	int in = abs(note[stp][v2] - note[stp][v1]);
 	if (in > 14) {
 		in = in % 12;
 		if (in < 3) in += 12;
@@ -956,8 +956,8 @@ CString CF1Ly::GetRealIntName(int s, int v1, int v2) {
 	// Interval between base notes
 	int no, oct, alter;
 	int no2, oct2, alter2;
-	GetRealNote(note[s][v1], tonic[s][v1], minor[s][v1], no, oct, alter);
-	GetRealNote(note[s][v2], tonic[s][v2], minor[s][v2], no2, oct2, alter2);
+	GetRealNote(note[stp][v1], tonic[stp][v1], minor[stp][v1], no, oct, alter);
+	GetRealNote(note[stp][v2], tonic[stp][v2], minor[stp][v2], no2, oct2, alter2);
 	int fno = no + oct * 12;
 	int fno2 = no2 + oct2 * 12;
 	int bin = abs(fno - fno2);
@@ -966,7 +966,7 @@ CString CF1Ly::GetRealIntName(int s, int v1, int v2) {
 		if (bin < 3) bin += 12;
 	}
 	// Diatonic interval
-	int din = CC_C(abs(note[s][v1] - note[s][v2]), 0, 0) - 7;
+	int din = CC_C(abs(note[stp][v1] - note[stp][v2]), 0, 0) - 7;
 	// Base diatonic interval
 	int bdin = CC_C(abs(fno - fno2), 0, 0) - 7;
 	int bdin2 = bdin;

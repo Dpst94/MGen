@@ -225,7 +225,7 @@ void CP2Ly::ParseLyI() {
 		int prev_note_step = fli[v][max(0, ls - 1)];
 		// Parse flags
 		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
-			int fl = lyi[s].nflags[f];
+			fl = lyi[s].nflags[f];
 			int link = lyi[s].fsl[f];
 			int vlink = lyi[s].fvl[f];
 			int vtype = ruleinfo[fl].viz;
@@ -345,7 +345,7 @@ void CP2Ly::ParseLyISep() {
 		int prev_note_step = max(s - 1, 0);
 		// Parse flags
 		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
-			int fl = lyi[s].nflags[f];
+			fl = lyi[s].nflags[f];
 			int link = lyi[s].fsl[f];
 			int vlink = lyi[s].fvl[f];
 			int vtype = ruleinfo[fl].viz;

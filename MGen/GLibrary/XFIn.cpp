@@ -305,7 +305,7 @@ void XFIn::ValidateXML() {
 							return;
 						}
 					}
-					else if (m) {
+					else if (m > 1) {
 						if (!note[vi][m - 1].size()) {
 							error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous measure does not have note in this voice.",
 								m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,

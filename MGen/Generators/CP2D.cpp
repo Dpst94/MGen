@@ -166,7 +166,7 @@ void CP2D::LoadRules(CString fname) {
 	int i = 0;
 	int sev = 0;
 	CString spec, voices;
-	int flag = 0;
+	int acpt = 0;
 	int rid;
 	ifstream fs;
 	// Check file exists
@@ -200,7 +200,7 @@ void CP2D::LoadRules(CString fname) {
 			sev = atoi(ast[4]);
 			rule = ast[7];
 			subrule = ast[8];
-			flag = atoi(ast[9]);
+			acpt = atoi(ast[9]);
 			// Find rule id
 			if (rid > max_rule) {
 				max_rule = rid;
@@ -213,7 +213,7 @@ void CP2D::LoadRules(CString fname) {
 			ruleinfo[rid].RuleClass = ast[5];
 			ruleinfo[rid].RuleGroup = ast[6];
 			// If testing, enable all disabled rules so that expected violations can be confirmed
-			//if (m_testing && flag == -1) flag = 1;
+			//if (m_testing && acpt == -1) acpt = 1;
 			ruleinfo[rid].viz = atoi(ast[12]);
 			ruleinfo[rid].viz_int = atoi(ast[13]);
 			ruleinfo[rid].viz_harm = atoi(ast[14]);
@@ -226,7 +226,7 @@ void CP2D::LoadRules(CString fname) {
 			if (!ast[23].IsEmpty()) {
 				Tokenize(ast[23], ast2, ",");
 				for (int x = 0; x < ast2.size(); ++x) {
-					int fl = atoi(ast2[x]);
+					fl = atoi(ast2[x]);
 					if (fl >= ruleinfo.size()) ruleinfo.resize(fl + 1);
 					if (fl) ruleinfo[fl].sas_emulator_replace.push_back(rid);
 				}
@@ -235,7 +235,7 @@ void CP2D::LoadRules(CString fname) {
 			if (!ast[25].IsEmpty()) {
 				Tokenize(ast[25], ast2, ",");
 				for (int x = 0; x < ast2.size(); ++x) {
-					int fl = atoi(ast2[x]);
+					fl = atoi(ast2[x]);
 					if (fl >= ruleinfo.size()) ruleinfo.resize(fl + 1);
 					if (fl) ruleinfo[fl].flag_replace.push_back(rid);
 				}
@@ -249,7 +249,7 @@ void CP2D::LoadRules(CString fname) {
 			nvc.resize(MAX_VC + 1);
 			nvp.resize(MAX_VP + 1);
 			for (int x = 0; x < spec.GetLength(); ++x) {
-				int sp = atoi(spec.Mid(x, 1));
+				sp = atoi(spec.Mid(x, 1));
 				if (sp > MAX_SPECIES) {
 					est.Format("Species id (%d) is greater than MAX_SPECIES (%d) for rule id %d. Consider increasing MAX_SPECIES",
 						sp, MAX_SPECIES, rid);
@@ -260,7 +260,7 @@ void CP2D::LoadRules(CString fname) {
 				nsp[sp] = 1;
 			}
 			if (voices[0] == '<') {
-				int v = atoi(voices.Mid(1, 1));
+				v = atoi(voices.Mid(1, 1));
 				if (v < 1) {
 					est.Format("Voice count (%d) is below 1 for rule id %d. Consider increasing MAX_SPECIES",
 						v, rid);
@@ -278,7 +278,7 @@ void CP2D::LoadRules(CString fname) {
 				for (int i = 1; i < v; ++i) nvc[i] = 1;
 			}
 			else if (voices[0] == '>') {
-				int v = atoi(voices.Mid(1, 1));
+				v = atoi(voices.Mid(1, 1));
 				if (v >= MAX_VC) {
 					est.Format("Voice count (%d) points above MAX_VC (%d) for rule id %d. Consider increasing MAX_SPECIES",
 						v, MAX_VC, rid);
@@ -336,9 +336,9 @@ void CP2D::LoadRules(CString fname) {
 						ruleinfo[rid].RuleComment != ast[10] || ruleinfo[rid].SubRuleComment != ast[11]) {
 						// Copy info
 						ResizeRuleVariantVector(ruleinfo2[rid]);
-						for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-							for (int vc = 1; vc <= MAX_VC; ++vc) {
-								for (int vp = 0; vp <= MAX_VP; ++vp) {
+						for (sp = 0; sp <= MAX_SPECIES; ++sp) {
+							for (vc = 1; vc <= MAX_VC; ++vc) {
+								for (vp = 0; vp <= MAX_VP; ++vp) {
 									SaveRuleVariant(sp, vc, vp, rid, ruleinfo[rid].RuleName, 
 										ruleinfo[rid].SubRuleName, ruleinfo[rid].RuleComment, ruleinfo[rid].SubRuleComment);
 								}
@@ -348,16 +348,16 @@ void CP2D::LoadRules(CString fname) {
 				}
 			}
 			if (!ruleinfo2[rid].size()) {
-				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-					for (int vc = 1; vc <= MAX_VC; ++vc) {
-						for (int vp = 0; vp <= MAX_VP; ++vp) {
+				for (sp = 0; sp <= MAX_SPECIES; ++sp) {
+					for (vc = 1; vc <= MAX_VC; ++vc) {
+						for (vp = 0; vp <= MAX_VP; ++vp) {
 							// Resize
 							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1, -1);
 							if (rid >= RULE_ALLOC && severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
 							if (!nsp[sp] || !nvc[vc] || !nvp[vp]) {
 							}
 							else {
-								accept[sp][vc][vp][rid] = flag;
+								accept[sp][vc][vp][rid] = acpt;
 								severity[sp][vc][vp][rid] = sev;
 							}
 						}
@@ -365,9 +365,9 @@ void CP2D::LoadRules(CString fname) {
 				}
 			}
 			else {
-				for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-					for (int vc = 1; vc <= MAX_VC; ++vc) {
-						for (int vp = 0; vp <= MAX_VP; ++vp) {
+				for (sp = 0; sp <= MAX_SPECIES; ++sp) {
+					for (vc = 1; vc <= MAX_VC; ++vc) {
+						for (vp = 0; vp <= MAX_VP; ++vp) {
 							// Resize
 							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1, -1);
 							if (rid >= RULE_ALLOC && severity[sp][vc][vp].size() <= rid) severity[sp][vc][vp].resize(rid + 1);
@@ -388,7 +388,7 @@ void CP2D::LoadRules(CString fname) {
 								}
 								else rid_unique[sp][vc][vp][rid] = 1;
 								SaveRuleVariant(sp, vc, vp, rid, rule, subrule, ast[10], ast[11]);
-								accept[sp][vc][vp][rid] = flag;
+								accept[sp][vc][vp][rid] = acpt;
 								severity[sp][vc][vp][rid] = sev;
 							}
 						}

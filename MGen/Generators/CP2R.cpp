@@ -3044,7 +3044,7 @@ int CP2R::FailHarm() {
 					// TODO: REMOVE
 					continue;
 					// For first suspended dissonance resolved note do not check msh
-					if (susres[v][ls]) continue;
+					//if (susres[v][ls]) continue;
 				}
 				else {
 					s9 = fli[v][ls];
