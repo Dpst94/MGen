@@ -292,8 +292,8 @@ protected:
 	vector<int> lva; // [s] Lowest voice for this step
 
 	// Intervals
-	int civl; // Chromatic interval between voices
-	int civlc; // Chromatic interval class between voices
+	int civl, civl2; // Chromatic interval between voices
+	int civlc, civlc2; // Chromatic interval class between voices
 	vector<vector<int>> hdb; // [v][ms] If in this voice measure starts with harmonic note
 
 	// Main vectors
