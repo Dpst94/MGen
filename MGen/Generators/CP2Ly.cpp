@@ -244,7 +244,12 @@ void CP2Ly::ParseLyI() {
 			// Highlight notes if flag is multivoice and is not gliss (gliss does not need note color)
 			if (vlink != lyi[s].fv[f] && vtype != vGlis) {
 				for (ls = bli[v][s1]; ls <= bli[v][s2]; ++ls) {
+					// Highlight first part of note
 					SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor);
+					// Highlight second part of note after tie
+					if (sus[v][ls]) {
+						SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor);
+					}
 				}
 				SetLyShape(link_note_step, link_note_step, f, fl, sev, vNoteColor);
 			}
