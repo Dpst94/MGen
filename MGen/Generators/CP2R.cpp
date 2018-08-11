@@ -320,12 +320,12 @@ void CP2R::SendCP() {
 				SendLining(step0 + fli[v][ls], s, s - fli[v][ls]);
 			}
 		}
-		if (!v) SendHarmMarks();
 		MergeNotes(step0, step0 + full_len - 1);
 		st.Format("#%d (from %s)",
 			cp_id + 1, bname_from_path(musicxml_file));
 		AddMelody(step0, step0 + full_len - 1, vi, st);
 	}
+	SendHarmMarks();
 	for (int s = step0 + real_len; s < step0 + full_len; ++s) tempo[s] = tempo[s - 1];
 	CountOff(step0, step0 + full_len - 1);
 	CountTime(step0, step0 + full_len - 1);
@@ -339,6 +339,11 @@ void CP2R::SendCP() {
 void CP2R::SendHarmMarks() {
 	for (hs = 0; hs < hli.size(); ++hs) {
 		s = hli[hs];
+		// Find lowest voice with note
+		for (v = 0; v < av_cnt; ++v) {
+			vi = vid[v];
+			if (cc[v][s]) break;
+		}
 		mark[step0 + s][vi] = GetHarmName(chm[hs], chm_alter[hs]);
 		if (show_harmony_bass && hbc[hs] % 7 != chm[hs]) {
 			if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 2) {
