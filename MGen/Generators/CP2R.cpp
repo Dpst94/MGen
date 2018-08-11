@@ -114,6 +114,8 @@ int CP2R::EvaluateCP() {
 int CP2R::FailMode() {
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
+		// Skip pause
+		if (!cc[v][s]) continue;
 		int maj_note = (cc[v][s] - bn + 12 + mode) % 12;
 		if (maj_note == 8 || maj_note == 6) {
 			if (!mminor) {
