@@ -273,6 +273,11 @@ void CP2Ly::ParseLyI() {
 				if (ruleinfo[fl].viz_harm == 3) {
 					SetLyShape(s2, s2, f, fl, sev, vHarm);
 				}
+				if (ruleinfo[fl].viz_harm == 4) {
+					for (hs = bhli[s1]; hs <= bhli[s2]; ++hs) {
+						SetLyShape(hli[hs], hli[hs], f, fl, sev, vHarm);
+					}
+				}
 			}
 			if (vtype == vPedal) {
 				if (bli[v][s1] == fli_size[v] - 1 && s1 == s2) continue;
