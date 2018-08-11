@@ -3141,6 +3141,10 @@ int CP2R::FailHarm() {
 	if (chm.size() && (chm[0] || hbc[0] % 7)) {
 		FLAGH(137, hli[0]);
 	}
+	// Check last harmony not T
+	if (chm.size() && (chm[chm.size() - 1] || hbc[chm.size() - 1] % 7)) {
+		FLAGH(531, hli[chm.size() - 1]);
+	}
 	if (EvalHarm()) return 1;
 	if (FailTonicCP()) return 1;
 	return 0;
