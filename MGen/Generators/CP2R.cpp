@@ -133,7 +133,7 @@ int CP2R::FailCross() {
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		int cross_start = -1;
 		sp = vsp[v];
-		for (s = 0; s < c_len; ++s) {
+		for (s = 0; s < ep2; ++s) {
 			vc = vca[s];
 			// Check if there is voice crossing
 			int is_cross;
@@ -147,47 +147,46 @@ int CP2R::FailCross() {
 			// Search for end of crossing
 			else {
 				if (!is_cross) {
-					if (FailOneCross(cross_start)) return 1;
+					if (FailOneCross(cross_start, s - 1)) return 1;
 					cross_start = -1;
 				}
 			}
 		}
 		if (cross_start > -1) {
-			s = c_len - 1;
-			if (FailOneCross(cross_start)) return 1;
+			if (FailOneCross(cross_start, ep2 - 1)) return 1;
 		}
 	}
 	return 0;
 }
 
-int CP2R::FailOneCross(int cross_start) {
+int CP2R::FailOneCross(int cross_start, int cross_end) {
 	// Is any crossing prohibited?
 	if (!accept[sp][vc][0][543]) {
-		FLAGL(543, cross_start, s, v2);
+		FLAGL(543, cross_start, cross_end, v2);
 	}
 	// Is there crossing in first or last measure?
 	else if (!accept[sp][vc][0][541] && bmli[cross_start] == 0) {
-		FLAGL(541, cross_start, s, v2);
+		FLAGL(541, cross_start, cross_end, v2);
 	}
-	else if (!accept[sp][vc][0][542] && bmli[s] == mli.size() - 1) {
-		FLAGL(542, cross_start, s, v2);
+	else if (!accept[sp][vc][0][542] && bmli[cross_end] == mli.size() - 1) {
+		FLAGL(542, cross_start, cross_end, v2);
 	}
 	else {
 		// Check crossing length
-		int clen = (s - cross_start) * 1.0 / npm;
+		int clen = (cross_end - cross_start + 1) * 1.0 / npm;
 		if (clen > cross_max_len[sp][av_cnt][0]) {
 			if (clen > cross_max_len2[sp][av_cnt][0]) {
-				FLAGL(519, cross_start, s, v2);
+				FLAGL(519, cross_start, cross_end, v2);
 			}
 			else {
-				FLAGL(518, cross_start, s, v2);
+				FLAGL(518, cross_start, cross_end, v2);
 			}
 		}
 	}
 	// Check which voices cross
 	if (v2 - v > 1) {
 		int found = 0;
-		for (int i = cross_start; i <= s; ++i) {
+		for (int i = cross_start; i <= cross_end; ++i) {
 			for (int v3 = v + 1; v3 < v2; ++v3) {
 				if (cc[v3][i]) {
 					found = 1;
@@ -196,11 +195,11 @@ int CP2R::FailOneCross(int cross_start) {
 			}
 		}
 		if (found) {
-			FLAGL(520, cross_start, s, v2);
+			FLAGL(520, cross_start, cross_end, v2);
 		}
 	}
 	// Only if not first note and not oblique motion
-	if (cross_start && cc[v][cross_start - 1] && cc[v][cross_start - 1] != cc[v][cross_start]) {
+	if (cross_start && cc[v][cross_start - 1] && cc[v2][cross_start - 1] && cc[v][cross_start - 1] != cc[v][cross_start] && cc[v2][cross_start - 1] != cc[v2][cross_start]) {
 		int int1 = abs(cc[v][cross_start] - cc[v2][cross_start]);
 		// Prohibit 2nd interval
 		if (int1 > 0 && int1 < 3) {
@@ -220,6 +219,30 @@ int CP2R::FailOneCross(int cross_start) {
 			}
 			else {
 				FLAGL(546, isus[v][bli[v][cross_start - 1]], cross_start, v2);
+			}
+		}
+	}
+	// Only if not last note and not oblique motion
+	if (cross_end < ep2 - 1 && cc[v][cross_end + 1] && cc[v2][cross_end + 1] && cc[v][cross_end + 1] != cc[v][cross_end] && cc[v2][cross_end + 1] != cc[v2][cross_end]) {
+		int int1 = abs(cc[v][cross_end + 1] - cc[v2][cross_end + 1]);
+		// Prohibit 2nd interval
+		if (int1 > 0 && int1 < 3) {
+			// 2 x 2nd intervals (sequential)
+			if (cc[v][cross_end + 1] == cc[v2][cross_end] && cc[v2][cross_end + 1] == cc[v][cross_end]) {
+				FLAGL(545, isus[v][bli[v][cross_end]], cross_end + 1, v2);
+			}
+			else {
+				FLAG(544, cross_end + 1, v2);
+			}
+		}
+		// Prohibit direct motion
+		if ((cc[v][cross_end + 1] - cc[v][cross_end]) * (cc[v2][cross_end + 1] - cc[v2][cross_end]) > 0) {
+			// Both leaps
+			if (leap[v][cross_end] && leap[v2][cross_end]) {
+				FLAGL(547, isus[v][bli[v][cross_end]], cross_end + 1, v2);
+			}
+			else {
+				FLAGL(546, isus[v][bli[v][cross_end]], cross_end + 1, v2);
 			}
 		}
 	}
