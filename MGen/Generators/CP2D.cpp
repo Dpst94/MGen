@@ -821,16 +821,6 @@ void CP2D::GetSpVcVp() {
 	sp = vsp[v];
 	vc = vca[s];
 	GetVp();
-	if (v2 == v) {
-		if (v == hva[s]) vp = vpExt;
-		else if (v == lva[s]) vp = vpBas;
-		else vp = vpNbs;
-	}
-	else {
-		if (v == lva[s] && v2 == hva[s]) vp = vpExt;
-		else if (v == lva[s] && v2 != hva[s]) vp = vpBas;
-		else vp = vpNbs;
-	}
 }
 
 void CP2D::GetVp() {

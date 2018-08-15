@@ -132,7 +132,9 @@ int CP2R::FailMode() {
 int CP2R::FailCross() {
 	int cross_start = -1;
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		sp = vsp[v];
 		for (s = 0; s < c_len; ++s) {
+			vc = vca[s];
 			// Check if there is voice crossing
 			int is_cross;
 			if (cc[v][s] && cc[v2][s] && cc[v2][s] < cc[v][s]) is_cross = 1;
@@ -159,14 +161,27 @@ int CP2R::FailCross() {
 }
 
 int CP2R::FailOneCross(int cross_start) {
-	// Check crossing length
-	int clen = (s - cross_start) * 1.0 / npm;
-	if (clen > cross_max_len[sp][av_cnt][0]) {
-		if (clen > cross_max_len2[sp][av_cnt][0]) {
-			FLAGVL(519, cross_start, s);
-		}
-		else {
-			FLAGVL(518, cross_start, s);
+	// Is any crossing prohibited?
+	if (!accept[sp][vc][0][543]) {
+		FLAGVL(543, cross_start, s);
+	}
+	// Is there crossing in first or last measure?
+	else if (!accept[sp][vc][0][541] && bmli[cross_start] == 0) {
+		FLAGVL(541, cross_start, s);
+	}
+	else if (!accept[sp][vc][0][542] && bmli[s] == mli.size() - 1) {
+		FLAGVL(542, cross_start, s);
+	}
+	else {
+		// Check crossing length
+		int clen = (s - cross_start) * 1.0 / npm;
+		if (clen > cross_max_len[sp][av_cnt][0]) {
+			if (clen > cross_max_len2[sp][av_cnt][0]) {
+				FLAGVL(519, cross_start, s);
+			}
+			else {
+				FLAGVL(518, cross_start, s);
+			}
 		}
 	}
 	// Check which voices cross
@@ -581,8 +596,8 @@ void CP2R::GetLeapSmooth() {
 			slur[v][i + 1] = 0;
 			if (cc[v][i] == cc[v][i + 1]) slur[v][i + 1] = 1;
 			if (!cc[v][i] || !cc[v][i + 1]) continue;
-			if (c[v][i + 1] - c[v][i] > 1) leap[v][i] = 1;
-			else if (c[v][i + 1] - c[v][i] < -1) leap[v][i] = -1;
+			if (c[v][i + 1] - c[v][i] > 1) leap[v][i] = c[v][i + 1] - c[v][i];
+			else if (c[v][i + 1] - c[v][i] < -1) leap[v][i] = c[v][i + 1] - c[v][i];
 			// Find all smooth
 			else if (c[v][i + 1] - c[v][i] == 1) smooth[v][i] = 1;
 			else if (c[v][i + 1] - c[v][i] == -1) smooth[v][i] = -1;
@@ -872,11 +887,18 @@ void CP2R::GetBasicMsh() {
 			continue;
 		}
 		s2 = fli2[v][ls];
-		if (s % npm == 0) mshb[v][ls] = pDownbeat;
-		else if (s > 0 && leap[v][s - 1]) mshb[v][ls] = pLeapTo;
-		else if (s2 < ep2 - 1 && leap[v][s2]) mshb[v][ls] = pLeapFrom;
+		if (s % npm == 0) {
+			// Long on downbeat
+			if (llen[v][ls] > 4 || leap[v][s2])	mshb[v][ls] = pDownbeat;
+			// Downbeat note not surrounded by descending stepwise movement
+			else if (smooth[v][s - 1] != -1 || smooth[v][s2 + 1] != -1) {
+				mshb[v][ls] = pDownbeat;
+			}
+		}
+		else if (abs(leap[v][s - 1]) > 2) mshb[v][ls] = pLeapTo;
+		else if (s2 < ep2 - 1 && abs(leap[v][s2]) > 2) mshb[v][ls] = pLeapFrom;
 		else {
-			if (s > 0 && s2 < ep2 - 1 && c[v][s - 1] == c[v][s2 + 1]) mshb[v][ls] = pAux;
+			if (s2 < ep2 - 1 && c[v][s - 1] == c[v][s2 + 1]) mshb[v][ls] = pAux;
 			else mshb[v][ls] = pPass;
 		}
 	}
