@@ -130,8 +130,8 @@ int CP2R::FailMode() {
 }
 
 int CP2R::FailCross() {
-	int cross_start = -1;
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		int cross_start = -1;
 		sp = vsp[v];
 		for (s = 0; s < c_len; ++s) {
 			vc = vca[s];
@@ -163,24 +163,24 @@ int CP2R::FailCross() {
 int CP2R::FailOneCross(int cross_start) {
 	// Is any crossing prohibited?
 	if (!accept[sp][vc][0][543]) {
-		FLAGVL(543, cross_start, s);
+		FLAGL(543, cross_start, s, v2);
 	}
 	// Is there crossing in first or last measure?
 	else if (!accept[sp][vc][0][541] && bmli[cross_start] == 0) {
-		FLAGVL(541, cross_start, s);
+		FLAGL(541, cross_start, s, v2);
 	}
 	else if (!accept[sp][vc][0][542] && bmli[s] == mli.size() - 1) {
-		FLAGVL(542, cross_start, s);
+		FLAGL(542, cross_start, s, v2);
 	}
 	else {
 		// Check crossing length
 		int clen = (s - cross_start) * 1.0 / npm;
 		if (clen > cross_max_len[sp][av_cnt][0]) {
 			if (clen > cross_max_len2[sp][av_cnt][0]) {
-				FLAGVL(519, cross_start, s);
+				FLAGL(519, cross_start, s, v2);
 			}
 			else {
-				FLAGVL(518, cross_start, s);
+				FLAGL(518, cross_start, s, v2);
 			}
 		}
 	}
@@ -196,7 +196,31 @@ int CP2R::FailOneCross(int cross_start) {
 			}
 		}
 		if (found) {
-			FLAGVL(520, cross_start, s);
+			FLAGL(520, cross_start, s, v2);
+		}
+	}
+	// Only if not first note and not oblique motion
+	if (cross_start && cc[v][cross_start - 1] && cc[v][cross_start - 1] != cc[v][cross_start]) {
+		int int1 = abs(cc[v][cross_start] - cc[v2][cross_start]);
+		// Prohibit 2nd interval
+		if (int1 > 0 && int1 < 3) {
+			// 2 x 2nd intervals (sequential)
+			if (cc[v][cross_start - 1] == cc[v2][cross_start] && cc[v2][cross_start - 1] == cc[v][cross_start]) {
+				FLAGL(545, isus[v][bli[v][cross_start - 1]], cross_start, v2);
+			}
+			else {
+				FLAG(544, cross_start, v2);
+			}
+		}
+		// Prohibit direct motion
+		if ((cc[v][cross_start] - cc[v][cross_start - 1]) * (cc[v2][cross_start] - cc[v2][cross_start - 1]) > 0) {
+			// Both leaps
+			if (leap[v][cross_start - 1] && leap[v2][cross_start - 1]) {
+				FLAGL(547, isus[v][bli[v][cross_start - 1]], cross_start, v2);
+			}
+			else {
+				FLAGL(546, isus[v][bli[v][cross_start - 1]], cross_start, v2);
+			}
 		}
 	}
 	return 0;
@@ -299,6 +323,9 @@ void CP2R::SendComment(int pos, int x, int i) {
 }
 
 void CP2R::SendLining(int pos, int x, int i) {
+	if (v % 2) {
+		lining[pos + i][vi] = HatchStyleDiagonalCross;
+	}
 	if (show_hatch == 1) {
 	}
 	if (show_hatch == 2) {
@@ -324,9 +351,6 @@ void CP2R::SendCP() {
 				else {
 					note[step0 + s][vi] = 0;
 					pause[step0 + s][vi] = 1;
-				}
-				if (v % 2) {
-					lining[step0 + s][v] = HatchStyleDiagonalCross;
 				}
 				len[step0 + s][vi] = llen[v][ls];
 				coff[step0 + s][vi] = s - fli[v][ls];
