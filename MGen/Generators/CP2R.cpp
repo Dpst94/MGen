@@ -989,7 +989,8 @@ void CP2R::GetBasicMsh() {
 			// Long on downbeat
 			if (llen[v][ls] > 4 || leap[v][s2])	mshb[v][ls] = pDownbeat;
 			// Downbeat note not surrounded by descending stepwise movement
-			else if (smooth[v][s - 1] != -1 || smooth[v][s2 + 1] != -1) {
+			// TODO: Optimize for generation
+			else if (smooth[v][s - 1] != -1 || (s2 < ep2 - 1 && smooth[v][s2 + 1] != -1)) {
 				mshb[v][ls] = pDownbeat;
 			}
 		}
@@ -2947,6 +2948,7 @@ int CP2R::FailPauses() {
 // Detect repeating notes. Step2 excluding
 int CP2R::FailNoteLen() {
 	if (sp == 0) {
+		if (av_cnt == 1) return 0;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
@@ -3009,6 +3011,7 @@ int CP2R::FailNoteLen() {
 // Detect repeating notes. Step2 excluding
 int CP2R::FailBeat() {
 	if (sp == 0) {
+		if (av_cnt == 1) return 0;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			if (!beat[v][ls]) continue;
 			s = fli[v][ls];
