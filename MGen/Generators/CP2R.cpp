@@ -54,6 +54,7 @@ int CP2R::EvaluateCP() {
 			if (FailLastNotes()) return 1;
 		}
 		if (FailCross()) return 1;
+		if (FailOverlap()) return 1;
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
 		if (FailLocalPiCount(notes_picount2[sp][av_cnt][0], min_picount2[sp][av_cnt][0], 345)) return 1;
 		if (FailLocalPiCount(notes_picount3[sp][av_cnt][0], min_picount3[sp][av_cnt][0], 346)) return 1;
@@ -129,10 +130,59 @@ int CP2R::FailMode() {
 	return 0;
 }
 
+// Find situations when one voice goes over previous note of another voice without actual crossing
+int CP2R::FailOverlap() {
+	CHECK_READY(DR_fli);
+	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+			s = fli[v][ls];
+			ls2 = bli[v2][s];
+			//s2 = fli[v2][ls2];
+			// Skip last note
+			if (ls2 == fli_size[v2] - 1) break;
+			vc = vca[s];
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			if (!cc[v2][s]) continue;
+			// Next notes
+			s3 = fli[v][ls + 1];
+			s4 = fli[v2][ls2 + 1];
+			// Skip oblique motion
+			if (s3 != s4) continue;
+			if (cc[v][s] < cc[v2][s]) {
+				// Skip crossing
+				if (cc[v][s3] > cc[v2][s4]) continue;
+				if (cc[v][s3] >= cc[v2][s] || cc[v2][s4] <= cc[v][s]) {
+					// Detect non-adjacent
+					int nonadj = 0;
+					if (v2 - v > 1) {
+						int found = 0;
+						for (int i = s; i <= fli2[v][ls + 1]; ++i) {
+							for (int v3 = v + 1; v3 < v2; ++v3) {
+								if (cc[v3][i]) {
+									nonadj = 1;
+									break;
+								}
+							}
+							if (nonadj) break;
+						}
+					}
+					if (nonadj) {
+						FLAGL(548, s, s3, v2);
+					}
+					else {
+						FLAGL(24, s, s3, v2);
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
 int CP2R::FailCross() {
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		int cross_start = -1;
-		sp = vsp[v];
 		for (s = 0; s < ep2; ++s) {
 			vc = vca[s];
 			// Check if there is voice crossing
@@ -193,6 +243,7 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 					break;
 				}
 			}
+			if (found) break;
 		}
 		if (found) {
 			FLAGL(520, cross_start, cross_end, v2);
@@ -3760,3 +3811,4 @@ int CP2R::FailStartPause() {
 	}
 	return 0;
 }
+

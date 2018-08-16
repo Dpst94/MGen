@@ -227,6 +227,7 @@ protected:
 	inline int FailMissSlurs();
 	inline int FailSlurs();
 	inline int FailStartPause();
+	inline int FailOverlap();
 	inline int FailMaxNoteLen();
 	inline int FailSusCount();
 	inline int FailNoteRepeat();
