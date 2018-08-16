@@ -50,9 +50,9 @@ int CP2R::EvaluateCP() {
 		if (FailVocalRangesConflict()) return 1;
 		if (av_cnt == 1) {
 			if (FailNoteRepeat()) return 1;
-			if (FailFirstNotes()) return 1;
-			if (FailLastNotes()) return 1;
 		}
+		if (FailFirstNotes()) return 1;
+		if (FailLastNotes()) return 1;
 		if (FailCross()) return 1;
 		if (FailOverlap()) return 1;
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
@@ -1732,28 +1732,43 @@ int CP2R::FailMultiCulm() {
 
 int CP2R::FailFirstNotes() {
 	CHECK_READY(DR_fli, DR_pc);
+	if (v == av_cnt - 1) vp = vpExt;
+	else if (v == 0) vp = vpBas;
+	else vp = vpNbs;
 	// Prohibit first note not tonic
-	if (pc[v][fin[v]] != 0) {
-		FLAGV(33, fin[v]);
+	s = fin[v];
+	if (pc[v][s] != 0) {
+		if (pc[v][s] == 4) FLAG(532, s, v);
+		else if (pc[v][s] == 2) {
+			if (sus[v][bli[v][s]]) FLAG(533, s, v);
+			else FLAG(534, s, v);
+		}
+		else FLAGV(535, s);
 	}
 	return 0;
 }
 
 int CP2R::FailLastNotes() {
 	CHECK_READY(DR_fli, DR_pc);
+	if (v == av_cnt - 1) vp = vpExt;
+	else if (v == 0) vp = vpBas;
+	else vp = vpNbs;
 	// Do not check if melody is short yet
 	if (fli_size[v] < 3) return 0;
 	// Prohibit last note not tonic
-	if (ep2 == c_len) {
-		s = fli[v][fli_size[v] - 1];
-		s_1 = fli[v][fli_size[v] - 2];
-		s_2 = fli[v][fli_size[v] - 3];
-		if (pc[v][s] != 0) FLAGV(50, s);
-		if (mode == 9) {
-			// Prohibit major second up before I
-			if (pcc[v][s] == 0 && pcc[v][s_1] == 10) FLAGV(74, s_1, s);
-			if (pcc[v][s] == 0 && pcc[v][s_2] == 10) FLAGV(74, s_2, s);
-		}
+	if (ep2 != c_len) return 0;
+	s = fli[v][fli_size[v] - 1];
+	s_1 = fli[v][fli_size[v] - 2];
+	s_2 = fli[v][fli_size[v] - 3];
+	if (pc[v][s] != 0) {
+		if (pc[v][s] == 4) FLAG(536, s, v);
+		else if (pc[v][s] == 2) FLAG(537, s, v);
+		else FLAG(538, s, v);
+	}
+	if (mode == 9) {
+		// Prohibit major second up before I
+		if (pcc[v][s] == 0 && pcc[v][s_1] == 10) FLAGV(74, s_1, s);
+		if (pcc[v][s] == 0 && pcc[v][s_2] == 10) FLAGV(74, s_2, s);
 	}
 	return 0;
 }
