@@ -25,6 +25,7 @@ private:
 	inline void EvalVocalRanges();
 	void GetPossibleVocalRanges();
 	int AnalyseCP();
+	int FailSpeciesCombination();
 
 	XFIn xfi;
 

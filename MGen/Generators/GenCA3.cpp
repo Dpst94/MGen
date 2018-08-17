@@ -797,7 +797,28 @@ int CGenCA3::AnalyseCP() {
 	skip_flags = 0;
 	GetCPKey();
 	if (GetVocalRanges()) return 1;
+	if (FailSpeciesCombination()) return 1;
 	EvaluateCP();
 	return 0;
 }
 
+int CGenCA3::FailSpeciesCombination() {
+	CString est;
+	// [sp] Species stats
+	vector <int> sps; 
+	sps.resize(MAX_SPECIES + 1);
+	for (v = 0; v < av_cnt; ++v) {
+		++sps[vsp[v]];
+	}
+	// Multiple cantus firmus
+	if (sps[0] > 1) {
+		est.Format("In counterpont #%d multiple cantus firmus detected", cp_id + 1);
+		WriteLog(5, est);
+	}
+	// Species 5 should not be combined with species 2, 3, 4
+	if (sps[5] && (sps[2] || sps[3] || sps[4])) {
+		est.Format("In counterpont #%d species 5 is combined with species 2, 3, or 4", cp_id + 1);
+		WriteLog(5, est);
+	}
+	return 0;
+}
