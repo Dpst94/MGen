@@ -315,7 +315,7 @@ protected:
 	vector<vector<int>> bli; // [v][s] Back links from each step to fli2
 	vector<vector<int>> lclimax; // [v][s] Local highest note (chromatic)
 	vector<vector<int>> lclimax2; // [v][s] Local highest note (chromatic)
-	vector<vector<int>> beat; // [v][ls] Beat type for each fli2: 0 = downbeat, 1 = beat 3
+	vector<vector<int>> beat; // [v][ls] Beat type for each fli2: (0 10 4 11) (1 12 5 13) (2 14 6 15) (3 16 7 17)
 	vector<int> nstat; // [c]
 	vector<int> nstat2; // [c]
 	vector<int> nstat3; // [c]

@@ -2967,7 +2967,7 @@ int CP2R::FailNoteLen() {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
-			if (llen[v][ls] == 8) continue;
+			if (llen[v][ls] == npm) continue;
 			FLAGV(514, s);
 		}
 	}
@@ -2975,17 +2975,25 @@ int CP2R::FailNoteLen() {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
-			if (llen[v][ls] == 8) continue;
-			if (llen[v][ls] == 16) continue;
+			if (llen[v][ls] == npm) continue;
+			if (llen[v][ls] == npm * 2) continue;
 			FLAGV(514, s);
 		}
 	}
-	else if (sp == 2) {
+	else if (sp == 2 || sp == 4) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
-			if (llen[v][ls] == 4) continue;
-			if (llen[v][ls] == 8) continue;
+			// Last whole
+			if (llen[v][ls] == npm && ls == fli_size[v] - 1) continue;
+			if (npm == 6 || (npm == 12 && btype == 2)) {
+				if (llen[v][ls] == npm / 3) continue;
+				if (llen[v][ls] == 2 * npm / 3) continue;
+			}
+			else {  // if (npm == 8 || npm == 4 || (npm == 12 && btype == 4)) 
+				if (llen[v][ls] == npm / 2) continue;
+				if (llen[v][ls] == npm) continue;
+			}
 			FLAGV(514, s);
 		}
 	}
@@ -2993,17 +3001,9 @@ int CP2R::FailNoteLen() {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
+			// Last whole
+			if (llen[v][ls] == npm && ls == fli_size[v] - 1) continue;
 			if (llen[v][ls] == 2) continue;
-			if (llen[v][ls] == 8 && ls == fli_size[v] - 1) continue;
-			FLAGV(514, s);
-		}
-	}
-	else if (sp == 4) {
-		for (ls = 0; ls < fli_size[v]; ++ls) {
-			s = fli[v][ls];
-			if (!cc[v][s]) continue;
-			if (llen[v][ls] == 4) continue;
-			if (llen[v][ls] == 8) continue;
 			FLAGV(514, s);
 		}
 	}
@@ -3626,13 +3626,23 @@ int CP2R::FailVRLimit() {
 int CP2R::FailMeasureLen() {
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
-		if (npm == 8) continue;
-		if (sp == 3 || sp == 1 || sp == 0) {
-			if (npm == 6) continue;
-			if (npm == 10) continue;
+		if (sp == 0) continue;
+		if (sp == 1) continue;
+		if (sp == 2) {
+			if (npm == 8) continue;
+			if (npm == 4 || npm == 6 || npm == 12) continue;
 		}
-		if (sp == 3 || sp == 2 || sp == 1 || sp == 0) {
+		if (sp == 3) {
+			if (npm == 8) continue;
+			if (npm == 10) continue;
 			if (npm == 12) continue;
+		}
+		if (sp == 4) {
+			if (npm == 8) continue;
+			if (npm == 12 && btype == 4) continue;
+		}
+		if (sp == 5) {
+			if (npm == 8) continue;
 		}
 		FLAGV(525, 0);
 	}
