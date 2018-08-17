@@ -34,6 +34,7 @@ private:
 	vector<vector<int>> cp_mea; // [cp_id][s]
 	vector<vector<int>> cp_vid; // [cp_id][s] voice id
 	vector<int> cp_fi; // [cp_id] fifths
+	vector<int> cp_btype; // [cp_id] beat type
 	vector<int> cp_error; // [cp_id] error on load
 	vector<CString> cp_text; // [cp_id]
 

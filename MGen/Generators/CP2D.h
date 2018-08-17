@@ -151,6 +151,7 @@ protected:
 	vector<int> nmaxd; // [v] diatonic
 	vector<int> fin; // [v] first note position in steps (after starting pause)
 	int npm;
+	int btype; // Beat type for current cp
 
 	// Indexes
 	int s, s0, s1, s2, s3, s4, s_1, s_2;

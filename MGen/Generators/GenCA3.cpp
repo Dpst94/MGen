@@ -125,6 +125,7 @@ int CGenCA3::XML_to_CP() {
 	vector<vector<CString>> it; // Intermediate text vector
 	vector<int> ifi; // Intermediate fifths vector
 	vector<int> ibl; // Intermediate barlines vector
+	vector<int> ibt; // Intermediate beat type
 	vector<vector<int>> ial; // Intermediate alterations vector
 
 	av_cnt = xfi.voice.size();
@@ -151,6 +152,7 @@ int CGenCA3::XML_to_CP() {
 				int ln = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
 				it[v].resize(pos + ln);
 				ifi.resize(pos + ln, 100);
+				ibt.resize(pos + ln);
 				cc[v].resize(pos + ln);
 				ial[v].resize(pos + ln);
 				retr[v].resize(pos + ln);
@@ -172,6 +174,7 @@ int CGenCA3::XML_to_CP() {
 				}
 				// Get fifths
 				ifi[pos] = xfi.note[vi][m][ni].fifths;
+				ibt[pos] = xfi.mea[m].beat_type;
 				// Concatenate text
 				it[v][pos] = xfi.note[vi][m][ni].words;
 				if (!xfi.note[vi][m][ni].words.IsEmpty() && !xfi.note[vi][m][ni].lyric.IsEmpty())
@@ -221,6 +224,7 @@ int CGenCA3::XML_to_CP() {
 				cp_mea.resize(cp_id + 1);
 				cp_text.resize(cp_id + 1);
 				cp_fi.resize(cp_id + 1, 100);
+				cp_btype.resize(cp_id + 1, 100);
 				cp_error.resize(cp_id + 1);
 				// Fill new cp_id
 				cp[cp_id].resize(av_cnt);
@@ -239,6 +243,7 @@ int CGenCA3::XML_to_CP() {
 					cp_retr[cp_id][v].resize(s2 - s1 + 1);
 					cp_vid[cp_id][v] = v;
 					for (int s3 = s1; s3 <= s2; ++s3) {
+						if (ibt[s3]) cp_btype[cp_id] = ibt[s3];
 						if (ifi[s3] != 100) {
 							if (cp_fi[cp_id] == 100) cp_fi[cp_id] = ifi[s3];
 							else {
@@ -320,7 +325,7 @@ int CGenCA3::CheckXML() {
 				float len = xfi.note[vi][m][ni].dur * 0.25 / xfi.note[vi][m][ni].dur_div;
 				if (len < 0.125) {
 					CString est;
-					est.Format("Note length %.3f is shorter than 1/8 (0.125). Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d",
+					est.Format("Note length %.3f is shorter than 1/8 (0.125). Currently not supported. Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d",
 						len, m, vi, xfi.voice[vi].id, xfi.voice[vi].name, 
 						xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord,
 						xfi.mea[m].beats, xfi.mea[m].beat_type, ni + 1, xfi.note[vi][m].size());
@@ -345,6 +350,7 @@ int CGenCA3::GetCP() {
 	mli.clear();
 	bmli.resize(c_len);
 	npm = 0;
+	btype = cp_btype[cp_id];
 	// Detect mli and npm
 	for (int s = 0; s < c_len; ++s) {
 		if (cp_mea[cp_id][s]) {
