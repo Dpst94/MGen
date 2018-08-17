@@ -47,6 +47,13 @@ const int sp_nlen[] = {
 };
 
 // Vocal range information
+struct LyLogEntry {
+	CString st;
+	int level;
+	int pos;
+};
+
+// Vocal range information
 struct VocalRangeInfo {
 	CString name;
 	CString clef;
@@ -134,6 +141,9 @@ protected:
 	void TestCC_C2();
 	void BuildPitchConvert();
 	void LogVector(CString print_st, int print_int, int x1, int x2, vector<int>& c, CString fname);
+	void WriteLogLy(int i, CString st, int pos);
+
+	vector<LyLogEntry> ly_log;
 
 	int max_rule = 0;
 	int av_cnt = 0;

@@ -1032,3 +1032,16 @@ void CP2D::LogVector(CString print_st, int print_int, int x1, int x2, vector<int
 	CGLib::AppendLineToFile(fname, st2 + " \n");
 }
 
+void CP2D::WriteLogLy(int i, CString st, int pos) {
+	LyLogEntry lle;
+	lle.st = st;
+	lle.level = i;
+	lle.pos = pos;
+	ly_log.push_back(lle);
+	if (pos == 1) {
+		CString st2;
+		st2.Format("Counterpoint #%d: " + st, cp_id + 1);
+		st = st2;
+	}
+	WriteLog(i, st);
+}

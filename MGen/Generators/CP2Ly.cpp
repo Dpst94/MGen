@@ -495,10 +495,29 @@ void CP2Ly::SaveLyCP() {
 	key_visual.MakeUpper();
 	if (key[1] == 'f') key_visual += "\\flat ";
 	if (key[1] == 's') key_visual = "\"" + key_visual + "#\"";
+	// Spacer
+	ly_ly_st += "\\markup {\n  ";
+	ly_ly_st += "    \\vspace #1\n";
+	ly_ly_st += "\n}\n";
+	// Show logs
+	for (int i = 0; i < ly_log.size(); ++i) {
+		if (ly_log[i].pos == 0) {
+			CString st;
+			ly_ly_st += "\\markup \\smaller \\bold \\wordwrap \\with-color #(rgb-color 1.000 0.000 0.000) { \\char ##x26D4 \n";
+			st = ly_log[i].st;
+			st.Replace("\"", "\\\"");
+			st.Replace(" ", "\" \"");
+			ly_ly_st += "\"" + st + "\"\n";
+			ly_ly_st += "}\n";
+		}
+	}
+	// Spacer
+	ly_ly_st += "\\markup {\n  ";
+	ly_ly_st += "    \\vspace #1\n";
+	ly_ly_st += "\n}\n";
 	// First info
 	CString st, st3;
 	ly_ly_st += "\\markup \\wordwrap \\bold {\n  ";
-	ly_ly_st += "    \\vspace #3\n";
 	st.Format("\"#\"%d (from %s)",
 		cp_id + 1, bname_from_path(musicxml_file));
 	ly_ly_st += st + " Key: " + key_visual;
@@ -523,6 +542,18 @@ void CP2Ly::SaveLyCP() {
 	slyi.clear();
 	slyi.resize(c_len + 1);
 	ly_ly_st += "\n}\n";
+	// Show logs
+	for (int i = 0; i < ly_log.size(); ++i) {
+		if (ly_log[i].pos == 1) {
+			CString st;
+			ly_ly_st += "\\markup \\smaller \\bold \\wordwrap \\with-color #(rgb-color 1.000 0.000 0.000) { \\char ##x26D4 \n";
+			st = ly_log[i].st;
+			st.Replace("\"", "\\\"");
+			st.Replace(" ", "\" \"");
+			ly_ly_st += "\"" + st + "\"\n";
+			ly_ly_st += "}\n";
+		}
+	}
 	// Save notes
 	ly_ly_st += "<<\n";
 	for (v = av_cnt - 1; v >= 0; --v) {
@@ -587,6 +618,7 @@ void CP2Ly::SaveLyCP() {
 	}
 	if (ly_st.size() <= cp_id) ly_st.resize(cp_id + 1);
 	ly_st[cp_id] = ly_ly_st;
+	ly_log.clear();
 }
 
 void CP2Ly::SendLySeparate() {

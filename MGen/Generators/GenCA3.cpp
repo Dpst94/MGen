@@ -166,7 +166,7 @@ int CGenCA3::XML_to_CP() {
 					est.Format("Detected too low note. This note will be replaced with a rest. Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d.",
 						m, vi, xfi.voice[vi].id, xfi.voice[vi].name, xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord,
 						xfi.mea[m].beats, xfi.mea[m].beat_type, ni + 1, xfi.note[vi][m].size());
-					WriteLog(5, est);
+					WriteLogLy(5, est, 0);
 				}
 				for (s = 0; s < ln; ++s) {
 					cc[v][pos + s] = xfi.note[vi][m][ni].pitch;
@@ -309,17 +309,6 @@ int CGenCA3::XML_to_CP() {
 
 int CGenCA3::CheckXML() {
 	for (int m = 1; m < xfi.mea.size(); ++m) {
-		if (m > 1) {
-			if (xfi.mea[m].beats != xfi.mea[m - 1].beats || xfi.mea[m].beat_type != xfi.mea[m - 1].beat_type) {
-				CString est;
-				// This is not a big problem because each counterpoint can have its measure size
-				// More important to have same measure size inside counterpoint
-				//est.Format("Measure %d size is changed", m);
-				//WriteLog(1, est);
-				//error = 10;
-				//return 1;
-			}
-		}
 		for (vi = 0; vi < xfi.voice.size(); ++vi) {
 			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
 				float len = xfi.note[vi][m][ni].dur * 0.25 / xfi.note[vi][m][ni].dur_div;
@@ -360,7 +349,7 @@ int CGenCA3::GetCP() {
 					if (npm != mli.end()[-1] - mli.end()[-2]) {
 						est.Format("Measure %zu size is changed from %d to %d inside counterpoint %d",
 							mli.size(), npm, mli.end()[-1] - mli.end()[-2], cp_id + 1);
-						WriteLog(5, est);
+						WriteLogLy(5, est, 0);
 						error = 10;
 						return 1;
 					}
@@ -396,7 +385,7 @@ int CGenCA3::GetCP() {
 	if (!has_note) {
 		est.Format("Counterpoint %d starts not on downbeat. Please check counterpoint.",
 			cp_id + 1);
-		WriteLog(5, est);
+		WriteLogLy(5, est, 0);
 		error = 10;
 		return 1;
 	}
@@ -462,7 +451,7 @@ int CGenCA3::GetCPSpecies() {
 	else if (vsp.size() != av_cnt) {
 		est.Format("Check species parameter in config or MusicXML file: found %zu voices, but there are %d voices in counterpoint %d. Parameter in MusicXML will have precedence",
 			vsp.size(), av_cnt, cp_id + 1);
-		WriteLog(5, est);
+		WriteLogLy(5, est, 0);
 		error = 10;
 		return 1;
 	}
@@ -546,7 +535,24 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 	for (int cp_id = 0; cp_id < ly_st.size(); ++cp_id) {
 		ly_fs << ly_st[cp_id];
 	}
-
+	CString ly_ly_st;
+	// Spacer
+	ly_ly_st += "\\markup {\n  ";
+	ly_ly_st += "    \\vspace #1\n";
+	ly_ly_st += "\n}\n";
+	// Show logs
+	for (int i = 0; i < ly_log.size(); ++i) {
+		if (ly_log[i].pos == 0) {
+			CString st;
+			ly_ly_st += "\\markup \\smaller \\bold \\wordwrap \\with-color #(rgb-color 1.000 0.000 0.000) { \\char ##x26D4 \n";
+			st = ly_log[i].st;
+			st.Replace("\"", "\\\"");
+			st.Replace(" ", "\" \"");
+			ly_ly_st += "\"" + st + "\"\n";
+			ly_ly_st += "}\n";
+		}
+	}
+	ly_fs << ly_ly_st;
 	ly_fs << "\\header {tagline = \"This file was created by MGen CP2 ";
 	ly_fs << APP_VERSION << " at " << CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S") << "\"}\n";
 	read_file_sv("configs\\ly\\footer.ly", sv);
@@ -614,16 +620,16 @@ void CGenCA3::GetCPKey() {
 	}
 	// Detect chromatic collisions
 	if (wrong_alt) {
-		est.Format("In counterpoint %d specified key was %s, but detected alterations (major I#, II# or VI#) cannot be used in this key. Please check source file",
+		est.Format("Specified key was %s, but detected alterations (major I#, II# or VI#) cannot be used in this key. Please check source file",
 			cp_id + 1, GetPrintKey(bn, mode));
-		WriteLog(5, est);
+		WriteLogLy(5, est, 1);
 	}
 	// Detect mminor
 	if (detected_mminor) {
 		if (mode != 9) {
-			est.Format("Detected melodic minor alterations in counterpoint %d (major IV# or V#), but specified key was %s. This is impossible. Please check source file",
+			est.Format("Detected melodic minor alterations (major IV# or V#), but specified key was %s. This is impossible. Please check source file",
 				cp_id + 1, GetPrintKey(bn, mode));
-			WriteLog(5, est);
+			WriteLogLy(5, est, 1);
 		}
 		else {
 			mminor = 1;
@@ -674,7 +680,7 @@ int CGenCA3::GetVocalRanges() {
 	for (v = 0; v < av_cnt; ++v) if (!vocra_p[v].size()) {
 		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s",
 			cp_id + 1, vid[v] + 1, vname[vid[v]]);
-		WriteLog(5, est);
+		WriteLogLy(5, est, 0);
 		error = 16;
 		return 1;
 	}
@@ -682,7 +688,7 @@ int CGenCA3::GetVocalRanges() {
 	for (v = 0; v < av_cnt; ++v) if (!vocra_detected[v]) {
 		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s. Please specify vocal range in instrument name in source file %s",
 			cp_id + 1, vid[v] + 1, vname[vid[v]], musicxml_file);
-		WriteLog(5, est);
+		WriteLogLy(5, est, 0);
 	}
 	return 0;
 }
@@ -812,13 +818,11 @@ int CGenCA3::FailSpeciesCombination() {
 	}
 	// Multiple cantus firmus
 	if (sps[0] > 1) {
-		est.Format("In counterpont #%d multiple cantus firmus detected", cp_id + 1);
-		WriteLog(5, est);
+		WriteLogLy(5, "Multiple cantus firmus detected", 1);
 	}
 	// Species 5 should not be combined with species 2, 3, 4
 	if (sps[5] && (sps[2] || sps[3] || sps[4])) {
-		est.Format("In counterpont #%d species 5 is combined with species 2, 3, or 4", cp_id + 1);
-		WriteLog(5, est);
+		WriteLogLy(5, "Species 5 is combined with species 2, 3, or 4", 1);
 	}
 	return 0;
 }
