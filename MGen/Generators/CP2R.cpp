@@ -2988,7 +2988,7 @@ int CP2R::FailNoteLen() {
 			if (llen[v][ls] == npm && ls == fli_size[v] - 1) continue;
 			if (npm == 6 || (npm == 12 && btype == 2)) {
 				if (llen[v][ls] == npm / 3) continue;
-				if (llen[v][ls] == 2 * npm / 3) continue;
+				if (llen[v][ls] == (2 * npm) / 3) continue;
 			}
 			else {  // if (npm == 8 || npm == 4 || (npm == 12 && btype == 4)) 
 				if (llen[v][ls] == npm / 2) continue;
@@ -3639,7 +3639,7 @@ int CP2R::FailMeasureLen() {
 		}
 		if (sp == 4) {
 			if (npm == 8) continue;
-			if (npm == 12 && btype == 4) continue;
+			if (npm == 4 || npm == 6 || npm == 12) continue;
 		}
 		if (sp == 5) {
 			if (npm == 8) continue;
@@ -3831,10 +3831,13 @@ int CP2R::FailStartPause() {
 			// Only halfnote pause is allowed
 			if (fin[v] % npm != 4) FLAGV(138, fin[v]);
 		}
-		else if (sp == 3 || sp == 5) {
+		else if (sp == 3) {
 			// Only particular pauses are allowed
-			if (fin[v] % npm != 2 && fin[v] % npm != 4 &&
-				fin[v] % npm != 6) FLAGV(138, fin[v]);
+			if (fin[v] % npm != 2) FLAGV(138, fin[v]);
+		}
+		else if (sp == 5) {
+			// Only particular pauses are allowed
+			if (fin[v] % npm != 2 && fin[v] % npm != 4) FLAGV(138, fin[v]);
 		}
 	}
 	return 0;
