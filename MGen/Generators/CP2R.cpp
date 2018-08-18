@@ -2575,12 +2575,13 @@ int CP2R::FailRhythm() {
 // Fail rhythm for species 2
 int CP2R::FailRhythm2() {
 	// Last measure not whole
-	if (c_len - fli[v][fli_size[v] - 1] < npm) {
+	if (c_len - fli[v][fli_size[v] - 1] < npm || 
+		(c_len == ep2 && llen[v][fli_size[v] - 1] != npm)) {
 		FLAGV(267, fli[v][fli_size[v] - 1]);
 	}
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
-		// Whole inside
-		if (!beat[v][ls] && llen[v][ls] == npm && cc[v][fli[v][ls]]) FLAGV(236, fli[v][ls]);
+		// Slurred note inside measure
+		if (llen[v][ls] == nlen * 2 && !sus[v][ls] && cc[v][fli[v][ls]]) FLAGV(236, fli[v][ls]);
 	}
 	return 0;
 }
@@ -2588,12 +2589,13 @@ int CP2R::FailRhythm2() {
 // Fail rhythm for species 4
 int CP2R::FailRhythm4() {
 	// Last measure not whole
-	if (c_len - fli[v][fli_size[v] - 1] < npm) {
+	if (c_len - fli[v][fli_size[v] - 1] < npm ||
+		(c_len == ep2 && llen[v][fli_size[v] - 1] != npm)) {
 		FLAGV(267, fli[v][fli_size[v] - 1]);
 	}
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
-		// Whole inside
-		if (!beat[v][ls] && llen[v][ls] == npm) FLAGV(236, fli[v][ls]);
+		// Slurred note inside measure
+		if (llen[v][ls] == nlen * 2 && !sus[v][ls] && cc[v][fli[v][ls]]) FLAGV(236, fli[v][ls]);
 	}
 	return 0;
 }
@@ -2603,25 +2605,10 @@ int CP2R::FailRhythm3() {
 	// Check uneven pause
 	if (fli_size[v] > 2 && !cc[v][0] && llen[v][0] % npm != llen[v][1]) FLAGV(237, 0);
 	// Last measure not whole
-	if (c_len - fli[v][fli_size[v] - 1] < npm) {
+	if (c_len - fli[v][fli_size[v] - 1] < npm ||
+		(c_len == ep2 && llen[v][fli_size[v] - 1] != npm)) {
 		FLAGV(267, fli[v][fli_size[v] - 1]);
 		if (c_len - fli[v][fli_size[v] - 1] == 2) FLAGV(252, fli[v][fli_size[v] - 1]);
-	}
-	for (ls = 0; ls < fli_size[v]; ++ls) {
-		s = fli[v][ls];
-		// 1/4 syncope (not for last 1/4 because it is applied with anticipation or sus)
-		if (beat[v][ls] == 4 && llen[v][ls] > 2 && cc[v][s]) FLAGV(235, s);
-		// 1/2 after 1/4
-		if (ls > 0 && beat[v][ls] == 1 && llen[v][ls] > 2 && llen[v][ls - 1] == 2 && cc[v][s]) {
-			if (bmli[s] >= mli.size() - 2) FLAGVL(238, s, mli[bmli[s]]);
-			// Flag slurred if sus or note is cut by scan window
-			else if (sus[v][ls] || (ls == fli_size[v] - 1 && c_len > ep2)) FLAGVL(239, s, mli[bmli[s]]);
-			else FLAGVL(240, s, mli[bmli[s]]);
-		}
-		// Non-uniform starting rhythm
-		if (ls > 0 && bmli[s] == 0 && llen[v][ls] != llen[v][ls - 1] && ls < fli_size[v] - 1) {
-			FLAGVL(254, s, fin[v]);
-		}
 	}
 	return 0;
 }
@@ -2984,13 +2971,15 @@ int CP2R::FailNoteLen() {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
-			// Last whole
-			if (llen[v][ls] == npm && ls == fli_size[v] - 1) continue;
+			// Last note - do not check length, it is checked in FailRhythm
+			if (ls == fli_size[v] - 1) continue;
 			if (npm == 6 || (npm == 12 && btype == 2)) {
+				nlen = npm / 3;
 				if (llen[v][ls] == npm / 3) continue;
 				if (llen[v][ls] == (2 * npm) / 3) continue;
 			}
 			else {  // if (npm == 8 || npm == 4 || (npm == 12 && btype == 4)) 
+				nlen = npm / 2;
 				if (llen[v][ls] == npm / 2) continue;
 				if (llen[v][ls] == npm) continue;
 			}
@@ -3001,8 +2990,8 @@ int CP2R::FailNoteLen() {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
-			// Last whole
-			if (llen[v][ls] == npm && ls == fli_size[v] - 1) continue;
+			// Last note - do not check length, it is checked in FailRhythm
+			if (ls == fli_size[v] - 1) continue;
 			if (llen[v][ls] == 2) continue;
 			FLAGV(514, s);
 		}
