@@ -233,6 +233,7 @@ protected:
 	inline int FailSusCount();
 	inline int FailNoteRepeat();
 	inline int FailPauses();
+	inline void GetNoteLen();
 	inline int FailNoteLen();
 	inline int FailBeat();
 	inline int FailRetrInside();

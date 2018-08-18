@@ -28,12 +28,14 @@ int CP2R::EvaluateCP() {
 	GetDiatonic(0, c_len);
 	GetPitchClass(0, c_len);
 	CreateLinks();
+	GetNoteLen();
 	GetNoteTypes();
 	GetVca();
 	GetLClimax();
 	GetLeapSmooth();
 	if (FailVocalRanges()) return 1;
 	if (FailMeasureLen()) return 1;
+	FailStartPause();
 
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
@@ -45,12 +47,7 @@ int CP2R::EvaluateCP() {
 		if (FailPauses()) return 1;
 		if (FailNoteLen()) return 1;
 		if (FailBeat()) return 1;
-	}
-	
-	FailStartPause();
-	for (v = 0; v < av_cnt; ++v) {
-		sp = vsp[v];
-		vaccept = &accept[sp][av_cnt][0];
+
 		if (FailVRLimit()) return 1;
 		if (FailVocalRangesConflict()) return 1;
 		if (av_cnt == 1) {
@@ -758,13 +755,20 @@ void CP2R::GetNoteTypes() {
 			l = llen[v][ls];
 			int sm = s % npm;
 			// Get beat
+
 			if (sm == 0) beat[v][ls] = 0;
 			else if (sm == 1) beat[v][ls] = 10;
 			else if (sm == 2) beat[v][ls] = 3;
 			else if (sm == 3) beat[v][ls] = 11;
-			else if (sm == 4) beat[v][ls] = 1;
+			else if (sm == 4) {
+				if (nlen[v] == 6) beat[v][ls] = 4;
+				else beat[v][ls] = 1;
+			}
 			else if (sm == 5) beat[v][ls] = 12;
-			else if (sm == 6) beat[v][ls] = 4;
+			else if (sm == 6) {
+				if (nlen[v] == 6) beat[v][ls] = 1;
+				else beat[v][ls] = 4;
+			}
 			else if (sm == 7) beat[v][ls] = 13;
 			else if (sm == 8) beat[v][ls] = 2;
 			else if (sm == 9) beat[v][ls] = 14;
@@ -2951,10 +2955,25 @@ int CP2R::FailPauses() {
 	return 0;
 }
 
+void CP2R::GetNoteLen() {
+	SET_READY(DR_nlen);
+	for (v = 0; v < av_cnt; ++v) {
+		sp = vsp[v];
+		nlen[v] = sp_nlen[sp];
+		if (sp == 2 || sp == 4) {
+			if (npm == 6 || (npm == 12 && btype == 2)) {
+				nlen[v] = npm / 3;
+			}
+			else {
+				nlen[v] = npm / 2;
+			}
+		}
+	}
+}
+
 // Detect repeating notes. Step2 excluding
 int CP2R::FailNoteLen() {
-	SET_READY(DR_nlen);
-	nlen[v] = sp_nlen[sp];
+	CHECK_READY(DR_nlen);
 	if (sp == 0) {
 		if (av_cnt == 1) return 0;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
@@ -2979,16 +2998,8 @@ int CP2R::FailNoteLen() {
 			if (!cc[v][s]) continue;
 			// Last note - do not check length, it is checked in FailRhythm
 			if (ls == fli_size[v] - 1) continue;
-			if (npm == 6 || (npm == 12 && btype == 2)) {
-				nlen[v] = npm / 3;
-				if (llen[v][ls] == npm / 3) continue;
-				if (llen[v][ls] == (2 * npm) / 3) continue;
-			}
-			else {  // if (npm == 8 || npm == 4 || (npm == 12 && btype == 4)) 
-				nlen[v] = npm / 2;
-				if (llen[v][ls] == npm / 2) continue;
-				if (llen[v][ls] == npm) continue;
-			}
+			if (llen[v][ls] == nlen[v]) continue;
+			if (llen[v][ls] == nlen[v] * 2) continue;
 			FLAGV(514, s);
 		}
 	}
@@ -3039,13 +3050,7 @@ int CP2R::FailBeat() {
 	else if (sp == 2 || sp == 4) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
-			if (nlen[v] == 4) {
-				if (beat[v][ls] < 4) continue;
-			}
-			else if (nlen[v] == 6) {
-				int pos = s - mli[bmli[s]];
-				if (!pos || pos == nlen[v]) continue;
-			}
+			if (beat[v][ls] < 4) continue;
 			FLAGV(515, s);
 		}
 	}
