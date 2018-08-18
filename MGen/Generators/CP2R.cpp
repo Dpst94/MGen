@@ -34,7 +34,7 @@ int CP2R::EvaluateCP() {
 	GetLeapSmooth();
 	if (FailVocalRanges()) return 1;
 	if (FailMeasureLen()) return 1;
-	FailStartPause();
+
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		vaccept = &accept[sp][av_cnt][0];
@@ -45,7 +45,12 @@ int CP2R::EvaluateCP() {
 		if (FailPauses()) return 1;
 		if (FailNoteLen()) return 1;
 		if (FailBeat()) return 1;
-
+	}
+	
+	FailStartPause();
+	for (v = 0; v < av_cnt; ++v) {
+		sp = vsp[v];
+		vaccept = &accept[sp][av_cnt][0];
 		if (FailVRLimit()) return 1;
 		if (FailVocalRangesConflict()) return 1;
 		if (av_cnt == 1) {
@@ -2556,7 +2561,7 @@ int CP2R::FailTritones2() {
 
 int CP2R::FailRhythm() {
 	CHECK_READY(DR_fli, DR_beat, DR_sus);
-	CHECK_READY(DR_leap);
+	CHECK_READY(DR_leap, DR_nlen);
 	if (sp == 2) {
 		if (FailRhythm2()) return 1;
 	}
@@ -2581,7 +2586,7 @@ int CP2R::FailRhythm2() {
 	}
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		// Slurred note inside measure
-		if (llen[v][ls] == nlen * 2 && !sus[v][ls] && cc[v][fli[v][ls]]) FLAGV(236, fli[v][ls]);
+		if (llen[v][ls] == nlen[v] * 2 && !sus[v][ls] && cc[v][fli[v][ls]]) FLAGV(236, fli[v][ls]);
 	}
 	return 0;
 }
@@ -2595,7 +2600,7 @@ int CP2R::FailRhythm4() {
 	}
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		// Slurred note inside measure
-		if (llen[v][ls] == nlen * 2 && !sus[v][ls] && cc[v][fli[v][ls]]) FLAGV(236, fli[v][ls]);
+		if (llen[v][ls] == nlen[v] * 2 && !sus[v][ls] && cc[v][fli[v][ls]]) FLAGV(236, fli[v][ls]);
 	}
 	return 0;
 }
@@ -2864,7 +2869,7 @@ int CP2R::FailMissSlurs() {
 
 // Detect many slurs
 int CP2R::FailSlurs() {
-	CHECK_READY(DR_fli);
+	CHECK_READY(DR_fli, DR_nlen);
 	// For species 5 there are separate rules (FailRhythm5)
 	// For species 4 we can have all notes slurred
 	if (sp >= 4) return 0;
@@ -2874,14 +2879,13 @@ int CP2R::FailSlurs() {
 	int scount = 0;
 	int cnt, max_count = 0;
 	int max_ls = 0;
-	int stl = sp_nlen[sp];
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		if (!ls && !cc[v][0]) continue;
 		// Subtract old slur
-		if (ls >= slurs_window[sp][av_cnt][0] && llen[v][ls - slurs_window[sp][av_cnt][0]] > stl)
+		if (ls >= slurs_window[sp][av_cnt][0] && llen[v][ls - slurs_window[sp][av_cnt][0]] > nlen[v])
 			--scount;
 		// Check slurs in window
-		if (llen[v][ls] > stl) {
+		if (llen[v][ls] > nlen[v]) {
 			++scount;
 			if (scount > max_count) {
 				max_count = scount;
@@ -2949,6 +2953,8 @@ int CP2R::FailPauses() {
 
 // Detect repeating notes. Step2 excluding
 int CP2R::FailNoteLen() {
+	SET_READY(DR_nlen);
+	nlen[v] = sp_nlen[sp];
 	if (sp == 0) {
 		if (av_cnt == 1) return 0;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
@@ -2974,12 +2980,12 @@ int CP2R::FailNoteLen() {
 			// Last note - do not check length, it is checked in FailRhythm
 			if (ls == fli_size[v] - 1) continue;
 			if (npm == 6 || (npm == 12 && btype == 2)) {
-				nlen = npm / 3;
+				nlen[v] = npm / 3;
 				if (llen[v][ls] == npm / 3) continue;
 				if (llen[v][ls] == (2 * npm) / 3) continue;
 			}
 			else {  // if (npm == 8 || npm == 4 || (npm == 12 && btype == 4)) 
-				nlen = npm / 2;
+				nlen[v] = npm / 2;
 				if (llen[v][ls] == npm / 2) continue;
 				if (llen[v][ls] == npm) continue;
 			}
@@ -3014,6 +3020,7 @@ int CP2R::FailNoteLen() {
 
 // Detect repeating notes. Step2 excluding
 int CP2R::FailBeat() {
+	CHECK_READY(DR_nlen);
 	if (sp == 0) {
 		if (av_cnt == 1) return 0;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
@@ -3029,23 +3036,22 @@ int CP2R::FailBeat() {
 			FLAGV(515, s);
 		}
 	}
-	else if (sp == 2) {
+	else if (sp == 2 || sp == 4) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
-			if (beat[v][ls] < 4) continue;
 			s = fli[v][ls];
+			if (nlen[v] == 4) {
+				if (beat[v][ls] < 4) continue;
+			}
+			else if (nlen[v] == 6) {
+				int pos = s - mli[bmli[s]];
+				if (!pos || pos == nlen[v]) continue;
+			}
 			FLAGV(515, s);
 		}
 	}
 	else if (sp == 3) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			if (beat[v][ls] < 10) continue;
-			s = fli[v][ls];
-			FLAGV(515, s);
-		}
-	}
-	else if (sp == 4) {
-		for (ls = 0; ls < fli_size[v]; ++ls) {
-			if (beat[v][ls] < 4) continue;
 			s = fli[v][ls];
 			FLAGV(515, s);
 		}
@@ -3740,6 +3746,7 @@ int CP2R::FailDownbeat() {
 }
 
 int CP2R::FailStartPause() {
+	CHECK_READY(DR_nlen);
 	// Last measure with starting voice
 	int last_start = 0;
 	// How many voices start in this measure
@@ -3818,7 +3825,7 @@ int CP2R::FailStartPause() {
 		}
 		else if (sp == 2 || sp == 4) {
 			// Only halfnote pause is allowed
-			if (fin[v] % npm != 4) FLAGV(138, fin[v]);
+			if (fin[v] % npm != nlen[v]) FLAGV(138, fin[v]);
 		}
 		else if (sp == 3) {
 			// Only particular pauses are allowed

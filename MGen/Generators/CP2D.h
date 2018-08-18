@@ -162,7 +162,7 @@ protected:
 	vector<int> fin; // [v] first note position in steps (after starting pause)
 	int npm; // Steps per measure
 	int btype; // Beat type for current cp
-	int nlen = 0; // Note length for species 2 and 4
+	vector<int> nlen; // Note length for species 2 and 4
 
 	// Indexes
 	int s, s0, s1, s2, s3, s4, s_1, s_2;

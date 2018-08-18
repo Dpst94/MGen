@@ -27,6 +27,7 @@ void CGenCA3::InitAnalysis() {
 	fli.resize(av_cnt);
 	fli2.resize(av_cnt);
 	bli.resize(av_cnt);
+	nlen.resize(av_cnt);
 	c.resize(av_cnt);
 	cc.resize(av_cnt);
 	pc.resize(av_cnt);
