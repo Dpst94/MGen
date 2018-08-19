@@ -979,39 +979,6 @@ void CP2R::MergeNotes(int step1, int step2) {
 	}
 }
 
-void CP2R::GetBasicMsh() {
-	CHECK_READY(DR_c, DR_fli, DR_leap);
-	SET_READY(DR_mshb);
-	int first = 1;
-	// Main calculation
-	for (ls = 0; ls < fli_size[v]; ++ls) {
-		s = fli[v][ls];
-		if (!cc[v][s]) continue;
-		if (first) {
-			first = 0;
-			// First note is always downbeat
-			mshb[v][ls] = pDownbeat;
-			continue;
-		}
-		s2 = fli2[v][ls];
-		if (s % npm == 0) {
-			// Long on downbeat
-			if (llen[v][ls] > 4 || leap[v][s2])	mshb[v][ls] = pDownbeat;
-			// Downbeat note not surrounded by descending stepwise movement
-			// TODO: Optimize for generation
-			else if (smooth[v][s - 1] != -1 || (s2 < ep2 - 1 && smooth[v][s2 + 1] != -1)) {
-				mshb[v][ls] = pDownbeat;
-			}
-		}
-		else if (abs(leap[v][s - 1]) > 2) mshb[v][ls] = pLeapTo;
-		else if (s2 < ep2 - 1 && abs(leap[v][s2]) > 2) mshb[v][ls] = pLeapFrom;
-		else {
-			if (s2 < ep2 - 1 && c[v][s - 1] == c[v][s2 + 1]) mshb[v][ls] = pAux;
-			else mshb[v][ls] = pPass;
-		}
-	}
-}
-
 void CP2R::GetDtp() {
 	CHECK_READY(DR_fli);
 	SET_READY(DR_dtp);
@@ -1030,13 +997,6 @@ void CP2R::GetDtp() {
 			pause_dist_s = 0;
 		}
 	}
-}
-
-void CP2R::ApplyFixedPat() {
-	CHECK_READY(DR_mshb);
-	CHECK_READY(DR_fli);
-	SET_READY(DR_msh);
-	for (int ls = 0; ls < fli_size[v]; ++ls) msh[v][ls] = mshb[v][ls];
 }
 
 void CP2R::CountFillInit(int tail_len, int pre, int &t1, int &t2, int &fill_end) {
@@ -3690,7 +3650,7 @@ int CP2R::FailPco() {
 			else if (ls < fli_size[v] - 1 && (leap[v][fli2[v][ls]] || leap[v2][fli2[v2][bli[v2][s]]]))
 				FLAG(324, s, v2);
 			// Suspension resolution
-			else if (mshb[v][ls] > 0 || mshb[v2][bli[v2][s]]) FLAG(324, s, v2);
+			else if (msh[v][ls] > 0 || msh[v2][bli[v2][s]]) FLAG(324, s, v2);
 		}
 		// Do not prohibit parallel first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
@@ -3711,43 +3671,58 @@ int CP2R::FailPco() {
 }
 
 int CP2R::FailMsh() {
+	SET_READY(DR_msh);
 	// Detect basic msh (based on downbeats and leaps)
 	GetBasicMsh();
-	ApplyFixedPat();
 	if (FailVIntervals()) return 1;
 	return 0;
 }
 
-int CP2R::FailDownbeat() {
+void CP2R::GetBasicMsh() {
+	CHECK_READY(DR_c, DR_fli, DR_leap);
+	int first = 1;
+	// Main calculation
+	for (ls = 0; ls < fli_size[v]; ++ls) {
+		s = fli[v][ls];
+		if (!cc[v][s]) continue;
+		if (first) {
+			first = 0;
+			// First note is always downbeat
+			msh[v][ls] = pDownbeat;
+			continue;
+		}
+		s2 = fli2[v][ls];
+		// Downbeat
+		if (s % npm == 0) {
+			// Long on downbeat
+			if (llen[v][ls] > 4 || leap[v][s2])	msh[v][ls] = pDownbeat;
+			// Downbeat note not surrounded by descending stepwise movement
+			// TODO: Optimize for generation
+			else if (smooth[v][s - 1] != -1 || (s2 < ep2 - 1 && smooth[v][s2 + 1] != -1)) {
+				msh[v][ls] = pDownbeat;
+			}
+		}
+		else if (abs(leap[v][s - 1]) > 2) msh[v][ls] = pLeapTo;
+		else if (s2 < ep2 - 1 && abs(leap[v][s2]) > 2) msh[v][ls] = pLeapFrom;
+		else {
+			msh[v][ls] = pAux;
+		}
+	}
+}
+
+void CP2R::GetMsh() {
 	for (ms = 0; ms < mli.size(); ++ms) {
 		s = mli[ms];
-		int hdb_count = 0;
 		for (v = 0; v < av_cnt; ++v) {
 			ls = bli[v][s];
-			// If not sus and not PDD, then this is definitely harmonic downbeat
-			if (!sus[v][ls] && msh[v][ls] > 0) {
-				hdb[v][ms] = 1;
-				++hdb_count;
-			}
-			else {
-				hdb[v][ms] = 0;
-			}
+			DetectPDD();
 		}
-		// Check each sus if it is consonating
-		for (v = 0; v < av_cnt; ++v) {
-			ls = bli[v][s];
-			// Skip non-sus
-			if (!sus[v][ls]) continue;
-			for (v2 = v + 1; v2 < av_cnt; ++v2) {
-				if (!hdb[v][ms]) continue;
-				GetVp();
-				if (vp == vpNbs) {
-				}
-			}
-		}
-		// Check each PDD if it is consonating
 	}
-	return 0;
+}
+
+void CP2R::DetectPDD() {
+	if (msh[v][ls] > 0) return;
+	if (sus[v][ls]) return;
 }
 
 int CP2R::FailStartPause() {

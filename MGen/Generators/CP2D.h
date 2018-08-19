@@ -306,7 +306,6 @@ protected:
 	// Intervals
 	int civl, civl2; // Chromatic interval between voices
 	int civlc, civlc2; // Chromatic interval class between voices
-	vector<vector<int>> hdb; // [v][ms] If in this voice measure starts with harmonic note
 
 	// Main vectors
 	vector<int> mli; // [s] Links to measure start step
@@ -357,8 +356,6 @@ protected:
 	vector<vector<int>> sus; // [v][ls] Note suspension flag (when above zero, links to first cantus-changing step)
 	vector<vector<int>> susres; // [v][ls] =1 if sus is resolved correctly
 	vector<vector<int>> isus; // [v][ls] Points to sus position or note start if there is no sus
-	vector<vector<int>> mshb; // [v][ls] Melody shape types for fli (basic without patterns)
-	vector<vector<int>> mshf; // [v][ls] Melody shape types for fli (with fixed patterns)
 	vector<vector<int>> msh; // [v][ls] Melody shape types for fli
 	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
