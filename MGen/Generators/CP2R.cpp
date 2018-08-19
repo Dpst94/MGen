@@ -253,16 +253,19 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 	}
 	// Only if not first note and not oblique motion
 	if (cross_start && cc[v][cross_start - 1] && cc[v2][cross_start - 1] && cc[v][cross_start - 1] != cc[v][cross_start] && cc[v2][cross_start - 1] != cc[v2][cross_start]) {
-		int int1 = abs(cc[v][cross_start] - cc[v2][cross_start]);
+		int int1 = abs(c[v][cross_start] - c[v2][cross_start]);
+		int int2 = abs(c[v][cross_start - 1] - c[v2][cross_start - 1]);
+		// 2 x 2nd intervals (sequential)
+		if (int1 == 1 && int2 == 1) {
+			FLAGL(545, isus[v][bli[v][cross_start - 1]], cross_start, v2);
+		}
 		// Prohibit 2nd interval
-		if (int1 > 0 && int1 < 3) {
-			// 2 x 2nd intervals (sequential)
-			if (cc[v][cross_start - 1] == cc[v2][cross_start] && cc[v2][cross_start - 1] == cc[v][cross_start]) {
-				FLAGL(545, isus[v][bli[v][cross_start - 1]], cross_start, v2);
-			}
-			else {
-				FLAG(544, cross_start, v2);
-			}
+		else if (int1 == 1) {
+			FLAG(544, cross_start, v2);
+		}
+		// Prohibit 2nd interval
+		else if (int2 == 1) {
+			FLAG(544, isus[v][bli[v][cross_start - 1]], v2);
 		}
 		// Prohibit direct motion
 		if ((cc[v][cross_start] - cc[v][cross_start - 1]) * (cc[v2][cross_start] - cc[v2][cross_start - 1]) > 0) {
@@ -277,16 +280,19 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 	}
 	// Only if not last note and not oblique motion
 	if (cross_end < ep2 - 1 && cc[v][cross_end + 1] && cc[v2][cross_end + 1] && cc[v][cross_end + 1] != cc[v][cross_end] && cc[v2][cross_end + 1] != cc[v2][cross_end]) {
-		int int1 = abs(cc[v][cross_end + 1] - cc[v2][cross_end + 1]);
+		int int1 = abs(c[v][cross_end + 1] - c[v2][cross_end + 1]);
+		int int2 = abs(c[v][cross_end] - c[v2][cross_end]);
+		// 2 x 2nd intervals (sequential)
+		if (int1 == 1 && int2 == 1) {
+			FLAGL(545, isus[v][bli[v][cross_end]], cross_end + 1, v2);
+		}
 		// Prohibit 2nd interval
-		if (int1 > 0 && int1 < 3) {
-			// 2 x 2nd intervals (sequential)
-			if (cc[v][cross_end + 1] == cc[v2][cross_end] && cc[v2][cross_end + 1] == cc[v][cross_end]) {
-				FLAGL(545, isus[v][bli[v][cross_end]], cross_end + 1, v2);
-			}
-			else {
-				FLAG(544, cross_end + 1, v2);
-			}
+		else if (int1 == 1) {
+			FLAG(544, cross_end + 1, v2);
+		}
+		// Prohibit 2nd interval
+		else if (int2 == 1) {
+			FLAG(544, isus[v][bli[v][cross_end]], v2);
 		}
 		// Prohibit direct motion
 		if ((cc[v][cross_end + 1] - cc[v][cross_end]) * (cc[v2][cross_end + 1] - cc[v2][cross_end]) > 0) {
