@@ -151,30 +151,41 @@ int CP2R::FailOverlap() {
 			s4 = fli[v2][ls2 + 1];
 			// Skip oblique motion
 			if (s3 != s4) continue;
+			int found = 0;
 			if (cc[v][s] < cc[v2][s]) {
 				// Skip crossing
 				if (cc[v][s3] > cc[v2][s4]) continue;
-				if (cc[v][s3] >= cc[v2][s] || cc[v2][s4] <= cc[v][s]) {
-					// Detect non-adjacent
-					int nonadj = 0;
-					if (v2 - v > 1) {
-						int found = 0;
-						for (int i = s; i <= fli2[v][ls + 1]; ++i) {
-							for (int v3 = v + 1; v3 < v2; ++v3) {
-								if (cc[v3][i]) {
-									nonadj = 1;
-									break;
-								}
+				if (cc[v][s3] >= cc[v2][s] || cc[v2][s4] <= cc[v][s]) found = 1;
+			}
+			else if (cc[v][s] > cc[v2][s]) {
+				// Skip crossing
+				if (cc[v][s3] < cc[v2][s4]) continue;
+				if (cc[v][s3] <= cc[v2][s] || cc[v2][s4] >= cc[v][s]) found = 1;
+			}
+			else if (cc[v][s] == cc[v2][s]) {
+				if ((cc[v][s3] <= cc[v2][s] && cc[v2][s4] <= cc[v2][s]) || 
+					(cc[v][s3] >= cc[v2][s] && cc[v2][s4] >= cc[v2][s])) found = 1;
+			}
+			if (found) {
+				// Detect non-adjacent
+				int nonadj = 0;
+				if (v2 - v > 1) {
+					int found = 0;
+					for (int i = s; i <= fli2[v][ls + 1]; ++i) {
+						for (int v3 = v + 1; v3 < v2; ++v3) {
+							if (cc[v3][i]) {
+								nonadj = 1;
+								break;
 							}
-							if (nonadj) break;
 						}
+						if (nonadj) break;
 					}
-					if (nonadj) {
-						FLAGL(548, s, s3, v2);
-					}
-					else {
-						FLAGL(24, s, s3, v2);
-					}
+				}
+				if (nonadj) {
+					FLAGL(548, s, s3, v2);
+				}
+				else {
+					FLAGL(24, s, s3, v2);
 				}
 			}
 		}
