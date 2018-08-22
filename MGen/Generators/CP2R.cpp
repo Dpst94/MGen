@@ -3695,8 +3695,11 @@ int CP2R::FailUnison() {
 int CP2R::FailPco() {
 	if (!civl) {
 		// Unison inside downbeat without suspension
-		if (!beat[v][ls] && ls < fli_size[v] - 1 && ls2 < fli_size[v2] - 1 && !sus[v][ls] && !sus[v2][ls2])
-			FLAG(91, s, v2);
+		if (!beat[v][ls] && ls < fli_size[v] - 1 && ls2 < fli_size[v2] - 1 && !sus[v][ls] && !sus[v2][ls2]) {
+			// Ignore more than 4 voices and 2 lowest of 4 voices
+			if (vca[s] < 4 || (vca[s] == 4 && v + v2 != 1) )
+				FLAG(91, s, v2);
+		}
 	}
 	if (civlc == 7 || civlc == 12 || civlc == 0) {
 		// Prohibit leading tone octave
