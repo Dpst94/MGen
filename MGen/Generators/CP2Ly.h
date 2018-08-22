@@ -19,7 +19,7 @@ struct LY_IntermediateCP {
 	vector<int> fvl; // [] Current flag voice links
 	vector<int> nfn; // [] Note flag number
 	vector<int> nfs; // [] Note flag shape
-	vector<CString> nfc; // [] Note flag comment
+	//vector<CString> nfc; // [] Note flag comment
 };
 
 class CP2Ly :

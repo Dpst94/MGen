@@ -43,6 +43,7 @@ void CGenCA3::InitAnalysis() {
 	tweight.resize(av_cnt);
 	g_leaps.resize(av_cnt);
 	fin.resize(av_cnt);
+	fil.resize(av_cnt);
 	g_leaped.resize(av_cnt);
 	slur.resize(av_cnt);
 	flag.resize(av_cnt);
@@ -618,14 +619,14 @@ void CGenCA3::GetCPKey() {
 	// Detect chromatic collisions
 	if (wrong_alt) {
 		est.Format("Specified key was %s, but detected alterations (major I#, II# or VI#) cannot be used in this key. Please check source file",
-			cp_id + 1, GetPrintKey(bn, mode));
+			GetPrintKey(bn, mode));
 		WriteLogLy(5, est, 1);
 	}
 	// Detect mminor
 	if (detected_mminor) {
 		if (mode != 9) {
 			est.Format("Detected melodic minor alterations (major IV# or V#), but specified key was %s. This is impossible. Please check source file",
-				cp_id + 1, GetPrintKey(bn, mode));
+				GetPrintKey(bn, mode));
 			WriteLogLy(5, est, 1);
 		}
 		else {

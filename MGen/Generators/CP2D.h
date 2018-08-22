@@ -160,6 +160,7 @@ protected:
 	vector<int> nmind; // [v] diatonic
 	vector<int> nmaxd; // [v] diatonic
 	vector<int> fin; // [v] first note position in steps (after starting pause)
+	vector<int> fil; // [v] First note link (after starting pause)
 	int npm; // Steps per measure
 	int btype; // Beat type for current cp
 	vector<int> nlen; // Note length for species 2 and 4

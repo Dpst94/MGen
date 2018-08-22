@@ -323,14 +323,6 @@ void CP2R::CreateLinks() {
 	SET_READY(DR_fli);
 	// Set first steps in case there is pause
 	for (int v = 0; v < av_cnt; ++v) {
-		// Search for first note
-		fin[v] = 0;
-		for (s = 0; s < ep2; ++s) {
-			if (cc[v][s]) {
-				fin[v] = s;
-				break;
-			}
-		}
 		int prev_note = -1;
 		int lpos = 0;
 		int l = 0;
@@ -357,6 +349,16 @@ void CP2R::CreateLinks() {
 		fli_size[v] = lpos;
 		llen[v][lpos - 1] = l;
 		rlen[v][lpos - 1] = l;
+		// Search for first note
+		fin[v] = 0;
+		fil[v] = 0;
+		for (s = 0; s < ep2; ++s) {
+			if (cc[v][s]) {
+				fin[v] = s;
+				fil[v] = bli[v][s];
+				break;
+			}
+		}
 	}
 }
 
@@ -3629,29 +3631,35 @@ int CP2R::FailMeasureLen() {
 int CP2R::FailVIntervals() {
 	CHECK_READY(DR_fli, DR_msh, DR_sus);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
-		for (ls = 1; ls < fli_size[v]; ++ls) {
-			s = fli[v][ls];
+		for (s = fin[v]; s < ep2; ++s) {
+			ls = bli[v][s];
 			ls2 = bli[v2][s];
+			// Skip no note start
+			if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
+			// Skip first note 
+			if (ls < fil[v] + 1) continue;
+			if (ls2 < fil[v2] + 1) continue;
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			if (!cc[v2][s]) continue;
 			GetVp();
 			vc = vca[s];
+			// Prepare data
+			civl = abs(cc[v][s] - cc[v2][s]);
+			if (FailUnison()) return 1;
+
 			// Skip oblique motion
-			if (s != fli[v2][ls2]) continue;
-			// Skip first note in second voice
-			if (!ls2) continue;
+			if (s != fli[v][ls] || s != fli[v2][ls2]) continue;
 			// Prepare data
 			s2 = fli2[v][ls];
-			civl = abs(cc[v][s] - cc[v2][s]);
 			civlc = civl % 12;
 			civl2 = abs(cc[v2][fli2[v2][ls2 - 1]] - cc[v][fli2[v][ls - 1]]);
 			civlc2 = civl2 % 12;
 			//if (civl && civl % 12 == 0) civlc2 = 12;
 			//else civlc2 = civl % 12;
 			// Skip pauses
-			if (!cc[v][s]) continue;
-			if (!cc[v2][s]) continue;
 			if (!cc[v][fli[v][ls - 1]]) continue;
 			if (!cc[v2][fli[v2][ls2 - 1]]) continue;
-			if (FailUnison()) return 1;
 			if (FailPco()) return 1;
 		}
 	}
@@ -3660,15 +3668,36 @@ int CP2R::FailVIntervals() {
 
 int CP2R::FailUnison() {
 	// Unison
-	if (!civl) {
-		// Inside downbeat without suspension
-		if (!beat[v][ls] && ls < fli_size[v] - 1 && ls2 < fli_size[v2] - 1 && !sus[v][ls] && !sus[v2][ls2])
-			FLAG(91, s, v2);
+	if (!civl && fli[v][ls] != fli[v2][ls2]) {
+		// Find previous interval
+		if (fli[v][ls] > fli[v2][ls2]) {
+			s3 = fli[v][ls] - 1;
+			// 2nd -> unison
+			civl2 = abs(cc[v2][s3] - cc[v][s3]);
+			if (civl2 == 1) FLAGL(275, s, max(isus[v][ls - 1], isus[v2][ls2 - 1]), v2);
+			else if (civl2 == 2) FLAGL(277, s, max(isus[v][ls - 1], isus[v2][ls2 - 1]), v2);
+		}
+		else {
+			s3 = fli[v2][ls2] - 1;
+			// 2nd -> unison
+			civl2 = abs(cc[v2][s3] - cc[v][s3]);
+			// Send flag to voice v2 instead of v
+			swap(v, v2);
+			if (civl2 == 1) FLAGL(275, s, max(isus[v2][ls - 1], isus[v][ls2 - 1]), v2);
+			else if (civl2 == 2) FLAGL(277, s, max(isus[v2][ls - 1], isus[v][ls2 - 1]), v2);
+			// Return to voice v
+			swap(v, v2);
+		}
 	}
 	return 0;
 }
 
 int CP2R::FailPco() {
+	if (!civl) {
+		// Unison inside downbeat without suspension
+		if (!beat[v][ls] && ls < fli_size[v] - 1 && ls2 < fli_size[v2] - 1 && !sus[v][ls] && !sus[v2][ls2])
+			FLAG(91, s, v2);
+	}
 	if (civlc == 7 || civlc == 12 || civlc == 0) {
 		// Prohibit leading tone octave
 		if (pcc[v][s] == 11 && pcc[v2][s] == 11) {

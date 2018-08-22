@@ -200,6 +200,29 @@ const CString mode_name2[] = {
 #define vCircle 19
 #define MAX_VIZ 20
 
+const CString viz_name[] = {
+	"Default", // 0
+	"Harm", // 1
+	"Interval", // 2
+	"VBracket", // 3
+	"Volta", // 4
+	"Slur", // 5
+	"PSlur", // 6
+	"Glis", // 7
+	"Bracket", // 8
+	"Trill", // 9
+	"TextSpanner", // 10
+	"Ottava", // 11
+	"Pedal", // 12
+	"NoteName", // 13
+	"Stac", // 14
+	"Staco", // 15
+	"NoteColor", // 16
+	"Petrucci", // 17
+	"Cross", // 18
+	"Circle" // 19
+};
+
 // Visualisation types
 #define vtPoint 1 // Can link only to one note
 #define vtVBracket 2 // Cannot collide in same interval between notes

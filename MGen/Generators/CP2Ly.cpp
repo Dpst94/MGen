@@ -54,7 +54,8 @@ void CP2Ly::AddNLink(int f) {
 			}
 			else {
 				CString est;
-				est.Format("Detected shape at hidden position %d-%d (instead of %d-%d), voice %d counterpoint %d: [%d] %s (%s). Cannot send this type of shapes to separate staff",
+				est.Format("Detected shape %s at hidden position %d-%d (instead of %d-%d), voice %d counterpoint %d: [%d] %s (%s). Cannot send this type of shapes to separate staff. Shape will be removed",
+					viz_name[ruleinfo[fl].viz],
 					s3, s4, isus[v][bli[v][s3]], isus[v][bli[v][s4]], v, cp_id + 1, fl,
 					ruleinfo[fl].RuleName, ruleinfo[fl].SubRuleName);
 				WriteLog(5, est);
@@ -79,7 +80,6 @@ void CP2Ly::AddNLink(int f) {
 		++ly_vflags;
 	}
 	lyi[s3].nfs.push_back(0);
-	lyi[s3].nfc.push_back("");
 }
 
 // Parse foreign flags from other voices: gliss and notecolor
@@ -108,7 +108,6 @@ void CP2Ly::AddNLinkForeign(int f) {
 	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	lyi[s3].nfn.push_back(0);
 	lyi[s3].nfs.push_back(0);
-	lyi[s3].nfc.push_back("");
 }
 
 void CP2Ly::AddNLinkSep(int f) {
@@ -131,7 +130,6 @@ void CP2Ly::AddNLinkSep(int f) {
 	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	lyi[s3].nfn.push_back(0);
 	lyi[s3].nfs.push_back(0);
-	lyi[s3].nfc.push_back("");
 	++ly_flags;
 }
 
@@ -253,8 +251,6 @@ void CP2Ly::ParseLyI() {
 				}
 				SetLyShape(link_note_step, link_note_step, f, fl, sev, vNoteColor);
 			}
-			// Skip all foreign shapes (show only note color)
-			if (v != lyi[s].fv[f] && vtype != vGlis) continue;
 			// Set interval if not debugexpect. If debugexpect, do not set for red flags
 			if (!ly_debugexpect || sev != 100) {
 				// Source positions
@@ -284,6 +280,8 @@ void CP2Ly::ParseLyI() {
 					}
 				}
 			}
+			// Skip all foreign shapes (show only note color, intervals and harmony)
+			if (v != lyi[s].fv[f] && vtype != vGlis) continue;
 			if (vtype == vPedal) {
 				if (bli[v][s1] == fli_size[v] - 1 && s1 == s2) continue;
 			}
