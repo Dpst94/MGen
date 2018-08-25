@@ -2822,26 +2822,26 @@ int CP2R::FailRhythm5() {
 int CP2R::FailMissSlurs() {
 	// Check only for species 4
 	if (sp != 4) return 0;
-	// Current window size
-	int wsize = 0;
-	// Number of slurs in window
+	// Missing slurs array
+	vector<int> msa;
+	msa.resize(mli.size());
+	// Number of missing slurs in window
 	int scount = 0;
 	int miss, max_miss = 0;
 	int max_ls = 0;
-	for (ls = 0; ls < fli_size[v] - 2; ++ls) {
-		if (!ls && !cc[v][0]) continue;
-		if (ls < miss_slurs_window[sp][av_cnt][0]) ++wsize;
-		// Subtract old slur
-		if (ls >= miss_slurs_window[sp][av_cnt][0] && sus[v][ls - miss_slurs_window[sp][av_cnt][0]])
+	for (ms = 1; ms < mli.size() - 1; ++ms) {
+		s = mli[ms];
+		ls = bli[v][s];
+		s2 = fli[v][ls];
+		// Subtract old missing slur
+		if (ms >= miss_slurs_window[sp][av_cnt][0] && msa[ms - miss_slurs_window[sp][av_cnt][0]])
 			--scount;
-		// Check slurs in window
-		if (sus[v][ls]) {
+		// Detect missing slur
+		if (s == s2) {
 			++scount;
-		}
-		else {
-			miss = wsize - scount;
-			if (miss > max_miss) {
-				max_miss = miss;
+			msa[ms] = 1;
+			if (scount > max_miss) {
+				max_miss = scount;
 				max_ls = ls;
 			}
 		}
