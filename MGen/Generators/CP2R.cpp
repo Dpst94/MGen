@@ -3710,8 +3710,8 @@ int CP2R::FailPco() {
 			else if (s > 0 && (leap[v][s - 1] || leap[v2][s - 1])) FLAG(324, s, v2);
 			else if (ls < fli_size[v] - 1 && (leap[v][fli2[v][ls]] || leap[v2][fli2[v2][ls2]]))
 				FLAG(324, s, v2);
-			// Suspension resolution
-			else if (msh[v][ls] > 0 || msh[v2][ls2]) FLAG(324, s, v2);
+			// Harmonic note in suspension resolution or other melodic shape without leap
+			else if (msh[v][ls] > 0 || msh[v2][ls2] > 0) FLAG(324, s, v2);
 		}
 		// Do not prohibit parallel first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
