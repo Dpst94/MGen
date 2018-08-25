@@ -111,6 +111,7 @@ int CP2R::EvaluateCP() {
 		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
 	}
 	if (FailRhythmRepeat()) return 1;
+	if (FailRhythmStack()) return 1;
 	if (FailHarm()) return 1;
 	return 0;
 }
@@ -2840,6 +2841,34 @@ int CP2R::FailRhythmRepeat() {
 				if (rh_id[v][ms] == rh_id[v2][ms] && rh_pid[v][ms] == rh_pid[v2][ms])
 					FLAGL(549, s, fli[v][bli[v][s + npm - 1]], v2);
 			}
+		}
+	}
+	return 0;
+}
+
+int CP2R::FailRhythmStack() {
+	CHECK_READY(DR_fli, DR_beat, DR_sus);
+	CHECK_READY(DR_leap, DR_nlen);
+	// Do not run check if there are less than 2 sp5 voices
+	int sp5_count = 0;
+	for (v = 0; v < av_cnt; ++v) {
+		if (vsp[v] == 5) ++sp5_count;
+	}
+	if (sp5_count < 2) return 0;
+	// Omit last measure
+	int max_step = min(ep2, c_len - npm);
+	for (s = 0; s < max_step; s += 2) {
+		int starts = 0;
+		for (v = 0; v < av_cnt; ++v) {
+			// Only for sp5
+			if (vsp[v] != 5) continue;
+			if (fli[v][bli[v][s]] == s) {
+				++starts;
+				break;
+			}
+		}
+		if (!starts) {
+			FLAGH(550, s);
 		}
 	}
 	return 0;

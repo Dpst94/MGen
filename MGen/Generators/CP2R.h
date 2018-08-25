@@ -221,6 +221,7 @@ protected:
 	inline int FailAdjacentTritones();
 	inline int FailTritones2();
 	inline int FailRhythmRepeat();
+	inline int FailRhythmStack();
 	inline int FailRhythm();
 	inline int FailRhythm2();
 	inline int FailRhythm4();
