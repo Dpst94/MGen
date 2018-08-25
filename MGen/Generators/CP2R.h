@@ -220,6 +220,7 @@ protected:
 	inline int FailAdjacentTritone2(int ta, int t1, int t2, int tb);
 	inline int FailAdjacentTritones();
 	inline int FailTritones2();
+	inline int FailRhythmRepeat();
 	inline int FailRhythm();
 	inline int FailRhythm2();
 	inline int FailRhythm4();

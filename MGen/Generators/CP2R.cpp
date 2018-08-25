@@ -110,6 +110,7 @@ int CP2R::EvaluateCP() {
 		if (FailLocalMacc(notes_arange[sp][av_cnt][0], min_arange[sp][av_cnt][0] / 10.0, 15)) return 1;
 		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
 	}
+	if (FailRhythmRepeat()) return 1;
 	if (FailHarm()) return 1;
 	return 0;
 }
@@ -664,6 +665,10 @@ int CP2R::FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int 
 
 void CP2R::ClearFlags(int step1, int step2) {
 	for (v = 0; v < av_cnt; ++v) {
+		// Clear rhythm ids
+		rh_id[v].clear();
+		// Clear rhythm pause ids
+		rh_pid[v].clear();
 		for (s = step1; s < step2; ++s) {
 			flag[v][s].clear();
 			fsl[v][s].clear();
@@ -2609,10 +2614,10 @@ int CP2R::FailRhythm3() {
 // Fail rhythm for species 5
 int CP2R::FailRhythm5() {
 	// Rhythm id
-	vector<int> rid;
+	rh_id[v].resize(mli.size());
 	int rid_cur = 0;
 	// Pause rhythm id
-	vector<int> pid;
+	rh_pid[v].resize(mli.size());
 	int pid_cur = 0;
 	int count8;
 	// Note lengths inside measure
@@ -2770,13 +2775,13 @@ int CP2R::FailRhythm5() {
 		// Check rhythm repeat
 		if (full_measure) {
 			// Check only if no croches or less than 4 notes
-			if (rid.size() && (!has_croche || l_len.size() <4)) {
-				// Do not fire for first measure if measure starts with pause
-				if (rid.back() == rid_cur && pid.back() == pid_cur)
+			if (ms > 0 && (!has_croche || l_len.size() <4)) {
+				// Fire if rhythm and pauses rhythm matches
+				if (rh_id[v][ms - 1] == rid_cur && rh_pid[v][ms - 1] == pid_cur)
 					FLAGVL(247, s, fli[v][bli[v][s + npm - 1]]);
 			}
-			rid.push_back(rid_cur);
-			pid.push_back(pid_cur);
+			rh_id[v][ms] = rid_cur;
+			rh_pid[v][ms] = pid_cur;
 		}
 		// Check rhythm rules
 		// First measure
@@ -2813,6 +2818,28 @@ int CP2R::FailRhythm5() {
 			//else if (slur1 == 2) FLAGV(251, s)
 			if (slur1 && l_len[0] == 6) FLAGV(243, s);
 			if (slur1 == 6) FLAGV(244, s);
+		}
+	}
+	return 0;
+}
+
+int CP2R::FailRhythmRepeat() {
+	CHECK_READY(DR_fli, DR_beat, DR_sus);
+	CHECK_READY(DR_leap, DR_nlen);
+	for (v = 0; v < av_cnt; ++v) {
+		// Only for sp5
+		if (vsp[v] != 5) continue;
+		for (v2 = v + 1; v2 < av_cnt; ++v2) {
+			// Only for sp5
+			if (vsp[v2] != 5) continue;
+			for (ms = 1; ms < mli.size() - 1; ++ms) {
+				s = mli[ms];
+				if (s >= ep2) break;
+				//if (ms >= rh_id[v].size() || ms >= rh_id[v2].size()) continue;
+				// Fire if rhythm and pauses rhythm matches
+				if (rh_id[v][ms] == rh_id[v2][ms] && rh_pid[v][ms] == rh_pid[v2][ms])
+					FLAGL(549, s, fli[v][bli[v][s + npm - 1]], v2);
+			}
 		}
 	}
 	return 0;

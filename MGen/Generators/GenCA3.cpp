@@ -58,6 +58,8 @@ void CGenCA3::InitAnalysis() {
 	dtp_s.resize(av_cnt);
 	pat_state.resize(av_cnt);
 	beat.resize(av_cnt);
+	rh_id.resize(av_cnt);
+	rh_pid.resize(av_cnt);
 	ha64.resize(c_len);
 	hbcc.resize(c_len);
 	hbc.resize(c_len);

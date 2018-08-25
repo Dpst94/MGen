@@ -304,6 +304,10 @@ protected:
 	vector<int> hva; // [s] Highest voice for this step
 	vector<int> lva; // [s] Lowest voice for this step
 
+	// Rhythm
+	vector<vector<int>> rh_id;
+	vector<vector<int>> rh_pid;
+
 	// Intervals
 	int civl, civl2; // Chromatic interval between voices
 	int civlc, civlc2; // Chromatic interval class between voices
