@@ -3216,23 +3216,23 @@ int CP2R::FailHarm() {
 					chm_alter.push_back(0);
 					// Reinitialize chord notes for new chord
 					for (v2 = 0; v2 < av_cnt; ++v2) {
-						ls = bli[v][s];
+						ls = bli[v2][s];
 						// Skip pauses
 						if (!cc[v2][s9]) continue;
 						// For first suspension in measure, evaluate last step. In other cases - first step
-						if (fli[v][ls] <= mli[ms] && sus[v][ls]) {
+						if (fli[v2][ls] <= mli[ms] && sus[v2][ls]) {
 							// TODO: REMOVE
 							continue;
 							// For first suspended dissonance resolved note do not check msh
-							if (susres[v][ls]) continue;
+							if (susres[v2][ls]) continue;
 						}
 						else {
 							// For all other notes, check msh and iHarm4
-							if (msh[v][ls] <= 0) continue;
+							if (msh[v2][ls] <= 0) continue;
 						}
 						// Record note
-						++chn[pc[v][s9]];
-						++cchn[pcc[v][s9]];
+						++chn[pc[v2][s9]];
+						++cchn[pcc[v2][s9]];
 					}
 					// Next harmony counter
 					++hcount;
