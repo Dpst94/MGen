@@ -1764,6 +1764,11 @@ int CP2R::FailLastNotes() {
 // Search for adjacent or symmetric repeats
 int CP2R::FailAdSymRepeat(int relen) {
 	CHECK_READY(DR_fli, DR_c);
+	// For 2/2 and 4/4 measure sizes, check beat 0 and beat 2
+	int sym_period;
+	if (npm == 8) sym_period = 4;
+	// For other measure sizes, check only beat 0. In theory, 6/4 can also have sym_period = npm / 2, but this is not implemented
+	else sym_period = npm;
 	// Do not test if flag disabled and not testing
 	//if (task != tEval && accept[sp][av_cnt][0][flag] == -1) return 0;
 	// Cycle through all notes that can be repeated
@@ -1775,9 +1780,9 @@ int CP2R::FailAdSymRepeat(int relen) {
 			rpos1 = ls + relen;
 		}
 		// If same beat is not adjacent, get same beat and check
-		else if (sp > 1 && ((fli[v][ls + relen] - fli[v][ls]) % 4)) {
+		else if (sp > 1 && ((fli[v][ls + relen] - fli[v][ls]) % sym_period)) {
 			for (int x = 1; x < 4; ++x) {
-				if (ls + x <= fli_size[v] - relen * 2 && !((fli[v][ls + relen + x] - fli[v][ls]) % 4)) {
+				if (ls + x <= fli_size[v] - relen * 2 && !((fli[v][ls + relen + x] - fli[v][ls]) % sym_period)) {
 					if (IsRepeat(ls, ls + relen + x, relen)) {
 						rpos1 = ls + relen + x;
 					}
@@ -1791,9 +1796,9 @@ int CP2R::FailAdSymRepeat(int relen) {
 				rpos2 = rpos1 + relen;
 			}
 			// If same beat is not adjacent, get same beat and check
-			else if (sp > 1 && ((fli[v][rpos1 + relen] - fli[v][rpos1]) % 4)) {
+			else if (sp > 1 && ((fli[v][rpos1 + relen] - fli[v][rpos1]) % sym_period)) {
 				for (int x = 1; x < 4; ++x) {
-					if (rpos1 + x <= fli_size[v] - relen * 2 && !((fli[v][rpos1 + relen + x] - fli[v][rpos1]) % 4)) {
+					if (rpos1 + x <= fli_size[v] - relen * 2 && !((fli[v][rpos1 + relen + x] - fli[v][rpos1]) % sym_period)) {
 						if (IsRepeat(rpos1, rpos1 + relen + x, relen)) {
 							rpos2 = rpos1 + relen + x;
 						}

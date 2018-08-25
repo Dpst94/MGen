@@ -581,7 +581,7 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += st;
 		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key " + LyMajorKey[maj_bn] + "\n";
 		ly_ly_st += "  \\major\n";
-		st.Format("  \\time %d/4\n", npm / 2);
+		st.Format("  \\time %d/%d\n", npm * btype / 8, btype);
 		ly_ly_st += st;
 		read_file_sv("configs\\ly\\staff.ly", sv);
 		for (int i = 0; i < sv.size(); ++i) {
