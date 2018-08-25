@@ -406,13 +406,13 @@ void CP2R::SendComment(int pos, int x, int i) {
 		if (GetRuleComment(fl, sp, vc, vp) != "") com += ". " + GetRuleComment(fl, sp, vc, vp);
 		if (GetSubRuleComment(fl, sp, vc, vp) != "") com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
 		//com += ". ";
-		comment[pos][v].push_back(com);
-		ccolor[pos][v].push_back(sev_color[severity[sp][vc][vp][fl]]);
+		comment[pos][vi].push_back(com);
+		ccolor[pos][vi].push_back(sev_color[severity[sp][vc][vp][fl]]);
 		// Set note color if this is maximum flag severity
 		if (severity[sp][vc][vp][fl] > current_severity && severity[sp][vc][vp][fl] >= show_min_severity
 			&& ruleinfo[fl].viz != vHarm) {
 			current_severity = severity[sp][vc][vp][fl];
-			color[pos + i][v] = sev_color[severity[sp][vc][vp][fl]];
+			color[pos + i][vi] = sev_color[severity[sp][vc][vp][fl]];
 		}
 	}
 }
