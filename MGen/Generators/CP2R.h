@@ -255,5 +255,6 @@ protected:
 	inline int FailPco();
 	inline int FailVRLimit();
 	inline int FailMeasureLen();
+	inline int FailParallelIco();
 };
 

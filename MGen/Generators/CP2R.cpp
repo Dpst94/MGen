@@ -3689,6 +3689,45 @@ int CP2R::FailMeasureLen() {
 	return 0;
 }
 
+int CP2R::FailParallelIco() {
+	CHECK_READY(DR_fli, DR_msh, DR_sus);
+	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		int civl_prev = -1;
+		int pico_count = 0;
+		int max_pico = 0;
+		int max_s = -1;
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			ls2 = bli[v2][s];
+			// Skip different notes and pauses
+			if (!cc[v][s] || !cc[v2][s] || s != fli[v2][ls2] || llen[v2][ls2] != llen[v][ls]) {
+				pico_count = 0;
+				continue;
+			}
+			civl = abs(cc[v][s] - cc[v2][s]);
+			civlc = civl % 12;
+			// Skip non-ico
+			if (civlc != 3 && civlc != 4 && civlc != 8 && civlc != 9) {
+				pico_count = 0;
+				continue;
+			}
+			// Skip different interval
+			if (pico_count && civl != civl_prev) {
+				pico_count = 0;
+				continue;
+			}
+			// Save interval
+			civl_prev = civl;
+			++pico_count;
+			GetVp();
+			vc = vca[s];
+			if (pico_count > 2) {
+			}
+		}
+	}
+	return 0;
+}
+
 int CP2R::FailVIntervals() {
 	CHECK_READY(DR_fli, DR_msh, DR_sus);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
