@@ -941,6 +941,9 @@ void CP2Ly::SaveLyComments() {
 // Send note or pause
 void CP2Ly::SendLyEvent(CString ev, int leng) {
 	// Length array
+	if (leng > 24) {
+		WriteLog(5, "WOW");
+	}
 	vector<int> la;
 	la.push_back(leng);
 	SplitLyNoteMeasure(s, la);
@@ -979,7 +982,7 @@ void CP2Ly::SplitLyNoteMeasure(int pos, vector<int> &la) {
 		// Remove last short note part
 		int left = ((inpos + la[0]) / npm) * npm - inpos;
 		// If there is no short note part, remove whole measure
-		if (left == la[0]) left = npm;
+		if (left == la[0]) left -= npm;
 		// Convert first part to second
 		la[0] = la[0] - left;
 		// Add first part
