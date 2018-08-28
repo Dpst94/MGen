@@ -758,7 +758,7 @@ void CGenCA3::EvalVocalRanges() {
 	}
 	for (int vr = 1; vr < 5; ++vr) {
 		if (vocra_used[vr] > 1) {
-			vocra_penalty += vocra_used[vr] * vocra_used[vr] + (5 - vr);
+			vocra_penalty += vocra_used[vr] * vocra_used[vr]; //  + (5 - vr)
 		}
 	}
 }
