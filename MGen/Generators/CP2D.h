@@ -36,6 +36,16 @@
 #define tEval 1
 #define tCor 2
 
+const CString degree_name[] = {
+	"I", // 0
+	"II", // 1
+	"III", // 2
+	"IV", // 3
+	"V", // 4
+	"VI", // 5
+	"VII" // 6
+};
+
 // Miminal note length for each species
 const int sp_nlen[] = {
 	8, // 0
@@ -96,6 +106,14 @@ struct RuleInfo2 {
 	vector<vector<int>> RuleParam;
 };
 
+// Flags information
+struct FlagInfo {
+	int s;
+	int id;
+	int fsl;
+	int fvl;
+};
+
 class CP2D :
 	public CGTemplate
 {
@@ -129,6 +147,7 @@ protected:
 	void ParseRules();
 
 	inline void SetRuleParam(vector<vector<vector<int>>>& par, int rid, int type, int id);
+	inline void SetRuleParamI2C(vector<vector<vector<int>>>& par, int rid, int type, int id);
 	inline void SetRuleParam(vector<vector<vector<float>>>& par, int rid, int type, int id);
 	void SetRuleParams();
 	void FillPause(int start, int length, int v);
@@ -166,13 +185,19 @@ protected:
 	vector<int> nlen; // Note length for species 2 and 4
 
 	// Indexes
-	int s, s0, s1, s2, s3, s4, s_1, s_2;
+	int s, s0, s1, s2, s3, s4, s5, s_1, s_2;
 	int v, v2, vi;
-	int ls, ls2;
+	int ls, ls2, ls3, ls4, ls5, ls6;
 	int ms;
 	int hs;
 	int sp, sp2, vc, vp;
 	int fl; // Current flag id
+
+	// Accumulated flags
+	int var;
+	vector<FlagInfo> flaga;
+	FlagInfo temp_flaginfo;
+	int hpenalty; // Harmonic penalty
 
 	// Local
 	int hrepeat_fired = 0; // Harmonic repeat in step
@@ -279,6 +304,7 @@ protected:
 	vector<vector<vector<int>>> tonic_wei_inv; // Percent of weight for inverted tonic chord
 	vector<vector<vector<int>>> vocra_disbal_yel; // Minimum disbalance length to flag (yellow)
 	vector<vector<vector<int>>> vocra_disbal_red; // Minimum disbalance length to flag (red)
+	vector<vector<vector<int>>> sus_insert_max_leap; // Maximum leap to sus resolution insertion
 	vector<vector<vector<float>>> cross_max_len; // Maximum length of voice crossing in measures
 	vector<vector<vector<float>>> cross_max_len2; // Maximum length of voice crossing in measures (red)
 	int c4p_last_steps; // Last steps that can have leap c4p compensated (converted from measures)
@@ -364,6 +390,9 @@ protected:
 	vector<vector<int>> msh; // [v][ls] Melody shape types for fli
 	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
+	vector<int> chn; // [pc] Diatonic pitch classes in chord
+	vector<int> cchn; // [pcc] Chromatic pitch classes in chord
+	vector<int> cchnv; // [pcc] Chromatic pitch classes in variant chord
 	vector<int> hli; // [hs] Forward links to first notes of each harmony
 	vector<int> ha64; // [hs] Audible 6/4 chord, while hbc will show root position or sixth chord
 	vector<int> hli2; // [hs] Forward links to last notes of each harmony
@@ -372,6 +401,8 @@ protected:
 	vector<int> bhli; // [s] Back links to first notes of each harmony
 	vector <int> chm; // [hs] Current harmonic meaning
 	vector <int> chm_alter; // [hs] Type of harmonic meaning
+	int hv; // Current harmony variant being analysed
+	int hv_alt; // Current harmony alteration variant being analysed
 
 	// Flags
 	vector<vector<vector<int>>> flag; // [v][s][] Note flags
@@ -405,7 +436,7 @@ protected:
 
 	// Pitch convert
 	vector <int> cc_c;
-	vector <int> c_cc;
+	vector <int> c_cc; // Convert to 
 
 	// Scan
 	long long cycle = 0; // Cycle number of full scan

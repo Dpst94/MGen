@@ -694,6 +694,17 @@ void CP2D::SetRuleParam(vector<vector<vector<int>>> &par, int rid, int type, int
 	}
 }
 
+void CP2D::SetRuleParamI2C(vector<vector<vector<int>>> &par, int rid, int type, int id) {
+	ResizeRuleVariantVector(par);
+	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
+		for (int vc = 1; vc <= MAX_VC; ++vc) {
+			for (int vp = 0; vp <= MAX_VP; ++vp) {
+				par[sp][vc][vp] = Interval2Chromatic(GetRuleParam(sp, vc, vp, rid, type, id));
+			}
+		}
+	}
+}
+
 void CP2D::SetRuleParam(vector<vector<vector<float>>> &par, int rid, int type, int id) {
 	ResizeRuleVariantVector(par);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
@@ -785,6 +796,7 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(mea_per_sus, 341, rsSubName, 0);
 	SetRuleParam(vocra_disbal_yel, 524, rsSubName, 0);
 	SetRuleParam(vocra_disbal_red, 526, rsSubName, 0);
+	SetRuleParamI2C(sus_insert_max_leap, 295, rsSubComment, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;

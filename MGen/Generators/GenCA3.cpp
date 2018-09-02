@@ -14,6 +14,9 @@ CGenCA3::~CGenCA3() {
 }
 
 void CGenCA3::InitAnalysis() {
+	chn.resize(7);
+	cchn.resize(12);
+	cchnv.resize(12);
 	nstat.resize(MAX_NOTE);
 	nstat2.resize(MAX_NOTE);
 	nstat3.resize(MAX_NOTE);
@@ -579,16 +582,15 @@ void CGenCA3::GetCPKey() {
 		if (cc[0][s]) {
 			//bn = cc[0][s] % 12;
 			// Collect notes from all voices
-			vector<int> chn, cchn;
-			chn.resize(7);
-			cchn.resize(12);
+			fill(chn.begin(), chn.end(), 0);
+			fill(cchn.begin(), cchn.end(), 0);
 			for (v = 0; v < av_cnt; ++v) {
 				++chn[pc[v][s]];
 				++cchn[pcc[v][s]];
 			}
 			int lchm;
 			int lchm_alter;
-			GetHarm(0, 0, chn, cchn, lchm, lchm_alter);
+			GetHarm(0, 0, lchm, lchm_alter);
 			bn = c_cc[lchm + 14] % 12;
 			break;
 		}

@@ -1057,9 +1057,12 @@ int CGenCP1::FailSus2() {
 						FLAG2C(296);
 					}
 					// Mark insertion as non-harmonic in basic msh if resolution is harmonic, sus ends with dissonance and not both movements are leaps
-					if (s3 && ls3 == ls + 2 && tivl[fli[ls + 2]] > 0 && aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
-					if (s4 && ls4 == ls + 2 && tivl[fli[ls + 2]] > 0 && aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
-					if (s5 && ls5 == ls + 2 && tivl[fli[ls + 2]] > 0 && aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
+					if (s3 && ls3 == ls + 2 && tivl[fli[ls + 2]] > 0 && 
+						aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
+					if (s4 && ls4 == ls + 2 && tivl[fli[ls + 2]] > 0 && 
+						aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
+					if (s5 && ls5 == ls + 2 && tivl[fli[ls + 2]] > 0 && 
+						aleap[cpv][fli2[ls]] * aleap[cpv][fli2[ls + 1]] == 0) mshb[ls + 1] = pAux;
 					// Mark resolution as obligatory harmonic in basic msh and ending as non-harmonic
 					// In this case all resolutions are marked, although one of them is enough, but this is a very rare case that several resolutions pass all checks
 					if (s3) {

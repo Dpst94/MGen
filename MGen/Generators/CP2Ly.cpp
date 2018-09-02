@@ -941,9 +941,6 @@ void CP2Ly::SaveLyComments() {
 // Send note or pause
 void CP2Ly::SendLyEvent(CString ev, int leng) {
 	// Length array
-	if (leng > 24) {
-		WriteLog(5, "WOW");
-	}
 	vector<int> la;
 	la.push_back(leng);
 	SplitLyNoteMeasure(s, la);

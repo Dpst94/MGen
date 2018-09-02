@@ -67,9 +67,11 @@
 #define pSusStart 4
 #define pSusRes 5
 #define pLastLT 6
+#define pHarmonicPDD 12
 #define pLong 7
 #define pAux -1
 #define pPass -2
+#define pAuxPDD -11
 
 // Patterns
 #define pCam 1 // Cambiata
@@ -130,6 +132,24 @@
 	fvl[v][s].push_back(v2);  \
 } while (0)
 
+// Accumulate flag
+#define FLAGA(id2, step, s2, v2) do { \
+  ASSERT_RULE(id2);  \
+	temp_flaginfo.s = step; \
+	temp_flaginfo.id = id2; \
+	temp_flaginfo.fsl = s2; \
+	temp_flaginfo.fvl = v2; \
+	flaga.push_back(temp_flaginfo); \
+} while (0)
+
+// Accumulate and return flag
+#define FLAGAR(id, s, s2, v2) do { \
+	if (!s3 && !s4 && !s5) { \
+		FLAGA(id, s, s2, v2); \
+		return; \
+	} \
+} while (0)
+
 class CP2R :
 	public CP2D
 {
@@ -182,7 +202,10 @@ protected:
 	inline int FailMinorStepwise();
 	void MergeNotes(int step1, int step2);
 	inline void GetBasicMsh();
+	inline void GetMeasureMsh();
 	inline void GetMsh();
+	inline void EvaluateMsh();
+	inline void DetectSus();
 	inline void DetectPDD();
 	inline void GetDtp();
 	inline void CountFillInit(int tail_len, int pre, int & t1, int & t2, int & fill_end);
@@ -239,7 +262,7 @@ protected:
 	inline int FailNoteLen();
 	inline int FailBeat();
 	inline int FailRetrInside();
-	inline void GetHarm(int found_gis, int found_fis, vector<int>& chn, vector<int>& cchn, int & lchm, int & lchm_alter);
+	inline void GetHarm(int found_gis, int found_fis, int & lchm, int & lchm_alter);
 	inline int FailHarm();
 	inline int EvalHarm();
 	inline int FailTonicCP();
