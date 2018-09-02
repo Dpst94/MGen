@@ -4040,6 +4040,7 @@ void CP2R::GetMsh() {
 					DetectSus();
 					DetectPDD();
 					DetectDNT();
+					DetectCambiata();
 					EvaluateMsh();
 				}
 				// Stop evaluating variants if all is ok
@@ -4054,8 +4055,8 @@ void CP2R::GetMsh() {
 void CP2R::DetectDNT() {
 	if (!accept[sp][vc][vp][258]) return;
 	// Suspension will conflict with DNT
+	int ls0 = bli[v][mli[ms]];
 	if (sus[v][ls]) return;
-	int ls0 = ls;
 	int ls_max = bli[v][mli[ms] + npm - 1] - 3;
 	if (ls_max > fli_size[v] - 4) ls_max = fli_size[v] - 4;
 	// Not enough notes for DNT
@@ -4067,26 +4068,30 @@ void CP2R::DetectDNT() {
 		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) return;
 		// First note must be chord tone
 		if (!cchnv[pcc[v][s2]]) return;
+		// Note 1 is short
+		if (llen[v][ls] < 2) continue;
 		// Note 2 is long
-		if (llen[v][ls + 1] > 4) continue;
+		if (llen[v][ls + 1] > 2) continue;
 		// Movement is stepwize
 		if (!smooth[v][s2]) continue;
 		if (ls < fli_size[v] - 2) {
 			// Note 2 is longer than 1
 			if (llen[v][ls + 1] > llen[v][ls]) continue;
 			// Note 3 is long
-			if (llen[v][ls + 2] > 4) continue;
-			// No leap
-			if (!leap[v][fli2[v][ls + 1]]) continue;
+			if (llen[v][ls + 2] > 2) continue;
+			// Wrong
+			if (abs(leap[v][fli2[v][ls + 1]]) != 2) continue;
 			// Leap has same direction
-			if (leap[v][fli2[v][ls + 1]] == smooth[v][s2]) continue;
-			// Too long leap
-			if (abs(leap[v][fli2[v][ls + 1]]) > 2) continue;
+			if (leap[v][fli2[v][ls + 1]] * smooth[v][s2] > 0) continue;
 			// Leap in (before DNT)
 			if (ls > 0 && leap[v][fli2[v][ls - 1]]) {
 				if (!accept[sp][vc][vp][3]) continue;
 			}
 			if (ls < fli_size[v] - 3) {
+				// Note 4 is short
+				if (llen[v][ls + 3] < 2) continue;
+				// Note 1 and 4 are different
+				if (cc[v][s] != cc[v][fli[v][ls + 3]]) continue;
 				// Note 3 is longer than 4
 				if (llen[v][ls + 2] > llen[v][ls + 3] && (ep2 == c_len || ls < fli_size[v] - 4)) continue;
 				// Movements are stepwize
@@ -4103,6 +4108,62 @@ void CP2R::DetectDNT() {
 					msh[v][ls + 1] = pAuxDNT1;
 					msh[v][ls + 2] = pAuxDNT2;
 					msh[v][ls + 3] = pHarmonicDNT2;
+				}
+			}
+		}
+	}
+}
+
+void CP2R::DetectCambiata() {
+	if (!accept[sp][vc][vp][256]) return;
+	// Suspension will conflict with cambiata
+	int ls0 = bli[v][mli[ms]];
+	if (sus[v][ls0]) return;
+	int ls_max = bli[v][mli[ms] + npm - 1] - 3;
+	if (ls_max > fli_size[v] - 4) ls_max = fli_size[v] - 4;
+	// Not enough notes for cambiata
+	if (ls_max < ls0) return;
+	for (ls = ls0; ls <= ls_max; ++ls) {
+		s = fli[v][ls];
+		s2 = fli2[v][ls];
+		// No pauses
+		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) return;
+		// First note must be chord tone
+		if (!cchnv[pcc[v][s2]]) return;
+		// Note 1 is short
+		if (llen[v][ls] < 2) continue;
+		// Note 2 is long
+		if (llen[v][ls + 1] > 2) continue;
+		// Movement is stepwize
+		if (!smooth[v][s2]) continue;
+		if (ls < fli_size[v] - 2) {
+			// Note 2 is longer than 1
+			if (llen[v][ls + 1] > llen[v][ls]) continue;
+			// Note 3 is long
+			if (llen[v][ls + 2] > 4) continue;
+			// Wrong
+			if (abs(leap[v][fli2[v][ls + 1]]) != 2) continue;
+			// Leap has other direction
+			if (leap[v][fli2[v][ls + 1]] * smooth[v][s2] < 0) continue;
+			if (ls < fli_size[v] - 3) {
+				// Fourth note must be chord tone
+				if (!cchnv[pcc[v][fli[v][ls + 3]]]) return;
+				// Note 4 is short
+				if (llen[v][ls + 3] < 2) continue;
+				// Note 3 is longer than 4
+				if (llen[v][ls + 2] > llen[v][ls + 3] && (ep2 == c_len || ls < fli_size[v] - 4)) continue;
+				// Both movements have different directions
+				if (smooth[v][s2] != -smooth[v][fli2[v][ls + 2]]) continue;
+				if (ls < fli_size[v] - 4) {
+					// Leap from note 4
+					if (abs(leap[v][fli2[v][ls + 3]]) > 3) {
+						if (!accept[sp][vc][vp][97]) continue;
+					}
+					// Apply pattern
+					msh[v][ls] = pHarmonicCam1;
+					msh[v][ls + 1] = pAuxCam1;
+					msh[v][ls + 2] = pAuxCam2;
+					msh[v][ls + 3] = pHarmonicCam2;
 				}
 			}
 		}
