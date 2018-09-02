@@ -68,10 +68,14 @@
 #define pSusRes 5
 #define pLastLT 6
 #define pHarmonicPDD 12
+#define pHarmonicDNT1 21
+#define pHarmonicDNT2 24
 #define pLong 7
 #define pAux -1
 #define pPass -2
 #define pAuxPDD -11
+#define pAuxDNT1 -22
+#define pAuxDNT2 -23
 
 // Patterns
 #define pCam 1 // Cambiata
@@ -207,6 +211,7 @@ protected:
 	inline void EvaluateMsh();
 	inline void DetectSus();
 	inline void DetectPDD();
+	inline void DetectDNT();
 	inline void GetDtp();
 	inline void CountFillInit(int tail_len, int pre, int & t1, int & t2, int & fill_end);
 	inline void CountFill(int tail_len, int & skips, int & fill_to, int pre, int & fill_to_pre, int & fill_from_pre, int & fill_from, int & deviates, int & dev_count, int leap_prev, int & fill_end, int & fill_goal);
