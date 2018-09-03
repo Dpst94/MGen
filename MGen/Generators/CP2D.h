@@ -111,6 +111,7 @@ struct FlagInfo {
 	int s;
 	int id;
 	int fsl;
+	int voice;
 	int fvl;
 };
 

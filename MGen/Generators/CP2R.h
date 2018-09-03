@@ -67,6 +67,7 @@
 #define pSusStart 4
 #define pSusRes 5
 #define pLastLT 6
+#define pFirst 7
 #define pHarmonicPDD 12
 #define pHarmonicDNT1 21
 #define pHarmonicDNT2 24
@@ -137,6 +138,7 @@
 // Accumulate flag
 #define FLAGA(id2, step, s2, v2) do { \
   ASSERT_RULE(id2);  \
+	temp_flaginfo.voice = v; \
 	temp_flaginfo.s = step; \
 	temp_flaginfo.id = id2; \
 	temp_flaginfo.fsl = s2; \

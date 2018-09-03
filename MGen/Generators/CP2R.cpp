@@ -3847,7 +3847,7 @@ void CP2R::GetBasicMsh() {
 		if (first) {
 			first = 0;
 			// First note is always downbeat
-			msh[v][ls] = pDownbeat;
+			msh[v][ls] = pFirst;
 			continue;
 		}
 		s2 = fli2[v][ls];
@@ -3881,7 +3881,7 @@ void CP2R::GetMeasureMsh() {
 		if (!cc[v][s]) continue;
 		s2 = fli2[v][ls];
 		// First note is always downbeat
-		if (s == fin[v]) msh[v][ls] = pDownbeat;
+		if (s == fin[v]) msh[v][ls] = pFirst;
 		// Sus start is always harmonic
 		else if (sus[v][ls]) msh[v][ls] = pSusStart;
 		// Downbeat
@@ -3912,11 +3912,23 @@ void CP2R::EvaluateMsh() {
 		}
 		if (!cchnv[pcc[v][s]]) {
 			++hpenalty;
+			// Do not flag discord if suspension, because it will be flagged in sus algorithm
+			if (sus[v][ls]) {}
+			else if (msh[v][ls] == pFirst) FLAGA(551, s, s, v);
+			else if (msh[v][ls] == pDownbeat) FLAGA(83, s, s, v);
+			else if (msh[v][ls] == pLeapTo) FLAGA(36, s, s, v);
+			else if (msh[v][ls] == pLeapFrom) FLAGA(187, s, s, v);
+			// pLastLT cannot be dissonance, because it is set only if it is not dissonance
+			else if (msh[v][ls] == pSusStart) FLAGA(458, s, s, v);
+			// pSusRes does not have separate flag, because it is marked as not resolved
+			// This is protection against wrong melodic shape value
+			else if (msh[v][ls] > 0) FLAGA(83, s, s, v);
 		}
 	}
 }
 
 void CP2R::GetMsh() {
+	flaga.clear();
 	for (ms = 0; ms < mli.size(); ++ms) {
 		fill(chn.begin(), chn.end(), 0);
 		fill(cchn.begin(), cchn.end(), 0);
@@ -3941,7 +3953,7 @@ void CP2R::GetMsh() {
 					else lmsh = pSusStart;
 				}
 				// First note
-				else if (s == fin[v]) lmsh = pDownbeat;
+				else if (s == fin[v]) lmsh = pFirst;
 				// Downbeat
 				else if (s % npm == 0) {
 					// Long on downbeat
@@ -3976,12 +3988,15 @@ void CP2R::GetMsh() {
 			// At least one note exists
 			if (!chn[hv] && !chn[(hv + 2) % 7] && !chn[(hv + 4) % 7]) continue;
 			// No other notes should exist
-			if (chn[(hv + 1) % 7] || chn[(hv + 3) % 7] || chn[(hv + 5) % 7] || chn[(hv + 6) % 7]) continue;
+			if (chn[(hv + 1) % 7] || chn[(hv + 3) % 7] || chn[(hv + 5) % 7]) continue;
+			// Do not check for 7th:  || chn[(hv + 6) % 7]
 			cpos[hv] = 1;
+			/*
 			CString st, est;
 			est.Format("Possible chord %s in measure %d:%d",
 				degree_name[hv], cp_id + 1, ms + 1);
 			WriteLog(1, est);
+			*/
 		}
 		// Scan all possible chords
 		for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
@@ -4032,6 +4047,7 @@ void CP2R::GetMsh() {
 					if (i == 5) est += " -";
 				}
 				WriteLog(1, est);
+				flaga.clear();
 				for (v = 0; v < av_cnt; ++v) {
 					GetMeasureMsh();
 					ls = bli[v][s0];
@@ -4048,6 +4064,11 @@ void CP2R::GetMsh() {
 			}
 			// Stop evaluating variants if all is ok
 			if (!hpenalty) break;
+		}
+		// Save flags
+		for (int fl = 0; fl < flaga.size(); ++fl) {
+			v = flaga[fl].voice;
+			FLAGL(flaga[fl].id, flaga[fl].s, flaga[fl].fsl, flaga[fl].fvl);
 		}
 	}
 }
