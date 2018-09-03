@@ -2778,8 +2778,9 @@ int CP2R::FailRhythm5() {
 		if (full_measure) {
 			// Check only if no croches or less than 4 notes
 			if (ms > 0 && (!has_croche || l_len.size() <4)) {
-				// Fire if rhythm and pauses rhythm matches
-				if (rh_id[v][ms - 1] == rid_cur && rh_pid[v][ms - 1] == pid_cur)
+				// Fire if rhythm and pauses rhythm matches and there is no full measure pause
+				if (rh_id[v][ms - 1] == rid_cur && rh_pid[v][ms - 1] == pid_cur &&
+					(l_len[0] < 8 || cc[v][s]))
 					FLAGVL(247, s, fli[v][bli[v][s + npm - 1]]);
 			}
 			rh_id[v][ms] = rid_cur;
@@ -2837,9 +2838,11 @@ int CP2R::FailRhythmRepeat() {
 			for (ms = 1; ms < mli.size() - 1; ++ms) {
 				s = mli[ms];
 				if (s >= ep2) break;
+				ls = bli[v][s];
 				//if (ms >= rh_id[v].size() || ms >= rh_id[v2].size()) continue;
-				// Fire if rhythm and pauses rhythm matches
-				if (rh_id[v][ms] == rh_id[v2][ms] && rh_pid[v][ms] == rh_pid[v2][ms])
+				// Fire if rhythm and pauses rhythm matches and there is no whole-measure pause
+				if (rh_id[v][ms] == rh_id[v2][ms] && rh_pid[v][ms] == rh_pid[v2][ms] &&
+					(fli2[v][ls] < s + npm - 1 || cc[v][s]))
 					FLAGL(549, s, fli[v][bli[v][s + npm - 1]], v2);
 			}
 		}
