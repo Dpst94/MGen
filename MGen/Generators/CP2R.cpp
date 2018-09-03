@@ -4193,6 +4193,8 @@ void CP2R::DetectCambiata() {
 
 void CP2R::DetectSus() {
 	susres[v][ls] = 0;
+	if (!ms) return;
+	if (!cc[v][s0]) return;
 	if (!sus[v][ls]) return;
 	// Allow if not discord
 	if (cchnv[pcc[v][s0]]) {
@@ -4322,6 +4324,7 @@ void CP2R::DetectSus() {
 void CP2R::DetectPDD() {
 	// First measure
 	if (!ms) return;
+	if (!cc[v][s0]) return;
 	// Second note must be non-chord tone
 	if (cchnv[pcc[v][s2]]) return;
 	// Suspension will conflict with PDD
