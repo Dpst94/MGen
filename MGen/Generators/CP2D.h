@@ -172,7 +172,7 @@ protected:
 	vector<int> minl; // [v]
 	vector<int> maxl; // [v]
 	vector<int> fli_size; // [v]
-	vector<int> vsp; // Species for each voice
+	vector<int> vsp; // [v] Species for each voice
 	vector<CString> vname; // [v] 
 	vector<CString> vname2; // [v] Names are unique
 	vector<int> nmin; // [v]

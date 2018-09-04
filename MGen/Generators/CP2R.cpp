@@ -3936,6 +3936,7 @@ void CP2R::GetMsh() {
 		fill(chn.begin(), chn.end(), 0);
 		fill(cchn.begin(), cchn.end(), 0);
 		s0 = mli[ms];
+		vc = vca[s0];
 		int s9;
 		// Get last measure step
 		int mea_end = mli[ms] + npm - 1;
@@ -4052,6 +4053,7 @@ void CP2R::GetMsh() {
 				WriteLog(1, est);
 				flaga.clear();
 				for (v = 0; v < av_cnt; ++v) {
+					sp = vsp[v];
 					GetMeasureMsh();
 					ls = bli[v][s0];
 					s = fli[v][ls];
@@ -4077,7 +4079,7 @@ void CP2R::GetMsh() {
 }
 
 void CP2R::DetectDNT() {
-	if (!accept[sp][vc][vp][258]) return;
+	if (!accept[sp][vc][0][258]) return;
 	// Suspension will conflict with DNT
 	int ls0 = bli[v][mli[ms]];
 	if (sus[v][ls]) return;
@@ -4109,7 +4111,7 @@ void CP2R::DetectDNT() {
 			if (leap[v][fli2[v][ls + 1]] * smooth[v][s2] > 0) continue;
 			// Leap in (before DNT)
 			if (ls > 0 && leap[v][fli2[v][ls - 1]]) {
-				if (!accept[sp][vc][vp][3]) continue;
+				if (!accept[sp][vc][0][3]) continue;
 			}
 			if (ls < fli_size[v] - 3) {
 				// Note 4 is short
@@ -4125,7 +4127,7 @@ void CP2R::DetectDNT() {
 				if (ls < fli_size[v] - 4) {
 					// Leap from note 4
 					if (leap[v][fli2[v][ls + 3]]) {
-						if (!accept[sp][vc][vp][97]) continue;
+						if (!accept[sp][vc][0][97]) continue;
 					}
 					// Apply pattern
 					msh[v][ls] = pHarmonicDNT1;
@@ -4139,7 +4141,7 @@ void CP2R::DetectDNT() {
 }
 
 void CP2R::DetectCambiata() {
-	if (!accept[sp][vc][vp][256]) return;
+	if (!accept[sp][vc][0][256]) return;
 	// Suspension will conflict with cambiata
 	int ls0 = bli[v][mli[ms]];
 	if (sus[v][ls0]) return;
@@ -4181,7 +4183,7 @@ void CP2R::DetectCambiata() {
 				if (ls < fli_size[v] - 4) {
 					// Leap from note 4
 					if (abs(leap[v][fli2[v][ls + 3]]) > 3) {
-						if (!accept[sp][vc][vp][97]) continue;
+						if (!accept[sp][vc][0][97]) continue;
 					}
 					// Apply pattern
 					msh[v][ls] = pHarmonicCam1;
@@ -4236,66 +4238,66 @@ void CP2R::DetectSus() {
 		s5 = 0;
 	}
 	// Check which beats are allowed by rules
-	if (!accept[sp][vc][vp][419]) s3 = 0;
-	if (!accept[sp][vc][vp][420]) s5 = 0;
+	if (!accept[sp][vc][0][419]) s3 = 0;
+	if (!accept[sp][vc][0][420]) s5 = 0;
 	if (s3) ls3 = bli[v][s3];
 	if (s4) ls4 = bli[v][s4];
 	if (s5) ls5 = bli[v][s5];
 	// Notes not on beat? 
-	if (!accept[sp][vc][vp][286]) {
+	if (!accept[sp][vc][0][286]) {
 		if (s3 && cc[v][s3] == cc[v][s3 - 1]) s3 = 0;
 		if (s4 && cc[v][s4] == cc[v][s4 - 1]) s4 = 0;
 		if (s5 && cc[v][s5] == cc[v][s5 - 1]) s5 = 0;
 		FLAGAR(286, s, s, v);
 	}
 	// Notes too short?
-	if (!accept[sp][vc][vp][291]) {
+	if (!accept[sp][vc][0][291]) {
 		if (s3 && llen[v][ls3] < 2 && ls3 < fli_size[v] - 1) s3 = 0;
 		if (s4 && llen[v][ls4] < 2 && ls4 < fli_size[v] - 1) s4 = 0;
 		if (s5 && llen[v][ls5] < 2 && ls5 < fli_size[v] - 1) s5 = 0;
 		FLAGAR(291, s, s, v);
 	}
 	// Notes not harmonic?
-	if (!accept[sp][vc][vp][220]) {
+	if (!accept[sp][vc][0][220]) {
 		if (s3 && !cchnv[pcc[v][s3]]) s3 = 0;
 		if (s4 && !cchnv[pcc[v][s4]]) s4 = 0;
 		if (s5 && !cchnv[pcc[v][s5]]) s5 = 0;
 		FLAGAR(220, s, s, v);
 	}
 	// Resolution by leap
-	if (!accept[sp][vc][vp][221]) {
+	if (!accept[sp][vc][0][221]) {
 		if (s3 && abs(c[v][s3] - c[v][s2]) > 1) s3 = 0;
 		if (s4 && abs(c[v][s4] - c[v][s2]) > 1) s4 = 0;
 		if (s5 && abs(c[v][s5] - c[v][s2]) > 1) s5 = 0;
 		FLAGAR(221, s, s, v);
 	}
 	// Resolution up not LT
-	if (!accept[sp][vc][vp][219]) {
+	if (!accept[sp][vc][0][219]) {
 		if (s3 && cc[v][s3] > cc[v][s2] && pcc[v][s2] != 11) s3 = 0;
 		if (s4 && cc[v][s4] > cc[v][s2] && pcc[v][s2] != 11) s4 = 0;
 		if (s5 && cc[v][s5] > cc[v][s2] && pcc[v][s2] != 11) s5 = 0;
 		FLAGAR(219, s, s, v);
 	}
 	// Notes have too many insertions?
-	if (!accept[sp][vc][vp][292]) {
+	if (!accept[sp][vc][0][292]) {
 		if (s3 && ls3 - ls > 3) s3 = 0;
 		if (s4 && ls4 - ls > 3) s4 = 0;
 		if (s5 && ls5 - ls > 3) s5 = 0;
 		FLAGAR(292, s, s, v);
 	}
 	// First leap is too long?
-	if (abs(cc[v][fli[v][ls + 1]] - cc[v][s2]) > sus_insert_max_leap[sp][vc][vp]) {
+	if (abs(cc[v][fli[v][ls + 1]] - cc[v][s2]) > sus_insert_max_leap[sp][vc][0]) {
 		FLAGA(295, fli[v][ls + 1], sus[v][ls], v);
 	}
 	// Single insertion, second movement is leap
-	if (!accept[sp][vc][vp][136]) {
+	if (!accept[sp][vc][0][136]) {
 		if (s3 && ls3 == ls + 2 && leap[v][fli2[v][ls + 1]] > 0) s3 = 0;
 		if (s4 && ls4 == ls + 2 && leap[v][fli2[v][ls + 1]] > 0) s4 = 0;
 		if (s5 && ls5 == ls + 2 && leap[v][fli2[v][ls + 1]] > 0) s5 = 0;
 		FLAGAR(136, s, s, v);
 	}
 	// Single insertion, second movement is leap
-	if (!accept[sp][vc][vp][296]) {
+	if (!accept[sp][vc][0][296]) {
 		if (s3 && ls3 == ls + 2 && leap[v][fli2[v][ls + 1]] < 0) s3 = 0;
 		if (s4 && ls4 == ls + 2 && leap[v][fli2[v][ls + 1]] < 0) s4 = 0;
 		if (s5 && ls5 == ls + 2 && leap[v][fli2[v][ls + 1]] < 0) s5 = 0;
