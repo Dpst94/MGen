@@ -3349,20 +3349,24 @@ int CP2R::EvalHarm() {
 	for (int i = 0; i < chm.size(); ++i) {
 		s = hli[i];
 		ls = bli[v][s];
+		// Prohibit 64 chord
+		if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
+			FLAGV(433, s);
+		}
+		// Prohibit audible 64 chord
+		else if (ha64[i] == 1) FLAGV(196, s);
+		// Prohibit audible 64 chord
+		else if (ha64[i] == 2) FLAGV(383, s);
+		// Prohibit DTIII#5 augmented chord
+		if (chm[i] == 2 && chm_alter[i] == 1) {
+			FLAGV(375, s);
+		}
 		if (i > 0) {
 			// Check GC for low voice and not last note (last note in any window is ignored)
 			if (ls < fli_size[v] - 1 &&
 				chm[i] == 0 && chm[i - 1] == 4 &&
 				pc[0][s] == 0 && pc[1][s] == 0 &&
 				s > 0 && pc[0][s - 1] == 4) FLAGV(48, s);
-			// Prohibit 64 chord
-			if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
-				FLAGV(433, s);
-			}
-			// Prohibit audible 64 chord
-			else if (ha64[i] == 1) FLAGV(196, s);
-			// Prohibit audible 64 chord
-			else if (ha64[i] == 2) FLAGV(383, s);
 			if (mminor) {
 				// Prohibit VI<->VI# containing progression
 				if (chm[i] % 2 && chm[i - 1] % 2 && chm_alter[i] * chm_alter[i - 1] == -1) {
@@ -3372,10 +3376,6 @@ int CP2R::EvalHarm() {
 				if (chm[i] && chm[i] % 2 == 0 && chm[i - 1] && chm[i - 1] % 2 == 0 &&
 					chm_alter[i] * chm_alter[i - 1] == -1) {
 					FLAGV(378, s);
-				}
-				// Prohibit DTIII#5 augmented chord
-				if (chm[i] == 2 && chm_alter[i] == 1) {
-					FLAGV(375, s);
 				}
 				// Prohibit dVII (GBD) in root position after S (DF#A) in root position
 				if (chm[i] == 6 && chm[i - 1] == 3 && chm_alter[i]<1 && chm_alter[i - 1] == 1) {
