@@ -1771,11 +1771,8 @@ int CP2R::FailLastNotes() {
 // Search for adjacent or symmetric repeats
 int CP2R::FailAdSymRepeat(int relen) {
 	CHECK_READY(DR_fli, DR_c);
-	// For 2/2 and 4/4 measure sizes, check beat 0 and beat 2
-	int sym_period;
-	if (npm == 8) sym_period = 4;
-	// For other measure sizes, check only beat 0. In theory, 6/4 can also have sym_period = npm / 2, but this is not implemented
-	else sym_period = npm;
+	// Check only same beat
+	int sym_period = npm;
 	// Do not test if flag disabled and not testing
 	//if (task != tEval && accept[sp][av_cnt][0][flag] == -1) return 0;
 	// Cycle through all notes that can be repeated
