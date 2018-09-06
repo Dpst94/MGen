@@ -1732,7 +1732,7 @@ int CP2R::FailFirstNotes() {
 	else vp = vpNbs;
 	// Prohibit first note not tonic
 	s = fin[v];
-	if (pc[v][s] != 0) {
+	if (pc[v][s] != 0 && !bmli[s]) {
 		if (pc[v][s] == 4) FLAG(532, s, v);
 		else if (pc[v][s] == 2) {
 			if (sus[v][bli[v][s]]) FLAG(533, s, v);
