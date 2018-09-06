@@ -4345,6 +4345,8 @@ void CP2R::DetectPDD() {
 	// First measure
 	if (!ms) return;
 	if (!cc[v][s0]) return;
+	// Last note
+	if (s2 == ep2 - 1) return;
 	// Second note must be non-chord tone
 	if (cchnv[pcc[v][s2]]) return;
 	// Suspension will conflict with PDD
