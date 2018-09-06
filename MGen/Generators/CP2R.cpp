@@ -3726,7 +3726,7 @@ int CP2R::FailParallelIco() {
 	return 0;
 }
 
-int CP2R::FailVIntervals() {
+int CP2R::FailUnisons() {
 	CHECK_READY(DR_fli, DR_msh, DR_sus);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (s = fin[v]; s < ep2; ++s) {
@@ -3745,20 +3745,6 @@ int CP2R::FailVIntervals() {
 			// Prepare data
 			civl = abs(cc[v][s] - cc[v2][s]);
 			if (FailUnison()) return 1;
-
-			// Skip oblique motion
-			if (s != fli[v][ls] || s != fli[v2][ls2]) continue;
-			// Prepare data
-			s2 = fli2[v][ls];
-			civlc = civl % 12;
-			civl2 = abs(cc[v2][fli2[v2][ls2 - 1]] - cc[v][fli2[v][ls - 1]]);
-			civlc2 = civl2 % 12;
-			//if (civl && civl % 12 == 0) civlc2 = 12;
-			//else civlc2 = civl % 12;
-			// Skip pauses
-			if (!cc[v][fli[v][ls - 1]]) continue;
-			if (!cc[v2][fli[v2][ls2 - 1]]) continue;
-			if (FailPco()) return 1;
 		}
 	}
 	return 0;
@@ -3790,9 +3776,40 @@ int CP2R::FailUnison() {
 	return 0;
 }
 
+int CP2R::FailVIntervals() {
+	CHECK_READY(DR_fli, DR_msh, DR_sus);
+	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		for (ls = 1; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			ls2 = bli[v2][s];
+			GetVp();
+			vc = vca[s];
+			// Check only when both notes start simultaneously
+			if (s != fli[v2][ls2]) continue;
+			// Skip first note in second voice
+			if (!ls2) continue;
+			// Prepare data
+			s2 = fli2[v][ls];
+			civl = abs(cc[v][s] - cc[v2][s]);
+			civlc = civl % 12;
+			civl2 = abs(cc[v2][s - 1] - cc[v][s - 1]);
+			civlc2 = civl2 % 12;
+			//if (civl && civl % 12 == 0) civlc2 = 12;
+			//else civlc2 = civl % 12;
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			if (!cc[v2][s]) continue;
+			if (!cc[v][s - 1]) continue;
+			if (!cc[v2][s - 1]) continue;
+			if (FailPco()) return 1;
+		}
+	}
+	return 0;
+}
+
 int CP2R::FailPco() {
 	if (!civl) {
-		// Unison inside downbeat without suspension
+		// Unison (inside) downbeat without suspension
 		if (!beat[v][ls] && ls < fli_size[v] - 1 && ls2 < fli_size[v2] - 1 && !sus[v][ls] && !sus[v2][ls2]) {
 			// Ignore more than 4 voices and 2 lowest of 4 voices
 			if (vca[s] < 4 || (vca[s] == 4 && v + v2 != 1) )
@@ -3811,9 +3828,9 @@ int CP2R::FailPco() {
 			// Harmonic note in suspension resolution or other melodic shape without leap
 			else if (msh[v][ls] > 0 || msh[v2][ls2] > 0) FLAG(324, s, v2);
 		}
-		// Do not prohibit parallel first - first (this is for sus notes, which starts are parallel)
+		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
-		// Prohibit parallel last - first
+		// Prohibit consecutive last - first
 		if (civl == civl2) {
 			if (civlc == 7) FLAGL(84, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
 			else FLAGL(481, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
@@ -3833,6 +3850,7 @@ int CP2R::FailMsh() {
 	SET_READY(DR_msh);
 	// Detect basic msh (based on downbeats and leaps)
 	GetBasicMsh();
+	if (FailUnisons()) return 1;
 	if (FailVIntervals()) return 1;
 	return 0;
 }
