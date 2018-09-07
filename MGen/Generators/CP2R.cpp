@@ -114,6 +114,7 @@ int CP2R::EvaluateCP() {
 	if (FailRhythmRepeat()) return 1;
 	if (FailRhythmStack()) return 1;
 	if (FailHarm()) return 1;
+	FindParallel6Chords();
 	return 0;
 }
 
@@ -3687,6 +3688,23 @@ int CP2R::FailMeasureLen() {
 	return 0;
 }
 
+void CP2R::FindParallel6Chords() {
+	// Do not process if less than 3 voices
+	int consec = 0;
+	for (hs = 0; hs < hli.size(); ++hs) {
+		// Detect 6th chord
+		if (hbc[hs] % 7 == (chm[hs] + 2) % 7) {
+			++consec;
+			if (consec == 3) {
+				FLAGHL(552, isus[0][bli[0][hli[hs - 2]]], isus[0][bli[0][hli[hs]]]);
+			}
+		}
+		else {
+			consec = 0;
+		}
+	}
+}
+
 int CP2R::FailParallelIco() {
 	CHECK_READY(DR_fli, DR_msh, DR_sus);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
@@ -3726,7 +3744,7 @@ int CP2R::FailParallelIco() {
 	return 0;
 }
 
-int CP2R::FailUnisons() {
+int CP2R::FailVIntervals() {
 	CHECK_READY(DR_fli, DR_msh, DR_sus);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (s = fin[v]; s < ep2; ++s) {
@@ -3734,9 +3752,6 @@ int CP2R::FailUnisons() {
 			ls2 = bli[v2][s];
 			// Skip no note start
 			if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
-			// Skip first note 
-			if (ls < fil[v] + 1) continue;
-			if (ls2 < fil[v2] + 1) continue;
 			// Skip pauses
 			if (!cc[v][s]) continue;
 			if (!cc[v2][s]) continue;
@@ -3744,6 +3759,10 @@ int CP2R::FailUnisons() {
 			vc = vca[s];
 			// Prepare data
 			civl = abs(cc[v][s] - cc[v2][s]);
+			// Skip first note 
+			if (ls < fil[v] + 1) continue;
+			if (ls2 < fil[v2] + 1) continue;
+
 			if (FailUnison()) return 1;
 		}
 	}
@@ -3776,7 +3795,7 @@ int CP2R::FailUnison() {
 	return 0;
 }
 
-int CP2R::FailVIntervals() {
+int CP2R::FailSyncVIntervals() {
 	CHECK_READY(DR_fli, DR_msh, DR_sus);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (ls = 1; ls < fli_size[v]; ++ls) {
@@ -3850,7 +3869,7 @@ int CP2R::FailMsh() {
 	SET_READY(DR_msh);
 	// Detect basic msh (based on downbeats and leaps)
 	GetBasicMsh();
-	if (FailUnisons()) return 1;
+	if (FailSyncVIntervals()) return 1;
 	if (FailVIntervals()) return 1;
 	return 0;
 }
