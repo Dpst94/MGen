@@ -1761,7 +1761,7 @@ int CP2R::FailLastNotes() {
 		else if (pc[v][s] == 2) FLAG(537, s, v);
 		else FLAG(538, s, v);
 	}
-	if (mode == 9) {
+	if (mminor) {
 		// Prohibit major second up before I
 		if (pcc[v][s] == 0 && pcc[v][s_1] == 10) FLAGV(74, s_1, s);
 		if (pcc[v][s] == 0 && pcc[v][s_2] == 10) FLAGV(74, s_2, s);
@@ -2171,7 +2171,8 @@ int CP2R::FailLastNoteRes() {
 	if (fli_size[v] < 2) return 0;
 	if (pcc[v][fli[v][fli_size[v] - 2]] == 11 && pc[v][c_len - 1] != 0) 
 		FLAGV(52, fli[v][fli_size[v] - 2]);
-	if (pc[v][fli[v][fli_size[v] - 2]] == 3 && pc[v][c_len - 1] != 2) FLAGV(87, fli[v][fli_size[v] - 2]);
+	if (pc[v][fli[v][fli_size[v] - 2]] == 3 && pc[v][c_len - 1] != 2) 
+		FLAGV(87, fli[v][fli_size[v] - 2]);
 	return 0;
 }
 
