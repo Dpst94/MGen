@@ -2169,7 +2169,8 @@ int CP2R::FailLastNoteRes() {
 	CHECK_READY(DR_pc, DR_fli);
 	if (ep2 < c_len) return 0;
 	if (fli_size[v] < 2) return 0;
-	if (pc[v][fli[v][fli_size[v] - 2]] == 6 && pc[v][c_len - 1] != 0) FLAGV(52, fli[v][fli_size[v] - 2]);
+	if (pcc[v][fli[v][fli_size[v] - 2]] == 11 && pc[v][c_len - 1] != 0) 
+		FLAGV(52, fli[v][fli_size[v] - 2]);
 	if (pc[v][fli[v][fli_size[v] - 2]] == 3 && pc[v][c_len - 1] != 2) FLAGV(87, fli[v][fli_size[v] - 2]);
 	return 0;
 }
