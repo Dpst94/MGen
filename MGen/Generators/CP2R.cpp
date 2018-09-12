@@ -3771,6 +3771,45 @@ int CP2R::FailVIntervals() {
 	return 0;
 }
 
+int CP2R::FailPcoApart() {
+	CHECK_READY(DR_fli, DR_msh, DR_sus);
+	for (v2 = v + 1; v2 < av_cnt; ++v2) {
+		pco5_last = -1;
+		pco8_last = -1;
+		pco5_last2 = -1;
+		pco8_last2 = -1;
+		for (s = fin[v]; s < ep2; ++s) {
+			ls = bli[v][s];
+			ls2 = bli[v2][s];
+			// Skip no note start
+			if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			if (!cc[v2][s]) continue;
+			GetVp();
+			vc = vca[s];
+			// Prepare data
+			civl = abs(cc[v][s] - cc[v2][s]);
+			// Skip first note 
+			if (ls < fil[v] + 1) continue;
+			if (ls2 < fil[v2] + 1) continue;
+
+			if (sus[v][ls]) {
+				s2 = sus[v][ls] - 1;
+				//if (FailPcoApartStep()) return 1;
+				s = sus[v][ls];
+				s2 = fli2[v][ls];
+				//if (FailPcoApartStep()) return 1;
+			}
+			else {
+				s2 = fli2[v][ls];
+				//if (FailPcoApartStep()) return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 int CP2R::FailUnison() {
 	// Unison
 	if (!civl && fli[v][ls] != fli[v2][ls2]) {
@@ -4097,7 +4136,7 @@ void CP2R::GetMsh() {
 					est += st;
 					if (i == 5) est += " -";
 				}
-				WriteLog(1, est);
+				//WriteLog(1, est);
 				flaga.clear();
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];

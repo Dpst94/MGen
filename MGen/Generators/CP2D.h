@@ -194,6 +194,12 @@ protected:
 	int sp, sp2, vc, vp;
 	int fl; // Current flag id
 
+	// PcoApart
+	int pco5_last = 0; // Last interval start
+	int pco8_last = 0;
+	int pco5_last2 = 0; // Last interval end
+	int pco8_last2 = 0;
+
 	// Accumulated flags
 	int var;
 	vector<FlagInfo> flaga;
