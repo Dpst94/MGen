@@ -3752,7 +3752,8 @@ void CGenCP1::ScanCP(int t, int v) {
 	GetCfli();
 	// Convert cf culmination to steps
 	cf_culm_s = -1;
-	if (cf_culm_cfs > -1) cf_culm_s = cfli[cf_culm_cfs];
+	if (cf_culm_cfs > -1 && cf_culm_cfs < cfli.size()) 
+		cf_culm_s = cfli[cf_culm_cfs];
 	// Check for wrong fn
 	if (FailStartPause()) return;
 	// Analyze combination
