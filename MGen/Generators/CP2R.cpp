@@ -3903,8 +3903,11 @@ int CP2R::FailPco() {
 		// because they are detected as pco apart now
 		// Prohibit consecutive last - first
 		if (civl == civl2) {
-			if (civlc == 7) FLAGL(84, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
-			else FLAGL(481, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
+			// Only if notes are different (ignore interval repeat)
+			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
+				if (civlc == 7) FLAGL(84, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
+				else FLAGL(481, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
+			}
 		}
 		else {
 			// Prohibit contrary movement
