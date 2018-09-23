@@ -3018,6 +3018,14 @@ void CP2R::GetNoteLen() {
 // Detect repeating notes. Step2 excluding
 int CP2R::FailNoteLen() {
 	CHECK_READY(DR_nlen);
+	// Get min isus length
+	min_isus = 6;
+	//if (npm == 8) min_isus = 6;
+	if (npm == 12) {
+		if (btype == 2) min_isus = 6;
+		if (btype == 4) min_isus = 8;
+	}
+	else if (npm <= 6) min_isus = 4;
 	if (sp == 0) {
 		if (av_cnt == 1) return 0;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
@@ -4019,16 +4027,116 @@ void CP2R::EvaluateMsh() {
 	}
 }
 
+void CP2R::GetISus() {
+	// Get last measure step
+	int mea_end = mli[ms] + npm - 1;
+	// Prevent going out of window
+	if (mea_end >= ep2) return;
+	int max_ls = bli[v][mea_end];
+	// Build harmony using already detected msh notes
+	for (v = 0; v < av_cnt; ++v) {
+		for (ls = bli[v][s0]; ls <= max_ls; ++ls) {
+			s = fli[v][ls];
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			isus[v][ls] = 0;
+			// Note is too short
+			if (llen[v][ls] < min_isus) continue;
+			// Note is last in measure or is a sus
+			if (ls == max_ls) continue;
+			// There is no resolution
+			int found_res = 0;
+			do {
+				// Detect resolution without insertion (LT)
+				if (pcc[v][s] == 11 && cc[v][fli[v][ls + 1]] == cc[v][s] + 1 && llen[v][ls + 1] > 1) {
+					found_res = fli[v][ls + 1];
+					break;
+				}
+				// Detect resolution without insertion (not LT)
+				if (c[v][fli[v][ls + 1]] == c[v][s] - 1 && llen[v][ls + 1] > 1) {
+					found_res = fli[v][ls + 1];
+					break;
+				}
+				// Detect no more notes for one insertion
+				if (ls >= max_ls - 1) break;
+				// Only for long enough resolution
+				if (llen[v][ls + 2] > 1) {
+					// Detect insertion surrounded by leaps
+					if (abs(c[v][fli[v][ls + 2]] - c[v][fli[v][ls + 1]]) > 1 &&
+						abs(c[v][fli[v][ls + 1]] - c[v][fli[v][ls]]) > 1) break;
+					// Detect one insertion (LT)
+					if (pcc[v][s] == 11 && cc[v][fli[v][ls + 2]] == cc[v][s] + 1) {
+						found_res = fli[v][ls + 2];
+						break;
+					}
+					// Detect one insertion (not LT)
+					if (c[v][fli[v][ls + 2]] == c[v][s] - 1) {
+						found_res = fli[v][ls + 2];
+						break;
+					}
+				}
+				// Detect no more notes for two insertions
+				if (ls >= max_ls - 2) break;
+				// Only for long enough resolution
+				if (llen[v][ls + 3] > 1) {
+					// Detect no two croches insertion
+					if (llen[v][ls + 1] != 1 || llen[v][ls + 1] != 1) break;
+					// Detect croche does not match resolution
+					if (cc[v][fli[v][ls + 1]] != cc[v][fli[v][ls + 3]]) break;
+					// Detect second croche not surrounded by stepwise movement
+					if (c[v][fli[v][ls + 1]] - c[v][fli[v][ls + 2]] != 1) break;
+					// Detect two insertions (LT)
+					if (pcc[v][s] == 11 && cc[v][fli[v][ls + 3]] == cc[v][s] + 1) {
+						found_res = fli[v][ls + 3];
+						break;
+					}
+					// Detect two insertions (not LT)
+					if (c[v][fli[v][ls + 3]] == c[v][s] - 1) {
+						found_res = fli[v][ls + 3];
+						break;
+					}
+				}
+			} while (0);
+			if (!found_res) continue;
+			// Check if resolution conflicts with other notes
+			int res_conflict = 0;
+			for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
+				ls2 = bli[v2][found_res];
+				// Do not compare to notes that started earlier
+				if (fli[v2][ls2] != found_res) continue;
+				// Do not compare to non-harmonic tones
+				if (msh[v2][ls2] <= 0) continue;
+				// Check interval
+				int ivl = abs(cc[v][found_res] - cc[v2][found_res]) % 12;
+				if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
+					res_conflict = 1;
+					break;
+				}
+				// Prohibit 4th and tritone only with bass
+				if (ivl == 5 || ivl == 6) {
+					if (!v2 || !v) {
+						res_conflict = 1;
+						break;
+					}
+				}
+			}
+			if (res_conflict) continue;
+			isus[v][ls] = -1;
+		}
+	}
+}
+
 void CP2R::GetMsh() {
 	flaga.clear();
 	for (ms = 0; ms < mli.size(); ++ms) {
+		s0 = mli[ms];
+		vc = vca[s0];
 		// Find harmonic notes that do not need rhythm analysis
 		GetMeasureMsh();
 		// For each note detect if it can be an intrabar suspension
+		GetISus();
 		// Find all shapes. Detect obligatory shapes
 		// Detect ambiguous shapes
-		s0 = mli[ms];
-		vc = vca[s0];
 		int s9;
 		// Get last measure step
 		int mea_end = mli[ms] + npm - 1;
