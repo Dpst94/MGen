@@ -393,7 +393,7 @@ protected:
 	// Harmonic data
 	vector<vector<int>> sus; // [v][ls] Note suspension flag (when above zero, links to first cantus-changing step)
 	vector<vector<int>> susres; // [v][ls] =1 if sus is resolved correctly
-	vector<vector<int>> isus; // [v][ls] Points to sus position or note start if there is no sus
+	vector<vector<int>> ssus; // [v][ls] Points to sus position or note start if there is no sus
 	vector<vector<int>> msh; // [v][ls] Melody shape types for fli
 	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants

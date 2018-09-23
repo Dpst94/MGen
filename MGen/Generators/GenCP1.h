@@ -161,7 +161,7 @@ protected:
 	vector<int> motion; // [s] Melody motion type
 	vector<int> sus; // [ls] Note suspension flag (when above zero, links to first cantus-changing step)
 	vector<int> susres; // [ls] =1 if sus is resolved correctly
-	vector<int> isus; // [ls] Points to sus position or note start if there is no sus
+	vector<int> ssus; // [ls] Points to sus position or note start if there is no sus
 	vector<int> cfli; // [cfs] Forward links to each cf note
 	vector<int> hli; // [hs] Forward links to first notes of each harmony
 	vector<int> ha64; // [hs] Audible 6/4 chord, while hbc will show root position or sixth chord

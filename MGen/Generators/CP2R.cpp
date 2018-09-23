@@ -272,7 +272,7 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 		int int2 = abs(c[v][cross_start - 1] - c[v2][cross_start - 1]);
 		// 2 x 2nd intervals (sequential)
 		if (int1 == 1 && int2 == 1) {
-			FLAGL(545, isus[v][bli[v][cross_start - 1]], cross_start, v2);
+			FLAGL(545, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
 		}
 		// Prohibit 2nd interval
 		else if (int1 == 1) {
@@ -280,16 +280,16 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 		}
 		// Prohibit 2nd interval
 		else if (int2 == 1) {
-			FLAG(544, isus[v][bli[v][cross_start - 1]], v2);
+			FLAG(544, ssus[v][bli[v][cross_start - 1]], v2);
 		}
 		// Prohibit direct motion
 		if ((cc[v][cross_start] - cc[v][cross_start - 1]) * (cc[v2][cross_start] - cc[v2][cross_start - 1]) > 0) {
 			// Both leaps
 			if (leap[v][cross_start - 1] && leap[v2][cross_start - 1]) {
-				FLAGL(547, isus[v][bli[v][cross_start - 1]], cross_start, v2);
+				FLAGL(547, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
 			}
 			else {
-				FLAGL(546, isus[v][bli[v][cross_start - 1]], cross_start, v2);
+				FLAGL(546, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
 			}
 		}
 	}
@@ -299,7 +299,7 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 		int int2 = abs(c[v][cross_end] - c[v2][cross_end]);
 		// 2 x 2nd intervals (sequential)
 		if (int1 == 1 && int2 == 1) {
-			FLAGL(545, isus[v][bli[v][cross_end]], cross_end + 1, v2);
+			FLAGL(545, ssus[v][bli[v][cross_end]], cross_end + 1, v2);
 		}
 		// Prohibit 2nd interval
 		else if (int1 == 1) {
@@ -307,16 +307,16 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 		}
 		// Prohibit 2nd interval
 		else if (int2 == 1) {
-			FLAG(544, isus[v][bli[v][cross_end]], v2);
+			FLAG(544, ssus[v][bli[v][cross_end]], v2);
 		}
 		// Prohibit direct motion
 		if ((cc[v][cross_end + 1] - cc[v][cross_end]) * (cc[v2][cross_end + 1] - cc[v2][cross_end]) > 0) {
 			// Both leaps
 			if (leap[v][cross_end] && leap[v2][cross_end]) {
-				FLAGL(547, isus[v][bli[v][cross_end]], cross_end + 1, v2);
+				FLAGL(547, ssus[v][bli[v][cross_end]], cross_end + 1, v2);
 			}
 			else {
-				FLAGL(546, isus[v][bli[v][cross_end]], cross_end + 1, v2);
+				FLAGL(546, ssus[v][bli[v][cross_end]], cross_end + 1, v2);
 			}
 		}
 	}
@@ -815,8 +815,8 @@ void CP2R::GetNoteTypes() {
 			if (bmli[s] != bmli[s2]) {
 				sus[v][ls] = mli[bmli[fli2[v][ls]]];
 			}
-			// Build isus
-			isus[v][ls] = sus[v][ls] ? sus[v][ls] : fli[v][ls];
+			// Build ssus
+			ssus[v][ls] = sus[v][ls] ? sus[v][ls] : fli[v][ls];
 		}
 	}
 }
@@ -1255,7 +1255,7 @@ int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_lea
 		if (leap_next > 0) {
 			// Flag if greater than two thirds
 			if (abs(c[v][fli2[v][fleap_end + 1]] - c[v][leap_start]) > 4)
-				FLAGVL(505, isus[v][fleap_start], fli[v][bli[v][leap_end] + 1]);
+				FLAGVL(505, ssus[v][fleap_start], fli[v][bli[v][leap_end] + 1]);
 			// Allow if both thirds, without flags (will process next cycle)
 			else arpeg = 1;
 		}
@@ -1266,12 +1266,12 @@ int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_lea
 			abs(c[v][leap_start] - c[v][fli2[v][fleap_start - 1]]) == 2) {
 			// If there is one more third forward (3 x 3rds total)
 			if (fleap_end < fli_size[v] - 1 && abs(c[v][fli2[v][fleap_end + 1]] - c[v][fli2[v][fleap_start - 1]]) == 6) {
-				FLAGVL(504, isus[v][fleap_start - 1], fli[v][fleap_start + 1]);
+				FLAGVL(504, ssus[v][fleap_start - 1], fli[v][fleap_start + 1]);
 			}
 			// If there is one more third backward (3 x 3rds total) - do not flag because it was already flagged
 			else if (fleap_start > 1 && abs(c[v][leap_end] - c[v][fli2[v][fleap_start - 2]]) == 6) {
 			}
-			else FLAGVL(503, isus[v][fleap_start - 1], fli[v][fleap_start + 1]);
+			else FLAGVL(503, ssus[v][fleap_start - 1], fli[v][fleap_start + 1]);
 			// Set middle leap note
 			leap_mid = leap_start;
 			// Set leap start to first note of first third
@@ -1380,11 +1380,11 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 		if (!filled) {
 			// If starting 3rd
 			if (fleap_start == fin[v] && leap_size == 2 && accept[sp][av_cnt][0][1]) {
-				FLAGVL(1, isus[v][fleap_start], fli[v][fleap_end]);
+				FLAGVL(1, ssus[v][fleap_start], fli[v][fleap_end]);
 				return 0;
 			}
 			if (child_leap && accept[sp][av_cnt][0][116 + leap_id])
-				FLAGVL(116 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+				FLAGVL(116 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 			// Check if  leap is prefilled
 			else {
 				if (ls > 0) {
@@ -1403,11 +1403,11 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 				}
 				if (prefilled) {
 					if (fli_size[v] - fleap_start <= pre_last_leaps[sp][av_cnt][0] + 1)
-						FLAGVL(204 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
-					else FLAGVL(112 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+						FLAGVL(204 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+					else FLAGVL(112 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 				}
 				else
-					FLAGVL(124 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+					FLAGVL(124 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 			}
 		}
 		// Show compensation flags only if successfully compensated
@@ -1415,19 +1415,19 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 		else {
 			// Flag late uncompensated precompensated leap
 			if (fill_to >= 3 && fill_to < fill_pre4_int[sp][av_cnt][0] && late_leap)
-				FLAGVL(144 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+				FLAGVL(144 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 			else if (fill_from >= 3 && fill_from < fill_pre4_int[sp][av_cnt][0] && late_leap)
-				FLAGVL(144 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+				FLAGVL(144 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 			// Flag prepared unfinished fill if it is not blocking 
-			else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start)) FLAGVL(100 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+			else if (fill_to == 2 && (fill_to_pre < 2 || !fleap_start)) FLAGVL(100 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 			// Flag unfinished fill if it is not blocking
-			else if (fill_to == 2 && fill_to_pre > 1) FLAGVL(104 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+			else if (fill_to == 2 && fill_to_pre > 1) FLAGVL(104 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 			// Flag after 3rd if it is not blocking
-			if (fill_from == 2) FLAGVL(53 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+			if (fill_from == 2) FLAGVL(53 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 			// Flag deviation if it is not blocking
-			if (deviates == 1) FLAGVL(42 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+			if (deviates == 1) FLAGVL(42 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 			// Flag deviation if it is not blocking
-			if (deviates == 2) FLAGVL(120 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+			if (deviates == 2) FLAGVL(120 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 		}
 	}
 	return 0;
@@ -1468,29 +1468,29 @@ int CP2R::FailLeapMDC() {
 			(fleap_end >= fli_size[v] - 3 && ep2 < c_len) ||
 			(fleap_end < fli_size[v] - 3 && cc[v][fli[v][fleap_end + 2]] == cc[v][leap_end] &&
 			(cc[v][fli[v][fleap_end + 3]] - cc[v][fli[v][fleap_end + 2]]) * leap[v][leap_start] < 0)))
-			FLAGVL(510 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
-		else FLAGVL(128 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+			FLAGVL(510 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(128 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Close + far
-	else if (!mdc1 && mdc2 == 2) FLAGVL(140 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+	else if (!mdc1 && mdc2 == 2) FLAGVL(140 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 	// Close + no
-	else if (!mdc1 && mdc2 == 3) FLAGVL(108 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+	else if (!mdc1 && mdc2 == 3) FLAGVL(108 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 	// next + close
 	else if (mdc1 == 1 && !mdc2) {
 		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) {
 			// Aux + close
 			if ((sp == 3 || sp == 5) && fleap_start > 2 && cc[v][fli[v][fleap_start - 2]] == cc[v][leap_start] &&
 				(cc[v][fli[v][fleap_start - 2]] - cc[v][fli[v][fleap_start - 3]]) * leap[v][leap_start] < 0)
-				FLAGVL(506 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
-			else FLAGVL(59 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+				FLAGVL(506 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+			else FLAGVL(59 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 		}
-		else FLAGVL(476 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(476 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Far + close
 	else if (mdc1 == 2 && !mdc2) {
 		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start])
-			FLAGVL(132 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
-		else FLAGVL(25 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+			FLAGVL(132 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(25 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Next + next
 	else if (mdc1 == 1 && mdc2 == 1) {
@@ -1501,25 +1501,25 @@ int CP2R::FailLeapMDC() {
 				(cc[v][fli[v][fleap_end + 3]] - cc[v][fli[v][fleap_end + 2]]) * leap[v][leap_start] < 0)) &&
 				fleap_start > 2 && cc[v][fli[v][fleap_start - 2]] == cc[v][leap_start] &&
 				(cc[v][fli[v][fleap_start - 2]] - cc[v][fli[v][fleap_start - 3]]) * leap[v][leap_start] < 0)
-				FLAGVL(414 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
-			else FLAGVL(63 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+				FLAGVL(414 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+			else FLAGVL(63 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 		}
-		else FLAGVL(460 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(460 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Next + far
 	else if (mdc1 == 1 && mdc2 >= 2) {
-		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGVL(391 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
-		else FLAGVL(464 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGVL(391 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(464 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Far + next
 	else if (mdc1 >= 2 && mdc2 == 1) {
-		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGVL(148 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
-		else FLAGVL(468 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGVL(148 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(468 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 	}
 	// Far + far
 	else if (mdc1 >= 2 && mdc2 >= 2) {
-		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGVL(398 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
-		else FLAGVL(472 + leap_id, isus[v][fleap_start], fli[v][fleap_end]);
+		if (sp < 2 || bmli[fli[v][fleap_end]] == bmli[leap_start]) FLAGVL(398 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+		else FLAGVL(472 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
 	}
 	return 0;
 }
@@ -2754,7 +2754,7 @@ int CP2R::FailRhythm5() {
 				if (ls2 < fli_size[v] - 1 && leap[v][s2])
 					FLAGV(88, s2);
 				else if (ls2 > 0 && leap[v][s2 - 1]) {
-					if (llen[v][ls2 - 1] > 1) FLAGV(88, isus[v][bli[v][s2 - 1]]);
+					if (llen[v][ls2 - 1] > 1) FLAGV(88, ssus[v][bli[v][s2 - 1]]);
 				}
 			}
 			else {
@@ -3698,7 +3698,7 @@ void CP2R::FindParallel6Chords() {
 		if (hbc[hs] % 7 == (chm[hs] + 2) % 7) {
 			++consec;
 			if (consec == 3) {
-				FLAGHL(552, isus[0][bli[0][hli[hs - 2]]], isus[0][bli[0][hli[hs]]]);
+				FLAGHL(552, ssus[0][bli[0][hli[hs - 2]]], ssus[0][bli[0][hli[hs]]]);
 			}
 		}
 		else {
@@ -3818,8 +3818,8 @@ int CP2R::FailUnison() {
 			s3 = fli[v][ls] - 1;
 			// 2nd -> unison
 			civl2 = abs(cc[v2][s3] - cc[v][s3]);
-			if (civl2 == 1) FLAGL(275, s, max(isus[v][ls - 1], isus[v2][ls2 - 1]), v2);
-			else if (civl2 == 2) FLAGL(277, s, max(isus[v][ls - 1], isus[v2][ls2 - 1]), v2);
+			if (civl2 == 1) FLAGL(275, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			else if (civl2 == 2) FLAGL(277, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 		else {
 			s3 = fli[v2][ls2] - 1;
@@ -3827,8 +3827,8 @@ int CP2R::FailUnison() {
 			civl2 = abs(cc[v2][s3] - cc[v][s3]);
 			// Send flag to voice v2 instead of v
 			swap(v, v2);
-			if (civl2 == 1) FLAGL(275, s, max(isus[v2][ls - 1], isus[v][ls2 - 1]), v2);
-			else if (civl2 == 2) FLAGL(277, s, max(isus[v2][ls - 1], isus[v][ls2 - 1]), v2);
+			if (civl2 == 1) FLAGL(275, s, max(ssus[v2][ls - 1], ssus[v][ls2 - 1]), v2);
+			else if (civl2 == 2) FLAGL(277, s, max(ssus[v2][ls - 1], ssus[v][ls2 - 1]), v2);
 			// Return to voice v
 			swap(v, v2);
 		}
@@ -3905,15 +3905,15 @@ int CP2R::FailPco() {
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				if (civlc == 7) FLAGL(84, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
-				else FLAGL(481, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
+				if (civlc == 7) FLAGL(84, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				else FLAGL(481, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 			}
 		}
 		else {
 			// Prohibit contrary movement
 			if (civlc == civlc2) {
-				if (civlc == 7) FLAGL(85, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
-				else FLAGL(482, max(isus[v][ls - 1], isus[v2][ls2 - 1]), s, v2);
+				if (civlc == 7) FLAGL(85, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				else FLAGL(482, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 			}
 		}
 	}
@@ -4022,8 +4022,11 @@ void CP2R::EvaluateMsh() {
 void CP2R::GetMsh() {
 	flaga.clear();
 	for (ms = 0; ms < mli.size(); ++ms) {
-		fill(chn.begin(), chn.end(), 0);
-		fill(cchn.begin(), cchn.end(), 0);
+		// Find harmonic notes that do not need rhythm analysis
+		GetMeasureMsh();
+		// For each note detect if it can be an intrabar suspension
+		// Find all shapes. Detect obligatory shapes
+		// Detect ambiguous shapes
 		s0 = mli[ms];
 		vc = vca[s0];
 		int s9;

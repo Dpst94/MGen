@@ -38,8 +38,8 @@ void CP2Ly::AddNLink(int f) {
 	int s3 = s;
 	int s4 = fsl[v][s][f];
 	if (ruleinfo[fl].viz == vGlis) {
-		s3 = isus[v][bli[v][s]];
-		s4 = isus[v][bli[v][fsl[v][s][f]]];
+		s3 = ssus[v][bli[v][s]];
+		s4 = ssus[v][bli[v][fsl[v][s][f]]];
 	}
 	lyi[s3].fhide.push_back(0);
 	// Check if this shape is not allowed at hidden position
@@ -56,7 +56,7 @@ void CP2Ly::AddNLink(int f) {
 				CString est;
 				est.Format("Detected shape %s at hidden position %d-%d (instead of %d-%d), voice %d counterpoint %d: [%d] %s (%s). Cannot send this type of shapes to separate staff. Shape will be removed",
 					viz_name[ruleinfo[fl].viz],
-					s3, s4, isus[v][bli[v][s3]], isus[v][bli[v][s4]], v, cp_id + 1, fl,
+					s3, s4, ssus[v][bli[v][s3]], ssus[v][bli[v][s4]], v, cp_id + 1, fl,
 					ruleinfo[fl].RuleName, ruleinfo[fl].SubRuleName);
 				WriteLog(5, est);
 			}
@@ -88,8 +88,8 @@ void CP2Ly::AddNLinkForeign(int f) {
 	int s3 = s;
 	int s4 = fsl[v][s][f];
 	if (ruleinfo[fl].viz == vGlis) {
-		s3 = isus[v2][bli[v2][s]];
-		s4 = isus[v2][bli[v2][fsl[v][s][f]]];
+		s3 = ssus[v2][bli[v2][s]];
+		s4 = ssus[v2][bli[v2][fsl[v][s][f]]];
 	}
 	lyi[s3].fhide.push_back(0);
 	// Do not check for hidden positions, because gliss pos is corrected and notecolor pos will be corrected
