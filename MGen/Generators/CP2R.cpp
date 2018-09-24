@@ -4037,11 +4037,12 @@ void CP2R::GetISus() {
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = bli[v][s0]; ls <= max_ls; ++ls) {
 			s = fli[v][ls];
+			int s9 = ssus[v][ls];
 			// Skip pauses
 			if (!cc[v][s]) continue;
 			isus[v][ls] = 0;
 			// Note is too short
-			if (llen[v][ls] < min_isus) continue;
+			if (fli2[v][ls] - s9 <= min_isus) continue;
 			// Note is last in measure or is a sus
 			if (ls == max_ls) continue;
 			// There is no resolution
@@ -4098,29 +4099,49 @@ void CP2R::GetISus() {
 				}
 			} while (0);
 			if (!found_res) continue;
-			// Check if resolution conflicts with other notes
-			int res_conflict = 0;
+			// Check if isus or resolution conflicts with other notes
+			int conflict = 0;
 			for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
+				// Check resolution
 				ls2 = bli[v2][found_res];
 				// Do not compare to notes that started earlier
-				if (fli[v2][ls2] != found_res) continue;
 				// Do not compare to non-harmonic tones
-				if (msh[v2][ls2] <= 0) continue;
-				// Check interval
-				int ivl = abs(cc[v][found_res] - cc[v2][found_res]) % 12;
-				if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
-					res_conflict = 1;
-					break;
-				}
-				// Prohibit 4th and tritone only with bass
-				if (ivl == 5 || ivl == 6) {
-					if (!v2 || !v) {
-						res_conflict = 1;
+				if (fli[v2][ls2] == found_res && msh[v2][ls2] > 0) {
+					// Check interval
+					int ivl = abs(cc[v][found_res] - cc[v2][found_res]) % 12;
+					if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
+						conflict = 1;
 						break;
+					}
+					// Prohibit 4th and tritone only with bass
+					if (ivl == 5 || ivl == 6) {
+						if (!v2 || !v) {
+							conflict = 1;
+							break;
+						}
+					}
+				}
+				// Now check isus start
+				ls2 = bli[v2][s9];
+				// Do not compare to notes that started earlier
+				// Do not compare to non-harmonic tones
+				if (fli[v2][ls2] == s9 && msh[v2][ls2] > 0) {
+					// Check interval
+					int ivl = abs(cc[v][s9] - cc[v2][s9]) % 12;
+					if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
+						conflict = 2;
+						break;
+					}
+					// Prohibit 4th and tritone only with bass
+					if (ivl == 5 || ivl == 6) {
+						if (!v2 || !v) {
+							conflict = 2;
+							break;
+						}
 					}
 				}
 			}
-			if (res_conflict) continue;
+			if (conflict) continue;
 			isus[v][ls] = -1;
 		}
 	}
