@@ -391,7 +391,7 @@ protected:
 	vector <int> tc; // [] Tail diatonic notes
 
 	// Harmonic data
-	int min_isus; // Minimal length of intrabar sus in croches
+	int min_sus; // Minimal length of intrabar sus in croches
 	vector<vector<int>> sus; // [v][ls] Note suspension flag (when above zero, links to first cantus-changing step)
 	vector<vector<int>> susres; // [v][ls] =1 if sus is resolved correctly
 	vector<vector<int>> ssus; // [v][ls] Points to sus position or note start if there is no sus
