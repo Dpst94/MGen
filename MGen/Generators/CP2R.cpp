@@ -3294,7 +3294,7 @@ int CP2R::FailHarm() {
 							// TODO: REMOVE
 							continue;
 							// For first suspended dissonance resolved note do not check msh
-							if (susres[v2][ls]) continue;
+							if (susres[v2][ls] > 0) continue;
 						}
 						else {
 							// For all other notes, check msh and iHarm4
@@ -4004,7 +4004,7 @@ void CP2R::EvaluateMsh() {
 		// For first suspension in measure, evaluate last step. In other cases - first step
 		if (s <= s0 && sus[v][ls]) {
 			// For first suspended dissonance resolved note do not check msh
-			if (susres[v][ls]) continue;
+			if (susres[v][ls] > 0) continue;
 		}
 		else {
 			// For all other notes, check msh and iHarm4
@@ -4099,7 +4099,7 @@ void CP2R::GetISus() {
 				}
 			} while (0);
 			if (!found_res) continue;
-			// Check if isus or resolution conflicts with other notes
+  		// Check if isus or resolution conflicts with other notes
 			int conflict = 0;
 			for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
 				// Check resolution
@@ -4148,7 +4148,7 @@ void CP2R::GetISus() {
 }
 
 void CP2R::DetectSus() {
-	susres[v][ls] = 0;
+	susres[v][ls] = -1;
 	// Do not check first measure
 	if (!ms) return;
 	// Do not check pause
@@ -4213,8 +4213,55 @@ void CP2R::DetectSus() {
 		}
 	} while (0);
 	if (!found_res) return;
-	// Do not check if resolution is harmonic, because this can be not the only possible resolution
 	// Do not check if sus preparation is harmonic, because it was already checked in previous measure with pSusStart
+	// Check if this sus is non-harmonic and thus definitely needs resolution
+	int sus_conflict = 0;
+	for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
+		ls2 = bli[v2][s0];
+		// Do not compare to notes that started earlier
+		// Do not compare to non-harmonic tones
+		if (fli[v2][ls2] == s0 && msh[v2][ls2] > 0) {
+			// Check interval
+			int ivl = abs(cc[v][s0] - cc[v2][s0]) % 12;
+			if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
+				sus_conflict = 1;
+				break;
+			}
+			// Prohibit 4th and tritone only with bass
+			if (ivl == 5 || ivl == 6) {
+				if (!v2 || !v) {
+					sus_conflict = 1;
+					break;
+				}
+			}
+		}
+	}
+	// Check if this sus resolution is non-harmonic and thus sus has to be harmonic
+	int res_conflict = 0;
+	for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
+		ls2 = bli[v2][found_res];
+		// Do not compare to notes that started earlier
+		// Do not compare to non-harmonic tones
+		if (fli[v2][ls2] == s0 && msh[v2][ls2] > 0) {
+			// Check interval
+			int ivl = abs(cc[v][s0] - cc[v2][s0]) % 12;
+			if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
+				res_conflict = 1;
+				break;
+			}
+			// Prohibit 4th and tritone only with bass
+			if (ivl == 5 || ivl == 6) {
+				if (!v2 || !v) {
+					res_conflict = 1;
+					break;
+				}
+			}
+		}
+	}
+	// If sus needs resolution, check for resolution
+	if (conflict) return;
+	susres[v][ls] = 0;
+	// If sus does not need resolution, add it to variant shapes
 }
 
 void CP2R::GetMsh() {
