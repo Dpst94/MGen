@@ -428,7 +428,7 @@ void CP2R::SendLining(int pos, int x, int i) {
 	if (show_hatch == 1) {
 	}
 	if (show_hatch == 2) {
-		if (msh[v][bli[v][x]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
+		if (msh[v][fli[v][bli[v][x]]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
 		else lining[pos + i][vi] = 0;
 	}
 }
@@ -966,11 +966,11 @@ int CP2R::FailMinorStepwise() {
 		s_1 = fli[v][ls - 1];
 		s1 = fli[v][ls + 1];
 		// Prohibit harmonic VI# not stepwize ascending
-		if ((sp < 2 || msh[v][ls] > 0) && pcc[v][s] == 9 &&
+		if ((sp < 2 || msh[v][s] > 0) && pcc[v][s] == 9 &&
 			(c[v][s] - c[v][s_1] != 1 || c[v][s1] - c[v][s] != 1))
 			FLAGVL(201, s_1, s1);
 		// Prohibit harmonic VII natural not stepwize descending
-		if ((sp < 2 || msh[v][ls] > 0) && pcc[v][s] == 10 &&
+		if ((sp < 2 || msh[v][s] > 0) && pcc[v][s] == 10 &&
 			(c[v][s] - c[v][s_1] != -1 || c[v][s1] - c[v][s] != -1))
 			FLAGVL(202, s_1, s1);
 	}
@@ -3213,8 +3213,8 @@ int CP2R::FailHarm() {
 			for (v = 0; v < av_cnt; ++v) {
 				if (fli_size[v] < 2) continue;
 				int s9 = fli[v][fli_size[v] - 2];
-				if (pcc[v][s9] == 11 && msh[v][fli_size[v] - 2] < 0) {
-					msh[v][fli_size[v] - 2] = pLastLT;
+				if (pcc[v][s9] == 11 && msh[v][fli[v][fli_size[v] - 2]] < 0) {
+					msh[v][fli[v][fli_size[v] - 2]] = pLastLT;
 				}
 			}
 		}
@@ -3243,7 +3243,7 @@ int CP2R::FailHarm() {
 				else {
 					s9 = fli[v][ls];
 					// For all other notes, check msh and iHarm4
-					if (msh[v][ls] <= 0) continue;
+					if (msh[v][s9] <= 0) continue;
 				}
 				// Pitch class
 				n = pc[v][s9];
@@ -3298,7 +3298,7 @@ int CP2R::FailHarm() {
 						}
 						else {
 							// For all other notes, check msh and iHarm4
-							if (msh[v2][ls] <= 0) continue;
+							if (msh[v2][fli[v2][ls]] <= 0) continue;
 						}
 						// Record note
 						++chn[pc[v2][s9]];
@@ -3894,7 +3894,7 @@ int CP2R::FailPco() {
 			else if (ls < fli_size[v] - 1 && (leap[v][fli2[v][ls]] || leap[v2][fli2[v2][ls2]]))
 				FLAG(324, s, v2);
 			// Harmonic note in suspension resolution or other melodic shape without leap
-			else if (msh[v][ls] > 0 || msh[v2][ls2] > 0) FLAG(324, s, v2);
+			else if (msh[v][s] > 0 || msh[v2][s] > 0) FLAG(324, s, v2);
 		}
 		// Prohibit F# octave
 		if (mminor && pcc[v][s] == 9 && pcc[v2][s] == 9) {
@@ -3905,7 +3905,7 @@ int CP2R::FailPco() {
 			else if (ls < fli_size[v] - 1 && (leap[v][fli2[v][ls]] || leap[v2][fli2[v2][ls2]]))
 				FLAG(553, s, v2);
 			// Harmonic note in suspension resolution or other melodic shape without leap
-			else if (msh[v][ls] > 0 || msh[v2][ls2] > 0) FLAG(553, s, v2);
+			else if (msh[v][s] > 0 || msh[v2][s] > 0) FLAG(553, s, v2);
 		}
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
@@ -3947,26 +3947,26 @@ void CP2R::GetBasicMsh() {
 		if (first) {
 			first = 0;
 			// First note is always downbeat
-			msh[v][ls] = pFirst;
+			msh[v][s] = pFirst;
 			continue;
 		}
 		s2 = fli2[v][ls];
 		// Sus start is always harmonic
-		if (sus[v][ls]) msh[v][ls] = pSusStart;
+		if (sus[v][ls]) msh[v][s] = pSusStart;
 		// Downbeat
 		if (s % npm == 0) {
 			// Long on downbeat
-			if (llen[v][ls] > 4 || leap[v][s2])	msh[v][ls] = pDownbeat;
+			if (llen[v][ls] > 4 || leap[v][s2])	msh[v][s] = pDownbeat;
 			// Downbeat note not surrounded by descending stepwise movement
 			// TODO: Optimize for generation
 			else if (smooth[v][s - 1] != -1 || (s2 < ep2 - 1 && smooth[v][s2 + 1] != -1)) {
-				msh[v][ls] = pDownbeat;
+				msh[v][s] = pDownbeat;
 			}
 		}
-		else if (abs(leap[v][s - 1]) > 2) msh[v][ls] = pLeapTo;
-		else if (s2 < ep2 - 1 && abs(leap[v][s2]) > 2) msh[v][ls] = pLeapFrom;
+		else if (abs(leap[v][s - 1]) > 2) msh[v][s] = pLeapTo;
+		else if (s2 < ep2 - 1 && abs(leap[v][s2]) > 2) msh[v][s] = pLeapFrom;
 		else {
-			msh[v][ls] = pAux;
+			msh[v][s] = pAux;
 		}
 	}
 }
@@ -3981,14 +3981,14 @@ void CP2R::GetMeasureMsh() {
 		if (!cc[v][s]) continue;
 		s2 = fli2[v][ls];
 		// First note is always downbeat
-		if (s == fin[v]) msh[v][ls] = pFirst;
+		if (s == fin[v]) msh[v][s] = pFirst;
 		// Sus start is always harmonic
-		else if (sus[v][ls]) msh[v][ls] = pSusStart;
+		else if (sus[v][ls]) msh[v][s] = pSusStart;
 		// Downbeat
-		else if (s % npm == 0) msh[v][ls] = pDownbeat;
-		else if (s > 0 && leap[v][s - 1]) msh[v][ls] = pLeapTo;
-		else if (s2 < ep2 - 1 && leap[v][s2]) msh[v][ls] = pLeapFrom;
-		else msh[v][ls] = pAux;
+		else if (s % npm == 0) msh[v][s] = pDownbeat;
+		else if (s > 0 && leap[v][s - 1]) msh[v][s] = pLeapTo;
+		else if (s2 < ep2 - 1 && leap[v][s2]) msh[v][s] = pLeapFrom;
+		else msh[v][s] = pAux;
 	}
 }
 
@@ -4008,21 +4008,21 @@ void CP2R::EvaluateMsh() {
 		}
 		else {
 			// For all other notes, check msh and iHarm4
-			if (msh[v][ls] <= 0) continue;
+			if (msh[v][s] <= 0) continue;
 		}
 		if (!cchnv[pcc[v][s]]) {
 			++hpenalty;
 			// Do not flag discord if suspension, because it will be flagged in sus algorithm
 			if (sus[v][ls]) {}
-			else if (msh[v][ls] == pFirst) FLAGA(551, s, s, v);
-			else if (msh[v][ls] == pDownbeat) FLAGA(83, s, s, v);
-			else if (msh[v][ls] == pLeapTo) FLAGA(36, s, s, v);
-			else if (msh[v][ls] == pLeapFrom) FLAGA(187, s, s, v);
+			else if (msh[v][s] == pFirst) FLAGA(551, s, s, v);
+			else if (msh[v][s] == pDownbeat) FLAGA(83, s, s, v);
+			else if (msh[v][s] == pLeapTo) FLAGA(36, s, s, v);
+			else if (msh[v][s] == pLeapFrom) FLAGA(187, s, s, v);
 			// pLastLT cannot be dissonance, because it is set only if it is not dissonance
-			else if (msh[v][ls] == pSusStart) FLAGA(458, s, s, v);
+			else if (msh[v][s] == pSusStart) FLAGA(458, s, s, v);
 			// pSusRes does not have separate flag, because it is marked as not resolved
 			// This is protection against wrong melodic shape value
-			else if (msh[v][ls] > 0) FLAGA(83, s, s, v);
+			else if (msh[v][s] > 0) FLAGA(83, s, s, v);
 		}
 	}
 }
@@ -4106,7 +4106,7 @@ void CP2R::GetISus() {
 				ls2 = bli[v2][found_res];
 				// Do not compare to notes that started earlier
 				// Do not compare to non-harmonic tones
-				if (fli[v2][ls2] == found_res && msh[v2][ls2] > 0) {
+				if (fli[v2][ls2] == found_res && msh[v2][found_res] > 0) {
 					// Check interval
 					int ivl = abs(cc[v][found_res] - cc[v2][found_res]) % 12;
 					if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
@@ -4125,7 +4125,7 @@ void CP2R::GetISus() {
 				ls2 = bli[v2][s9];
 				// Do not compare to notes that started earlier
 				// Do not compare to non-harmonic tones
-				if (fli[v2][ls2] == s9 && msh[v2][ls2] > 0) {
+				if (fli[v2][ls2] == s9 && msh[v2][s9] > 0) {
 					// Check interval
 					int ivl = abs(cc[v][s9] - cc[v2][s9]) % 12;
 					if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
@@ -4220,7 +4220,7 @@ void CP2R::DetectSus() {
 		ls2 = bli[v2][s0];
 		// Do not compare to notes that started earlier
 		// Do not compare to non-harmonic tones
-		if (fli[v2][ls2] == s0 && msh[v2][ls2] > 0) {
+		if (fli[v2][ls2] == s0 && msh[v2][s0] > 0) {
 			// Check interval
 			int ivl = abs(cc[v][s0] - cc[v2][s0]) % 12;
 			if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
@@ -4242,7 +4242,7 @@ void CP2R::DetectSus() {
 		ls2 = bli[v2][found_res];
 		// Do not compare to notes that started earlier
 		// Do not compare to non-harmonic tones
-		if (fli[v2][ls2] == s0 && msh[v2][ls2] > 0) {
+		if (fli[v2][ls2] == s0 && msh[v2][found_res] > 0) {
 			// Check interval
 			int ivl = abs(cc[v][s0] - cc[v2][s0]) % 12;
 			if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
@@ -4343,10 +4343,10 @@ void CP2R::DetectDNT() {
 						if (!accept[sp][vc][0][97]) continue;
 					}
 					// Apply pattern
-					msh[v][ls] = pHarmonicDNT1;
-					msh[v][ls + 1] = pAuxDNT1;
-					msh[v][ls + 2] = pAuxDNT2;
-					msh[v][ls + 3] = pHarmonicDNT2;
+					msh[v][fli[v][ls]] = pHarmonicDNT1;
+					msh[v][fli[v][ls + 1]] = pAuxDNT1;
+					msh[v][fli[v][ls + 2]] = pAuxDNT2;
+					msh[v][fli[v][ls + 3]] = pHarmonicDNT2;
 				}
 			}
 		}
@@ -4399,10 +4399,10 @@ void CP2R::DetectCambiata() {
 						if (!accept[sp][vc][0][97]) continue;
 					}
 					// Apply pattern
-					msh[v][ls] = pHarmonicCam1;
-					msh[v][ls + 1] = pAuxCam1;
-					msh[v][ls + 2] = pAuxCam2;
-					msh[v][ls + 3] = pHarmonicCam2;
+					msh[v][fli[v][ls]] = pHarmonicCam1;
+					msh[v][fli[v][ls + 1]] = pAuxCam1;
+					msh[v][fli[v][ls + 2]] = pAuxCam2;
+					msh[v][fli[v][ls + 3]] = pHarmonicCam2;
 				}
 			}
 		}
@@ -4433,8 +4433,8 @@ void CP2R::DetectPDD() {
 		// Third note must be chord note
 		if (!cchnv[pcc[v][s2 + 1]]) return;
 		// Apply pattern
-		msh[v][ls] = pAuxPDD;
-		msh[v][ls + 1] = pHarmonicPDD;
+		msh[v][fli[v][ls]] = pAuxPDD;
+		msh[v][fli[v][ls + 1]] = pHarmonicPDD;
 	}
 }
 
