@@ -57,6 +57,14 @@ const int sp_nlen[] = {
 };
 
 // Vocal range information
+struct ShapeVariant {
+	int type;
+	int v;
+	int s;
+	int state;
+};
+
+// Vocal range information
 struct LyLogEntry {
 	CString st;
 	int level;
@@ -392,11 +400,12 @@ protected:
 
 	// Harmonic data
 	int min_sus; // Minimal length of intrabar sus in croches
+	vector<ShapeVariant> shvar; // [] Shape variants for current measure
 	vector<vector<int>> sus; // [v][ls] Note suspension flag (when above zero, links to first cantus-changing step)
 	vector<vector<int>> susres; // [v][ls] =1 if sus is resolved correctly
 	vector<vector<int>> ssus; // [v][ls] Points to sus position or note start if there is no sus
 	vector<vector<int>> isus; // [v][ls] 0 - note cannot be intrabar sus. -1 - note can be intrabar sus. -2 - note is intrabar sus
-	vector<vector<int>> msh; // [v][ls] Melody shape types for fli
+	vector<vector<int>> msh; // [v][s] Melody shape types for fli
 	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
 	vector<int> chn; // [pc] Diatonic pitch classes in chord

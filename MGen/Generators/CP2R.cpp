@@ -4028,13 +4028,13 @@ void CP2R::EvaluateMsh() {
 }
 
 void CP2R::GetISus() {
-	// Get last measure step
-	int mea_end = mli[ms] + npm - 1;
-	// Prevent going out of window
-	if (mea_end >= ep2) return;
-	int max_ls = bli[v][mea_end];
 	// Build harmony using already detected msh notes
 	for (v = 0; v < av_cnt; ++v) {
+		// Get last measure step
+		int mea_end = mli[ms] + npm - 1;
+		// Prevent going out of window
+		if (mea_end >= ep2) return;
+		int max_ls = bli[v][mea_end];
 		for (ls = bli[v][s0]; ls <= max_ls; ++ls) {
 			s = fli[v][ls];
 			int s9 = ssus[v][ls];
@@ -4106,7 +4106,8 @@ void CP2R::GetISus() {
 				ls2 = bli[v2][found_res];
 				// Do not compare to notes that started earlier
 				// Do not compare to non-harmonic tones
-				if (fli[v2][ls2] == found_res && msh[v2][found_res] > 0) {
+				// Do not compare to pauses
+				if (cc[v2][found_res] && fli[v2][ls2] == found_res && msh[v2][found_res] > 0) {
 					// Check interval
 					int ivl = abs(cc[v][found_res] - cc[v2][found_res]) % 12;
 					if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
@@ -4114,7 +4115,7 @@ void CP2R::GetISus() {
 						break;
 					}
 					// Prohibit 4th and tritone only with bass
-					if (ivl == 5 || ivl == 6) {
+					else if (ivl == 5 || ivl == 6) {
 						if (!v2 || !v) {
 							conflict = 1;
 							break;
@@ -4125,7 +4126,8 @@ void CP2R::GetISus() {
 				ls2 = bli[v2][s9];
 				// Do not compare to notes that started earlier
 				// Do not compare to non-harmonic tones
-				if (fli[v2][ls2] == s9 && msh[v2][s9] > 0) {
+				// Do not compare to pauses
+				if (cc[v2][s9] && fli[v2][ls2] == s9 && msh[v2][s9] > 0) {
 					// Check interval
 					int ivl = abs(cc[v][s9] - cc[v2][s9]) % 12;
 					if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
@@ -4148,17 +4150,56 @@ void CP2R::GetISus() {
 }
 
 void CP2R::DetectSus() {
-	susres[v][ls] = -1;
+	susres[v][ls] = 0;
 	// Do not check first measure
 	if (!ms) return;
 	// Do not check pause
 	if (!cc[v][s0]) return;
 	// Check only sus
 	if (!sus[v][ls]) return;
-	// Not enough notes for resolution
-	if (ls >= fli_size[v] - 1 || bmli[fli[v][ls + 1]] > mli[ms]) return;
-	// Note is too short
-	if (llen[v][ls] < min_sus) return;
+	// Check if this sus is non-harmonic and thus definitely needs resolution
+	int sus_conflict = 0;
+	for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
+		ls2 = bli[v2][s0];
+		// Do not compare to notes that started earlier
+		// Do not compare to non-harmonic tones
+		// Do not compare to pauses
+		if (cc[v2][s0] && fli[v2][ls2] == s0 && msh[v2][s0] > 0) {
+			// Check interval
+			int ivl = abs(cc[v][s0] - cc[v2][s0]) % 12;
+			if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
+				sus_conflict = 1;
+				break;
+			}
+			// Prohibit 4th and tritone only with bass
+			else if (ivl == 5 || ivl == 6) {
+				if (!v2 || !v) {
+					sus_conflict = 1;
+					break;
+				}
+			}
+			// Detect unison or octave
+			else if (ivl == 0) {
+				if (sus_conflict == 0) sus_conflict = -1;
+			}
+		}
+	}
+	// If sus forms dissonance, sus is not harmonic
+	if (sus_conflict == 1) {
+		msh[v][s0] = pSusNonHarm;
+	}
+	// If sus forms octave/unison, sus is harmonic
+	else if (sus_conflict == -1) {
+		msh[v][s0] = pSusHarm;
+	}
+	// If sus does not form consonance or dissonance, add both variants
+	if (sus_conflict == 0) {
+		int p = shvar.size();
+		shvar.resize(p + 1);
+		shvar[p].type = sSus;
+		shvar[p].s = s0;
+		shvar[p].v = v;
+	}
 	// There is no resolution
 	int found_res = 0;
 	do {
@@ -4212,61 +4253,63 @@ void CP2R::DetectSus() {
 			}
 		}
 	} while (0);
-	if (!found_res) return;
-	// Do not check if sus preparation is harmonic, because it was already checked in previous measure with pSusStart
-	// Check if this sus is non-harmonic and thus definitely needs resolution
-	int sus_conflict = 0;
-	for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
-		ls2 = bli[v2][s0];
-		// Do not compare to notes that started earlier
-		// Do not compare to non-harmonic tones
-		if (fli[v2][ls2] == s0 && msh[v2][s0] > 0) {
-			// Check interval
-			int ivl = abs(cc[v][s0] - cc[v2][s0]) % 12;
-			if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
-				sus_conflict = 1;
-				break;
-			}
-			// Prohibit 4th and tritone only with bass
-			if (ivl == 5 || ivl == 6) {
-				if (!v2 || !v) {
-					sus_conflict = 1;
-					break;
-				}
-			}
-		}
+	// If no sus resolution shape was found, do not mark resolution or ornament and set no susres
+	if (!found_res) {
+		susres[v][ls] = -1;
+		return;
 	}
+	// Do not check if sus preparation is harmonic, because it was already checked in previous measure with pSusStart
 	// Check if this sus resolution is non-harmonic and thus sus has to be harmonic
 	int res_conflict = 0;
 	for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
 		ls2 = bli[v2][found_res];
 		// Do not compare to notes that started earlier
 		// Do not compare to non-harmonic tones
-		if (fli[v2][ls2] == s0 && msh[v2][found_res] > 0) {
+		// Do not compare to pauses
+		if (cc[v2][found_res] && fli[v2][ls2] == s0 && msh[v2][found_res] > 0) {
 			// Check interval
-			int ivl = abs(cc[v][s0] - cc[v2][s0]) % 12;
+			int ivl = abs(cc[v][found_res] - cc[v2][found_res]) % 12;
 			if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
 				res_conflict = 1;
 				break;
 			}
 			// Prohibit 4th and tritone only with bass
-			if (ivl == 5 || ivl == 6) {
+			else if (ivl == 5 || ivl == 6) {
 				if (!v2 || !v) {
 					res_conflict = 1;
 					break;
 				}
 			}
+			// Detect unison or octave
+			else if (ivl == 0) {
+				if (res_conflict == 0) res_conflict = -1;
+			}
 		}
 	}
-	// If sus needs resolution, check for resolution
-	if (conflict) return;
-	susres[v][ls] = 0;
-	// If sus does not need resolution, add it to variant shapes
+	// If sus res forms dissonance, sus res is not harmonic
+	if (res_conflict == 1) {
+		msh[v][found_res] = pAux;
+		susres[v][ls] = -1;
+	}
+	// If sus forms octave/unison, sus is harmonic
+	else if (sus_conflict == -1) {
+		msh[v][found_res] = pSusRes;
+		susres[v][ls] = 1;
+	}
+	// If sus does not form consonance or dissonance, add both variants
+	if (sus_conflict == 0) {
+		int p = shvar.size();
+		shvar.resize(p + 1);
+		shvar[p].type = sSusRes;
+		shvar[p].s = found_res;
+		shvar[p].v = v;
+	}
 }
 
 void CP2R::GetMsh() {
 	flaga.clear();
 	for (ms = 0; ms < mli.size(); ++ms) {
+		shvar.clear();
 		s0 = mli[ms];
 		vc = vca[s0];
 		// Find harmonic notes that do not need rhythm analysis

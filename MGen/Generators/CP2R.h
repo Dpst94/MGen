@@ -61,6 +61,13 @@
 #define mContrary 4
 
 // Melody shape types
+#define sSus 1
+#define sSusRes 2
+#define sDNT 3
+#define sPDD 4
+#define sCam 5
+
+// Melody shape note position types
 #define pDownbeat 1
 #define pLeapTo 2
 #define pLeapFrom 3
@@ -68,6 +75,7 @@
 #define pSusRes 5
 #define pLastLT 6
 #define pFirst 7
+#define pSusHarm 8
 #define pHarmonicPDD 12
 #define pHarmonicDNT1 21
 #define pHarmonicDNT2 24
@@ -76,6 +84,7 @@
 #define pLong 7
 #define pAux -1
 #define pPass -2
+#define pSusNonHarm -3
 #define pAuxPDD -11
 #define pAuxDNT1 -22
 #define pAuxDNT2 -23
