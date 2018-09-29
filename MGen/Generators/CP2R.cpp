@@ -4324,8 +4324,6 @@ void CP2R::GetMsh() {
 		for (v = 0; v < av_cnt; ++v) {
 			GetMeasureMsh();
 		}
-		// For each note detect if it can be an intrabar suspension
-		GetISus();
 		// Find all shapes. Detect obligatory shapes
 		for (v = 0; v < av_cnt; ++v) {
 			sp = vsp[v];
