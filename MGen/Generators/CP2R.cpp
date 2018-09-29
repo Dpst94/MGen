@@ -4157,49 +4157,13 @@ void CP2R::DetectSus() {
 	if (!cc[v][s0]) return;
 	// Check only sus
 	if (!sus[v][ls]) return;
-	// Check if this sus is non-harmonic and thus definitely needs resolution
-	int sus_conflict = 0;
-	for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
-		ls2 = bli[v2][s0];
-		// Do not compare to notes that started earlier
-		// Do not compare to non-harmonic tones
-		// Do not compare to pauses
-		if (cc[v2][s0] && fli[v2][ls2] == s0 && msh[v2][s0] > 0) {
-			// Check interval
-			int ivl = abs(cc[v][s0] - cc[v2][s0]) % 12;
-			if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
-				sus_conflict = 1;
-				break;
-			}
-			// Prohibit 4th and tritone only with bass
-			else if (ivl == 5 || ivl == 6) {
-				if (!v2 || !v) {
-					sus_conflict = 1;
-					break;
-				}
-			}
-			// Detect unison or octave
-			else if (ivl == 0) {
-				if (sus_conflict == 0) sus_conflict = -1;
-			}
-		}
-	}
-	// If sus forms dissonance, sus is not harmonic
-	if (sus_conflict == 1) {
-	}
-	// If sus forms octave/unison, sus is harmonic
-	else if (sus_conflict == -1) {
-		msh[v][s0] = pSusHarm;
-	}
-	// If sus does not form consonance or dissonance, add both variants
-	else if (sus_conflict == 0) {
-		int p = shvar.size();
-		shvar.resize(p + 1);
-		shvar[p].type = sSus;
-		shvar[p].s = s0;
-		shvar[p].v = v;
-		msh[v][s0] = pSusVar;
-	}
+	// Add sus variants
+	int p = shvar.size();
+	shvar.resize(p + 1);
+	shvar[p].type = sSus;
+	shvar[p].s = s0;
+	shvar[p].v = v;
+	msh[v][s0] = pSusVar;
 	// There is no resolution
 	int found_res = 0;
 	do {
