@@ -4164,7 +4164,7 @@ void CP2R::DetectSus() {
 	shvar[p].s = s0;
 	shvar[p].v = v;
 	msh[v][s0] = pSusVar;
-	// There is no resolution
+	// Check if there is no resolution
 	int found_res = 0;
 	do {
 		// Detect resolution without insertion (LT)
@@ -4222,59 +4222,16 @@ void CP2R::DetectSus() {
 		susres[v][ls] = -1;
 		return;
 	}
-	// Do not check if sus preparation is harmonic, because it was already checked in previous measure with pSusStart
-	// Check if this sus resolution is non-harmonic and thus sus has to be harmonic
-	int res_conflict = 0;
-	for (v2 = 0; v2 < av_cnt; ++v2) if (v != v2) {
-		ls2 = bli[v2][found_res];
-		// Do not compare to notes that started earlier
-		// Do not compare to non-harmonic tones
-		// Do not compare to pauses
-		if (cc[v2][found_res] && fli[v2][ls2] == s0 && msh[v2][found_res] > 0) {
-			// Check interval
-			int ivl = abs(cc[v][found_res] - cc[v2][found_res]) % 12;
-			if (ivl == 1 || ivl == 2 || ivl == 10 || ivl == 11) {
-				res_conflict = 1;
-				break;
-			}
-			// Prohibit 4th and tritone only with bass
-			else if (ivl == 5 || ivl == 6) {
-				if (!v2 || !v) {
-					res_conflict = 1;
-					break;
-				}
-			}
-			// Detect unison or octave
-			else if (ivl == 0) {
-				if (res_conflict == 0) res_conflict = -1;
-			}
-		}
-	}
-	// If sus res forms dissonance, sus res is not harmonic
-	if (res_conflict == 1) {
-		susres[v][ls] = -1;
-	}
-	// If sus forms octave/unison, sus is harmonic
-	else if (res_conflict == -1) {
-		msh[v][found_res] = pSusRes;
-		susres[v][ls] = 1;
-		// Ornament notes
-		for (ls3 = bli[v][found_res] - 1; ls3 > ls; --ls3) {
-			msh[v][fli[v][ls3]] = pAux;
-		}
-	}
-	// If sus does not form consonance or dissonance, add both variants
-	else if (res_conflict == 0) {
-		int p = shvar.size();
-		shvar.resize(p + 1);
-		shvar[p].type = sSusRes;
-		shvar[p].s = found_res;
-		shvar[p].v = v;
-		msh[v][s0] = pSusResVar;
-		// Ornament notes
-		for (ls3 = bli[v][found_res] - 1; ls3 > ls; --ls3) {
-			msh[v][fli[v][ls3]] = pSusOrnVar;
-		}
+	// Add resolution variants
+	int p = shvar.size();
+	shvar.resize(p + 1);
+	shvar[p].type = sSusRes;
+	shvar[p].s = found_res;
+	shvar[p].v = v;
+	msh[v][s0] = pSusResVar;
+	// Ornament notes
+	for (ls3 = bli[v][found_res] - 1; ls3 > ls; --ls3) {
+		msh[v][fli[v][ls3]] = pSusOrnVar;
 	}
 }
 
