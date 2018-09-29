@@ -4186,19 +4186,19 @@ void CP2R::DetectSus() {
 	}
 	// If sus forms dissonance, sus is not harmonic
 	if (sus_conflict == 1) {
-		msh[v][s0] = pSusNonHarm;
 	}
 	// If sus forms octave/unison, sus is harmonic
 	else if (sus_conflict == -1) {
 		msh[v][s0] = pSusHarm;
 	}
 	// If sus does not form consonance or dissonance, add both variants
-	if (sus_conflict == 0) {
+	else if (sus_conflict == 0) {
 		int p = shvar.size();
 		shvar.resize(p + 1);
 		shvar[p].type = sSus;
 		shvar[p].s = s0;
 		shvar[p].v = v;
+		msh[v][s0] = pSusVar;
 	}
 	// There is no resolution
 	int found_res = 0;
@@ -4288,21 +4288,29 @@ void CP2R::DetectSus() {
 	}
 	// If sus res forms dissonance, sus res is not harmonic
 	if (res_conflict == 1) {
-		msh[v][found_res] = pAux;
 		susres[v][ls] = -1;
 	}
 	// If sus forms octave/unison, sus is harmonic
-	else if (sus_conflict == -1) {
+	else if (res_conflict == -1) {
 		msh[v][found_res] = pSusRes;
 		susres[v][ls] = 1;
+		// Ornament notes
+		for (ls3 = bli[v][found_res] - 1; ls3 > ls; --ls3) {
+			msh[v][fli[v][ls3]] = pAux;
+		}
 	}
 	// If sus does not form consonance or dissonance, add both variants
-	if (sus_conflict == 0) {
+	else if (res_conflict == 0) {
 		int p = shvar.size();
 		shvar.resize(p + 1);
 		shvar[p].type = sSusRes;
 		shvar[p].s = found_res;
 		shvar[p].v = v;
+		msh[v][s0] = pSusResVar;
+		// Ornament notes
+		for (ls3 = bli[v][found_res] - 1; ls3 > ls; --ls3) {
+			msh[v][fli[v][ls3]] = pSusOrnVar;
+		}
 	}
 }
 
@@ -4325,9 +4333,9 @@ void CP2R::GetMsh() {
 			s = fli[v][ls];
 			s2 = fli2[v][ls];
 			DetectSus();
-			DetectPDD();
-			DetectDNT();
-			DetectCambiata();
+			//DetectPDD();
+			//DetectDNT();
+			//DetectCambiata();
 			// If shape does not question msh, set msh
 		}
 		// Detect ambiguous shapes

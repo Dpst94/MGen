@@ -84,12 +84,15 @@
 #define pLong 7
 #define pAux -1
 #define pPass -2
-#define pSusNonHarm -3
 #define pAuxPDD -11
 #define pAuxDNT1 -22
 #define pAuxDNT2 -23
 #define pAuxCam1 -42
 #define pAuxCam2 -43
+
+#define pSusVar 101
+#define pSusResVar 102
+#define pSusOrnVar 103
 
 // Patterns
 #define pCam 1 // Cambiata
