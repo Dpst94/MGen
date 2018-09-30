@@ -4063,7 +4063,6 @@ void CP2R::GetMeasureMsh() {
 }
 
 void CP2R::EvaluateMsh() {
-	hpenalty = 0;
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
@@ -4218,6 +4217,7 @@ void CP2R::GetMsh() {
 				}
 				WriteLog(1, est);
 				flaga.clear();
+				hpenalty = 0;
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];
 					GetMeasureMsh();
