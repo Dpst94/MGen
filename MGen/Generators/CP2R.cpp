@@ -428,8 +428,21 @@ void CP2R::SendLining(int pos, int x, int i) {
 	if (show_hatch == 1) {
 	}
 	if (show_hatch == 2) {
-		if (msh[v][fli[v][bli[v][x]]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
-		else lining[pos + i][vi] = 0;
+		ls = bli[v][x];
+		if (sus[v][ls]) {
+			if (x < sus[v][ls]) {
+				if (msh[v][fli[v][ls]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
+				else lining[pos + i][vi] = 0;
+			}
+			else {
+				if (msh[v][sus[v][ls]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
+				else lining[pos + i][vi] = 0;
+			}
+		}
+		else {
+			if (msh[v][fli[v][ls]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
+			else lining[pos + i][vi] = 0;
+		}
 	}
 }
 
@@ -459,6 +472,7 @@ void CP2R::SendCP() {
 			}
 		}
 		MergeNotes(step0, step0 + full_len - 1);
+		MakeBellDyn(vi, step0, step0 + full_len - 1, 50, 110, 0);
 		st.Format("#%d (from %s)",
 			cp_id + 1, bname_from_path(musicxml_file));
 		AddMelody(step0, step0 + full_len - 1, vi, st);
@@ -472,6 +486,18 @@ void CP2R::SendCP() {
 	t_generated = step0 + full_len - 1;
 	Adapt(step0, t_generated);
 	t_sent = t_generated;
+}
+
+// Create bell dynamics curve
+void CP2R::MakeBellDyn(int v, int step1, int step2, int dyn1, int dyn2, int dyn_rand) {
+	// Do not process if steps are equal or wrong
+	if (step2 <= step1) return;
+	int mids = (step1 + step2) / 2;
+	int counts = step2 - step1;
+	for (int s = step1; s <= step2; ++s) {
+		if (s < mids)	dyn[s][v] = dyn1 + min(dyn2 - dyn1, (dyn2 - dyn1) * (s - step1) / counts * 2) + dyn_rand * rand2() / RAND_MAX;
+		else dyn[s][v] = dyn1 + min(dyn2 - dyn1, (dyn2 - dyn1) * (step2 - s) / counts * 2) + dyn_rand * rand2() / RAND_MAX;
+	}
 }
 
 void CP2R::SendHarmMarks() {
@@ -4354,6 +4380,7 @@ void CP2R::DetectSus() {
 				if ((c[v][s3] - c[v][s2] == 1 && c[v][s3] - c[v][s4] == 2) ||
 					(c[v][s2] - c[v][s3] == 2 && c[v][s4] - c[v][s3] == 1)) {
 					susres[v][ls] = 1;
+					msh[v][sus[v][ls]] = pSusHarm;
 					msh[v][fli[v][ls + 1]] = pAux;
 				}
 			}
@@ -4453,14 +4480,17 @@ void CP2R::DetectSus() {
 	// Mark resolution as obligatory harmonic in basic msh and ending as non-harmonic
 	// In this case all resolutions are marked, although one of them is enough, but this is a very rare case that several resolutions pass all checks
 	if (s3) {
+		msh[v][sus[v][ls]] = pSusNonHarm;
 		msh[v][fli[v][ls3]] = pSusRes;
 		susres[v][ls] = 1;
 	}
 	if (s4) {
+		msh[v][sus[v][ls]] = pSusNonHarm;
 		msh[v][fli[v][ls4]] = pSusRes;
 		susres[v][ls] = 1;
 	}
 	if (s5) {
+		msh[v][sus[v][ls]] = pSusNonHarm;
 		msh[v][fli[v][ls5]] = pSusRes;
 		susres[v][ls] = 1;
 	}

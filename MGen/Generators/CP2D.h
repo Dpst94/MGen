@@ -57,14 +57,6 @@ const int sp_nlen[] = {
 };
 
 // Vocal range information
-struct ShapeVariant {
-	int type;
-	int v;
-	int s;
-	int state;
-};
-
-// Vocal range information
 struct LyLogEntry {
 	CString st;
 	int level;
@@ -400,7 +392,6 @@ protected:
 
 	// Harmonic data
 	int min_sus; // Minimal length of intrabar sus in croches
-	vector<ShapeVariant> shvar; // [] Shape variants for current measure
 	vector<vector<int>> sus; // [v][ls] Note suspension flag (when above zero, links to first cantus-changing step)
 	vector<vector<int>> susres; // [v][ls] =1 if sus is resolved correctly
 	vector<vector<int>> ssus; // [v][ls] Points to sus position or note start if there is no sus

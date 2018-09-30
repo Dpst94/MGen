@@ -84,6 +84,7 @@
 #define pLong 7
 #define pAux -1
 #define pPass -2
+#define pSusNonHarm -3
 #define pAuxPDD -11
 #define pAuxDNT1 -22
 #define pAuxDNT2 -23
@@ -180,6 +181,7 @@ protected:
 	void SendComment(int pos, int x, int i);
 	void SendLining(int pos, int x, int i);
 	void SendCP();
+	void MakeBellDyn(int v, int step1, int step2, int dyn1, int dyn2, int dyn_rand);
 	void SendHarmMarks();
 	void SendHarmColor();
 	
