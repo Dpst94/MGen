@@ -221,7 +221,6 @@ protected:
 	inline void GetMeasureMsh();
 	inline void GetMsh();
 	inline void EvaluateMsh();
-	inline void GetISus();
 	inline void DetectSus();
 	inline void DetectPDD();
 	inline void DetectDNT();
