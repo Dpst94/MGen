@@ -912,6 +912,7 @@ void CP2D::LoadHarmNotation() {
 }
 
 CString CP2D::GetHarmName(int pitch, int alter) {
+	if (pitch == -1) return "?";
 	if (mode == 9) {
 		if (alter == 1) return HarmName_ma[pitch];
 		else return HarmName_m[pitch];

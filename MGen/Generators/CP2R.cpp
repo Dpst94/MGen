@@ -483,7 +483,7 @@ void CP2R::SendHarmMarks() {
 			if (cc[v][s]) break;
 		}
 		mark[step0 + s][vi] = GetHarmName(chm[hs], chm_alter[hs]);
-		if (show_harmony_bass && hbc[hs] % 7 != chm[hs]) {
+		if (show_harmony_bass && chm[hs] > 0 && hbc[hs] % 7 != chm[hs]) {
 			if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 2) {
 				mark[step0 + s][vi] += "6";
 			}
@@ -3129,8 +3129,8 @@ int CP2R::FailRetrInside() {
 }
 
 // Take vector of diatonic notes and detect most possible chord
-void CP2R::GetHarm(int found_gis, int found_fis, int &lchm, int &lchm_alter) {
-	int max_rat = -10000;
+void CP2R::GetHarm(int found_gis, int found_fis, int &lchm, int &lchm_alter, int &rating) {
+	rating = -10000;
 	for (int x = 0; x < 7; ++x) {
 		// No root note
 		if (!chn[x]) continue;
@@ -3138,15 +3138,17 @@ void CP2R::GetHarm(int found_gis, int found_fis, int &lchm, int &lchm_alter) {
 		// Each chord note adds to rating
 		rat += chn[x] + chn[(x + 2) % 7] ? 1 : 0 + 
 			chn[(x + 4) % 7] ? 1 : 0;
+		// VII note means 7th chord
+		if (chn[(x + 6) % 7]) rat -= 10;
 		// VI note means other chord
 		if (chn[(x + 5) % 7]) rat -= 100;
 		// IV note means other chord
 		if (chn[(x + 3) % 7]) rat -= 100;
 		// II note means other chord
 		if (chn[(x + 1) % 7]) rat -= 100;
-		if (rat > max_rat) {
+		if (rat > rating) {
 			lchm = x;
-			max_rat = rat;
+			rating = rat;
 		}
 	}
 	lchm_alter = 0;
@@ -3172,8 +3174,7 @@ int CP2R::FailHarm() {
 	CHECK_READY(DR_fli, DR_c, DR_pc);
 	SET_READY(DR_hli);
 	if (av_cnt < 2) return 0;
-	int s9;
-	int n, hcount;
+	int n, hcount, rat;
 	int last_b; // First harmony in measure has b
 	int found_gis, found_fis;
 	int mea_end;
@@ -3218,6 +3219,7 @@ int CP2R::FailHarm() {
 				}
 			}
 		}
+		int bad_harm = 0;
 		// Loop inside measure
 		for (s = mli[ms]; s <= mea_end; ++s) {
 			for (v = 0; v < av_cnt; ++v) {
@@ -3234,26 +3236,40 @@ int CP2R::FailHarm() {
 				else if (pcc[v][s] == 8) found_fis = -1;
 				// For first suspension in measure, evaluate last step. In other cases - first step
 				if (fli[v][ls] <= mli[ms] && sus[v][ls]) {
-					s9 = fli2[v][ls];
-					// TODO: REMOVE
-					continue;
 					// For first suspended dissonance resolved note do not check msh
-					//if (susres[v][ls]) continue;
+					if (susres[v][ls]) continue;
 				}
 				else {
-					s9 = fli[v][ls];
 					// For all other notes, check msh and iHarm4
-					if (msh[v][s9] <= 0) continue;
+					if (msh[v][s] <= 0) continue;
 				}
 				// Pitch class
-				n = pc[v][s9];
+				n = pc[v][s];
 				// Find harmonic conflict
 				if (s > mli[ms] && (chn[(n + 1) % 7] || chn[(n + 6) % 7] ||
-					(chn[n] && !cchn[pcc[v][s9]]))) {
-					GetHarm(found_gis, found_fis, chm[hs], chm_alter[hs]);
-					RemoveHarmDuplicate();
+					(chn[n] && !cchn[pcc[v][s]]))) {
+					// Remove notes of current step from chord, because this step belongs to next chord
+					for (v2 = 0; v2 < v; ++v2) {
+						ls = bli[v2][s];
+						// Skip if not note start 
+						if (fli[v2][ls] != s) continue;
+						// Skip pauses
+						if (!cc[v2][s]) continue;
+						// Check msh
+						if (msh[v2][fli[v2][ls]] <= 0) continue;
+						// Remove note
+						--chn[pc[v2][s]];
+						--cchn[pcc[v][s]];
+					}
 					// More than two harmonies
-					if (hcount) FLAGHL(40, s, mli[ms]);
+					if (hcount) {
+						FLAGHL(40, s, mli[ms]);
+						chm[hs] = -1;
+						chm_alter[hs] = -1;
+						RemoveHarmDuplicate();
+						bad_harm = 1;
+						break;
+					}
 					else {
 						// Two harmonies penultimate
 						if (ms == mli.size() - 2) FLAGHL(306, s, mli[ms]);
@@ -3261,16 +3277,27 @@ int CP2R::FailHarm() {
 							/*
 							// Stepwize resolution of 5th to 6th or 6th to 5th with two harmonies in measure
 							if ((sp == 4 ||
-								(sp == 5 && sus[ls1] && fli2[ls1] - sus[ls1] == 3 && rlen[ls1 + 1] >= 4)) && (
-								(ivlc[mli[ms]] == 4 && ivlc[s] == 5) ||
-									(ivlc[mli[ms]] == 5 && ivlc[s] == 4)) &&
-								abs(ac[cpv][mli[ms]] - ac[cpv][s]) < 2)
-								FLAG2L(329, s, mli[ms]);
+							(sp == 5 && sus[ls1] && fli2[ls1] - sus[ls1] == 3 && rlen[ls1 + 1] >= 4)) && (
+							(ivlc[mli[ms]] == 4 && ivlc[s] == 5) ||
+							(ivlc[mli[ms]] == 5 && ivlc[s] == 4)) &&
+							abs(ac[cpv][mli[ms]] - ac[cpv][s]) < 2)
+							FLAG2L(329, s, mli[ms]);
 							else FLAG2L(307, s, mli[ms]);
 							*/
 							FLAGHL(307, s, mli[ms]);
+							chm[hs] = -1;
+							chm_alter[hs] = 0;
+							RemoveHarmDuplicate();
+							bad_harm = 1;
+							break;
 						}
 					}
+					GetHarm(found_gis, found_fis, chm[hs], chm_alter[hs], rat);
+					if (rat < 0) {
+						chm[hs] = -1;
+						chm_alter[hs] = 0;
+					}
+					RemoveHarmDuplicate();
 					fill(chn.begin(), chn.end(), 0);
 					fill(cchn.begin(), cchn.end(), 0);
 					hli.push_back(s);
@@ -3288,11 +3315,9 @@ int CP2R::FailHarm() {
 					for (v2 = 0; v2 < av_cnt; ++v2) {
 						ls = bli[v2][s];
 						// Skip pauses
-						if (!cc[v2][s9]) continue;
+						if (!cc[v2][s]) continue;
 						// For first suspension in measure, evaluate last step. In other cases - first step
 						if (fli[v2][ls] <= mli[ms] && sus[v2][ls]) {
-							// TODO: REMOVE
-							continue;
 							// For first suspended dissonance resolved note do not check msh
 							if (susres[v2][ls] > 0) continue;
 						}
@@ -3301,41 +3326,50 @@ int CP2R::FailHarm() {
 							if (msh[v2][fli[v2][ls]] <= 0) continue;
 						}
 						// Record note
-						++chn[pc[v2][s9]];
-						++cchn[pcc[v2][s9]];
+						++chn[pc[v2][s]];
+						++cchn[pcc[v2][s]];
 					}
 					// Next harmony counter
 					++hcount;
 				}
 				// Record note
 				++chn[n];
-				++cchn[pcc[v][s9]];
+				++cchn[pcc[v][s]];
 			}
+			if (bad_harm) break;
 		}
-		GetHarm(found_gis, found_fis, chm[hs], chm_alter[hs]);
-		RemoveHarmDuplicate();
+		if (!bad_harm) {
+			GetHarm(found_gis, found_fis, chm[hs], chm_alter[hs], rat);
+			if (rat < 0) {
+				chm[hs] = -1;
+				chm_alter[hs] = 0;
+			}
+			RemoveHarmDuplicate();
+		}
 		// If penultimate measure
 		if (ms == mli.size() - 2 && hcount) {
 			// Prohibit D or DVII harmony in penultimate measure before non-D / DVII harmony
 			if (chm.size() > 1 && (chm[chm.size() - 2] == 4 || chm[chm.size() - 2] == 6) &&
-				(chm[chm.size() - 1] != 4 && chm[chm.size() - 1] != 6)) FLAGH(322, hli[chm.size() - 1]);
+				(chm[chm.size() - 1] > -1 && chm[chm.size() - 1] != 4 && chm[chm.size() - 1] != 6)) FLAGH(322, hli[chm.size() - 1]);
 		}
 		if (hli2.size()) hli2[hli2.size() - 1] = mea_end;
 	}
 	GetBhli();
-	// Check penultimate harmony not D / DVII
-	if (ep2 == c_len && hli.size() > 1) {
-		hs = hli.size() - 2;
-		if (chm[hs] != 4 && chm[hs] != 6) FLAGH(335, hli[hs]);
-	}
-	GetHarmBass();
-	// Check first harmony not T
-	if (chm.size() && (chm[0] || hbc[0] % 7)) {
-		FLAGH(137, hli[0]);
-	}
-	// Check last harmony not T
-	if (chm.size() && (chm[chm.size() - 1] || hbc[chm.size() - 1] % 7)) {
-		FLAGH(531, hli[chm.size() - 1]);
+	if (chm[hs] > -1) {
+		// Check penultimate harmony not D / DVII
+		if (ep2 == c_len && hli.size() > 1) {
+			hs = hli.size() - 2;
+			if (chm[hs] != 4 && chm[hs] != 6) FLAGH(335, hli[hs]);
+		}
+		GetHarmBass();
+		// Check first harmony not T
+		if (chm.size() && (chm[0] || hbc[0] % 7)) {
+			FLAGH(137, hli[0]);
+		}
+		// Check last harmony not T
+		if (chm.size() && (chm[chm.size() - 1] || hbc[chm.size() - 1] % 7)) {
+			FLAGH(531, hli[chm.size() - 1]);
+		}
 	}
 	if (EvalHarm()) return 1;
 	if (FailTonicCP()) return 1;
@@ -3357,6 +3391,11 @@ int CP2R::EvalHarm() {
 	for (int i = 0; i < chm.size(); ++i) {
 		s = hli[i];
 		ls = bli[v][s];
+		// Skip wrong harmony
+		if (chm[i] == -1) {
+			FLAGV(555, s);
+			continue;
+		}
 		// Prohibit 64 chord
 		if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
 			FLAGV(433, s);
@@ -3369,7 +3408,7 @@ int CP2R::EvalHarm() {
 		if (chm[i] == 2 && chm_alter[i] == 1) {
 			FLAGV(375, s);
 		}
-		if (i > 0) {
+		if (i > 0 && chm[i - 1] > -1) {
 			// Check GC for low voice and not last note (last note in any window is ignored)
 			if (ls < fli_size[v] - 1 &&
 				chm[i] == 0 && chm[i - 1] == 4 &&
@@ -3535,6 +3574,11 @@ void CP2R::GetHarmBass() {
 	int harm_end, nt;
 	int de1, de2, de3;
 	for (int hs = 0; hs < hli.size(); ++hs) {
+		if (chm[hs] == -1) {
+			hbc[hs] = -1;
+			hbcc[hs] = -1;
+			continue;
+		}
 		// Get harmonic notes
 		de1 = chm[hs];
 		de2 = (de1 + 2) % 7;
@@ -3703,7 +3747,7 @@ void CP2R::FindParallel6Chords() {
 	int consec = 0;
 	for (hs = 0; hs < hli.size(); ++hs) {
 		// Detect 6th chord
-		if (hbc[hs] % 7 == (chm[hs] + 2) % 7) {
+		if (chm[hs] > -1 && hbc[hs] % 7 == (chm[hs] + 2) % 7) {
 			++consec;
 			if (consec == 3) {
 				FLAGHL(552, ssus[0][bli[0][hli[hs - 2]]], ssus[0][bli[0][hli[hs]]]);
@@ -4030,6 +4074,7 @@ void CP2R::EvaluateMsh() {
 void CP2R::GetMsh() {
 	flaga.clear();
 	for (ms = 0; ms < mli.size(); ++ms) {
+		hpenalty = 0;
 		fill(chn.begin(), chn.end(), 0);
 		fill(cchn.begin(), cchn.end(), 0);
 		s0 = mli[ms];
@@ -4080,7 +4125,8 @@ void CP2R::GetMsh() {
 		// Main chord
 		int lchm;
 		int lchm_alter;
-		GetHarm(0, 0, lchm, lchm_alter);
+		int rat;
+		GetHarm(0, 0, lchm, lchm_alter, rat);
 		// Possible chords
 		vector <int> cpos;
 		cpos.resize(7);
@@ -4089,15 +4135,12 @@ void CP2R::GetMsh() {
 			// At least one note exists
 			if (!chn[hv] && !chn[(hv + 2) % 7] && !chn[(hv + 4) % 7]) continue;
 			// No other notes should exist
-			if (chn[(hv + 1) % 7] || chn[(hv + 3) % 7] || chn[(hv + 5) % 7]) continue;
-			// Do not check for 7th:  || chn[(hv + 6) % 7]
+			if (chn[(hv + 1) % 7] || chn[(hv + 3) % 7] || chn[(hv + 5) % 7] || chn[(hv + 6) % 7]) continue;
 			cpos[hv] = 1;
-			/*
 			CString st, est;
 			est.Format("Possible chord %s in measure %d:%d",
 			degree_name[hv], cp_id + 1, ms + 1);
 			WriteLog(1, est);
-			*/
 		}
 		// Scan all possible chords
 		for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
@@ -4143,11 +4186,11 @@ void CP2R::GetMsh() {
 				est.Format("Checking chord %s%s in measure %d:%d:",
 					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1);
 				for (int i = 0; i < 12; ++i) {
-					st.Format(" %d", cchnv[i]);
+					st.Format(" %d", cchn[i]);
 					est += st;
 					if (i == 5) est += " -";
 				}
-				//WriteLog(1, est);
+				WriteLog(1, est);
 				flaga.clear();
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];

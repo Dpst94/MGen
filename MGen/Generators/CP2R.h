@@ -280,7 +280,7 @@ protected:
 	inline int FailNoteLen();
 	inline int FailBeat();
 	inline int FailRetrInside();
-	inline void GetHarm(int found_gis, int found_fis, int & lchm, int & lchm_alter);
+	inline void GetHarm(int found_gis, int found_fis, int & lchm, int & lchm_alter, int & rating);
 	inline int FailHarm();
 	inline int EvalHarm();
 	inline int FailTonicCP();
