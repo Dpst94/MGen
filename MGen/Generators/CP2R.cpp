@@ -4257,9 +4257,9 @@ void CP2R::DetectDNT() {
 		s = fli[v][ls];
 		s2 = fli2[v][ls];
 		// No pauses
-		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) return;
+		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) continue;
 		// First note must be chord tone
-		if (!cchnv[pcc[v][s2]]) return;
+		if (!cchnv[pcc[v][s2]]) continue;
 		// Note 1 is short
 		if (llen[v][ls] < 2) continue;
 		// Note 2 is long
@@ -4319,9 +4319,9 @@ void CP2R::DetectCambiata() {
 		s = fli[v][ls];
 		s2 = fli2[v][ls];
 		// No pauses
-		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) return;
+		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) continue;
 		// First note must be chord tone
-		if (!cchnv[pcc[v][s2]]) return;
+		if (!cchnv[pcc[v][s2]]) continue;
 		// Note 1 is short
 		if (llen[v][ls] < 2) continue;
 		// Note 2 is long
@@ -4339,7 +4339,7 @@ void CP2R::DetectCambiata() {
 			if (leap[v][fli2[v][ls + 1]] * smooth[v][s2] < 0) continue;
 			if (ls < fli_size[v] - 3) {
 				// Fourth note must be chord tone
-				if (!cchnv[pcc[v][fli[v][ls + 3]]]) return;
+				if (!cchnv[pcc[v][fli[v][ls + 3]]]) continue;
 				// Note 4 is short
 				if (llen[v][ls + 3] < 2) continue;
 				// Note 3 is longer than 4

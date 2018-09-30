@@ -827,7 +827,7 @@ int CGenCA3::FailSpeciesCombination() {
 	}
 	// Species 5 should not be combined with species 2, 3, 4
 	if (sps[5] && (sps[2] || sps[3] || sps[4])) {
-		WriteLogLy(5, "Species 5 is combined with species 2, 3, or 4", 1);
+		WriteLogLy(5, "Species 5 should not be combined with species 2, 3, or 4", 1);
 	}
 	return 0;
 }
