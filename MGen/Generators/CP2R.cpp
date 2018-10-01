@@ -3235,16 +3235,6 @@ int CP2R::FailHarm() {
 		found_gis = 0;
 		found_fis = 0;
 		hcount = 0;
-		// Make last leading tone in penultimate measure harmonic
-		if (ms == mli.size() - 2) {
-			for (v = 0; v < av_cnt; ++v) {
-				if (fli_size[v] < 2) continue;
-				int s9 = fli[v][fli_size[v] - 2];
-				if (pcc[v][s9] == 11 && msh[v][fli[v][fli_size[v] - 2]] < 0) {
-					msh[v][fli[v][fli_size[v] - 2]] = pLastLT;
-				}
-			}
-		}
 		int bad_harm = 0;
 		// Loop inside measure
 		for (s = mli[ms]; s <= mea_end; ++s) {
@@ -3298,7 +3288,31 @@ int CP2R::FailHarm() {
 					}
 					else {
 						// Two harmonies penultimate
-						if (ms == mli.size() - 2) FLAGHL(306, s, mli[ms]);
+						if (ms == mli.size() - 2) {
+							FLAGHL(306, s, mli[ms]);
+							// Prohibit wrong second harmony position
+							int dist = s - mli[ms];
+							if (npm == 8) {
+								if (dist != 4 && dist != 6) FLAGH(556, s);
+							}
+							else if (npm == 4) {
+								if (dist != 2) FLAGH(556, s);
+							}
+							else if (npm == 6) {
+								if (dist != 4) FLAGH(556, s);
+							}
+							else if (npm == 10) {
+								if (dist != 6) FLAGH(556, s);
+							}
+							else if (npm == 12) {
+								if (btype == 4) {
+									if (dist != 6) FLAGH(556, s);
+								}
+								else {
+									if (dist != 8) FLAGH(556, s);
+								}
+							}
+						}
 						else {
 							/*
 							// Stepwize resolution of 5th to 6th or 6th to 5th with two harmonies in measure
@@ -4059,6 +4073,13 @@ void CP2R::GetMeasureMsh() {
 		else if (s > 0 && leap[v][s - 1]) msh[v][s] = pLeapTo;
 		else if (s2 < ep2 - 1 && leap[v][s2]) msh[v][s] = pLeapFrom;
 		else msh[v][s] = pAux;
+	}
+	// Make last leading tone in penultimate measure harmonic
+	if (ms == mli.size() - 2) {
+		int s9 = fli[v][fli_size[v] - 2];
+		if (fli_size[v] >= 2 && pcc[v][s9] == 11 && msh[v][fli[v][fli_size[v] - 2]] < 0) {
+			msh[v][fli[v][fli_size[v] - 2]] = pLastLT;
+		}
 	}
 }
 
