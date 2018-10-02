@@ -16,7 +16,10 @@ CGenCA3::~CGenCA3() {
 void CGenCA3::InitAnalysis() {
 	chn.resize(7);
 	cchn.resize(12);
-	cchnv.resize(12);
+	cchnv.resize(2);
+	cchnv[0].resize(12);
+	cchnv[1].resize(12);
+	shp.resize(16);
 	nstat.resize(MAX_NOTE);
 	nstat2.resize(MAX_NOTE);
 	nstat3.resize(MAX_NOTE);

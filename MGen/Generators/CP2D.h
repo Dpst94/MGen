@@ -401,7 +401,8 @@ protected:
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
 	vector<int> chn; // [pc] Diatonic pitch classes in chord
 	vector<int> cchn; // [pcc] Chromatic pitch classes in chord
-	vector<int> cchnv; // [pcc] Chromatic pitch classes in variant chord
+	vector<vector<int>> cchnv; // [harm][pcc] Chromatic pitch classes in variant chord
+	vector<int> shp; // [s] Harmony position for each step
 	vector<int> hli; // [hs] Forward links to first notes of each harmony
 	vector<int> ha64; // [hs] Audible 6/4 chord, while hbc will show root position or sixth chord
 	vector<int> hli2; // [hs] Forward links to last notes of each harmony
