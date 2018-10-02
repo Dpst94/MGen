@@ -221,7 +221,9 @@ protected:
 	void MergeNotes(int step1, int step2);
 	inline void GetBasicMsh();
 	inline void GetMeasureMsh();
+	inline void GetMinimumMsh();
 	inline void GetMsh();
+	inline void GetMsh2();
 	inline void EvaluateMsh();
 	inline void DetectSus();
 	inline void DetectPDD();
@@ -304,3 +306,4 @@ protected:
 	inline int FailParallelIco();
 };
 
+void GetMsh2();
