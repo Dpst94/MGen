@@ -509,7 +509,7 @@ void CP2R::SendHarmMarks() {
 			if (cc[v][s]) break;
 		}
 		mark[step0 + s][vi] = GetHarmName(chm[hs], chm_alter[hs]);
-		if (show_harmony_bass && chm[hs] > 0 && hbc[hs] % 7 != chm[hs]) {
+		if (show_harmony_bass && chm[hs] > -1 && hbc[hs] % 7 != chm[hs]) {
 			if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 2) {
 				mark[step0 + s][vi] += "6";
 			}
@@ -3395,21 +3395,19 @@ int CP2R::FailHarm() {
 		if (hli2.size()) hli2[hli2.size() - 1] = mea_end;
 	}
 	GetBhli();
-	if (chm[hs] > -1) {
-		// Check penultimate harmony not D / DVII
-		if (ep2 == c_len && hli.size() > 1) {
-			hs = hli.size() - 2;
-			if (chm[hs] != 4 && chm[hs] != 6) FLAGH(335, hli[hs]);
-		}
-		GetHarmBass();
-		// Check first harmony not T
-		if (chm.size() && (chm[0] || hbc[0] % 7)) {
-			FLAGH(137, hli[0]);
-		}
-		// Check last harmony not T
-		if (chm.size() && (chm[chm.size() - 1] || hbc[chm.size() - 1] % 7)) {
-			FLAGH(531, hli[chm.size() - 1]);
-		}
+	// Check penultimate harmony not D / DVII
+	if (ep2 == c_len && hli.size() > 1) {
+		hs = hli.size() - 2;
+		if (chm[hs] > -1 && chm[hs] != 4 && chm[hs] != 6) FLAGH(335, hli[hs]);
+	}
+	GetHarmBass();
+	// Check first harmony not T
+	if (chm.size() && chm[0] > -1 && (chm[0] || hbc[0] % 7)) {
+		FLAGH(137, hli[0]);
+	}
+	// Check last harmony not T
+	if (chm.size() && (chm[chm.size() - 1] > 0 || hbc[chm.size() - 1] % 7)) {
+		FLAGH(531, hli[chm.size() - 1]);
 	}
 	if (EvalHarm()) return 1;
 	if (FailTonicCP()) return 1;
@@ -4296,16 +4294,6 @@ void CP2R::GetMsh2() {
 	// Clear harmonic notes vector
 	fill(chn.begin(), chn.end(), 0);
 	fill(cchn.begin(), cchn.end(), 0);
-	hli.push_back(mli[ms]);
-	hli2.push_back(0);
-	hs = hli.size() - 1;
-	if (hli2.size() > 1) hli2[hli2.size() - 2] = hli[hli.size() - 1] - 1;
-	ha64.push_back(0);
-	// Set harmony bass to random
-	hbcc.push_back(127);
-	hbc.push_back(0);
-	chm.push_back(0);
-	chm_alter.push_back(0);
 	int hcount = 0;
 	int bad_harm = 0;
 	// Loop inside measure
