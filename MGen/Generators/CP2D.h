@@ -202,9 +202,10 @@ protected:
 
 	// Accumulated flags
 	int var;
-	vector<FlagInfo> flaga;
+	vector<FlagInfo> flagab; // Saved flags of best variant
+	vector<FlagInfo> flaga; // Flags of current variant
 	FlagInfo temp_flaginfo;
-	int hpenalty; // Harmonic penalty
+	float hpenalty; // Harmonic penalty
 	int hstart; // (s) Start of current harmony
 	int hend; // (s) End of current harmony
 
@@ -398,6 +399,7 @@ protected:
 	vector<vector<int>> ssus; // [v][ls] Points to sus position or note start if there is no sus
 	vector<vector<int>> isus; // [v][ls] 0 - note cannot be intrabar sus. -1 - note can be intrabar sus. -2 - note is intrabar sus
 	vector<vector<int>> msh; // [v][s] Melody shape types for fli
+	vector<vector<int>> mshb; // [v][s] Best msh
 	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
 	vector<int> chn; // [pc] Diatonic pitch classes in chord

@@ -4072,7 +4072,7 @@ void CP2R::EvaluateMsh() {
 			if (msh[v][s] <= 0) continue;
 		}
 		if (!cchnv[shp[s % npm]][pcc[v][s]]) {
-			++hpenalty;
+			hpenalty += 1;
 			// Do not flag discord if suspension, because it will be flagged in sus algorithm
 			if (sus[v][ls]) {}
 			else if (msh[v][s] == pFirst) FLAGA(551, s, s, v);
@@ -4275,7 +4275,7 @@ void CP2R::GetMsh() {
 					EvaluateMsh();
 				}
 				CString st, est;
-				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %d, flags %d:",
+				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %.01f, flags %d:",
 					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1,
 					hpenalty, flaga.size());
 				for (int i = 0; i < 12; ++i) {
@@ -4402,6 +4402,7 @@ void CP2R::GetMsh2() {
 		if (i < sec_hp) shp[i] = 0;
 		else shp[i] = 1;
 	}
+	float min_hpenalty = 1000000.0;
 	// Scan all possible chords
 	for (int hv2 = lchm[0] + 7; hv2 > lchm[0]; --hv2) {
 		hv = hv2 % 7;
@@ -4483,7 +4484,7 @@ void CP2R::GetMsh2() {
 					}
 					flaga.clear();
 					hpenalty = 0;
-					if (hv4 == lchm[1] + 3 || hv2 == lchm[0] + 3) hpenalty = 1;
+					if (hv4 == lchm[1] + 3 || hv2 == lchm[0] + 3) hpenalty += 0.2;
 					for (v = 0; v < av_cnt; ++v) {
 						sp = vsp[v];
 						GetMeasureMsh();
@@ -4509,7 +4510,7 @@ void CP2R::GetMsh2() {
 						EvaluateMsh();
 					}
 					CString st, est;
-					est.Format("Checking chords %s%s %s%s in measure %d:%d, hpenalty %d, flags %d:",
+					est.Format("Checking chords %s%s %s%s in measure %d:%d, hpenalty %.01f, flags %d:",
 						degree_name[hv], hv_alt ? "*" : "",
 						degree_name[hv3], hv_alt2 ? "*" : "",
 						cp_id + 1, ms + 1, hpenalty, flaga.size());
@@ -4531,6 +4532,17 @@ void CP2R::GetMsh2() {
 						est += st;
 					}
 					WriteLog(1, est);
+					// Save best variant
+					if (hpenalty < min_hpenalty) {
+						WriteLog(1, "Selected best hpenalty");
+						min_hpenalty = hpenalty;
+						flagab = flaga;
+						for (s = s0; s < s0 + npm; ++s) {
+							for (v = 0; v < av_cnt; ++v) {
+								mshb[v][s] = msh[v][s];
+							}
+						}
+					}
 					// Stop evaluating variants if all is ok
 					if (!hpenalty) break;
 				}
@@ -4543,10 +4555,16 @@ void CP2R::GetMsh2() {
 		// Stop evaluating variants if all is ok
 		if (!hpenalty) break;
 	}
+	// Apply best msh
+	for (s = s0; s < s0 + npm; ++s) {
+		for (v = 0; v < av_cnt; ++v) {
+			msh[v][s] = mshb[v][s];
+		}
+	}
 	// Save flags
-	for (int fl = 0; fl < flaga.size(); ++fl) {
-		v = flaga[fl].voice;
-		FLAGL(flaga[fl].id, flaga[fl].s, flaga[fl].fsl, flaga[fl].fvl);
+	for (int fl = 0; fl < flagab.size(); ++fl) {
+		v = flagab[fl].voice;
+		FLAGL(flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
 	}
 	// Reset step harmony positions
 	fill(shp.begin(), shp.end(), 0);
