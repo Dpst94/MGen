@@ -222,7 +222,9 @@ protected:
 	inline void GetBasicMsh();
 	inline void GetMeasureMsh();
 	inline void GetMinimumMsh();
+	inline void GetHarmVar(vector<int>& cpos, int &poss_vars);
 	inline void GetMsh();
+	inline void GetHarmVars(int & lchm, int & lchm_alter, int & rat, vector<int>& cpos, int & poss_vars);
 	inline void GetMsh2();
 	inline void EvaluateMsh();
 	inline void DetectSus();

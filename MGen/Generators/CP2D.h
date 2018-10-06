@@ -205,6 +205,8 @@ protected:
 	vector<FlagInfo> flaga;
 	FlagInfo temp_flaginfo;
 	int hpenalty; // Harmonic penalty
+	int hstart; // (s) Start of current harmony
+	int hend; // (s) End of current harmony
 
 	// Local
 	int hrepeat_fired = 0; // Harmonic repeat in step
@@ -401,6 +403,8 @@ protected:
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
 	vector<int> chn; // [pc] Diatonic pitch classes in chord
 	vector<int> cchn; // [pcc] Chromatic pitch classes in chord
+	vector<vector<int>> cchn2; // [harm][pcc] Chromatic pitch classes in chord for multiple chords in measure
+	vector<vector<int>> cpos; // [harm][pc] Possible chords for multiple chords in measure
 	vector<vector<int>> cchnv; // [harm][pcc] Chromatic pitch classes in variant chord
 	vector<int> shp; // [s] Harmony position for each step
 	vector<int> hli; // [hs] Forward links to first notes of each harmony

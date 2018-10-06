@@ -3177,6 +3177,7 @@ void CP2R::GetHarm(int found_gis, int found_fis, int &lchm, int &lchm_alter, int
 			rating = rat;
 		}
 	}
+	if (found_gis == -100) return;
 	lchm_alter = 0;
 	if (mminor) {
 		// Check chords with G or G#
@@ -4070,12 +4071,13 @@ void CP2R::EvaluateMsh() {
 			// For all other notes, check msh and iHarm4
 			if (msh[v][s] <= 0) continue;
 		}
-		if (!cchnv[0][pcc[v][s]]) {
+		if (!cchnv[shp[s % npm]][pcc[v][s]]) {
 			++hpenalty;
 			// Do not flag discord if suspension, because it will be flagged in sus algorithm
 			if (sus[v][ls]) {}
 			else if (msh[v][s] == pFirst) FLAGA(551, s, s, v);
-			else if (msh[v][s] == pDownbeat) FLAGA(83, s, s, v);
+			else if (msh[v][s] == pDownbeat) 
+				FLAGA(83, s, s, v);
 			else if (msh[v][s] == pLeapTo) FLAGA(36, s, s, v);
 			else if (msh[v][s] == pLeapFrom) FLAGA(187, s, s, v);
 			// pLastLT cannot be dissonance, because it is set only if it is not dissonance
@@ -4128,6 +4130,8 @@ void CP2R::GetMinimumMsh() {
 		s2 = fli2[v][ls];
 		// Skip first suspension, mark last suspension
 		if (sus[v][ls]) {
+			// Mark sus start
+			msh[v][sus[v][ls]] = pAux;
 			if (s >= s0) msh[v][s] = pSusStart;
 		}
 		// First note
@@ -4151,6 +4155,22 @@ void CP2R::GetMinimumMsh() {
 		if (fli_size[v] >= 2 && pcc[v][s9] == 11 && msh[v][fli[v][fli_size[v] - 2]] < 0) {
 			msh[v][fli[v][fli_size[v] - 2]] = pLastLT;
 		}
+	}
+}
+
+// Detect all possible chords
+void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
+	for (hv = 0; hv < 7; ++hv) {
+		// At least one note exists
+		if (!chn[hv] && !chn[(hv + 2) % 7] && !chn[(hv + 4) % 7]) continue;
+		// No other notes should exist
+		if (chn[(hv + 1) % 7] || chn[(hv + 3) % 7] || chn[(hv + 5) % 7] || chn[(hv + 6) % 7]) continue;
+		cpos[hv] = 1;
+		++poss_vars;
+		CString st, est;
+		est.Format("Possible chord %s in measure %d:%d",
+			degree_name[hv], cp_id + 1, ms + 1);
+		WriteLog(1, est);
 	}
 }
 
@@ -4186,26 +4206,13 @@ void CP2R::GetMsh() {
 		int lchm;
 		int lchm_alter;
 		int rat;
-		GetHarm(0, 0, lchm, lchm_alter, rat);
 		// Possible chords
 		vector <int> cpos;
 		cpos.resize(7);
 		int poss_vars = 0;
-		// Detect all possible chords
-		for (hv = 0; hv < 7; ++hv) {
-			// At least one note exists
-			if (!chn[hv] && !chn[(hv + 2) % 7] && !chn[(hv + 4) % 7]) continue;
-			// No other notes should exist
-			if (chn[(hv + 1) % 7] || chn[(hv + 3) % 7] || chn[(hv + 5) % 7] || chn[(hv + 6) % 7]) continue;
-			cpos[hv] = 1;
-			++poss_vars;
-			CString st, est;
-			est.Format("Possible chord %s in measure %d:%d",
-			degree_name[hv], cp_id + 1, ms + 1);
-			WriteLog(1, est);
-		}
+		GetHarmVars(lchm, lchm_alter, rat, cpos, poss_vars);
 		if (!poss_vars && ms == mli.size() - 2) {
-			//GetMsh2();
+			GetMsh2();
 			continue;
 		}
 		// Scan all possible chords
@@ -4248,22 +4255,15 @@ void CP2R::GetMsh() {
 						}
 					}
 				}
-				CString st, est;
-				est.Format("Checking chord %s%s in measure %d:%d:",
-					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1);
-				for (int i = 0; i < 12; ++i) {
-					st.Format(" %d", cchn[i]);
-					est += st;
-					if (i == 5) est += " -";
-				}
-				WriteLog(1, est);
 				flaga.clear();
 				hpenalty = 0;
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];
 					GetMeasureMsh();
-					ls = bli[v][s0];
-					s = fli[v][ls];
+					hstart = s0;
+					hend = s0 + npm - 1;
+					s = hstart;
+					ls = bli[v][s];
 					s2 = fli2[v][ls];
 					DetectSus();
 					DetectPDD();
@@ -4271,6 +4271,16 @@ void CP2R::GetMsh() {
 					DetectCambiata();
 					EvaluateMsh();
 				}
+				CString st, est;
+				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %d, flags %d:",
+					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1,
+					hpenalty, flaga.size());
+				for (int i = 0; i < 12; ++i) {
+					st.Format(" %d", cchn[i]);
+					est += st;
+					if (i == 5) est += " -";
+				}
+				WriteLog(1, est);
 				// Stop evaluating variants if all is ok
 				if (!hpenalty) break;
 			}
@@ -4285,17 +4295,29 @@ void CP2R::GetMsh() {
 	}
 }
 
+void CP2R::GetHarmVars(int &lchm, int &lchm_alter, int &rat, vector<int> & cpos, int & poss_vars) {
+	GetHarm(-100, 0, lchm, lchm_alter, rat);
+	GetHarmVar(cpos, poss_vars);
+}
+
 void CP2R::GetMsh2() {
 	// Detect second chord position
+	// Main chord
+	vector<int> lchm;
+	lchm.resize(2);
+	int lchm_alter;
+	int rat;
+	int poss_vars = 0;
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
 	if (mea_end >= ep2) return;
 	// Clear harmonic notes vector
 	fill(chn.begin(), chn.end(), 0);
-	fill(cchn.begin(), cchn.end(), 0);
+	fill(cchn2[0].begin(), cchn2[0].end(), 0);
+	fill(cchn2[1].begin(), cchn2[1].end(), 0);
 	int hcount = 0;
-	int bad_harm = 0;
+	int sec_hp = 0;
 	// Loop inside measure
 	for (s = mli[ms]; s <= mea_end; ++s) {
 		for (v = 0; v < av_cnt; ++v) {
@@ -4308,17 +4330,24 @@ void CP2R::GetMsh2() {
 			// For first suspension in measure, evaluate last step. In other cases - first step
 			if (fli[v][ls] <= mli[ms] && sus[v][ls]) {
 				// For first suspended dissonance resolved note do not check msh
-				if (susres[v][ls]) continue;
+				if (msh[v][sus[v][ls]] < 0) continue;
 			}
 			else {
-				// For all other notes, check msh and iHarm4
+				// For all other notes, check msh
 				if (msh[v][s] <= 0) continue;
 			}
 			// Pitch class
 			int n = pc[v][s];
 			// Find harmonic conflict
 			if (s > mli[ms] && (chn[(n + 1) % 7] || chn[(n + 6) % 7] ||
-				(chn[n] && !cchn[pcc[v][s]]))) {
+				(chn[n] && !cchn2[hcount][pcc[v][s]]))) {
+				// More than two harmonies
+				if (hcount) return;
+				// Two harmonies penultimate
+				else {
+					// Get second harmony position
+					sec_hp = s - mli[ms];
+				}
 				// Remove notes of current step from chord, because this step belongs to next chord
 				for (v2 = 0; v2 < v; ++v2) {
 					ls = bli[v2][s];
@@ -4330,75 +4359,14 @@ void CP2R::GetMsh2() {
 					if (msh[v2][fli[v2][ls]] <= 0) continue;
 					// Remove note
 					--chn[pc[v2][s]];
-					--cchn[pcc[v][s]];
+					--cchn2[hcount][pcc[v][s]];
 				}
-				// More than two harmonies
-				if (hcount) {
-					FLAGHL(40, s, mli[ms]);
-					chm[hs] = -1;
-					chm_alter[hs] = -1;
-					RemoveHarmDuplicate();
-					bad_harm = 1;
-					break;
-				}
-				else {
-					// Two harmonies penultimate
-					if (ms == mli.size() - 2) {
-						FLAGHL(306, s, mli[ms]);
-						// Prohibit wrong second harmony position
-						int dist = s - mli[ms];
-						if (npm == 8) {
-							if (dist != 4 && dist != 6) FLAGH(556, s);
-						}
-						else if (npm == 4) {
-							if (dist != 2) FLAGH(556, s);
-						}
-						else if (npm == 6) {
-							if (dist != 4) FLAGH(556, s);
-						}
-						else if (npm == 10) {
-							if (dist != 6) FLAGH(556, s);
-						}
-						else if (npm == 12) {
-							if (btype == 4) {
-								if (dist != 6) FLAGH(556, s);
-							}
-							else {
-								if (dist != 8) FLAGH(556, s);
-							}
-						}
-					}
-					else {
-						/*
-						// Stepwize resolution of 5th to 6th or 6th to 5th with two harmonies in measure
-						if ((sp == 4 ||
-						(sp == 5 && sus[ls1] && fli2[ls1] - sus[ls1] == 3 && rlen[ls1 + 1] >= 4)) && (
-						(ivlc[mli[ms]] == 4 && ivlc[s] == 5) ||
-						(ivlc[mli[ms]] == 5 && ivlc[s] == 4)) &&
-						abs(ac[cpv][mli[ms]] - ac[cpv][s]) < 2)
-						FLAG2L(329, s, mli[ms]);
-						else FLAG2L(307, s, mli[ms]);
-						*/
-						FLAGHL(307, s, mli[ms]);
-						chm[hs] = -1;
-						chm_alter[hs] = 0;
-						RemoveHarmDuplicate();
-						bad_harm = 1;
-						break;
-					}
-				}
-				//GetHarm(found_gis, found_fis, chm[hs], chm_alter[hs], rat);
+				GetHarmVars(lchm[hcount], lchm_alter, rat, cpos[hcount], poss_vars);
+				if (poss_vars == 0) return;
+				// Next harmony counter
+				++hcount;
 				fill(chn.begin(), chn.end(), 0);
-				fill(cchn.begin(), cchn.end(), 0);
-				hli.push_back(s);
-				hli2.push_back(0);
-				hs = hli.size() - 1;
-				if (hli2.size() > 1) hli2[hli2.size() - 2] = hli[hli.size() - 1] - 1;
-				chm.push_back(0);
-				ha64.push_back(0);
-				hbcc.push_back(127);
-				hbc.push_back(0);
-				chm_alter.push_back(0);
+				fill(cchn2[hcount].begin(), cchn2[hcount].end(), 0);
 				// Reinitialize chord notes for new chord
 				for (v2 = 0; v2 < av_cnt; ++v2) {
 					ls = bli[v2][s];
@@ -4415,19 +4383,168 @@ void CP2R::GetMsh2() {
 					}
 					// Record note
 					++chn[pc[v2][s]];
-					++cchn[pcc[v2][s]];
+					++cchn2[hcount][pcc[v2][s]];
 				}
-				// Next harmony counter
-				++hcount;
 			}
 			// Record note
 			++chn[n];
-			++cchn[pcc[v][s]];
+			++cchn2[hcount][pcc[v][s]];
 		}
-		if (bad_harm) break;
 	}
-	// Get possible chords
-	// Scan chords
+	// Process last chord
+	GetHarmVars(lchm[hcount], lchm_alter, rat, cpos[hcount], poss_vars);
+	if (poss_vars == 0) return;
+	// Init step harmony position
+	for (int i = 0; i < npm; ++i) {
+		if (i < sec_hp) shp[i] = 0;
+		else shp[i] = 1;
+	}
+	// Scan all possible chords
+	for (int hv2 = lchm[0] + 7; hv2 > lchm[0]; --hv2) {
+		hv = hv2 % 7;
+		if (!cpos[0][hv]) continue;
+		for (hv_alt = 0; hv_alt <= 1; ++hv_alt) {
+			// Only for melodic minor
+			if (hv_alt && !mminor) continue;
+			fill(cchnv[0].begin(), cchnv[0].end(), 0);
+			cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
+			cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 1;
+			cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 1;
+			if (mminor) {
+				if (hv_alt) {
+					if (cchnv[0][8]) {
+						// Skip if this variant conflicts with detected notes
+						if (cchn2[0][8]) continue;
+						// Convert to altered
+						cchnv[0][8] = 0;
+						cchnv[0][9] = 1;
+					}
+					else if (cchnv[0][10]) {
+						// Skip if this variant conflicts with detected notes
+						if (cchn2[0][10]) continue;
+						// Convert to altered
+						cchnv[0][10] = 0;
+						cchnv[0][11] = 1;
+					}
+					else continue;
+				}
+				else {
+					if (cchnv[0][8]) {
+						// Skip if this variant conflicts with detected notes
+						if (cchn2[0][9]) continue;
+					}
+					if (cchnv[0][10]) {
+						// Skip if this variant conflicts with detected notes
+						if (cchn2[0][11]) continue;
+					}
+				}
+			}
+			for (int hv4 = lchm[1] + 7; hv4 > lchm[1]; --hv4) {
+				int hv3 = hv4 % 7;
+				if (!cpos[1][hv3]) continue;
+				for (int hv_alt2 = 0; hv_alt2 <= 1; ++hv_alt2) {
+					// Only for melodic minor
+					if (hv_alt2 && !mminor) continue;
+					fill(cchnv[1].begin(), cchnv[1].end(), 0);
+					cchnv[1][(c_cc[hv3 + 14] + 24 - bn) % 12] = 1;
+					cchnv[1][(c_cc[hv3 + 16] + 24 - bn) % 12] = 1;
+					cchnv[1][(c_cc[hv3 + 18] + 24 - bn) % 12] = 1;
+					if (mminor) {
+						if (hv_alt2) {
+							if (cchnv[1][8]) {
+								// Skip if this variant conflicts with detected notes
+								if (cchn2[1][8]) continue;
+								// Convert to altered
+								cchnv[1][8] = 0;
+								cchnv[1][9] = 1;
+							}
+							else if (cchnv[1][10]) {
+								// Skip if this variant conflicts with detected notes
+								if (cchn2[1][10]) continue;
+								// Convert to altered
+								cchnv[1][10] = 0;
+								cchnv[1][11] = 1;
+							}
+							else continue;
+						}
+						else {
+							if (cchnv[1][8]) {
+								// Skip if this variant conflicts with detected notes
+								if (cchn2[1][9]) continue;
+							}
+							if (cchnv[1][10]) {
+								// Skip if this variant conflicts with detected notes
+								if (cchn2[1][11]) continue;
+							}
+						}
+					}
+					flaga.clear();
+					hpenalty = 0;
+					if (hv4 == lchm[1] + 3 || hv2 == lchm[0] + 3) hpenalty = 1;
+					for (v = 0; v < av_cnt; ++v) {
+						sp = vsp[v];
+						GetMeasureMsh();
+						// First harmony
+						hstart = s0;
+						hend = s0 + sec_hp - 1;
+						s = hstart;
+						ls = bli[v][s];
+						s2 = fli2[v][ls];
+						DetectSus();
+						DetectPDD();
+						// Second harmony
+						hstart = s0 + sec_hp;
+						hend = s0 + npm - 1;
+						s = hstart;
+						ls = bli[v][s];
+						s2 = fli2[v][ls];
+						DetectSus();
+						DetectPDD();
+						// Full measure
+						DetectDNT();
+						DetectCambiata();
+						EvaluateMsh();
+					}
+					CString st, est;
+					est.Format("Checking chords %s%s %s%s in measure %d:%d, hpenalty %d, flags %d:",
+						degree_name[hv], hv_alt ? "*" : "",
+						degree_name[hv3], hv_alt2 ? "*" : "",
+						cp_id + 1, ms + 1, hpenalty, flaga.size());
+					for (int i = 0; i < 12; ++i) {
+						st.Format(" %d", cchn2[0][i]);
+						est += st;
+						if (i == 5) est += " -";
+						if (i == 11) est += " /";
+					}
+					for (int i = 0; i < 12; ++i) {
+						st.Format(" %d", cchn2[1][i]);
+						est += st;
+						if (i == 5) est += " -";
+					}
+					for (int fl = 0; fl < flaga.size(); ++fl) {
+						st.Format(" [%d] %d %s (%s)", flaga[fl].id, flaga[fl].s, 
+							ruleinfo[flaga[fl].id].RuleName, 
+							ruleinfo[flaga[fl].id].SubRuleName);
+						est += st;
+					}
+					WriteLog(1, est);
+					// Stop evaluating variants if all is ok
+					if (!hpenalty) break;
+				}
+				// Stop evaluating variants if all is ok
+				if (!hpenalty) break;
+			}
+			// Stop evaluating variants if all is ok
+			if (!hpenalty) break;
+		}
+		// Stop evaluating variants if all is ok
+		if (!hpenalty) break;
+	}
+	// Save flags
+	for (int fl = 0; fl < flaga.size(); ++fl) {
+		v = flaga[fl].voice;
+		FLAGL(flaga[fl].id, flaga[fl].s, flaga[fl].fsl, flaga[fl].fvl);
+	}
 	// Reset step harmony positions
 	fill(shp.begin(), shp.end(), 0);
 }
@@ -4436,7 +4553,7 @@ void CP2R::DetectDNT() {
 	if (!accept[sp][vc][0][258]) return;
 	// Suspension will conflict with DNT
 	int ls0 = bli[v][mli[ms]];
-	if (sus[v][ls]) return;
+	if (sus[v][ls0]) return;
 	int ls_max = bli[v][mli[ms] + npm - 1] - 3;
 	if (ls_max > fli_size[v] - 4) ls_max = fli_size[v] - 4;
 	// Not enough notes for DNT
@@ -4468,6 +4585,8 @@ void CP2R::DetectDNT() {
 				if (!accept[sp][vc][0][3]) continue;
 			}
 			if (ls < fli_size[v] - 3) {
+				// Note 4 must be chord tone
+				if (!cchnv[shp[fli[v][ls + 3] % npm]][pcc[v][fli[v][ls + 3]]]) continue;
 				// Note 4 is short
 				if (llen[v][ls + 3] < 2) continue;
 				// Note 1 and 4 are different
@@ -4552,13 +4671,17 @@ void CP2R::DetectCambiata() {
 
 void CP2R::DetectSus() {
 	susres[v][ls] = 0;
+	// Skip first measure
 	if (!ms) return;
-	if (!cc[v][s0]) return;
-	if (!sus[v][ls]) return;
+	// Skip pause
+	if (!cc[v][s]) return;
+	// Note must start before harmony start
+	if (fli[v][ls] >= hstart) return;
+	msh[v][hstart] = pAux;
 	// Allow if not discord
-	if (cchnv[shp[s0 % npm]][pcc[v][s0]]) {
+	if (cchnv[shp[s % npm]][pcc[v][s]]) {
 		// Are there enough notes for resolution ornament?
-		if (ls < fli_size[v] - 2) {
+		if (ls < fli_size[v] - 2 && fli2[v][ls + 1] < hend) {
 			s3 = fli2[v][ls + 1];
 			s4 = fli2[v][ls + 2];
 			// Is there a dissonance between two consonances, forming stepwise descending movement?
@@ -4568,14 +4691,14 @@ void CP2R::DetectSus() {
 				if ((c[v][s3] - c[v][s2] == 1 && c[v][s3] - c[v][s4] == 2) ||
 					(c[v][s2] - c[v][s3] == 2 && c[v][s4] - c[v][s3] == 1)) {
 					susres[v][ls] = 1;
-					msh[v][sus[v][ls]] = pSusHarm;
+					msh[v][hstart] = pSusHarm;
 					msh[v][fli[v][ls + 1]] = pAux;
 				}
 			}
 		}
 		return;
 	}
-	// Last sus
+	// Last generated note is sus
 	if (ls >= fli_size[v] - 1) {
 		return;
 	}
@@ -4584,14 +4707,18 @@ void CP2R::DetectSus() {
 		return;
 	}
 	// Available beats
-	s3 = sus[v][ls] + npm / 4;
-	s4 = sus[v][ls] + npm / 2;
-	s5 = sus[v][ls] + npm * 3 / 4;
+	s3 = hstart + npm / 4;
+	s4 = hstart + npm / 2;
+	s5 = hstart + npm * 3 / 4;
 	// For species 2 and 4 check only 3rd beat
 	if (sp == 2 || sp == 4) {
 		s3 = 0;
 		s5 = 0;
 	}
+	// Check that beats are before or at sus note
+	if (s3 && s3 <= s2) s3 = 0;
+	if (s4 && s4 <= s2) s4 = 0;
+	if (s5 && s5 <= s2) s5 = 0;
 	// Check which beats are allowed by rules
 	if (!accept[sp][vc][0][419]) s3 = 0;
 	if (!accept[sp][vc][0][420]) s5 = 0;
@@ -4642,7 +4769,7 @@ void CP2R::DetectSus() {
 	}
 	// First leap is too long?
 	if (abs(cc[v][fli[v][ls + 1]] - cc[v][s2]) > sus_insert_max_leap[sp][vc][0]) {
-		FLAGA(295, fli[v][ls + 1], sus[v][ls], v);
+		FLAGA(295, fli[v][ls + 1], hstart, v);
 	}
 	// Single insertion, second movement is leap
 	if (!accept[sp][vc][0][136]) {
@@ -4687,9 +4814,13 @@ void CP2R::DetectSus() {
 void CP2R::DetectPDD() {
 	// First measure
 	if (!ms) return;
-	if (!cc[v][s0]) return;
+	if (!cc[v][s]) return;
 	// Last note
 	if (s2 == ep2 - 1) return;
+	// Both notes should be inside measure
+	if (s2 >= hend) return;
+	// Note must not start before harmony start
+	if (fli[v][ls] != hstart) return;
 	// Second note must be non-chord tone
 	if (cchnv[shp[s2 % npm]][pcc[v][s2]]) return;
 	// Suspension will conflict with PDD

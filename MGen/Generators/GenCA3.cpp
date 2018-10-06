@@ -14,6 +14,12 @@ CGenCA3::~CGenCA3() {
 }
 
 void CGenCA3::InitAnalysis() {
+	cchn2.resize(2);
+	cchn2[0].resize(12);
+	cchn2[1].resize(12);
+	cpos.resize(2);
+	cpos[0].resize(7);
+	cpos[1].resize(7);
 	chn.resize(7);
 	cchn.resize(12);
 	cchnv.resize(2);
