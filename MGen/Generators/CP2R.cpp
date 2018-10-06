@@ -3254,7 +3254,7 @@ int CP2R::FailHarm() {
 				// For first suspension in measure, evaluate last step. In other cases - first step
 				if (fli[v][ls] <= mli[ms] && sus[v][ls]) {
 					// For first suspended dissonance resolved note do not check msh
-					if (susres[v][ls]) continue;
+					if (msh[v][sus[v][ls]] < 0) continue;
 				}
 				else {
 					// For all other notes, check msh and iHarm4
@@ -3360,7 +3360,7 @@ int CP2R::FailHarm() {
 						// For first suspension in measure, evaluate last step. In other cases - first step
 						if (fli[v2][ls] <= mli[ms] && sus[v2][ls]) {
 							// For first suspended dissonance resolved note do not check msh
-							if (susres[v2][ls] > 0) continue;
+							if (msh[v2][sus[v2][ls]] < 0) continue;
 						}
 						else {
 							// For all other notes, check msh and iHarm4
@@ -4065,7 +4065,7 @@ void CP2R::EvaluateMsh() {
 		// For first suspension in measure, evaluate last step. In other cases - first step
 		if (s <= s0 && sus[v][ls]) {
 			// For first suspended dissonance resolved note do not check msh
-			if (susres[v][ls] > 0) continue;
+			if (msh[v][sus[v][ls]] < 0) continue;
 		}
 		else {
 			// For all other notes, check msh and iHarm4
@@ -4101,7 +4101,10 @@ void CP2R::GetMeasureMsh() {
 		// First note is always downbeat
 		if (s == fin[v]) msh[v][s] = pFirst;
 		// Sus start is always harmonic
-		else if (sus[v][ls]) msh[v][s] = pSusStart;
+		else if (sus[v][ls]) {
+			msh[v][s] = pSusStart;
+			msh[v][sus[v][ls]] = pAux;
+		}
 		// Downbeat
 		else if (s % npm == 0) msh[v][s] = pDownbeat;
 		else if (s > 0 && leap[v][s - 1]) msh[v][s] = pLeapTo;
@@ -4375,7 +4378,7 @@ void CP2R::GetMsh2() {
 					// For first suspension in measure, evaluate last step. In other cases - first step
 					if (fli[v2][ls] <= mli[ms] && sus[v2][ls]) {
 						// For first suspended dissonance resolved note do not check msh
-						if (susres[v2][ls] > 0) continue;
+						if (msh[v2][sus[v2][ls]] < 0) continue;
 					}
 					else {
 						// For all other notes, check msh and iHarm4
@@ -4670,7 +4673,6 @@ void CP2R::DetectCambiata() {
 }
 
 void CP2R::DetectSus() {
-	susres[v][ls] = 0;
 	// Skip first measure
 	if (!ms) return;
 	// Skip pause
@@ -4690,7 +4692,6 @@ void CP2R::DetectSus() {
 				// Detect stepwise+leap or leap+stepwise
 				if ((c[v][s3] - c[v][s2] == 1 && c[v][s3] - c[v][s4] == 2) ||
 					(c[v][s2] - c[v][s3] == 2 && c[v][s4] - c[v][s3] == 1)) {
-					susres[v][ls] = 1;
 					msh[v][hstart] = pSusHarm;
 					msh[v][fli[v][ls + 1]] = pAux;
 				}
@@ -4797,17 +4798,14 @@ void CP2R::DetectSus() {
 	if (s3) {
 		msh[v][sus[v][ls]] = pSusNonHarm;
 		msh[v][fli[v][ls3]] = pSusRes;
-		susres[v][ls] = 1;
 	}
 	if (s4) {
 		msh[v][sus[v][ls]] = pSusNonHarm;
 		msh[v][fli[v][ls4]] = pSusRes;
-		susres[v][ls] = 1;
 	}
 	if (s5) {
 		msh[v][sus[v][ls]] = pSusNonHarm;
 		msh[v][fli[v][ls5]] = pSusRes;
-		susres[v][ls] = 1;
 	}
 }
 

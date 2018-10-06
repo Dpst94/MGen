@@ -62,7 +62,6 @@ void CGenCA3::InitAnalysis() {
 	fsl.resize(av_cnt);
 	fvl.resize(av_cnt);
 	sus.resize(av_cnt);
-	susres.resize(av_cnt);
 	ssus.resize(av_cnt);
 	isus.resize(av_cnt);
 	msh.resize(av_cnt);
@@ -109,7 +108,6 @@ void CGenCA3::InitAnalysis() {
 		fsl[v].resize(c_len);
 		fvl[v].resize(c_len);
 		sus[v].resize(c_len);
-		susres[v].resize(c_len);
 		ssus[v].resize(c_len);
 		isus[v].resize(c_len);
 		msh[v].resize(c_len);

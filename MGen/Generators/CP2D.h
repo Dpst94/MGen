@@ -395,7 +395,6 @@ protected:
 	// Harmonic data
 	int min_sus; // Minimal length of intrabar sus in croches
 	vector<vector<int>> sus; // [v][ls] Note suspension flag (when above zero, links to first cantus-changing step)
-	vector<vector<int>> susres; // [v][ls] =1 if sus is resolved correctly
 	vector<vector<int>> ssus; // [v][ls] Points to sus position or note start if there is no sus
 	vector<vector<int>> isus; // [v][ls] 0 - note cannot be intrabar sus. -1 - note can be intrabar sus. -2 - note is intrabar sus
 	vector<vector<int>> msh; // [v][s] Melody shape types for fli
