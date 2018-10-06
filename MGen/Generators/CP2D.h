@@ -205,7 +205,7 @@ protected:
 	vector<FlagInfo> flagab; // Saved flags of best variant
 	vector<FlagInfo> flaga; // Flags of current variant
 	FlagInfo temp_flaginfo;
-	float hpenalty; // Harmonic penalty
+	int hpenalty; // Harmonic penalty
 	int hstart; // (s) Start of current harmony
 	int hend; // (s) End of current harmony
 

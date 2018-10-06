@@ -4072,7 +4072,7 @@ void CP2R::EvaluateMsh() {
 			if (msh[v][s] <= 0) continue;
 		}
 		if (!cchnv[shp[s % npm]][pcc[v][s]]) {
-			hpenalty += 1;
+			hpenalty += 10;
 			// Do not flag discord if suspension, because it will be flagged in sus algorithm
 			if (sus[v][ls]) {}
 			else if (msh[v][s] == pFirst) FLAGA(551, s, s, v);
@@ -4275,7 +4275,7 @@ void CP2R::GetMsh() {
 					EvaluateMsh();
 				}
 				CString st, est;
-				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %.01f, flags %d:",
+				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %.d, flags %d:",
 					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1,
 					hpenalty, flaga.size());
 				for (int i = 0; i < 12; ++i) {
@@ -4402,7 +4402,7 @@ void CP2R::GetMsh2() {
 		if (i < sec_hp) shp[i] = 0;
 		else shp[i] = 1;
 	}
-	float min_hpenalty = 1000000.0;
+	int min_hpenalty = 1000000;
 	// Scan all possible chords
 	for (int hv2 = lchm[0] + 7; hv2 > lchm[0]; --hv2) {
 		hv = hv2 % 7;
@@ -4484,7 +4484,7 @@ void CP2R::GetMsh2() {
 					}
 					flaga.clear();
 					hpenalty = 0;
-					if (hv4 == lchm[1] + 3 || hv2 == lchm[0] + 3) hpenalty += 0.2;
+					if (hv4 == lchm[1] + 3 || hv2 == lchm[0] + 3) hpenalty += 1;
 					for (v = 0; v < av_cnt; ++v) {
 						sp = vsp[v];
 						GetMeasureMsh();
@@ -4510,7 +4510,7 @@ void CP2R::GetMsh2() {
 						EvaluateMsh();
 					}
 					CString st, est;
-					est.Format("Checking chords %s%s %s%s in measure %d:%d, hpenalty %.01f, flags %d:",
+					est.Format("Checking chords %s%s %s%s in measure %d:%d, hpenalty %d, flags %d:",
 						degree_name[hv], hv_alt ? "*" : "",
 						degree_name[hv3], hv_alt2 ? "*" : "",
 						cp_id + 1, ms + 1, hpenalty, flaga.size());
