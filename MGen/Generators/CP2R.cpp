@@ -4103,7 +4103,7 @@ void CP2R::GetMeasureMsh() {
 		// Sus start is always harmonic
 		else if (sus[v][ls]) {
 			msh[v][s] = pSusStart;
-			msh[v][sus[v][ls]] = pAux;
+			msh[v][sus[v][ls]] = pSusHarm;
 		}
 		// Downbeat
 		else if (s % npm == 0) msh[v][s] = pDownbeat;
@@ -4726,9 +4726,9 @@ void CP2R::DetectSus() {
 		return;
 	}
 	// Available beats
-	s3 = hstart + npm / 4;
-	s4 = hstart + npm / 2;
-	s5 = hstart + npm * 3 / 4;
+	s3 = hstart + 2;
+	s4 = hstart + 4;
+	s5 = hstart + 6;
 	// For species 2 and 4 check only 3rd beat
 	if (sp == 2 || sp == 4) {
 		s3 = 0;
@@ -4816,14 +4816,17 @@ void CP2R::DetectSus() {
 	if (s3) {
 		msh[v][sus[v][ls]] = pSusNonHarm;
 		msh[v][fli[v][ls3]] = pSusRes;
+		WriteLog(1, "Detected sus at s3");
 	}
 	if (s4) {
 		msh[v][sus[v][ls]] = pSusNonHarm;
 		msh[v][fli[v][ls4]] = pSusRes;
+		WriteLog(1, "Detected sus at s4");
 	}
 	if (s5) {
 		msh[v][sus[v][ls]] = pSusNonHarm;
 		msh[v][fli[v][ls5]] = pSusRes;
+		WriteLog(1, "Detected sus at s5");
 	}
 }
 
