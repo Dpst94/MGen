@@ -4068,25 +4068,14 @@ void CP2R::EvaluateMsh() {
 	for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 		s = fli[v][ls];
 		if (!cc[v][s]) continue;
-		// For first suspension in measure, evaluate last step. In other cases - first step
-		if (s <= s0 && sus[v][ls]) {
-			// For first suspended dissonance resolved note do not check msh
-			if (msh[v][sus[v][ls]] < 0) continue;
-		}
-		else {
-			// For all other notes, check msh and iHarm4
-			if (msh[v][s] <= 0) continue;
-		}
+		// If note starts in current measure, always check its start
+		if (s < s0) continue;
+		if (msh[v][s] <= 0) continue;
 		if (!cchnv[shp[s % npm]][pcc[v][s]]) {
-			hpenalty += 10;
-			// Do not flag discord if suspension, because it will be flagged in sus algorithm
-			if (sus[v][ls]) {}
-			else if (msh[v][s] == pFirst) FLAGA(551, s, s, v);
-			else if (msh[v][s] == pDownbeat) 
-				FLAGA(83, s, s, v);
+			if (msh[v][s] == pFirst) FLAGA(551, s, s, v);
+			else if (msh[v][s] == pDownbeat) FLAGA(83, s, s, v);
 			else if (msh[v][s] == pLeapTo) FLAGA(36, s, s, v);
 			else if (msh[v][s] == pLeapFrom) FLAGA(187, s, s, v);
-			// pLastLT cannot be dissonance, because it is set only if it is not dissonance
 			else if (msh[v][s] == pSusStart) FLAGA(458, s, s, v);
 			// pSusRes does not have separate flag, because it is marked as not resolved
 			// This is protection against wrong melodic shape value
@@ -4183,7 +4172,7 @@ void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 		CString st, est;
 		est.Format("Possible chord %s in measure %d:%d",
 			degree_name[hv], cp_id + 1, ms + 1);
-		WriteLog(1, est);
+		WriteLog(3, est);
 	}
 }
 
@@ -4293,7 +4282,7 @@ void CP2R::GetMsh() {
 					est += st;
 					if (i == 5) est += " -";
 				}
-				WriteLog(1, est);
+				WriteLog(3, est);
 				// Stop evaluating variants if all is ok
 				if (!hpenalty) break;
 			}
@@ -4534,10 +4523,10 @@ void CP2R::GetMsh2() {
 							ruleinfo[flaga[fl].id].SubRuleName);
 						est += st;
 					}
-					WriteLog(1, est);
+					WriteLog(3, est);
 					// Save best variant
 					if (hpenalty < min_hpenalty) {
-						WriteLog(1, "Selected best hpenalty");
+						WriteLog(3, "Selected best hpenalty");
 						min_hpenalty = hpenalty;
 						flagab = flaga;
 						for (s = s0; s < s0 + npm; ++s) {
@@ -4700,7 +4689,7 @@ void CP2R::DetectSus() {
 	if (!cc[v][s]) return;
 	// Note must start before harmony start
 	if (fli[v][ls] >= hstart) return;
-	msh[v][hstart] = pAux;
+	msh[v][hstart] = pSusHarm;
 	msh[v][fli[v][ls]] = pSusStart;
 	// Allow if not discord
 	if (cchnv[shp[s % npm]][pcc[v][s]]) {
@@ -4714,7 +4703,6 @@ void CP2R::DetectSus() {
 				// Detect stepwise+leap or leap+stepwise
 				if ((c[v][s3] - c[v][s2] == 1 && c[v][s3] - c[v][s4] == 2) ||
 					(c[v][s2] - c[v][s3] == 2 && c[v][s4] - c[v][s3] == 1)) {
-					msh[v][hstart] = pSusHarm;
 					msh[v][fli[v][ls + 1]] = pAux;
 				}
 			}
@@ -4824,17 +4812,17 @@ void CP2R::DetectSus() {
 	if (s3) {
 		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls3]] = pSusRes;
-		WriteLog(1, "Detected sus at s3");
+		WriteLog(3, "Detected sus at s3");
 	}
 	if (s4) {
 		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls4]] = pSusRes;
-		WriteLog(1, "Detected sus at s4");
+		WriteLog(3, "Detected sus at s4");
 	}
 	if (s5) {
 		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls5]] = pSusRes;
-		WriteLog(1, "Detected sus at s5");
+		WriteLog(3, "Detected sus at s5");
 	}
 }
 

@@ -157,6 +157,7 @@
 	temp_flaginfo.fsl = s2; \
 	temp_flaginfo.fvl = v2; \
 	flaga.push_back(temp_flaginfo); \
+  if (!accept[sp][vc][0][id2]) hpenalty += 10; \
 } while (0)
 
 // Accumulate and return flag
