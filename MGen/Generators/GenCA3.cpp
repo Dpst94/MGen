@@ -164,12 +164,16 @@ int CGenCA3::XML_to_CP() {
 				ibl[pos + 8.0 * xfi.mea[m].len - 1] = 1;
 			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
 				int ln = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
-				it[v].resize(pos + ln);
-				ifi.resize(pos + ln, 100);
-				ibt.resize(pos + ln);
-				cc[v].resize(pos + ln);
-				ial[v].resize(pos + ln);
-				retr[v].resize(pos + ln);
+				c_len = max(c_len, pos + ln);
+				it[v].resize(c_len);
+				ifi.resize(c_len, 100);
+				ibt.resize(c_len);
+				if (pos + ln == 1127) {
+					WriteLog(1, "WOW");
+				}
+				cc[v].resize(c_len);
+				ial[v].resize(c_len);
+				retr[v].resize(c_len);
 				if (xfi.note[vi][m][ni].tempo && !cp_tempo)
 					cp_tempo = xfi.note[vi][m][ni].tempo;
 				if (pos && !xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].tie_stop &&
@@ -195,7 +199,6 @@ int CGenCA3::XML_to_CP() {
 					it[v][pos] += ",";
 				it[v][pos] += xfi.note[vi][m][ni].lyric;
 				pos += ln;
-				c_len = max(c_len, pos);
 			}
 		}
 	}
@@ -589,7 +592,7 @@ void CGenCA3::GetCPKey() {
 	GetDiatonic(0, c_len);
 	GetPitchClass(0, c_len);
 	// Get base note as last note in bass
-	for (s = c_len - 1; s >= 0; ++s) {
+	for (s = c_len - 1; s >= 0; --s) {
 		if (cc[0][s]) {
 			//bn = cc[0][s] % 12;
 			// Collect notes from all voices
