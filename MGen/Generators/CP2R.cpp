@@ -440,8 +440,14 @@ void CP2R::SendLining(int pos, int x, int i) {
 			}
 		}
 		else {
-			if (msh[v][fli[v][ls]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
-			else lining[pos + i][vi] = 0;
+			if (hli[bhli[x]] > fli[v][ls]) {
+				if (msh[v][hli[bhli[x]]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
+				else lining[pos + i][vi] = 0;
+			}
+			else {
+				if (msh[v][fli[v][ls]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
+				else lining[pos + i][vi] = 0;
+			}
 		}
 	}
 }
@@ -4698,6 +4704,7 @@ void CP2R::DetectSus() {
 	// Note must start before harmony start
 	if (fli[v][ls] >= hstart) return;
 	msh[v][hstart] = pAux;
+	msh[v][fli[v][ls]] = pSusStart;
 	// Allow if not discord
 	if (cchnv[shp[s % npm]][pcc[v][s]]) {
 		// Are there enough notes for resolution ornament?
@@ -4722,7 +4729,7 @@ void CP2R::DetectSus() {
 		return;
 	}
 	// Full measure should be generated
-	if (sus[v][ls] + npm >= ep2 && ep2 < c_len) {
+	if (mli[ms] + npm >= ep2 && ep2 < c_len) {
 		return;
 	}
 	// Available beats
@@ -4814,17 +4821,17 @@ void CP2R::DetectSus() {
 	// Mark resolution as obligatory harmonic in basic msh and ending as non-harmonic
 	// In this case all resolutions are marked, although one of them is enough, but this is a very rare case that several resolutions pass all checks
 	if (s3) {
-		msh[v][sus[v][ls]] = pSusNonHarm;
+		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls3]] = pSusRes;
 		WriteLog(1, "Detected sus at s3");
 	}
 	if (s4) {
-		msh[v][sus[v][ls]] = pSusNonHarm;
+		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls4]] = pSusRes;
 		WriteLog(1, "Detected sus at s4");
 	}
 	if (s5) {
-		msh[v][sus[v][ls]] = pSusNonHarm;
+		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls5]] = pSusRes;
 		WriteLog(1, "Detected sus at s5");
 	}
@@ -4842,14 +4849,19 @@ void CP2R::DetectPDD() {
 	if (fli[v][ls] != hstart) return;
 	// Second note must be non-chord tone
 	if (cchnv[shp[s2 % npm]][pcc[v][s2]]) return;
-	// Suspension will conflict with PDD
-	if (sus[v][ls]) return;
 	// No pauses
 	if (!cc[v][s] || !cc[v][s - 1] || !cc[v][s2 + 1]) return;
 	// Stepwize downward movement
 	if (c[v][s] - c[v][s - 1] != -1) return;
 	// Note 2 is not too long
 	if (llen[v][ls] > 4) return;
+	// Find at least one dissonance
+	/*
+	int has_dissonance = 0;
+	for (v2 = 0; v2 < av_cnt; ++v2) {
+		if (v2 == v) continue;
+	}
+	*/
 	if (ls < fli_size[v] - 1) {
 		// Stepwize downward movement
 		if (c[v][s2 + 1] - c[v][s2] != -1) return;
