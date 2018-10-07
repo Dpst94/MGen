@@ -3248,7 +3248,7 @@ int CP2R::FailHarm() {
 			for (v = 0; v < av_cnt; ++v) {
 				ls = bli[v][s];
 				// Skip if not note start or sus
-				if (fli[v][ls] != s && sus[v][ls] != s) continue;
+				if (fli[v][ls] != s && hli.back() != s) continue;
 				// Skip pauses
 				if (!cc[v][s]) continue;
 				sp = vsp[v];
@@ -3257,13 +3257,13 @@ int CP2R::FailHarm() {
 				else if (pcc[v][s] == 10) found_gis = -1;
 				else if (pcc[v][s] == 9) found_fis = 1;
 				else if (pcc[v][s] == 8) found_fis = -1;
-				// For first suspension in measure, evaluate last step. In other cases - first step
-				if (fli[v][ls] <= mli[ms] && sus[v][ls]) {
-					// For first suspended dissonance resolved note do not check msh
-					if (msh[v][sus[v][ls]] < 0) continue;
+				// For first suspension in harmony, check harmony start msh
+				if (fli[v][ls] <= hli.back() && s == hli.back()) {
+					// If first suspension in harmony is non-harmonic, do not add it to harmony
+					if (msh[v][hli.back()] < 0) continue;
 				}
 				else {
-					// For all other notes, check msh and iHarm4
+					// For all other notes, check msh at position
 					if (msh[v][s] <= 0) continue;
 				}
 				// Pitch class
@@ -3279,7 +3279,7 @@ int CP2R::FailHarm() {
 						// Skip pauses
 						if (!cc[v2][s]) continue;
 						// Check msh
-						if (msh[v2][fli[v2][ls]] <= 0) continue;
+						if (msh[v2][s] <= 0) continue;
 						// Remove note
 						--chn[pc[v2][s]];
 						--cchn[pcc[v][s]];
@@ -3363,14 +3363,14 @@ int CP2R::FailHarm() {
 						ls = bli[v2][s];
 						// Skip pauses
 						if (!cc[v2][s]) continue;
-						// For first suspension in measure, evaluate last step. In other cases - first step
-						if (fli[v2][ls] <= mli[ms] && sus[v2][ls]) {
-							// For first suspended dissonance resolved note do not check msh
-							if (msh[v2][sus[v2][ls]] < 0) continue;
+						// For first suspension in harmony, check harmony start msh
+						if (fli[v2][ls] < s) {
+							// If first suspension in harmony is non-harmonic, do not add it to harmony
+							if (msh[v2][s] < 0) continue;
 						}
 						else {
-							// For all other notes, check msh and iHarm4
-							if (msh[v2][fli[v2][ls]] <= 0) continue;
+							// For all other notes, check msh at position
+							if (msh[v2][s] <= 0) continue;
 						}
 						// Record note
 						++chn[pc[v2][s]];
@@ -4100,6 +4100,8 @@ void CP2R::GetMeasureMsh() {
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
 	if (mea_end >= ep2) return;
+	// Clear msh
+	for (s = mli[ms]; s < mli[ms] + npm; ++s) msh[v][s] = pAux;
 	for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 		s = fli[v][ls];
 		if (!cc[v][s]) continue;
@@ -4132,9 +4134,10 @@ void CP2R::GetMinimumMsh() {
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
 	if (mea_end >= ep2) return;
+	// Clear msh
+	for (s = mli[ms]; s < mli[ms] + npm; ++s) msh[v][s] = pAux;
 	for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 		s = fli[v][ls];
-		msh[v][s] = pAux;
 		if (!cc[v][s]) continue;
 		s2 = fli2[v][ls];
 		// Skip first suspension, mark last suspension
@@ -4169,6 +4172,7 @@ void CP2R::GetMinimumMsh() {
 
 // Detect all possible chords
 void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
+	poss_vars = 0;
 	for (hv = 0; hv < 7; ++hv) {
 		// At least one note exists
 		if (!chn[hv] && !chn[(hv + 2) % 7] && !chn[(hv + 4) % 7]) continue;
@@ -4218,7 +4222,7 @@ void CP2R::GetMsh() {
 		// Possible chords
 		vector <int> cpos;
 		cpos.resize(7);
-		int poss_vars = 0;
+		int poss_vars;
 		GetHarmVars(lchm, lchm_alter, rat, cpos, poss_vars);
 		if (!poss_vars && ms == mli.size() - 2) {
 			GetMsh2();
@@ -4316,7 +4320,7 @@ void CP2R::GetMsh2() {
 	lchm.resize(2);
 	int lchm_alter;
 	int rat;
-	int poss_vars = 0;
+	int poss_vars;
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
@@ -4365,7 +4369,7 @@ void CP2R::GetMsh2() {
 					// Skip pauses
 					if (!cc[v2][s]) continue;
 					// Check msh
-					if (msh[v2][fli[v2][ls]] <= 0) continue;
+					if (msh[v2][s] <= 0) continue;
 					// Remove note
 					--chn[pc[v2][s]];
 					--cchn2[hcount][pcc[v][s]];
@@ -4375,21 +4379,14 @@ void CP2R::GetMsh2() {
 				// Next harmony counter
 				++hcount;
 				fill(chn.begin(), chn.end(), 0);
-				fill(cchn2[hcount].begin(), cchn2[hcount].end(), 0);
 				// Reinitialize chord notes for new chord
 				for (v2 = 0; v2 < av_cnt; ++v2) {
 					ls = bli[v2][s];
 					// Skip pauses
 					if (!cc[v2][s]) continue;
 					// For first suspension in measure, evaluate last step. In other cases - first step
-					if (fli[v2][ls] <= mli[ms] && sus[v2][ls]) {
-						// For first suspended dissonance resolved note do not check msh
-						if (msh[v2][sus[v2][ls]] < 0) continue;
-					}
-					else {
-						// For all other notes, check msh and iHarm4
-						if (msh[v2][fli[v2][ls]] <= 0) continue;
-					}
+					if (fli[v2][ls] < s) continue;
+					if (msh[v2][fli[v2][ls]] <= 0) continue;
 					// Record note
 					++chn[pc[v2][s]];
 					++cchn2[hcount][pcc[v2][s]];
@@ -4745,6 +4742,10 @@ void CP2R::DetectSus() {
 	if (s3 && s3 <= s2) s3 = 0;
 	if (s4 && s4 <= s2) s4 = 0;
 	if (s5 && s5 <= s2) s5 = 0;
+	// Check that beats are in measure
+	if (s3 && s3 >= mli[ms] + npm) s3 = 0;
+	if (s4 && s4 >= mli[ms] + npm) s4 = 0;
+	if (s5 && s5 >= mli[ms] + npm) s5 = 0;
 	// Check which beats are allowed by rules
 	if (!accept[sp][vc][0][419]) s3 = 0;
 	if (!accept[sp][vc][0][420]) s5 = 0;
