@@ -4090,7 +4090,7 @@ void CP2R::GetMeasureMsh() {
 	// Prevent going out of window
 	if (mea_end >= ep2) return;
 	// Clear msh
-	for (s = mli[ms]; s < mli[ms] + npm; ++s) msh[v][s] = pAux;
+	for (s = mli[ms]; s < mli[ms] + npm; ++s) msh[v][s] = pDownbeat;
 	for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 		s = fli[v][ls];
 		if (!cc[v][s]) continue;
