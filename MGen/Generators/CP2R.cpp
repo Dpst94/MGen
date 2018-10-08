@@ -4090,7 +4090,7 @@ void CP2R::GetMeasureMsh() {
 	// Prevent going out of window
 	if (mea_end >= ep2) return;
 	// Clear msh
-	for (s = mli[ms]; s < mli[ms] + npm; ++s) msh[v][s] = pDownbeat;
+	for (s = mli[ms]; s < mli[ms] + npm; ++s) msh[v][s] = 1;
 	for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 		s = fli[v][ls];
 		if (!cc[v][s]) continue;
@@ -4277,6 +4277,21 @@ void CP2R::GetMsh() {
 				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %.d, flags %d:",
 					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1,
 					hpenalty, flaga.size());
+				est += " msh:";
+				for (v = 0; v < av_cnt; ++v) {
+					for (int i = 0; i < npm; ++i) {
+						st.Format(" %d", msh[v][s0 + i]);
+						est += st;
+					}
+					if (v < av_cnt - 1) est += " /";
+				}
+				for (int fl = 0; fl < flaga.size(); ++fl) {
+					st.Format(" [%d] %d %s (%s)", flaga[fl].id, flaga[fl].s,
+						ruleinfo[flaga[fl].id].RuleName,
+						ruleinfo[flaga[fl].id].SubRuleName);
+					est += st;
+				}
+				est += " ch:";
 				for (int i = 0; i < 12; ++i) {
 					st.Format(" %d", cchn[i]);
 					est += st;
@@ -4502,10 +4517,25 @@ void CP2R::GetMsh2() {
 						EvaluateMsh();
 					}
 					CString st, est;
-					est.Format("Checking chords %s%s %s%s in measure %d:%d, hpenalty %d, flags %d:",
+					est.Format("Checked chords %s%s %s%s in measure %d:%d, hpenalty %d, flags %d:",
 						degree_name[hv], hv_alt ? "*" : "",
 						degree_name[hv3], hv_alt2 ? "*" : "",
 						cp_id + 1, ms + 1, hpenalty, flaga.size());
+					est += " msh:";
+					for (v = 0; v < av_cnt; ++v) {
+						for (int i = 0; i < npm; ++i) {
+							st.Format(" %d", msh[v][s0 + i]);
+							est += st;
+						}
+						if (v < av_cnt - 1) est += " /";
+					}
+					for (int fl = 0; fl < flaga.size(); ++fl) {
+						st.Format(" [%d] %d %s (%s)", flaga[fl].id, flaga[fl].s,
+							ruleinfo[flaga[fl].id].RuleName,
+							ruleinfo[flaga[fl].id].SubRuleName);
+						est += st;
+					}
+					est += " ch:";
 					for (int i = 0; i < 12; ++i) {
 						st.Format(" %d", cchn2[0][i]);
 						est += st;
@@ -4516,12 +4546,6 @@ void CP2R::GetMsh2() {
 						st.Format(" %d", cchn2[1][i]);
 						est += st;
 						if (i == 5) est += " -";
-					}
-					for (int fl = 0; fl < flaga.size(); ++fl) {
-						st.Format(" [%d] %d %s (%s)", flaga[fl].id, flaga[fl].s, 
-							ruleinfo[flaga[fl].id].RuleName, 
-							ruleinfo[flaga[fl].id].SubRuleName);
-						est += st;
 					}
 					WriteLog(3, est);
 					// Save best variant

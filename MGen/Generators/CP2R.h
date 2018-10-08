@@ -68,7 +68,7 @@
 #define sCam 5
 
 // Melody shape note position types
-#define pDownbeat 1
+#define pDownbeat 9
 #define pLeapTo 2
 #define pLeapFrom 3
 #define pSusStart 4
