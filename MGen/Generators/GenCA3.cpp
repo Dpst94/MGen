@@ -150,9 +150,17 @@ int CGenCA3::XML_to_CP() {
 	it.resize(av_cnt);
 	for (vi = 0; vi < xfi.voice.size(); ++vi) {
 		v = av_cnt - vi - 1;
+		// Position in resulting vector
 		int pos = 0;
+		// Position of measure inside xml file
+		float xpos = 0;
+		// Position of note inside xml measure
+		float xpos2 = 0;
 		vname[v] = xfi.voice[vi].name;
 		for (int m = 1; m < xfi.mea.size(); ++m) {
+			xpos += xfi.mea[m].len * 8.0;
+			xpos2 = 0;
+			int posm = pos;
 			im.resize(pos + 1);
 			ibl.resize(pos + 8.0 * xfi.mea[m].len);
 			im[pos] = 1;
@@ -163,14 +171,14 @@ int CGenCA3::XML_to_CP() {
 				xfi.mea[m].barline == "heavy-heavy") 
 				ibl[pos + 8.0 * xfi.mea[m].len - 1] = 1;
 			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
-				int ln = xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
+				xpos2 += xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
+				int ln = floor(xpos + xpos2) - pos; 
+				// xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
+				//if (pos + ln < floor(xpos + xpos2)) 
 				c_len = max(c_len, pos + ln);
 				it[v].resize(c_len);
 				ifi.resize(c_len, 100);
 				ibt.resize(c_len);
-				if (pos + ln == 1127) {
-					WriteLog(1, "WOW");
-				}
 				cc[v].resize(c_len);
 				ial[v].resize(c_len);
 				retr[v].resize(c_len);
