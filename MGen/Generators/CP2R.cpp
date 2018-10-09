@@ -3620,41 +3620,53 @@ void CP2R::EvalMshHarm(int hvar) {
 	// Init lhbcc - lowest harmonic note in bass
 	int lhbc = 1000;
 	for (ls = bli[0][hstart]; ls <= bli[0][hend]; ++ls) {
-		s = fli[v][ls];
-		if (!cc[v][s]) continue;
-		int nt = c[v][s] % 7;
+		s = fli[0][ls];
+		if (!cc[0][s]) continue;
+		int nt = c[0][s] % 7;
 		// Do not process notes that are not harmonic
 		if (nt != de1 && nt != de2 && nt != de3) continue;
 		// Process only lower notes
-		if (c[v][s] > lhbc) continue;
+		if (c[0][s] > lhbc) continue;
 		// For left sus and isus check hstart
 		if (s < hstart) {
-			if (msh[v][hstart]) {
-				lhbc = c[v][s];
+			if (msh[0][hstart] > 0) {
+				lhbc = c[0][s];
 			}
 		}
 		// For other notes check note start
 		else {
-			if (msh[v][s] > 0) {
-				lhbc = c[v][s];
+			if (msh[0][s] > 0) {
+				lhbc = c[0][s];
 			}
 		}
 	}
 	// Detect 6/4 chord
-	if (lhbc % 7 == (hv + 3) % 7) hpenalty += 2;
+	if (lhbc % 7 == (hv + 4) % 7) hpenalty += 2;
 	// Detect 6th chord
-	if (lhbc % 7 == (hv + 5) % 7) hpenalty += 1;
+	if (lhbc % 7 == (hv + 2) % 7) hpenalty += 1;
 	int found_de1 = 0;
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
 			int nt = c[v][s] % 7;
-			if (nt == de1) {
-				found_de1 = 1;
-				break;
+			if (nt != de1) continue;
+			// For left sus and isus check hstart
+			if (s < hstart) {
+				if (msh[v][hstart] > 0) {
+					found_de1 = 1;
+					break;
+				}
+			}
+			// For other notes check note start
+			else {
+				if (msh[v][s] > 0) {
+					found_de1 = 1;
+					break;
+				}
 			}
 		}
+		if (found_de1) break;
 	}
 	if (!found_de1) hpenalty += 3;
 }
@@ -4269,6 +4281,8 @@ void CP2R::GetMsh() {
 			continue;
 		}
 		int min_hpenalty = 1000000;
+		hstart = s0;
+		hend = s0 + npm - 1;
 		// Scan all possible chords
 		for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
 			hv = hv2 % 7;
@@ -4311,15 +4325,9 @@ void CP2R::GetMsh() {
 				}
 				flaga.clear();
 				hpenalty = 0;
-				if (hnotes) {
-					if (hv2 == lchm + 3) hpenalty += 2;
-					if (hv2 == lchm + 5) hpenalty += 1;
-				}
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];
 					GetMeasureMsh();
-					hstart = s0;
-					hend = s0 + npm - 1;
 					s = hstart;
 					ls = bli[v][s];
 					s2 = fli2[v][ls];
@@ -4329,6 +4337,7 @@ void CP2R::GetMsh() {
 					DetectCambiata();
 					EvaluateMsh();
 				}
+				EvalMshHarm(hv);
 				CString st, est;
 				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %d, flags %d:",
 					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1,
