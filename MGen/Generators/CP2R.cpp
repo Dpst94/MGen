@@ -4217,6 +4217,7 @@ void CP2R::GetMsh() {
 			GetMsh2();
 			continue;
 		}
+		int min_hpenalty = 1000000;
 		// Scan all possible chords
 		for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
 			hv = hv2 % 7;
@@ -4259,6 +4260,7 @@ void CP2R::GetMsh() {
 				}
 				flaga.clear();
 				hpenalty = 0;
+				if (hv2 == lchm + 3) hpenalty += 1;
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];
 					GetMeasureMsh();
@@ -4298,16 +4300,33 @@ void CP2R::GetMsh() {
 					if (i == 5) est += " -";
 				}
 				WriteLog(3, est);
+				// Save best variant
+				if (hpenalty < min_hpenalty) {
+					WriteLog(3, "Selected best hpenalty");
+					min_hpenalty = hpenalty;
+					flagab = flaga;
+					for (s = s0; s < s0 + npm; ++s) {
+						for (v = 0; v < av_cnt; ++v) {
+							mshb[v][s] = msh[v][s];
+						}
+					}
+				}
 				// Stop evaluating variants if all is ok
 				if (!hpenalty) break;
 			}
 			// Stop evaluating variants if all is ok
 			if (!hpenalty) break;
 		}
+		// Apply best msh
+		for (s = s0; s < s0 + npm; ++s) {
+			for (v = 0; v < av_cnt; ++v) {
+				msh[v][s] = mshb[v][s];
+			}
+		}
 		// Save flags
-		for (int fl = 0; fl < flaga.size(); ++fl) {
-			v = flaga[fl].voice;
-			FLAGL(flaga[fl].id, flaga[fl].s, flaga[fl].fsl, flaga[fl].fvl);
+		for (int fl = 0; fl < flagab.size(); ++fl) {
+			v = flagab[fl].voice;
+			FLAGL(flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
 		}
 	}
 }
