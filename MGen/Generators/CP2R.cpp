@@ -3612,9 +3612,55 @@ void CP2R::GetBhli() {
 	}
 }
 
+void CP2R::EvalMshHarm(int hvar) {
+	// Get harmonic notes
+	int de1 = hvar;
+	int de2 = (de1 + 2) % 7;
+	int de3 = (de1 + 4) % 7;
+	// Init lhbcc - lowest harmonic note in bass
+	int lhbc = 1000;
+	for (ls = bli[0][hstart]; ls <= bli[0][hend]; ++ls) {
+		s = fli[v][ls];
+		if (!cc[v][s]) continue;
+		int nt = c[v][s] % 7;
+		// Do not process notes that are not harmonic
+		if (nt != de1 && nt != de2 && nt != de3) continue;
+		// Process only lower notes
+		if (c[v][s] > lhbc) continue;
+		// For left sus and isus check hstart
+		if (s < hstart) {
+			if (msh[v][hstart]) {
+				lhbc = c[v][s];
+			}
+		}
+		// For other notes check note start
+		else {
+			if (msh[v][s] > 0) {
+				lhbc = c[v][s];
+			}
+		}
+	}
+	// Detect 6/4 chord
+	if (lhbc % 7 == (hv + 3) % 7) hpenalty += 2;
+	// Detect 6th chord
+	if (lhbc % 7 == (hv + 5) % 7) hpenalty += 1;
+	int found_de1 = 0;
+	for (v = 0; v < av_cnt; ++v) {
+		for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
+			s = fli[v][ls];
+			if (!cc[v][s]) continue;
+			int nt = c[v][s] % 7;
+			if (nt == de1) {
+				found_de1 = 1;
+				break;
+			}
+		}
+	}
+	if (!found_de1) hpenalty += 3;
+}
+
 void CP2R::GetHarmBass() {
 	SET_READY(DR_hbc);
-	// Do not process for lower cantus, because in this case lowest note is always cantus and it is already set
 	int ls1, ls2;
 	int harm_end, nt;
 	int de1, de2, de3;
@@ -3628,8 +3674,6 @@ void CP2R::GetHarmBass() {
 		de1 = chm[hs];
 		de2 = (de1 + 2) % 7;
 		de3 = (de1 + 4) % 7;
-		// 5th for 6/4 count
-		int q_prev = -1;
 		// Init habcc - lowest harmonic note, including audible or suggested
 		int habcc = 1000;
 		// Loop inside harmony
@@ -4190,6 +4234,7 @@ void CP2R::GetMsh() {
 		// Prevent going out of window
 		if (mea_end >= ep2) break;
 		// Build harmony using already detected msh notes
+		int hnotes = 0;
 		for (v = 0; v < av_cnt; ++v) {
 			GetMinimumMsh();
 			for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
@@ -4202,6 +4247,7 @@ void CP2R::GetMsh() {
 				// Record note
 				++chn[pc[v][s]];
 				++cchn[pcc[v][s]];
+				++hnotes;
 			}
 		}
 		// Main chord
@@ -4213,6 +4259,11 @@ void CP2R::GetMsh() {
 		cpos.resize(7);
 		int poss_vars;
 		GetHarmVars(lchm, lchm_alter, rat, cpos, poss_vars);
+		// If no harmonic notes found, scan all harmonies
+		if (!poss_vars && !hnotes) {
+			poss_vars = 7;
+			for (int i = 0; i < 7; ++i) cpos[i] = 1;
+		}
 		if (!poss_vars && ms == mli.size() - 2) {
 			GetMsh2();
 			continue;
@@ -4260,7 +4311,10 @@ void CP2R::GetMsh() {
 				}
 				flaga.clear();
 				hpenalty = 0;
-				if (hv2 == lchm + 3) hpenalty += 1;
+				if (hnotes) {
+					if (hv2 == lchm + 3) hpenalty += 2;
+					if (hv2 == lchm + 5) hpenalty += 1;
+				}
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];
 					GetMeasureMsh();
@@ -4276,7 +4330,7 @@ void CP2R::GetMsh() {
 					EvaluateMsh();
 				}
 				CString st, est;
-				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %.d, flags %d:",
+				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %d, flags %d:",
 					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1,
 					hpenalty, flaga.size());
 				est += " msh:";
@@ -4510,7 +4564,10 @@ void CP2R::GetMsh2() {
 					}
 					flaga.clear();
 					hpenalty = 0;
-					if (hv4 == lchm[1] + 3 || hv2 == lchm[0] + 3) hpenalty += 1;
+					if (hv2 == lchm[0] + 3) hpenalty += 2;
+					if (hv2 == lchm[0] + 5) hpenalty += 1;
+					if (hv4 == lchm[1] + 3) hpenalty += 1;
+					if (hv4 == lchm[1] + 5) hpenalty += 1;
 					for (v = 0; v < av_cnt; ++v) {
 						sp = vsp[v];
 						GetMeasureMsh();

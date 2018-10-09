@@ -294,6 +294,7 @@ protected:
 	inline void RemoveHarmDuplicate();
 	inline int FailHarmStep(int i, const int * hv, int & count, int & wcount, int repeat_letters, int miss_letters, int flagr, int flagm);
 	inline void GetBhli();
+	inline void EvalMshHarm(int hvar);
 	inline void GetHarmBass();
 	inline int FailVocalRanges();
 	inline int FailVocalRangesConflict();
