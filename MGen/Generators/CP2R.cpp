@@ -4601,6 +4601,14 @@ void CP2R::GetMsh2() {
 						DetectCambiata();
 						EvaluateMsh();
 					}
+					// First harmony
+					hstart = s0;
+					hend = s0 + sec_hp - 1;
+					EvalMshHarm(hv);
+					// Second harmony
+					hstart = s0 + sec_hp;
+					hend = s0 + npm - 1;
+					EvalMshHarm(hv3);
 					CString st, est;
 					est.Format("Checked chords %s%s %s%s in measure %d:%d, hpenalty %d, flags %d:",
 						degree_name[hv], hv_alt ? "*" : "",
