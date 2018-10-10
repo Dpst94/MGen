@@ -158,7 +158,6 @@ int CGenCA3::XML_to_CP() {
 		float xpos2 = 0;
 		vname[v] = xfi.voice[vi].name;
 		for (int m = 1; m < xfi.mea.size(); ++m) {
-			xpos += xfi.mea[m].len * 8.0;
 			xpos2 = 0;
 			int posm = pos;
 			im.resize(pos + 1);
@@ -208,6 +207,7 @@ int CGenCA3::XML_to_CP() {
 				it[v][pos] += xfi.note[vi][m][ni].lyric;
 				pos += ln;
 			}
+			xpos += xfi.mea[m].len * 8.0;
 		}
 	}
 	if (!cp_tempo) cp_tempo = 100;
