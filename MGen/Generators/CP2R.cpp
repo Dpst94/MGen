@@ -4149,6 +4149,7 @@ void CP2R::GetMeasureMsh() {
 	for (s = mli[ms]; s < mli[ms] + npm; ++s) msh[v][s] = 1;
 	for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 		s = fli[v][ls];
+		msh[v][s] = pAux;
 		if (!cc[v][s]) continue;
 		s2 = fli2[v][ls];
 		// First note is always downbeat
@@ -4166,7 +4167,6 @@ void CP2R::GetMeasureMsh() {
 			llen[v][ls + 1] <= npm && llen[v][ls - 1] >= llen[v][ls]) msh[v][s] = pAux;
 		else if (s > 0 && leap[v][s - 1]) msh[v][s] = pLeapTo;
 		else if (s2 < ep2 - 1 && leap[v][s2]) msh[v][s] = pLeapFrom;
-		else msh[v][s] = pAux;
 	}
 	// Make last leading tone in penultimate measure harmonic
 	if (ms == mli.size() - 2) {
