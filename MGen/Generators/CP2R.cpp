@@ -4160,6 +4160,10 @@ void CP2R::GetMeasureMsh() {
 		}
 		// Downbeat
 		else if (s % npm == 0) msh[v][s] = pDownbeat;
+		// Anticipation
+		else if (ls == bli[v][mea_end] && s2 < ep2 - 1 && s2 == s0 + npm - 1 &&
+			cc[v][s2] == cc[v][s2 + 1] && llen[v][ls] <= 4 && ms == mli.size() - 2 &&
+			llen[v][ls + 1] <= npm && llen[v][ls - 1] >= llen[v][ls]) msh[v][s] = pAux;
 		else if (s > 0 && leap[v][s - 1]) msh[v][s] = pLeapTo;
 		else if (s2 < ep2 - 1 && leap[v][s2]) msh[v][s] = pLeapFrom;
 		else msh[v][s] = pAux;
@@ -4203,6 +4207,10 @@ void CP2R::GetMinimumMsh() {
 				msh[v][s] = pDownbeat;
 			}
 		}
+		// Anticipation
+		else if (ls == bli[v][mea_end] && s2 < ep2 - 1 && s2 == s0 + npm - 1 &&
+			cc[v][s2] == cc[v][s2 + 1] && llen[v][ls] <= 4 && ms == mli.size() - 2 &&
+			llen[v][ls + 1] <= npm && llen[v][ls - 1] >= llen[v][ls]) msh[v][s] = pAux;
 		else if (abs(leap[v][s - 1]) > 2) msh[v][s] = pLeapTo;
 		else if (s2 < ep2 - 1 && abs(leap[v][s2]) > 2) msh[v][s] = pLeapFrom;
 		else if (leap[v][s - 1]) {
