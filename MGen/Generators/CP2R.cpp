@@ -4411,16 +4411,18 @@ void CP2R::GetMsh() {
 			// Stop evaluating variants if all is ok
 			if (!hpenalty) break;
 		}
-		// Apply best msh
-		for (s = s0; s < s0 + npm; ++s) {
-			for (v = 0; v < av_cnt; ++v) {
-				msh[v][s] = mshb[v][s];
+		if (min_hpenalty < 1000000) {
+			// Apply best msh
+			for (s = s0; s < s0 + npm; ++s) {
+				for (v = 0; v < av_cnt; ++v) {
+					msh[v][s] = mshb[v][s];
+				}
 			}
-		}
-		// Save flags
-		for (int fl = 0; fl < flagab.size(); ++fl) {
-			v = flagab[fl].voice;
-			FLAGL(flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
+			// Save flags
+			for (int fl = 0; fl < flagab.size(); ++fl) {
+				v = flagab[fl].voice;
+				FLAGL(flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
+			}
 		}
 	}
 }
@@ -4695,16 +4697,18 @@ void CP2R::GetMsh2() {
 		// Stop evaluating variants if all is ok
 		if (!hpenalty) break;
 	}
-	// Apply best msh
-	for (s = s0; s < s0 + npm; ++s) {
-		for (v = 0; v < av_cnt; ++v) {
-			msh[v][s] = mshb[v][s];
+	if (min_hpenalty < 1000000) {
+		// Apply best msh
+		for (s = s0; s < s0 + npm; ++s) {
+			for (v = 0; v < av_cnt; ++v) {
+				msh[v][s] = mshb[v][s];
+			}
 		}
-	}
-	// Save flags
-	for (int fl = 0; fl < flagab.size(); ++fl) {
-		v = flagab[fl].voice;
-		FLAGL(flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
+		// Save flags
+		for (int fl = 0; fl < flagab.size(); ++fl) {
+			v = flagab[fl].voice;
+			FLAGL(flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
+		}
 	}
 	// Reset step harmony positions
 	fill(shp.begin(), shp.end(), 0);
