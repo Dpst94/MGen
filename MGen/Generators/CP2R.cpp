@@ -4256,10 +4256,12 @@ void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 		if (chn[(hv + 1) % 7] || chn[(hv + 3) % 7] || chn[(hv + 5) % 7] || chn[(hv + 6) % 7]) continue;
 		cpos[hv] = 1;
 		++poss_vars;
+#if defined(_DEBUG)
 		CString st, est;
 		est.Format("Possible chord %s in measure %d:%d",
 			degree_name[hv], cp_id + 1, ms + 1);
 		WriteLog(3, est);
+#endif
 	}
 }
 
@@ -4369,6 +4371,7 @@ void CP2R::GetMsh() {
 					EvaluateMsh();
 				}
 				EvalMshHarm(hv);
+#if defined(_DEBUG)
 				CString st, est;
 				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %d, flags %d:",
 					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1,
@@ -4394,9 +4397,12 @@ void CP2R::GetMsh() {
 					if (i == 5) est += " -";
 				}
 				WriteLog(3, est);
+#endif
 				// Save best variant
 				if (hpenalty < min_hpenalty) {
+#if defined(_DEBUG)
 					WriteLog(3, "Selected best hpenalty");
+#endif
 					min_hpenalty = hpenalty;
 					flagab = flaga;
 					for (s = s0; s < s0 + npm; ++s) {
@@ -4642,6 +4648,7 @@ void CP2R::GetMsh2() {
 					hstart = s0 + sec_hp;
 					hend = s0 + npm - 1;
 					EvalMshHarm(hv3);
+#if defined(_DEBUG)
 					CString st, est;
 					est.Format("Checked chords %s%s %s%s in measure %d:%d, hpenalty %d, flags %d:",
 						degree_name[hv], hv_alt ? "*" : "",
@@ -4674,9 +4681,12 @@ void CP2R::GetMsh2() {
 						if (i == 5) est += " -";
 					}
 					WriteLog(3, est);
+#endif
 					// Save best variant
 					if (hpenalty < min_hpenalty) {
+#if defined(_DEBUG)
 						WriteLog(3, "Selected best hpenalty");
+#endif
 						min_hpenalty = hpenalty;
 						flagab = flaga;
 						for (s = s0; s < s0 + npm; ++s) {
@@ -4964,17 +4974,23 @@ void CP2R::DetectSus() {
 	if (s3) {
 		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls3]] = pSusRes;
+#if defined(_DEBUG)
 		WriteLog(3, "Detected sus at s3");
+#endif
 	}
 	if (s4) {
 		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls4]] = pSusRes;
+#if defined(_DEBUG)
 		WriteLog(3, "Detected sus at s4");
+#endif
 	}
 	if (s5) {
 		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls5]] = pSusRes;
+#if defined(_DEBUG)
 		WriteLog(3, "Detected sus at s5");
+#endif
 	}
 }
 
