@@ -178,7 +178,7 @@ void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype) {
 		}
 		lyi[st1].sht[vtype] = ruleinfo[fl].viz_text;
 		// Save flag shape (step depends if link is forward or backward)
-		lyi[s].nfs[f] = vtype;
+		if (fl) lyi[s].nfs[f] = vtype;
 		lyi[st1].shflag[vtype] = f;
 		lyi[st1].shfp[vtype] = s;
 	}
@@ -221,6 +221,8 @@ void CP2Ly::ParseLyI() {
 		int next_note_step = fli[v][min(ls + 1, fli_size[v] - 1)];
 		// Find previous note position
 		int prev_note_step = fli[v][max(0, ls - 1)];
+		// Mark msh
+		if (cc[v][s] && msh[v][s] < 0) SetLyShape(s, s, 0, 0, 0, vStac);
 		// Parse flags
 		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
 			fl = lyi[s].nflags[f];
