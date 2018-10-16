@@ -2996,6 +2996,35 @@ int CP2R::FailMaxNoteLen() {
 	return 0;
 }
 
+// Detect sus mistakes: short preparation
+void CP2R::FlagSus() {
+	for (v = 0; v < av_cnt; ++v) {
+		sp = vsp[v];
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			s2 = fli2[v][ls];
+			if (sus[v][ls]) {
+			  // Preparation is shorter then suspension
+				if ((sus[v][ls] - s) * 2 < llen[v][ls])
+					FLAGV(1, s);
+				// Preparation is too short for measure size
+				if (npm == 12 && btype == 4) {
+					if (sus[v][ls] - s < 6)
+						FLAGV(1, s);
+				}
+				else if (npm == 4 || npm == 6) {
+					if (sus[v][ls] - s < 2)
+						FLAGV(1, s);
+				}
+			}
+			else {
+				if (hli[bhli[s2]] > s) {
+				}
+			}
+		}
+	}
+}
+
 int CP2R::FailSusCount() {
 	CHECK_READY(DR_sus);
 	int c_sus = 0;
