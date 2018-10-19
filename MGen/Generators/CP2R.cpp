@@ -4153,9 +4153,17 @@ void CP2R::EvaluateMsh() {
 	for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 		s = fli[v][ls];
 		if (!cc[v][s]) continue;
-		// If note starts in current measure, always check its start
-		if (s < s0) continue;
 		if (msh[v][s] <= 0) continue;
+		// If note starts in current measure, always check its start
+		if (s < s0) {
+			// If note started in previous measure, check if it traverses multiple harmonies in current measure
+			if (bhli[fli2[v][ls]] - bhli[s0] > 0) {
+				// Set msh and check to measure start
+				s = s0;
+				msh[v][s] = pSusStart;
+			}
+			else continue;
+		}
 		if (!cchnv[shp[s % npm]][pcc[v][s]]) {
 			if (msh[v][s] == pFirst) FLAGA(551, s, s, v);
 			else if (msh[v][s] == pDownbeat) FLAGA(83, s, s, v);
