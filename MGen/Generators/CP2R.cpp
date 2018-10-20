@@ -429,25 +429,12 @@ void CP2R::SendLining(int pos, int x, int i) {
 	}
 	if (show_hatch == 2) {
 		ls = bli[v][x];
-		if (sus[v][ls]) {
-			if (x < sus[v][ls]) {
-				if (msh[v][fli[v][ls]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
-				else lining[pos + i][vi] = 0;
-			}
-			else {
-				if (msh[v][sus[v][ls]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
-				else lining[pos + i][vi] = 0;
-			}
+		if (hli[bhli[x]] == x || fli[v][ls] == x) {
+			if (msh[v][x] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
+			else lining[pos + i][vi] = 0;
 		}
 		else {
-			if (hli[bhli[x]] > fli[v][ls]) {
-				if (msh[v][hli[bhli[x]]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
-				else lining[pos + i][vi] = 0;
-			}
-			else {
-				if (msh[v][fli[v][ls]] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
-				else lining[pos + i][vi] = 0;
-			}
+			lining[pos + i][vi] = lining[pos + i - 1][vi];
 		}
 	}
 }
