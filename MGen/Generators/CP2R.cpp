@@ -4231,7 +4231,7 @@ void CP2R::GetMinimumMsh() {
 		if (sus[v][ls]) {
 			// Mark sus start
 			msh[v][sus[v][ls]] = pAux;
-			if (s >= s0) msh[v][s] = pSusStart;
+			msh[v][s] = pSusStart;
 		}
 		// First note
 		else if (s == fin[v]) msh[v][s] = pFirst;
