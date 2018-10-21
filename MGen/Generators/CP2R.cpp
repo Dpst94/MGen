@@ -50,6 +50,18 @@ inline void CP2R::FlagL(int voice, int fid, int step, int step2, int voice2) {
 	fvl[voice][step].push_back(voice2);
 }
 
+// Accumulate flag
+inline void CP2R::FlagA(int voice, int fid, int step, int step2, int voice2) {
+	AssertRule(fid);
+	temp_flaginfo.voice = voice; 
+	temp_flaginfo.s = step;
+	temp_flaginfo.id = fid;
+	temp_flaginfo.fsl = step2;
+	temp_flaginfo.fvl = voice2;
+	flaga.push_back(temp_flaginfo);
+	if (!accept[sp][vc][0][fid]) hpenalty += 10;
+}
+
 inline void CP2R::AssertRule(int fid) {
 	if (ruleinfo[fid].SubRuleName.IsEmpty() && warn_rule_undefined < 5) { 
 		++warn_rule_undefined; 
@@ -4189,14 +4201,14 @@ void CP2R::EvaluateMsh() {
 			else continue;
 		}
 		if (!cchnv[shp[s % npm]][pcc[v][s]]) {
-			if (msh[v][s] == pFirst) FLAGA(551, s, s, v);
-			else if (msh[v][s] == pDownbeat) FLAGA(83, s, s, v);
-			else if (msh[v][s] == pLeapTo) FLAGA(36, s, s, v);
-			else if (msh[v][s] == pLeapFrom) FLAGA(187, s, s, v);
-			else if (msh[v][s] == pSusStart) FLAGA(458, s, s, v);
+			if (msh[v][s] == pFirst) FlagA(v, 551, s, s, v);
+			else if (msh[v][s] == pDownbeat) FlagA(v, 83, s, s, v);
+			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v);
+			else if (msh[v][s] == pLeapFrom) FlagA(v, 187, s, s, v);
+			else if (msh[v][s] == pSusStart) FlagA(v, 458, s, s, v);
 			// pSusRes does not have separate flag, because it is marked as not resolved
 			// This is protection against wrong melodic shape value
-			else if (msh[v][s] > 0) FLAGA(83, s, s, v);
+			else if (msh[v][s] > 0) FlagA(v, 83, s, s, v);
 		}
 	}
 }
@@ -4968,60 +4980,60 @@ void CP2R::DetectSus() {
 		if (s3 && cc[v][s3] == cc[v][s3 - 1]) s3 = 0;
 		if (s4 && cc[v][s4] == cc[v][s4 - 1]) s4 = 0;
 		if (s5 && cc[v][s5] == cc[v][s5 - 1]) s5 = 0;
-		FLAGAR(286, s, s, v);
+		FLAGAR(v, 286, s, s, v);
 	}
 	// Notes too short?
 	if (!accept[sp][vc][0][291]) {
 		if (s3 && llen[v][ls3] < 2 && ls3 < fli_size[v] - 1) s3 = 0;
 		if (s4 && llen[v][ls4] < 2 && ls4 < fli_size[v] - 1) s4 = 0;
 		if (s5 && llen[v][ls5] < 2 && ls5 < fli_size[v] - 1) s5 = 0;
-		FLAGAR(291, s, s, v);
+		FLAGAR(v, 291, s, s, v);
 	}
 	// Notes not harmonic?
 	if (!accept[sp][vc][0][220]) {
 		if (s3 && !cchnv[shp[s3 % npm]][pcc[v][s3]]) s3 = 0;
 		if (s4 && !cchnv[shp[s4 % npm]][pcc[v][s4]]) s4 = 0;
 		if (s5 && !cchnv[shp[s5 % npm]][pcc[v][s5]]) s5 = 0;
-		FLAGAR(220, s, s, v);
+		FLAGAR(v, 220, s, s, v);
 	}
 	// Resolution by leap
 	if (!accept[sp][vc][0][221]) {
 		if (s3 && abs(c[v][s3] - c[v][s2]) > 1) s3 = 0;
 		if (s4 && abs(c[v][s4] - c[v][s2]) > 1) s4 = 0;
 		if (s5 && abs(c[v][s5] - c[v][s2]) > 1) s5 = 0;
-		FLAGAR(221, s, s, v);
+		FLAGAR(v, 221, s, s, v);
 	}
 	// Resolution up not LT
 	if (!accept[sp][vc][0][219]) {
 		if (s3 && cc[v][s3] > cc[v][s2] && pcc[v][s2] != 11) s3 = 0;
 		if (s4 && cc[v][s4] > cc[v][s2] && pcc[v][s2] != 11) s4 = 0;
 		if (s5 && cc[v][s5] > cc[v][s2] && pcc[v][s2] != 11) s5 = 0;
-		FLAGAR(219, s, s, v);
+		FLAGAR(v, 219, s, s, v);
 	}
 	// Notes have too many insertions?
 	if (!accept[sp][vc][0][292]) {
 		if (s3 && ls3 - ls > 3) s3 = 0;
 		if (s4 && ls4 - ls > 3) s4 = 0;
 		if (s5 && ls5 - ls > 3) s5 = 0;
-		FLAGAR(292, s, s, v);
+		FLAGAR(v, 292, s, s, v);
 	}
 	// First leap is too long?
 	if (abs(cc[v][fli[v][ls + 1]] - cc[v][s2]) > sus_insert_max_leap[sp][vc][0]) {
-		FLAGA(295, fli[v][ls + 1], hstart, v);
+		FlagA(v, 295, fli[v][ls + 1], hstart, v);
 	}
 	// Single insertion, second movement is leap
 	if (!accept[sp][vc][0][136]) {
 		if (s3 && ls3 == ls + 2 && leap[v][fli2[v][ls + 1]] > 0) s3 = 0;
 		if (s4 && ls4 == ls + 2 && leap[v][fli2[v][ls + 1]] > 0) s4 = 0;
 		if (s5 && ls5 == ls + 2 && leap[v][fli2[v][ls + 1]] > 0) s5 = 0;
-		FLAGAR(136, s, s, v);
+		FLAGAR(v, 136, s, s, v);
 	}
 	// Single insertion, second movement is leap
 	if (!accept[sp][vc][0][296]) {
 		if (s3 && ls3 == ls + 2 && leap[v][fli2[v][ls + 1]] < 0) s3 = 0;
 		if (s4 && ls4 == ls + 2 && leap[v][fli2[v][ls + 1]] < 0) s4 = 0;
 		if (s5 && ls5 == ls + 2 && leap[v][fli2[v][ls + 1]] < 0) s5 = 0;
-		FLAGAR(296, s, s, v);
+		FLAGAR(v, 296, s, s, v);
 	}
 	// Mark insertion as non-harmonic in basic msh if resolution is harmonic, sus ends with dissonance and not both movements are leaps
 	if (s3 && ls3 == ls + 2 && cchnv[shp[fli[v][ls + 2] % npm]][pcc[v][fli[v][ls + 2]]] &&

@@ -100,22 +100,10 @@
 #define pDNT 2 // Double-neighbour tone
 #define pPDD 3 // Passing downbeat dissonance
 
-// Accumulate flag
-#define FLAGA(id2, step, s2, v2) do { \
-  ASSERT_RULE(id2);  \
-	temp_flaginfo.voice = v; \
-	temp_flaginfo.s = step; \
-	temp_flaginfo.id = id2; \
-	temp_flaginfo.fsl = s2; \
-	temp_flaginfo.fvl = v2; \
-	flaga.push_back(temp_flaginfo); \
-  if (!accept[sp][vc][0][id2]) hpenalty += 10; \
-} while (0)
-
 // Accumulate and return flag
-#define FLAGAR(id, s, s2, v2) do { \
+#define FLAGAR(voice, fid, step, step2, voice2) do { \
 	if (!s3 && !s4 && !s5) { \
-		FLAGA(id, s, s2, v2); \
+		FlagA(voice, fid, step, step2, voice2); \
 		return; \
 	} \
 } while (0)
@@ -161,6 +149,7 @@ protected:
 	inline void FlagVL(int voice, int fid, int step, int step2);
 	inline void Flag(int voice, int fid, int step, int voice2);
 	inline void FlagL(int voice, int fid, int step, int step2, int voice2);
+	inline void FlagA(int voice, int fid, int step, int step2, int voice2);
 	inline void AssertRule(int fid);
 
 	inline int EvaluateCP();
