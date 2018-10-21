@@ -2857,16 +2857,6 @@ int CP2R::FailRhythm5() {
 			FlagVL(v, 234, fli[v][l_ls[1]], fli[v][l_ls[0]]);
 		else if (l_len.size() > 2 && l_len[2] == 6 && cc[v][fli[v][l_ls[1]]]) 
 			FlagVL(v, 234, fli[v][l_ls[2]], fli[v][l_ls[0]]);
-		// 1/2 after 1/4 or 1/8 in measure
-		else if (full_measure && l_len[l_len.size() - 1] == 4 && l_len[0] != 4) {
-			s3 = fli[v][l_ls[l_ls.size() - 1]];
-			if (cc[v][s3]) {
-				if (ms >= mli.size() - 2) FlagVL(v, 238, s3, s);
-				else if (slur2 != 0) FlagVL(v, 239, s3, s);
-				else if (slur1 != 0) FlagVL(v, 278, s3, s);
-				else FlagVL(v, 240, s3, s);
-			}
-		}
 		// Many notes in measure
 		if (l_len.size() == 5) {
 			if (slur1) FlagV(v, 301, s);
@@ -2936,7 +2926,7 @@ int CP2R::FailAnapaest() {
 		// Detect note start at beat 2 if there is no beat 4
 		for (v = 0; v < av_cnt; ++v) {
 			if (fli[v][bli[v][s0 + 2]] == s0 + 2) {
-				FlagV(v, 550, s0 + 2);
+				FlagV(v, 240, s0 + 2);
 				break;
 			}
 		}
