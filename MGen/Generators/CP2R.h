@@ -100,54 +100,6 @@
 #define pDNT 2 // Double-neighbour tone
 #define pPDD 3 // Passing downbeat dissonance
 
-// Report violation and save link inside voice
-#define FLAGH(id, s) do { \
-  ASSERT_RULE(id);  \
-	flag[0][s].push_back(id);  \
-	fsl[0][s].push_back(s);  \
-	fvl[0][s].push_back(0);  \
-} while (0)
-
-// Report violation and save link inside voice
-#define FLAGHL(id, s, s2) do { \
-  ASSERT_RULE(id);  \
-	flag[0][s].push_back(id);  \
-	fsl[0][s].push_back(s2);  \
-	fvl[0][s].push_back(0);  \
-} while (0)
-
-// Report violation and save link inside voice
-#define FLAGV(id, s) do { \
-  ASSERT_RULE(id);  \
-	flag[v][s].push_back(id);  \
-	fsl[v][s].push_back(s);  \
-	fvl[v][s].push_back(v);  \
-} while (0)
-
-// Report violation and save link inside voice
-#define FLAGVL(id, s, s2) do { \
-  ASSERT_RULE(id);  \
-	flag[v][s].push_back(id);  \
-	fsl[v][s].push_back(s2);  \
-	fvl[v][s].push_back(v);  \
-} while (0)
-
-// Report violation and save link inside voice
-#define FLAG(id, s, v2) do { \
-  ASSERT_RULE(id);  \
-	flag[v][s].push_back(id);  \
-	fsl[v][s].push_back(s);  \
-	fvl[v][s].push_back(v2);  \
-} while (0)
-
-// Report violation and save link inside voice
-#define FLAGL(id, s, s2, v2) do { \
-  ASSERT_RULE(id);  \
-	flag[v][s].push_back(id);  \
-	fsl[v][s].push_back(s2);  \
-	fvl[v][s].push_back(v2);  \
-} while (0)
-
 // Accumulate flag
 #define FLAGA(id2, step, s2, v2) do { \
   ASSERT_RULE(id2);  \
@@ -203,6 +155,14 @@ protected:
 	inline void CheckReadyPersist(int id);
 	inline void CheckReadyPersist(int id, int id2);
 	inline void CheckReadyPersist(int id, int id2, int id3);
+
+	// FLAGS
+	inline void FlagV(int voice, int fid, int step);
+	inline void FlagVL(int voice, int fid, int step, int step2);
+	inline void Flag(int voice, int fid, int step, int voice2);
+	inline void FlagL(int voice, int fid, int step, int step2, int voice2);
+	inline void AssertRule(int fid);
+
 	inline int EvaluateCP();
 	inline int FailMode();
 	inline int FailCross();
@@ -269,7 +229,6 @@ protected:
 	inline int FailAdjacentTritones();
 	inline int FailTritones2();
 	inline int FailRhythmRepeat();
-	inline int FailRhythmStack();
 	inline int FailAnapaest();
 	inline int FailRhythm();
 	inline int FailRhythm2();
@@ -311,5 +270,3 @@ protected:
 	inline void FindParallel6Chords();
 	inline int FailParallelIco();
 };
-
-void GetMsh2();
