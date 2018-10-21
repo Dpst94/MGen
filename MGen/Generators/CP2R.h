@@ -270,6 +270,7 @@ protected:
 	inline int FailTritones2();
 	inline int FailRhythmRepeat();
 	inline int FailRhythmStack();
+	inline int FailAnapaest();
 	inline int FailRhythm();
 	inline int FailRhythm2();
 	inline int FailRhythm4();

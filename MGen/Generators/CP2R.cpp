@@ -113,6 +113,7 @@ int CP2R::EvaluateCP() {
 	GetMsh();
 	if (FailRhythmRepeat()) return 1;
 	if (FailRhythmStack()) return 1;
+	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
 	FindParallel6Chords();
 	return 0;
@@ -2869,6 +2870,7 @@ int CP2R::FailRhythmRepeat() {
 	return 0;
 }
 
+// (obsolete)
 int CP2R::FailRhythmStack() {
 	CHECK_READY(DR_fli, DR_beat, DR_sus);
 	CHECK_READY(DR_leap, DR_nlen);
@@ -2892,6 +2894,41 @@ int CP2R::FailRhythmStack() {
 		}
 		if (!starts) {
 			FLAGH(550, s);
+		}
+	}
+	return 0;
+}
+
+int CP2R::FailAnapaest() {
+	CHECK_READY(DR_fli, DR_beat, DR_sus);
+	CHECK_READY(DR_leap, DR_nlen);
+	// Check only for 4/4
+	if (npm != 8) return 0;
+	// Do not run check if there are no sp5 voices
+	int sp5_count = 0;
+	for (v = 0; v < av_cnt; ++v) {
+		if (vsp[v] == 5) ++sp5_count;
+	}
+	if (sp5_count < 1) return 0;
+	for (ms = 0; ms < mli.size(); ++ms) {
+		// Skip penultimate measure
+		if (ms == mli.size() - 2) continue;
+		s0 = mli[ms];
+		// Detect note start at beat 4
+		int start4 = -1;
+		for (v = 0; v < av_cnt; ++v) {
+			if (fli[v][bli[v][s0 + 6]] == s0 + 6) {
+				start4 = v;
+				break;
+			}
+		}
+		if (start4 != -1) continue;
+		// Detect note start at beat 2 if there is no beat 4
+		for (v = 0; v < av_cnt; ++v) {
+			if (fli[v][bli[v][s0 + 2]] == s0 + 2) {
+				FLAGV(550, s0 + 2);
+				break;
+			}
 		}
 	}
 	return 0;
