@@ -161,6 +161,7 @@ int CP2R::EvaluateCP() {
 		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
 	}
 	GetMsh();
+	FlagFullParallel();
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
@@ -2911,9 +2912,38 @@ int CP2R::FailRhythmRepeat() {
 	return 0;
 }
 
+void CP2R::FlagFullParallel() {
+	CHECK_READY(DR_fli);
+	// Skip if not all voices are in whole notes
+	for (v = 0; v < av_cnt; ++v) {
+		if (vsp[v] > 1) return;
+	}
+	int fps = 0;
+	for (ls = 0; ls < fli_size[0]; ++ls) {
+		s = fli[0][ls];
+		int fp = 1;
+		for (v = 0; v < av_cnt; ++v) {
+			// Wrong note lengths
+			if (ls >= fli_size[v] || llen[v][ls] != npm) {
+				fp = 0;
+				break;
+			}
+			// Non-parallel motion
+			else if (v && ls && c[v][s] - c[v][s - 1] != c[0][s] - c[0][s - 1]) {
+				fp = 0;
+				break;
+			}
+		}
+		if (ls && fp) ++fps;
+		else fps = 0;
+		if (fps == 2) {
+			FlagVL(0, 550, s, fli[0][ls - 2]);
+		}
+	}
+}
+
 int CP2R::FailAnapaest() {
-	CHECK_READY(DR_fli, DR_beat, DR_sus);
-	CHECK_READY(DR_leap, DR_nlen);
+	CHECK_READY(DR_fli);
 	// Check only for 4/4
 	if (npm != 8) return 0;
 	// Do not run check if there are no sp5 voices
