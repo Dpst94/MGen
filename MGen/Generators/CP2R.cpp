@@ -3025,13 +3025,16 @@ int CP2R::FailSlurs() {
 	int scount = 0;
 	int cnt, max_count = 0;
 	int max_ls = 0;
+	int sw = slurs_window[sp][av_cnt][0];
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		if (!ls && !cc[v][0]) continue;
-		// Subtract old slur
-		if (ls >= slurs_window[sp][av_cnt][0] && llen[v][ls - slurs_window[sp][av_cnt][0]] > nlen[v])
+		// Subtract old slur or repeat
+		if (ls >= sw && 
+			(llen[v][ls - sw] > nlen[v] || 
+				cc[v][fli2[v][ls - sw]] == cc[v][fli2[v][ls - sw] + 1]))
 			--scount;
-		// Check slurs in window
-		if (llen[v][ls] > nlen[v]) {
+		// Check slurs and repeats in window
+		if (llen[v][ls] > nlen[v] || cc[v][fli2[v][ls]] == cc[v][fli2[v][ls] + 1]) {
 			++scount;
 			if (scount > max_count) {
 				max_count = scount;
@@ -3040,7 +3043,8 @@ int CP2R::FailSlurs() {
 		}
 	}
 	if (max_count == 1) FlagV(v, 93, fli[v][max_ls]);
-	else if (max_count == 2) FlagV(v, 94, fli[v][max_ls]);
+	else if (max_count == 2) 
+		FlagV(v, 94, fli[v][max_ls]);
 	else if (max_count > 2) {
 		FlagV(v, 95, fli[v][max_ls]);
 		if (!accept[sp][av_cnt][0][95]) fpenalty += (max_count - 2) * 50;
