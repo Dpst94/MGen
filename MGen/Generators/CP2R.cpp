@@ -162,6 +162,7 @@ int CP2R::EvaluateCP() {
 	}
 	GetMsh();
 	FlagFullParallel();
+	FlagMultiSlur();
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
@@ -2938,6 +2939,27 @@ void CP2R::FlagFullParallel() {
 		else fps = 0;
 		if (fps == 2) {
 			FlagVL(0, 550, s, fli[0][ls - 2]);
+		}
+	}
+}
+
+void CP2R::FlagMultiSlur() {
+	CHECK_READY(DR_fli);
+	for (ms = 1; ms < mli.size(); ++ms) {
+		s = mli[ms];
+		int scount = 0;
+		for (v = 0; v < av_cnt; ++v) {
+			// Skip species except CF and 1
+			if (vsp[v] > 1) continue;
+			// Detect slur or note repeat
+			if (cc[v][s] == cc[v][s - 1]) {
+				++scount;
+				if (scount == 1) v2 = v;
+				else break;
+			}
+		}
+		if (scount > 1) {
+			FlagL(v, 557, s, s, v2);
 		}
 	}
 }
