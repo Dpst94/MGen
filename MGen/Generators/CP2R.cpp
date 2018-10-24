@@ -477,6 +477,9 @@ void CP2R::SendLining(int pos, int x, int i) {
 	if (v % 2) {
 		lining[pos + i][vi] = HatchStyleDiagonalCross;
 	}
+	else {
+		lining[pos + i][vi] = 0;
+	}
 	if (show_hatch == 1) {
 	}
 	if (show_hatch == 2 && av_cnt > 1) {
