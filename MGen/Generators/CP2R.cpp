@@ -166,6 +166,7 @@ int CP2R::EvaluateCP() {
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
+	FlagSus2();
 	FindParallel6Chords();
 	return 0;
 }
@@ -3092,6 +3093,7 @@ int CP2R::FailMaxNoteLen() {
 }
 
 // Detect sus mistakes: short preparation
+// TODO: need to implement
 void CP2R::FlagSus() {
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
@@ -3116,6 +3118,20 @@ void CP2R::FlagSus() {
 				if (hli[bhli[s2]] > s) {
 				}
 			}
+		}
+	}
+}
+
+void CP2R::FlagSus2() {
+	for (v = 0; v < av_cnt; ++v) {
+		// Species 2
+		if (vsp[v] != 2) continue;
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			// I -> LT penultimate
+			if (bmli[sus[v][ls]] == mli.size() - 2 && ls < fli_size[v] - 1 &&
+				pcc[v][sus[v][ls]] == 0 && pcc[v][fli[v][ls + 1]] == 11) FlagV(v, 387, sus[v][ls]);
+			// Other
+			else FlagV(v, 388, sus[v][ls]);
 		}
 	}
 }
@@ -5257,4 +5273,3 @@ int CP2R::FailStartPause() {
 	}
 	return 0;
 }
-

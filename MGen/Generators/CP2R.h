@@ -232,6 +232,7 @@ protected:
 	inline int FailOverlap();
 	inline int FailMaxNoteLen();
 	inline void FlagSus();
+	inline void FlagSus2();
 	inline int FailSusCount();
 	inline int FailNoteRepeat();
 	inline int FailPauses();
