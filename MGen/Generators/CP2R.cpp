@@ -479,7 +479,7 @@ void CP2R::SendLining(int pos, int x, int i) {
 	}
 	if (show_hatch == 1) {
 	}
-	if (show_hatch == 2) {
+	if (show_hatch == 2 && av_cnt > 1) {
 		ls = bli[v][x];
 		if (hli[bhli[x]] == x || fli[v][ls] == x) {
 			if (msh[v][x] < 0) lining[pos + i][vi] = HatchStyleLargeConfetti;
