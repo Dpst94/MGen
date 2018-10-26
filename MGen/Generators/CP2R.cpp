@@ -4790,10 +4790,6 @@ void CP2R::GetMsh2() {
 					}
 					flaga.clear();
 					hpenalty = 0;
-					if (hv2 == lchm[0] + 3) hpenalty += 2;
-					if (hv2 == lchm[0] + 5) hpenalty += 1;
-					if (hv4 == lchm[1] + 3) hpenalty += 1;
-					if (hv4 == lchm[1] + 5) hpenalty += 1;
 					for (v = 0; v < av_cnt; ++v) {
 						sp = vsp[v];
 						GetMeasureMsh();
