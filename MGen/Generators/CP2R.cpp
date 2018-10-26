@@ -4055,8 +4055,8 @@ int CP2R::FailVIntervals() {
 			// Prepare data
 			civl = abs(cc[v][s] - cc[v2][s]);
 			// Skip first note 
-			if (ls < fil[v] + 1) continue;
-			if (ls2 < fil[v2] + 1) continue;
+			if (ls <= fil[v]) continue;
+			if (ls2 <= fil[v2]) continue;
 
 			if (FailUnison()) return 1;
 		}
@@ -4084,8 +4084,8 @@ int CP2R::FailPcoApart() {
 			// Prepare data
 			civl = abs(cc[v][s] - cc[v2][s]);
 			// Skip first note 
-			if (ls < fil[v] + 1) continue;
-			if (ls2 < fil[v2] + 1) continue;
+			if (ls <= fil[v]) continue;
+			if (ls2 <= fil[v2]) continue;
 
 			if (sus[v][ls]) {
 				s2 = sus[v][ls] - 1;
@@ -4263,11 +4263,13 @@ void CP2R::EvaluateMsh() {
 	if (mea_end >= ep2) return;
 	for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 		s = fli[v][ls];
+		// Skip pauses
 		if (!cc[v][s]) continue;
+		// Skip non-harmonic tones
 		if (msh[v][s] <= 0) continue;
-		// If note starts in current measure, always check its start
+		// Check if note started in previous measure
 		if (s < s0) {
-			// If note started in previous measure, check if it traverses multiple harmonies in current measure
+			// Check if note traverses multiple harmonies in current measure
 			if (bhli[fli2[v][ls]] - bhli[s0] > 0) {
 				// Set msh and check to measure start
 				s = s0;
@@ -4285,6 +4287,33 @@ void CP2R::EvaluateMsh() {
 			// This is protection against wrong melodic shape value
 			else if (msh[v][s] > 0) FlagA(v, 83, s, s, v);
 		}
+	}
+}
+
+void CP2R::EvaluateMshSteps() {
+	// Skip bass
+	if (!v) return;
+	// Get last measure step
+	int mea_end = mli[ms] + npm - 1;
+	// Prevent going out of window
+	if (mea_end >= ep2) return;
+	v2 = 0;
+	GetVp();
+	for (s = s0; s <= mea_end; ++s) {
+		ls = bli[v][s];
+		ls2 = bli[0][s];
+		// Skip no note start
+		if (s != fli[v][ls] && s != fli[0][ls2]) continue;
+		// Skip non-chord tones
+		if (msh[v][ssus[v][ls]] <= 0) continue;
+		if (msh[0][ssus[0][ls2]] <= 0) continue;
+		// Skip pauses
+		if (!cc[v][s]) continue;
+		if (!cc[0][s]) continue;
+		vc = vca[s];
+		// Prepare data
+		civl = abs(cc[v][s] - cc[0][s]);
+		if (civl % 12 == 6 || civl % 12 == 5) FlagA(v, 331, s, s, 0);
 	}
 }
 
@@ -4517,6 +4546,7 @@ void CP2R::GetMsh() {
 					DetectDNT();
 					DetectCambiata();
 					EvaluateMsh();
+					EvaluateMshSteps();
 				}
 				EvalMshHarm(hv);
 #if defined(_DEBUG)
@@ -4787,6 +4817,7 @@ void CP2R::GetMsh2() {
 						DetectDNT();
 						DetectCambiata();
 						EvaluateMsh();
+						EvaluateMshSteps();
 					}
 					// First harmony
 					hstart = s0;
