@@ -3808,7 +3808,24 @@ void CP2R::EvalMshHarm(int hvar) {
 		}
 		if (found_de1) break;
 	}
+	// Increase penalty for chord without root (probably wrong chord detected)
 	if (!found_de1) hpenalty += 3;
+}
+
+// Detect ambiguous harmony
+void CP2R::EvalHarmAmbig(int hvar) {
+	// Get harmonic notes
+	int de1 = hvar;
+	int de2 = (de1 + 2) % 7;
+	int de3 = (de1 + 4) % 7;
+	// Downbeat harmonic notes
+	int downbeat_harm = 0;
+	for (v = 0; v < av_cnt; ++v) {
+		ls = bli[v][s0];
+		if (fli[v][ls] == s0 && msh[v][s0] > 0) ++downbeat_harm;
+
+	}
+	if (!downbeat_harm) FlagA(0, 558, s0, s0, 0);
 }
 
 void CP2R::GetHarmBass() {
@@ -4549,6 +4566,7 @@ void CP2R::GetMsh() {
 					EvaluateMshSteps();
 				}
 				EvalMshHarm(hv);
+				EvalHarmAmbig(hv);
 #if defined(_DEBUG)
 				CString st, est;
 				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %d, flags %d:",
@@ -4819,6 +4837,7 @@ void CP2R::GetMsh2() {
 					hstart = s0;
 					hend = s0 + sec_hp - 1;
 					EvalMshHarm(hv);
+					EvalHarmAmbig(hv);
 					// Second harmony
 					hstart = s0 + sec_hp;
 					hend = s0 + npm - 1;
