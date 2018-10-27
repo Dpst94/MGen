@@ -167,7 +167,6 @@ int CP2R::EvaluateCP() {
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
 	FlagSus2();
-	FindParallel6Chords();
 	return 0;
 }
 
@@ -3998,23 +3997,6 @@ int CP2R::FailMeasureLen() {
 		FlagV(v, 525, 0);
 	}
 	return 0;
-}
-
-void CP2R::FindParallel6Chords() {
-	// Do not process if less than 3 voices
-	int consec = 0;
-	for (hs = 0; hs < hli.size(); ++hs) {
-		// Detect 6th chord
-		if (chm[hs] > -1 && hbc[hs] % 7 == (chm[hs] + 2) % 7) {
-			++consec;
-			if (consec == 3) {
-				FlagVL(0, 552, ssus[0][bli[0][hli[hs - 2]]], ssus[0][bli[0][hli[hs]]]);
-			}
-		}
-		else {
-			consec = 0;
-		}
-	}
 }
 
 int CP2R::FailParallelIco() {

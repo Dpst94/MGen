@@ -261,6 +261,5 @@ protected:
 	inline int FailPco();
 	inline int FailVRLimit();
 	inline int FailMeasureLen();
-	inline void FindParallel6Chords();
 	inline int FailParallelIco();
 };
