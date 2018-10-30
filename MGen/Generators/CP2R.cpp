@@ -5009,7 +5009,7 @@ void CP2R::DetectCambiata() {
 				if (ls < fli_size[v] - 4) {
 					// Leap from note 4
 					if (abs(leap[v][fli2[v][ls + 3]]) > 3) {
-						if (!accept[sp][vc][0][97]) continue;
+						continue;
 					}
 					// Apply pattern
 					msh[v][fli[v][ls]] = pHarmonicCam1;
