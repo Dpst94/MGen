@@ -3588,10 +3588,6 @@ int CP2R::EvalHarm() {
 		else if (ha64[i] == 1) FlagV(v, 196, s);
 		// Prohibit audible 64 chord
 		else if (ha64[i] == 2) FlagV(v, 383, s);
-		// Prohibit DTIII#5 augmented chord
-		if (chm[i] == 2 && chm_alter[i] == 1) {
-			FlagV(v, 375, s);
-		}
 		if (i > 0 && chm[i - 1] > -1) {
 			// Check GC for low voice and not last note (last note in any window is ignored)
 			if (ls < fli_size[v] - 1 &&
@@ -3783,6 +3779,7 @@ void CP2R::EvalMshHarm(int hvar) {
 	if (lhbc % 7 == (hv + 4) % 7) hpenalty += 10;
 	// Detect 6th chord
 	if (lhbc % 7 == (hv + 2) % 7) hpenalty += 1;
+	// Find root in harmonic notes
 	int found_de1 = 0;
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
@@ -3809,6 +3806,10 @@ void CP2R::EvalMshHarm(int hvar) {
 	}
 	// Increase penalty for chord without root (probably wrong chord detected)
 	if (!found_de1) hpenalty += 1000;
+	// Prohibit DTIII#5 augmented chord
+	if (cchnv[shp[hstart % npm]][11] && cchnv[shp[hstart % npm]][3]) {
+		FlagA(0, 375, hstart, hstart, 0, 3);
+	}
 }
 
 // Detect ambiguous harmony
