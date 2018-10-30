@@ -101,9 +101,9 @@
 #define pPDD 3 // Passing downbeat dissonance
 
 // Accumulate and return flag
-#define FLAGAR(voice, fid, step, step2, voice2) do { \
+#define FLAGAR(voice, fid, step, step2, voice2, ihpe) do { \
 	if (!s3 && !s4 && !s5) { \
-		FlagA(voice, fid, step, step2, voice2); \
+		FlagA(voice, fid, step, step2, voice2, ihpe); \
 		return; \
 	} \
 } while (0)
@@ -149,7 +149,7 @@ protected:
 	inline void FlagVL(int voice, int fid, int step, int step2);
 	inline void Flag(int voice, int fid, int step, int voice2);
 	inline void FlagL(int voice, int fid, int step, int step2, int voice2);
-	inline void FlagA(int voice, int fid, int step, int step2, int voice2);
+	inline void FlagA(int voice, int fid, int step, int step2, int voice2, int ihpe);
 	inline void AssertRule(int fid);
 
 	inline int EvaluateCP();
