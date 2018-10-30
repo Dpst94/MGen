@@ -4933,10 +4933,6 @@ void CP2R::DetectDNT() {
 			if (llen[v][ls + 1] > llen[v][ls]) continue;
 			// Note 3 is long
 			if (llen[v][ls + 2] > 2) continue;
-			// Leap in (before DNT)
-			if (ls > 0 && leap[v][fli2[v][ls - 1]]) {
-				if (!accept[sp][vc][0][3]) continue;
-			}
 			if (ls < fli_size[v] - 3) {
 				// Note 4 must be chord tone
 				if (!cchnv[shp[fli[v][ls + 3] % npm]][pcc[v][fli[v][ls + 3]]]) continue;
@@ -4950,10 +4946,14 @@ void CP2R::DetectDNT() {
 				if (cc[v][s] != cc[v][fli[v][ls + 3]]) continue;
 				// Note 3 is longer than 4
 				if (llen[v][ls + 2] > llen[v][ls + 3] && (ep2 == c_len || ls < fli_size[v] - 4)) continue;
+				// Leap in (before DNT)
+				if (ls > 0 && leap[v][fli2[v][ls - 1]]) {
+					if (!accept[sp][vc][0][3]) FlagA(v, 3, s, s, v, 0);
+				}
 				if (ls < fli_size[v] - 4) {
 					// Leap from note 4
 					if (leap[v][fli2[v][ls + 3]]) {
-						if (!accept[sp][vc][0][97]) continue;
+						if (!accept[sp][vc][0][97]) FlagA(v, 97, fli[v][ls + 3], fli[v][ls + 3], v, 0);
 					}
 					// Apply pattern
 					msh[v][fli[v][ls]] = pHarmonicDNT1;
