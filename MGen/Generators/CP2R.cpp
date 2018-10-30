@@ -4319,7 +4319,7 @@ void CP2R::EvaluateMshSteps() {
 	}
 }
 
-void CP2R::GetMeasureMsh() {
+void CP2R::GetMeasureMsh(int sec_hp) {
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
@@ -4340,6 +4340,8 @@ void CP2R::GetMeasureMsh() {
 		}
 		// Downbeat
 		else if (s % npm == 0) msh[v][s] = pDownbeat;
+		// First note in harmony
+		else if (s == sec_hp) msh[v][s] = pDownbeat;
 		// Anticipation
 		else if (ls == bli[v][mea_end] && s2 < ep2 - 1 && s2 == s0 + npm - 1 &&
 			cc[v][s2] == cc[v][s2 + 1] && llen[v][ls] <= 4 && ms == mli.size() - 2 &&
@@ -4539,7 +4541,7 @@ void CP2R::GetMsh() {
 				hpenalty = 0;
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];
-					GetMeasureMsh();
+					GetMeasureMsh(-1);
 					s = hstart;
 					ls = bli[v][s];
 					s2 = fli2[v][ls];
@@ -4795,7 +4797,7 @@ void CP2R::GetMsh2() {
 					hpenalty = 0;
 					for (v = 0; v < av_cnt; ++v) {
 						sp = vsp[v];
-						GetMeasureMsh();
+						GetMeasureMsh(s0 + sec_hp);
 						// First harmony
 						hstart = s0;
 						hend = s0 + sec_hp - 1;

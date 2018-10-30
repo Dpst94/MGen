@@ -170,7 +170,6 @@ protected:
 	inline int FailMinorStepwise();
 	void MergeNotes(int step1, int step2);
 	inline void GetBasicMsh();
-	inline void GetMeasureMsh();
 	inline void GetMinimumMsh();
 	inline void GetHarmVar(vector<int>& cpos, int &poss_vars);
 	inline void GetMsh();
@@ -178,6 +177,7 @@ protected:
 	inline void GetMsh2();
 	inline void EvaluateMsh();
 	inline void EvaluateMshSteps();
+	inline void GetMeasureMsh(int sec_hp);
 	inline void DetectSus();
 	inline void DetectPDD();
 	inline void DetectDNT();
