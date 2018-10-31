@@ -230,6 +230,7 @@ protected:
 	inline int FailMissSlurs();
 	inline int FailSlurs();
 	inline int FailStartPause();
+	inline void EvaluateHarmTriRes();
 	inline int FailOverlap();
 	inline int FailMaxNoteLen();
 	inline void FlagSus();
@@ -262,4 +263,6 @@ protected:
 	inline int FailVRLimit();
 	inline int FailMeasureLen();
 	inline int FailParallelIco();
+	inline int GetTriRes(int cc1, int cc2);
 };
+
