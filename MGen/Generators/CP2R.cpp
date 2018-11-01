@@ -4266,8 +4266,16 @@ void CP2R::EvaluateMsh() {
 		s = fli[v][ls];
 		// Skip pauses
 		if (!cc[v][s]) continue;
-		// Skip non-harmonic tones
-		if (msh[v][s] <= 0) continue;
+		if (msh[v][s] <= 0) {
+			// Detect auxiliary tone, not surrounded by chord tones
+			if (cc[v][fli[v][ls - 1]] == cc[v][fli[v][ls + 1]] && abs(c[v][fli[v][ls - 1]] - c[v][s]) == 1 && 
+				(!cchnv[shp[fli[v][ls - 1] % npm]][pcc[v][fli[v][ls - 1]]] || 
+					!cchnv[shp[fli[v][ls + 1] % npm]][pcc[v][fli[v][ls + 1]]])) {
+				msh[v][s] = pAuxWrong;
+			}
+			// Skip non-harmonic tones
+			else continue;
+		}
 		// Check if note started in previous measure
 		if (s < s0) {
 			// Check if note traverses multiple harmonies in current measure
