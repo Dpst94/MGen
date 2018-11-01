@@ -4335,10 +4335,10 @@ void CP2R::EvaluateHarmTriRes() {
 	// Check all voices except bass
 	for (v = 1; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
-			GetVp();
 			for (s = s0; s <= mea_end; ++s) {
 				ls = bli[v][s];
 				ls2 = bli[v2][s];
+				GetVp();
 				// Skip no note start
 				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
 				// Skip non-chord tones
