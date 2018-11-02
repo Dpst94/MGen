@@ -4272,9 +4272,11 @@ void CP2R::EvaluateMsh() {
 				(!cchnv[shp[fli[v][ls - 1] % npm]][pcc[v][fli[v][ls - 1]]] || 
 					!cchnv[shp[fli[v][ls + 1] % npm]][pcc[v][fli[v][ls + 1]]])) {
 				msh[v][s] = pAuxWrong;
+				if (!cchnv[shp[s % npm]][pcc[v][s]]) 
+					FlagA(v, 170, s, s, v, 50);
 			}
 			// Skip non-harmonic tones
-			else continue;
+			continue;
 		}
 		// Check if note started in previous measure
 		if (s < s0) {
