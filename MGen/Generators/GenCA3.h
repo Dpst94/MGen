@@ -38,6 +38,7 @@ private:
 	vector<int> cp_btype; // [cp_id] beat type
 	vector<int> cp_error; // [cp_id] error on load
 	vector<CString> cp_text; // [cp_id]
+	vector<CString> cp_lyrics; // [cp_id]
 
 };
 

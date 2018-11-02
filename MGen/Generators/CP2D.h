@@ -165,6 +165,9 @@ protected:
 
 	vector<LyLogEntry> ly_log;
 
+	CString xml_text; // Imported text
+	CString xml_lyrics; // Imported lyrics
+
 	int max_rule = 0;
 	int av_cnt = 0;
 	int c_len = 0;
@@ -441,6 +444,8 @@ protected:
 	// Ly Parameters
 	int ly_msh = 1; // 0 - do not show msh, 1 - show msh
 	int ly_rule_verbose = 0; // How verbose rule display format is
+	int ly_show_xml_text = 0; // show imported text from xml file
+	int ly_show_xml_lyrics = 0; // show imported lyrics from xml file
 
 	// Graphs
 	vector <vector <float>> tweight; // [ls] Tonic weight for each note

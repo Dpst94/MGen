@@ -137,6 +137,7 @@ void CGenCA3::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 int CGenCA3::XML_to_CP() {
 	vector<int> im; // Intermediate measures vector
 	vector<vector<CString>> it; // Intermediate text vector
+	vector<vector<CString>> ilyr; // Intermediate lyrics vector
 	vector<int> ifi; // Intermediate fifths vector
 	vector<int> ibl; // Intermediate barlines vector
 	vector<int> ibt; // Intermediate beat type
@@ -148,6 +149,7 @@ int CGenCA3::XML_to_CP() {
 	cp_tempo = 0;
 	vname.resize(av_cnt);
 	it.resize(av_cnt);
+	ilyr.resize(av_cnt);
 	for (vi = 0; vi < xfi.voice.size(); ++vi) {
 		v = av_cnt - vi - 1;
 		// Position in resulting vector
@@ -176,6 +178,7 @@ int CGenCA3::XML_to_CP() {
 				//if (pos + ln < floor(xpos + xpos2)) 
 				c_len = max(c_len, pos + ln);
 				it[v].resize(c_len);
+				ilyr[v].resize(c_len);
 				ifi.resize(c_len, 100);
 				ibt.resize(c_len);
 				cc[v].resize(c_len);
@@ -202,9 +205,7 @@ int CGenCA3::XML_to_CP() {
 				ibt[pos] = xfi.mea[m].beat_type;
 				// Concatenate text
 				it[v][pos] = xfi.note[vi][m][ni].words;
-				if (!xfi.note[vi][m][ni].words.IsEmpty() && !xfi.note[vi][m][ni].lyric.IsEmpty())
-					it[v][pos] += ",";
-				it[v][pos] += xfi.note[vi][m][ni].lyric;
+				ilyr[v][pos] = xfi.note[vi][m][ni].lyric;
 				pos += ln;
 			}
 			xpos += xfi.mea[m].len * 8.0;
@@ -248,6 +249,7 @@ int CGenCA3::XML_to_CP() {
 				cp_vid.resize(cp_id + 1);
 				cp_mea.resize(cp_id + 1);
 				cp_text.resize(cp_id + 1);
+				cp_lyrics.resize(cp_id + 1);
 				cp_fi.resize(cp_id + 1, 100);
 				cp_btype.resize(cp_id + 1, 100);
 				cp_error.resize(cp_id + 1);
@@ -284,9 +286,10 @@ int CGenCA3::XML_to_CP() {
 						cp[cp_id][v][s3 - s1] = cc[v][s3];
 						cp_alter[cp_id][v][s3 - s1] = ial[v][s3];
 						cp_retr[cp_id][v][s3 - s1] = retr[v][s3];
-						if (!cp_text[cp_id].IsEmpty() && !it[v][s3].IsEmpty()) cp_text[cp_id] += ",";
+						if (!cp_text[cp_id].IsEmpty() && !it[v][s3].IsEmpty()) cp_text[cp_id] += " ";
 						cp_text[cp_id] += it[v][s3];
-						cp_text[cp_id].Replace(" ", ",");
+						if (!cp_lyrics[cp_id].IsEmpty() && !ilyr[v][s3].IsEmpty()) cp_lyrics[cp_id] += " ";
+						cp_lyrics[cp_id] += ilyr[v][s3];
 					}
 				}
 				if (cp_fi[cp_id] == 100) cp_fi[cp_id] = 0;
@@ -423,13 +426,29 @@ int CGenCA3::GetCPSpecies() {
 	CString est;
 	LoadSpecies(conf_species);
 	// Check if species can be loaded from MusicXML
+	int found = 0;
+	xml_text = cp_text[cp_id];
+	xml_lyrics = cp_lyrics[cp_id];
 	if (!cp_text[cp_id].IsEmpty()) {
 		vector<CString> sa;
-		Tokenize(cp_text[cp_id], sa, ",");
+		Tokenize(cp_text[cp_id], sa, " ");
 		for (int i = 0; i < sa.size(); ++i) {
 			sa[i].Trim();
 			if (sa[i].Left(2) == "sp") {
 				LoadSpecies(sa[i].Mid(2));
+				found = 1;
+				break;
+			}
+		}
+	}
+	if (!found && !cp_lyrics[cp_id].IsEmpty()) {
+		vector<CString> sa;
+		Tokenize(cp_lyrics[cp_id], sa, " ");
+		for (int i = 0; i < sa.size(); ++i) {
+			sa[i].Trim();
+			if (sa[i].Left(2) == "sp") {
+				LoadSpecies(sa[i].Mid(2));
+				found = 1;
 				break;
 			}
 		}

@@ -126,7 +126,7 @@ void XFIn::LoadXML(CString pth) {
 			if (staff >= words.size()) words.resize(staff + 1);
 			words[staff] = nd.child("direction-type").child("words").text().as_string();
 			if (nd.child("direction-type").child("words").next_sibling().name()[0] != '\0') {
-				words[staff] += ",";
+				words[staff] += " ";
 				words[staff] += nd.child("direction-type").child("words").next_sibling().text().as_string();
 			}
 			if (nd.child("direction-type").child("metronome").child("per-minute").name()[0] != '\0') {

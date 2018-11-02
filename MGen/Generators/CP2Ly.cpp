@@ -470,6 +470,7 @@ void CP2Ly::InitFSep() {
 }
 
 void CP2Ly::SaveLyCP() {
+	CString st;
 	InitFSep();
 	ly_flags = 0;
 	vector<CString> sv;
@@ -516,8 +517,8 @@ void CP2Ly::SaveLyCP() {
 	ly_ly_st += "    \\vspace #1\n";
 	ly_ly_st += "\n}\n";
 	// First info
-	CString st, st3;
-	ly_ly_st += "\\markup \\wordwrap \\bold {\n  ";
+	CString st3;
+	ly_ly_st += "\\markup \\wordwrap {\n  \\bold {\n";
 	st.Format("\"#\"%d (from %s)",
 		cp_id + 1, bname_from_path(musicxml_file));
 	ly_ly_st += st + " Key: " + key_visual;
@@ -541,6 +542,27 @@ void CP2Ly::SaveLyCP() {
 	// Init separate staff
 	slyi.clear();
 	slyi.resize(c_len + 1);
+	ly_ly_st += "\n}\n";
+	// Show text
+	if (ly_show_xml_text && !xml_text.IsEmpty()) {
+		ly_ly_st += "\\tiny { \n";
+		st = "Text: " + xml_text;
+		if (st.Right(1) != "." && st.Right(1) != "!" && st.Right(1) != "?") st += ".";
+		st.Replace("\"", "\\\"");
+		st.Replace(" ", "\" \"");
+		ly_ly_st += "\"" + st + "\"\n";
+		ly_ly_st += "}\n";
+	}
+	// Show lyrics
+	if (ly_show_xml_lyrics && !xml_lyrics.IsEmpty()) {
+		ly_ly_st += "\\tiny { \n";
+		st = "Lyrics: " + xml_lyrics;
+		if (st.Right(1) != "." && st.Right(1) != "!" && st.Right(1) != "?") st += ".";
+		st.Replace("\"", "\\\"");
+		st.Replace(" ", "\" \"");
+		ly_ly_st += "\"" + st + "\"\n";
+		ly_ly_st += "}\n";
+	}
 	ly_ly_st += "\n}\n";
 	// Show logs
 	for (int i = 0; i < ly_log.size(); ++i) {
