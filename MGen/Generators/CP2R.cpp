@@ -4,7 +4,7 @@
 #include "CP2R.h"
 
 #ifdef _DEBUG
-#define new DEBUG_NEW 
+#define new DEBUG_NEW
 #endif
 
 CP2R::CP2R() {
