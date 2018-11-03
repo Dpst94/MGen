@@ -237,7 +237,12 @@ int CP2R::FailOverlap() {
 						if (nonadj) break;
 					}
 				}
-				if (nonadj) {
+				// Direct movement to 2nd
+				if (abs(cc[v][s3] - cc[v2][s4]) < 3 && abs(cc[v][s3] - cc[v2][s4]) > 0 && 
+					(cc[v][s3] - cc[v][s3 - 1]) * (cc[v2][s4] - cc[v2][s4 - 1]) > 0) {
+					FlagL(v, 136, s, s3, v2);
+				}
+				else if (nonadj) {
 					FlagL(v, 548, s, s3, v2);
 				}
 				else {
