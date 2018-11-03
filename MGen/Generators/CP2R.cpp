@@ -4325,7 +4325,8 @@ void CP2R::EvaluateMshSteps() {
 		// Prepare data
 		civl = abs(cc[v][s] - cc[0][s]);
 		// Flag 4th or tritone with bass
-		if (civl % 12 == 6 || civl % 12 == 5) FlagA(v, 331, s, s, 0, 100);
+		if (civl % 12 == 5) FlagA(v, 171, s, s, 0, 100);
+		if (civl % 12 == 6) FlagA(v, 331, s, s, 0, 100);
 	}
 }
 
