@@ -421,7 +421,7 @@ int CGenCA3::GetCP() {
 }
 
 int CGenCA3::GetCPSpecies() {
-	CString est;
+	CString st, est;
 	LoadSpecies(conf_species);
 	// Check if species can be loaded from MusicXML
 	int found = 0;
@@ -429,7 +429,9 @@ int CGenCA3::GetCPSpecies() {
 	xml_lyrics = cp_lyrics[cp_id];
 	if (!cp_text[cp_id].IsEmpty()) {
 		vector<CString> sa;
-		Tokenize(cp_text[cp_id], sa, " ");
+		st = cp_text[cp_id];
+		st.Replace(",", " ");
+		Tokenize(st, sa, " ");
 		for (int i = 0; i < sa.size(); ++i) {
 			sa[i].Trim();
 			if (sa[i].Left(2) == "sp") {
@@ -441,7 +443,9 @@ int CGenCA3::GetCPSpecies() {
 	}
 	if (!found && !cp_lyrics[cp_id].IsEmpty()) {
 		vector<CString> sa;
-		Tokenize(cp_lyrics[cp_id], sa, " ");
+		st = cp_lyrics[cp_id];
+		st.Replace(",", " ");
+		Tokenize(st, sa, " ");
 		for (int i = 0; i < sa.size(); ++i) {
 			sa[i].Trim();
 			if (sa[i].Left(2) == "sp") {
