@@ -378,7 +378,6 @@ int CGenCA3::GetCP() {
 						est.Format("Measure %zu size is changed from %d to %d inside counterpoint %d",
 							mli.size(), npm, mli.end()[-1] - mli.end()[-2], cp_id + 1);
 						WriteLogLy(5, est, 0);
-						error = 10;
 						return 1;
 					}
 				}
@@ -414,7 +413,6 @@ int CGenCA3::GetCP() {
 		est.Format("Counterpoint %d starts not on downbeat. Please check counterpoint.",
 			cp_id + 1);
 		WriteLogLy(5, est, 0);
-		error = 10;
 		return 1;
 	}
 
@@ -496,7 +494,6 @@ int CGenCA3::GetCPSpecies() {
 		est.Format("Check species parameter in config or MusicXML file: found %zu voices, but there are %d voices in counterpoint %d. Parameter in MusicXML will have precedence",
 			vsp.size(), av_cnt, cp_id + 1);
 		WriteLogLy(5, est, 0);
-		error = 10;
 		return 1;
 	}
 	return 0;
@@ -727,7 +724,6 @@ int CGenCA3::GetVocalRanges() {
 		est.Format("Cannot detect vocal range for counterpoint %d, part %d: %s",
 			cp_id + 1, vid[v] + 1, vname[vid[v]]);
 		WriteLogLy(5, est, 0);
-		error = 16;
 		return 1;
 	}
 	ScanVocalRanges();
