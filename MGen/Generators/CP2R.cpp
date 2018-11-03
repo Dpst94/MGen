@@ -4275,6 +4275,13 @@ void CP2R::EvaluateMsh() {
 				if (!cchnv[shp[s % npm]][pcc[v][s]]) 
 					FlagA(v, 170, s, s, v, 50);
 			}
+			// Detect non-harmonic tone, which is longer than previous chord tone
+			else if (llen[v][ls] > llen[v][ls - 1] && msh[v][ssus[v][ls - 1]] > 0 &&
+				cchnv[shp[fli[v][ls - 1] % npm]][pcc[v][fli[v][ls - 1]]]) {
+				msh[v][s] = pLong;
+				if (!cchnv[shp[s % npm]][pcc[v][s]])
+					FlagA(v, 223, s, s, v, 50);
+			}
 			// Skip non-harmonic tones
 			continue;
 		}
