@@ -5241,17 +5241,10 @@ void CP2R::DetectSus() {
 		FlagA(v, 295, fli[v][ls + 1], hstart, v, 100);
 	}
 	// Single insertion, second movement is leap
-	if (!accept[sp][vc][0][136]) {
-		if (s3 && ls3 == ls + 2 && leap[v][fli2[v][ls + 1]] > 0) s3 = 0;
-		if (s4 && ls4 == ls + 2 && leap[v][fli2[v][ls + 1]] > 0) s4 = 0;
-		if (s5 && ls5 == ls + 2 && leap[v][fli2[v][ls + 1]] > 0) s5 = 0;
-		FLAGAR(v, 136, s, s, v, 100);
-	}
-	// Single insertion, second movement is leap
 	if (!accept[sp][vc][0][296]) {
-		if (s3 && ls3 == ls + 2 && leap[v][fli2[v][ls + 1]] < 0) s3 = 0;
-		if (s4 && ls4 == ls + 2 && leap[v][fli2[v][ls + 1]] < 0) s4 = 0;
-		if (s5 && ls5 == ls + 2 && leap[v][fli2[v][ls + 1]] < 0) s5 = 0;
+		if (s3 && ls3 == ls + 2 && leap[v][fli2[v][ls + 1]] > sus_insert_max_leap2[sp][vc][0]) s3 = 0;
+		if (s4 && ls4 == ls + 2 && leap[v][fli2[v][ls + 1]] > sus_insert_max_leap2[sp][vc][0]) s4 = 0;
+		if (s5 && ls5 == ls + 2 && leap[v][fli2[v][ls + 1]] > sus_insert_max_leap2[sp][vc][0]) s5 = 0;
 		FLAGAR(v, 296, s, s, v, 100);
 	}
 	// Mark insertion as non-harmonic in basic msh if resolution is harmonic, sus ends with dissonance and not both movements are leaps

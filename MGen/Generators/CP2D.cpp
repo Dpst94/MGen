@@ -799,6 +799,7 @@ void CP2D::SetRuleParams() {
 	SetRuleParam(vocra_disbal_yel, 524, rsSubName, 0);
 	SetRuleParam(vocra_disbal_red, 526, rsSubName, 0);
 	SetRuleParamI2C(sus_insert_max_leap, 295, rsSubComment, 0);
+	SetRuleParamI2C(sus_insert_max_leap2, 295, rsSubComment, 0);
 	// Log
 	long long time_stop = CGLib::time();
 	CString st;

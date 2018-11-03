@@ -40,6 +40,7 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 		CString est;
 		est.Format("LoadConfigFile cannot find file: %s", fname);
 		WriteLog(5, est);
+		error = 1000;
 		return;
 	}
 	fs.open(fname);
