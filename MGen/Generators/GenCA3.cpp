@@ -504,6 +504,7 @@ int CGenCA3::GetCPSpecies() {
 
 void CGenCA3::Generate() {
 	CString st;
+	if (error) return;
 	LoadLyShapes("configs\\ly\\shapes.csv");
 	if (HarmName[0].IsEmpty()) {
 		WriteLog(5, "Harmonic notation not loaded: please check harm_notation parameter in configuration file");
@@ -557,6 +558,7 @@ void CGenCA3::Generate() {
 }
 
 void CGenCA3::SaveLy(CString dir, CString fname) {
+	if (error) return;
 	vector<CString> sv;
 	CString title;
 	// Remove server config prefix
