@@ -1049,11 +1049,11 @@ int CP2R::FailMinorStepwise() {
 		s_1 = fli[v][ls - 1];
 		s1 = fli[v][ls + 1];
 		// Prohibit harmonic VI# not stepwize ascending
-		if ((sp < 2 || msh[v][s] > 0) && pcc[v][s] == 9 &&
+		if ((sp < 2 || nih[v][s]) && pcc[v][s] == 9 &&
 			(c[v][s] - c[v][s_1] != 1 || c[v][s1] - c[v][s] != 1))
 			FlagVL(v, 201, s_1, s1);
 		// Prohibit harmonic VII natural not stepwize descending
-		if ((sp < 2 || msh[v][s] > 0) && pcc[v][s] == 10 &&
+		if ((sp < 2 || nih[v][s]) && pcc[v][s] == 10 &&
 			(c[v][s] - c[v][s_1] != -1 || c[v][s1] - c[v][s] != -1))
 			FlagVL(v, 202, s_1, s1);
 	}
@@ -4556,6 +4556,10 @@ void CP2R::GetMsh() {
 		int hnotes = 0;
 		for (v = 0; v < av_cnt; ++v) {
 			GetMinimumMsh();
+			// Clear note-in-harmony
+			for (s = s0; s < s0 + npm; ++s) {
+				nih[v][s] = 0;
+			}
 			for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 				s = fli[v][ls];
 				if (!cc[v][s]) continue;
@@ -4989,6 +4993,7 @@ void CP2R::GetMsh2() {
 						for (s = s0; s < s0 + npm; ++s) {
 							for (v = 0; v < av_cnt; ++v) {
 								mshb[v][s] = msh[v][s];
+								nihb[v][s] = nih[v][s];
 							}
 						}
 					}
@@ -5009,6 +5014,7 @@ void CP2R::GetMsh2() {
 		for (s = s0; s < s0 + npm; ++s) {
 			for (v = 0; v < av_cnt; ++v) {
 				msh[v][s] = mshb[v][s];
+				nih[v][s] = nihb[v][s];
 			}
 		}
 		// Save flags
