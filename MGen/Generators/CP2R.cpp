@@ -5026,7 +5026,7 @@ void CP2R::DetectDNT() {
 		// No pauses
 		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) continue;
 		// First note must be chord tone
-		if (!nih[v][s2]) continue;
+		if (!nih[v][s]) continue;
 		// Movement is stepwize
 		if (!smooth[v][s2]) continue;
 		// Note 1 is short
@@ -5090,7 +5090,7 @@ void CP2R::DetectCambiata() {
 		// No pauses
 		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) continue;
 		// First note must be chord tone
-		if (!nih[v][s2]) continue;
+		if (!nih[v][s]) continue;
 		// Note 1 is short
 		if (llen[v][ls] < 2) continue;
 		// Note 2 is long
@@ -5147,7 +5147,7 @@ void CP2R::DetectSus() {
 			s3 = fli2[v][ls + 1];
 			s4 = fli2[v][ls + 2];
 			// Is there a dissonance between two consonances, forming stepwise descending movement?
-			if (!nih[v][s3] && nih[v][s4] && c[v][s2] - c[v][s4] == 1 &&
+			if (!nih[v][fli[v][ls + 1]] && nih[v][fli[v][ls + 2]] && c[v][s2] - c[v][s4] == 1 &&
 				llen[v][ls + 2] >= 2 && beat[v][ls + 2] < 10) {
 				// Detect stepwise+leap or leap+stepwise
 				if ((c[v][s3] - c[v][s2] == 1 && c[v][s3] - c[v][s4] == 2) ||
@@ -5191,9 +5191,9 @@ void CP2R::DetectSus() {
 	if (s5) ls5 = bli[v][s5];
 	// Notes not on beat? 
 	if (!accept[sp][vc][0][286]) {
-		if (s3 && cc[v][s3] == cc[v][s3 - 1]) s3 = 0;
-		if (s4 && cc[v][s4] == cc[v][s4 - 1]) s4 = 0;
-		if (s5 && cc[v][s5] == cc[v][s5 - 1]) s5 = 0;
+		if (s3 && s3 != fli[v][ls3]) s3 = 0;
+		if (s4 && s4 != fli[v][ls4]) s4 = 0;
+		if (s5 && s5 != fli[v][ls5]) s5 = 0;
 		FLAGAR(v, 286, s, s, v, 100);
 	}
 	// Notes too short?
@@ -5285,7 +5285,7 @@ void CP2R::DetectPDD() {
 	// Note must not start before harmony start
 	if (fli[v][ls] != hstart) return;
 	// Second note must be non-chord tone
-	if (nih[v][s2]) return;
+	if (nih[v][s]) return;
 	// No pauses
 	if (!cc[v][s] || !cc[v][s - 1] || !cc[v][s2 + 1]) return;
 	// Stepwize downward movement
