@@ -402,6 +402,7 @@ protected:
 	vector<vector<int>> sus; // [v][ls] Note suspension flag (when above zero, links to first cantus-changing step)
 	vector<vector<int>> ssus; // [v][ls] Points to sus position or note start if there is no sus
 	vector<vector<int>> isus; // [v][ls] 0 - note cannot be intrabar sus. -1 - note can be intrabar sus. -2 - note is intrabar sus
+	vector<vector<int>> resol; // [v][s] 0 - this note is not resolved; >0 points to step of resolution note
 	vector<vector<int>> msh; // [v][s] Melody shape types for fli
 	vector<vector<int>> mshb; // [v][s] Best msh
 	vector<vector<int>> nih; // [v][s] Is current note in harmony?

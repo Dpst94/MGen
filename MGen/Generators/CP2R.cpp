@@ -3828,10 +3828,6 @@ void CP2R::EvalMshHarm(int hvar) {
 
 // Detect ambiguous harmony
 void CP2R::EvalHarmAmbig(int hvar) {
-	// Get harmonic notes
-	int de1 = hvar;
-	int de2 = (de1 + 2) % 7;
-	int de3 = (de1 + 4) % 7;
 	// Downbeat harmonic notes
 	int downbeat_harm = 0;
 	for (v = 0; v < av_cnt; ++v) {
@@ -3840,6 +3836,42 @@ void CP2R::EvalHarmAmbig(int hvar) {
 	}
 	// Not a single harmonic note on first beat
 	if (!downbeat_harm) FlagA(0, 558, hstart, hstart, 0, 30);
+}
+
+void CP2R::EvalHarmIncomplete(int hvar) {
+	if (accept[0][av_cnt][0][559]) return;
+	// Get harmonic notes
+	int de1 = hvar;
+	int de2 = (de1 + 2) % 7;
+	int de3 = (de1 + 4) % 7;
+	// Count harmonic occurences
+	int dc1 = 0;
+	int dc2 = 0;
+	int dc3 = 0;
+	for (v = 0; v < av_cnt; ++v) {
+		ls = bli[v][hstart];
+		// Incomplete
+		if (msh[v][hstart] > 0 && nih[v][hstart]) {
+			if (de1 == pc[v][hstart]) ++dc1;
+			else if (de2 == pc[v][hstart]) ++dc2;
+			else if (de3 == pc[v][hstart]) ++dc3;
+		}
+		else {
+			if (resol[v][hstart]) {
+				if (de1 == pc[v][resol[v][hstart]]) ++dc1;
+				else if (de2 == pc[v][resol[v][hstart]]) ++dc2;
+				else if (de3 == pc[v][resol[v][hstart]]) ++dc3;
+			}
+		}
+	}
+	// Penultimate incomplete D
+	if (mli.size() > 1 && hvar == 4 && hend == mli[mli.size() - 1] - 1) {
+		if (!dc1 || !dc2 || !dc3) FlagA(0, 172, hstart, hstart, 0, 0);
+	}
+	// Non penultimate incomplete
+	else {
+		if (!dc1 || !dc2) FlagA(0, 559, hstart, hstart, 0, 0);
+	}
 }
 
 void CP2R::GetHarmBass() {
@@ -4643,10 +4675,14 @@ void CP2R::GetMsh() {
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];
 					GetMeasureMsh(-1);
+					// Clear resolutions
+					for (s = s0; s < s0 + npm; ++s) {
+						resol[v][s] = 0;
+					}
+					GetNotesInHarm();
 					s = hstart;
 					ls = bli[v][s];
 					s2 = fli2[v][ls];
-					GetNotesInHarm();
 					DetectSus();
 					DetectPDD();
 					DetectDNT();
@@ -4656,6 +4692,7 @@ void CP2R::GetMsh() {
 				}
 				EvalMshHarm(hv);
 				EvalHarmAmbig(hv);
+				EvalHarmIncomplete(hv);
 				EvaluateHarmTriRes();
 #if defined(_DEBUG)
 				CString st, est;
@@ -4918,22 +4955,26 @@ void CP2R::GetMsh2() {
 					for (v = 0; v < av_cnt; ++v) {
 						sp = vsp[v];
 						GetMeasureMsh(s0 + sec_hp);
+						// Clear resolutions
+						for (s = s0; s < s0 + npm; ++s) {
+							resol[v][s] = 0;
+						}
 						// First harmony
 						hstart = s0;
 						hend = s0 + sec_hp - 1;
+						GetNotesInHarm();
 						s = hstart;
 						ls = bli[v][s];
 						s2 = fli2[v][ls];
-						GetNotesInHarm();
 						DetectSus();
 						DetectPDD();
 						// Second harmony
 						hstart = s0 + sec_hp;
 						hend = s0 + npm - 1;
+						GetNotesInHarm();
 						s = hstart;
 						ls = bli[v][s];
 						s2 = fli2[v][ls];
-						GetNotesInHarm();
 						DetectSus();
 						DetectPDD();
 						// Full measure
@@ -4947,12 +4988,14 @@ void CP2R::GetMsh2() {
 					hend = s0 + sec_hp - 1;
 					EvalMshHarm(hv);
 					EvalHarmAmbig(hv);
+					EvalHarmIncomplete(hv);
 					EvaluateHarmTriRes();
 					// Second harmony
 					hstart = s0 + sec_hp;
 					hend = s0 + npm - 1;
 					EvalMshHarm(hv3);
 					EvalHarmAmbig(hv3);
+					EvalHarmIncomplete(hv3);
 					EvaluateHarmTriRes();
 #if defined(_DEBUG)
 					CString st, est;
@@ -5275,6 +5318,7 @@ void CP2R::DetectSus() {
 	if (s3) {
 		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls3]] = pSusRes;
+		resol[v][hstart] = fli[v][ls3];
 #if defined(_DEBUG)
 		WriteLog(3, "Detected sus at s3");
 #endif
@@ -5282,6 +5326,7 @@ void CP2R::DetectSus() {
 	if (s4) {
 		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls4]] = pSusRes;
+		resol[v][hstart] = fli[v][ls4];
 #if defined(_DEBUG)
 		WriteLog(3, "Detected sus at s4");
 #endif
@@ -5289,6 +5334,7 @@ void CP2R::DetectSus() {
 	if (s5) {
 		msh[v][hstart] = pSusNonHarm;
 		msh[v][fli[v][ls5]] = pSusRes;
+		resol[v][hstart] = fli[v][ls5];
 #if defined(_DEBUG)
 		WriteLog(3, "Detected sus at s5");
 #endif
@@ -5330,6 +5376,7 @@ void CP2R::DetectPDD() {
 		// Apply pattern
 		msh[v][fli[v][ls]] = pAuxPDD;
 		msh[v][fli[v][ls + 1]] = pHarmonicPDD;
+		resol[v][hstart] = fli[v][ls + 1];
 	}
 }
 

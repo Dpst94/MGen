@@ -254,6 +254,7 @@ protected:
 	inline void GetBhli();
 	inline void EvalMshHarm(int hvar);
 	inline void EvalHarmAmbig(int hvar);
+	inline void EvalHarmIncomplete(int hvar);
 	inline void GetHarmBass();
 	inline int FailVocalRanges();
 	inline int FailVocalRangesConflict();
