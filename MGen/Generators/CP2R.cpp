@@ -4952,7 +4952,7 @@ void CP2R::GetMsh2() {
 					hstart = s0 + sec_hp;
 					hend = s0 + npm - 1;
 					EvalMshHarm(hv3);
-					EvalHarmAmbig(hv);
+					EvalHarmAmbig(hv3);
 					EvaluateHarmTriRes();
 #if defined(_DEBUG)
 					CString st, est;
