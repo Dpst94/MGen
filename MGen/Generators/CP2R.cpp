@@ -2504,8 +2504,9 @@ int CP2R::FailAdjacentTritones() {
 		s = fli2[v][ls];
 		s2 = fli[v][ls + 1];
 		if (mode == 9) {
-			if (FailAdjacentTritone2(3, 5, 11, 0)) return 1;
-			if (FailAdjacentTritone2(7, 8, 2, 3)) return 1;
+			if (FailAdjacentTritone2(3,  5, 11, 0)) return 1;
+			if (FailAdjacentTritone2(7,  8, 2,  3)) return 1;
+			if (FailAdjacentTritone2(10, 9, 3,  2)) return 1;
 		}
 		else {
 			if (FailAdjacentTritone2(4, 5, 11, 0)) return 1;
@@ -2531,8 +2532,8 @@ int CP2R::FailTritones2() {
 		ls1 = bli[v][mli[ms]];
 		ls2 = bli[v][mea_end];
 		vector<vector<int>> tfound, tfound2;
-		tfound.resize(2);
-		tfound2.resize(2);
+		tfound.resize(3);
+		tfound2.resize(3);
 		// Loop inside measure
 		for (ls = ls1; ls <= ls2; ++ls) {
 			lpcc = pcc[v][fli[v][ls]];
@@ -2543,10 +2544,12 @@ int CP2R::FailTritones2() {
 				// Find first and last notes of minor tritone
 				if (lpcc == 8) tfound[1].push_back(ls);
 				if (lpcc == 2) tfound2[1].push_back(ls);
+				if (lpcc == 9) tfound[2].push_back(ls);
+				if (lpcc == 3) tfound2[2].push_back(ls);
 			}
 		}
 		// Loop through tritone types 
-		for (int tt = 0; tt < 2; ++tt) {
+		for (int tt = 0; tt < 3; ++tt) {
 			// Check each note combination
 			for (int tn = 0; tn < tfound[tt].size(); ++tn) {
 				for (int tn2 = 0; tn2 < tfound2[tt].size(); ++tn2) {
@@ -2603,6 +2606,8 @@ int CP2R::FailTritones2() {
 							GetTritoneResolution(3, 5, 11, 0, res1, res2);
 						if (tt == 1)
 							GetTritoneResolution(7, 8, 2, 3, res1, res2);
+						if (tt == 2)
+							GetTritoneResolution(2, 3, 9, 10, res1, res2);
 					}
 					else {
 						if (tt == 0)
@@ -3830,12 +3835,11 @@ void CP2R::EvalHarmAmbig(int hvar) {
 	// Downbeat harmonic notes
 	int downbeat_harm = 0;
 	for (v = 0; v < av_cnt; ++v) {
-		ls = bli[v][s0];
-		if (fli[v][ls] == s0 && msh[v][s0] > 0) ++downbeat_harm;
-
+		ls = bli[v][hstart];
+		if (fli[v][ls] == hstart && msh[v][hstart] > 0) ++downbeat_harm;
 	}
-	// Not a single harmonic note on downbeat
-	if (!downbeat_harm) FlagA(0, 558, s0, s0, 0, 30);
+	// Not a single harmonic note on first beat
+	if (!downbeat_harm) FlagA(0, 558, hstart, hstart, 0, 30);
 }
 
 void CP2R::GetHarmBass() {
@@ -4948,6 +4952,7 @@ void CP2R::GetMsh2() {
 					hstart = s0 + sec_hp;
 					hend = s0 + npm - 1;
 					EvalMshHarm(hv3);
+					EvalHarmAmbig(hv);
 					EvaluateHarmTriRes();
 #if defined(_DEBUG)
 					CString st, est;
