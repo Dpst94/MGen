@@ -79,6 +79,7 @@
 #define pDownbeat 10
 #define pAuxWrong 11
 #define pHarmonicPDD 12
+#define pLast 13
 #define pHarmonicDNT1 21
 #define pHarmonicDNT2 24
 #define pHarmonicCam1 41

@@ -151,9 +151,6 @@ int CP2R::EvaluateCP() {
 			if (FailFisTrail()) return 1;
 		}
 		if (FailMsh()) return 1;
-		if (mminor) {
-			if (FailMinorStepwise()) return 1;
-		}
 		GetDtp();
 		if (FailLeap()) return 1;
 		MakeMacc();
@@ -167,6 +164,13 @@ int CP2R::EvaluateCP() {
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
 	FlagSus2();
+	for (v = 0; v < av_cnt; ++v) {
+		sp = vsp[v];
+		vaccept = &accept[sp][av_cnt][0];
+		if (mminor) {
+			if (FailMinorStepwise()) return 1;
+		}
+	}
 	return 0;
 }
 
@@ -4046,7 +4050,7 @@ int CP2R::FailParallelIco() {
 }
 
 int CP2R::FailVIntervals() {
-	CHECK_READY(DR_fli, DR_msh, DR_sus);
+	CHECK_READY(DR_fli, DR_sus);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (s = fin[v]; s < ep2; ++s) {
 			ls = bli[v][s];
@@ -4136,7 +4140,7 @@ int CP2R::FailUnison() {
 }
 
 int CP2R::FailSyncVIntervals() {
-	CHECK_READY(DR_fli, DR_msh, DR_sus);
+	CHECK_READY(DR_fli, DR_sus);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (ls = 1; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
@@ -4220,46 +4224,9 @@ int CP2R::FailPco() {
 }
 
 int CP2R::FailMsh() {
-	SET_READY(DR_msh);
-	// Detect basic msh (based on downbeats and leaps)
-	GetBasicMsh();
 	if (FailSyncVIntervals()) return 1;
 	if (FailVIntervals()) return 1;
 	return 0;
-}
-
-void CP2R::GetBasicMsh() {
-	CHECK_READY(DR_c, DR_fli, DR_leap);
-	int first = 1;
-	// Main calculation
-	for (ls = 0; ls < fli_size[v]; ++ls) {
-		s = fli[v][ls];
-		if (!cc[v][s]) continue;
-		if (first) {
-			first = 0;
-			// First note is always downbeat
-			msh[v][s] = pFirst;
-			continue;
-		}
-		s2 = fli2[v][ls];
-		// Sus start is always harmonic
-		if (sus[v][ls]) msh[v][s] = pSusStart;
-		// Downbeat
-		if (s % npm == 0) {
-			// Long on downbeat
-			if (llen[v][ls] > 4 || leap[v][s2])	msh[v][s] = pDownbeat;
-			// Downbeat note not surrounded by descending stepwise movement
-			// TODO: Optimize for generation
-			else if (smooth[v][s - 1] != -1 || (s2 < ep2 - 1 && smooth[v][s2 + 1] != -1)) {
-				msh[v][s] = pDownbeat;
-			}
-		}
-		else if (abs(leap[v][s - 1]) > 2) msh[v][s] = pLeapTo;
-		else if (s2 < ep2 - 1 && abs(leap[v][s2]) > 2) msh[v][s] = pLeapFrom;
-		else {
-			msh[v][s] = pAux;
-		}
-	}
 }
 
 void CP2R::EvaluateMsh() {
@@ -4446,6 +4413,7 @@ void CP2R::GetMeasureMsh(int sec_hp) {
 		s2 = fli2[v][ls];
 		// First note is always downbeat
 		if (s == fin[v]) msh[v][s] = pFirst;
+		else if (ls == fli_size[v] - 1) msh[v][s] = pLast;
 		// Sus start is always harmonic
 		else if (sus[v][ls]) {
 			msh[v][s] = pSusStart;
@@ -4492,6 +4460,7 @@ void CP2R::GetMinimumMsh() {
 		}
 		// First note
 		else if (s == fin[v]) msh[v][s] = pFirst;
+		else if (ls == fli_size[v] - 1) msh[v][s] = pLast;
 		// Downbeat
 		else if (s % npm == 0) {
 			// Long on downbeat
@@ -4560,6 +4529,7 @@ void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 }
 
 void CP2R::GetMsh() {
+	SET_READY(DR_msh);
 	flaga.clear();
 	for (ms = 0; ms < mli.size(); ++ms) {
 		hpenalty = 0;
