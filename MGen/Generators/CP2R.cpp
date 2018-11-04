@@ -4241,17 +4241,17 @@ void CP2R::EvaluateMsh() {
 		if (msh[v][s] <= 0) {
 			// Detect auxiliary tone, not surrounded by chord tones
 			if (cc[v][fli[v][ls - 1]] == cc[v][fli[v][ls + 1]] && abs(c[v][fli[v][ls - 1]] - c[v][s]) == 1 && 
-				(!cchnv[shp[fli[v][ls - 1] % npm]][pcc[v][fli[v][ls - 1]]] || 
-					!cchnv[shp[fli[v][ls + 1] % npm]][pcc[v][fli[v][ls + 1]]])) {
+				(!nih[v][fli[v][ls - 1]] || 
+					!nih[v][fli[v][ls + 1]])) {
 				msh[v][s] = pAuxWrong;
-				if (!cchnv[shp[s % npm]][pcc[v][s]]) 
+				if (!nih[v][s])
 					FlagA(v, 170, s, s, v, 50);
 			}
 			// Detect non-harmonic tone, which is longer than previous chord tone
 			else if (llen[v][ls] > llen[v][ls - 1] && msh[v][ssus[v][ls - 1]] > 0 &&
-				cchnv[shp[fli[v][ls - 1] % npm]][pcc[v][fli[v][ls - 1]]]) {
+				nih[v][fli[v][ls - 1]]) {
 				msh[v][s] = pLong;
-				if (!cchnv[shp[s % npm]][pcc[v][s]])
+				if (!nih[v][s])
 					FlagA(v, 223, s, s, v, 50);
 			}
 			// Skip non-harmonic tones
@@ -4267,7 +4267,7 @@ void CP2R::EvaluateMsh() {
 			}
 			else continue;
 		}
-		if (!cchnv[shp[s % npm]][pcc[v][s]]) {
+		if (!nih[v][s]) {
 			if (msh[v][s] == pFirst) FlagA(v, 551, s, s, v, 100);
 			else if (msh[v][s] == pDownbeat) FlagA(v, 83, s, s, v, 100);
 			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v, 100);
@@ -4628,6 +4628,7 @@ void CP2R::GetMsh() {
 					s = hstart;
 					ls = bli[v][s];
 					s2 = fli2[v][ls];
+					GetNotesInHarm();
 					DetectSus();
 					DetectPDD();
 					DetectDNT();
@@ -4675,6 +4676,7 @@ void CP2R::GetMsh() {
 					for (s = s0; s < s0 + npm; ++s) {
 						for (v = 0; v < av_cnt; ++v) {
 							mshb[v][s] = msh[v][s];
+							nihb[v][s] = nih[v][s];
 						}
 					}
 				}
@@ -4689,6 +4691,7 @@ void CP2R::GetMsh() {
 			for (s = s0; s < s0 + npm; ++s) {
 				for (v = 0; v < av_cnt; ++v) {
 					msh[v][s] = mshb[v][s];
+					nih[v][s] = nihb[v][s];
 				}
 			}
 			// Save flags
@@ -4696,6 +4699,21 @@ void CP2R::GetMsh() {
 				v = flagab[fl].voice;
 				FlagL(v, flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
 			}
+		}
+	}
+}
+
+void CP2R::GetNotesInHarm() {
+	for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
+		s = fli[v][ls];
+		// Skip pauses
+		if (!cc[v][s]) continue;
+		if (s < hstart) s = hstart;
+		if (cchnv[shp[s % npm]][pcc[v][s]]) {
+			nih[v][s] = 1;
+		}
+		else {
+			nih[v][s] = 0;
 		}
 	}
 }
@@ -4888,6 +4906,7 @@ void CP2R::GetMsh2() {
 						s = hstart;
 						ls = bli[v][s];
 						s2 = fli2[v][ls];
+						GetNotesInHarm();
 						DetectSus();
 						DetectPDD();
 						// Second harmony
@@ -4896,6 +4915,7 @@ void CP2R::GetMsh2() {
 						s = hstart;
 						ls = bli[v][s];
 						s2 = fli2[v][ls];
+						GetNotesInHarm();
 						DetectSus();
 						DetectPDD();
 						// Full measure
@@ -5006,7 +5026,7 @@ void CP2R::DetectDNT() {
 		// No pauses
 		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) continue;
 		// First note must be chord tone
-		if (!cchnv[shp[s2 % npm]][pcc[v][s2]]) continue;
+		if (!nih[v][s2]) continue;
 		// Movement is stepwize
 		if (!smooth[v][s2]) continue;
 		// Note 1 is short
@@ -5024,7 +5044,7 @@ void CP2R::DetectDNT() {
 			if (llen[v][ls + 2] > 2) continue;
 			if (ls < fli_size[v] - 3) {
 				// Note 4 must be chord tone
-				if (!cchnv[shp[fli[v][ls + 3] % npm]][pcc[v][fli[v][ls + 3]]]) continue;
+				if (!nih[v][fli[v][ls + 3]]) continue;
 				// Movements are stepwize
 				if (!smooth[v][fli2[v][ls + 2]]) continue;
 				// Both movements have same direction
@@ -5070,7 +5090,7 @@ void CP2R::DetectCambiata() {
 		// No pauses
 		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) continue;
 		// First note must be chord tone
-		if (!cchnv[shp[s2 % npm]][pcc[v][s2]]) continue;
+		if (!nih[v][s2]) continue;
 		// Note 1 is short
 		if (llen[v][ls] < 2) continue;
 		// Note 2 is long
@@ -5088,7 +5108,7 @@ void CP2R::DetectCambiata() {
 			if (leap[v][fli2[v][ls + 1]] * smooth[v][s2] < 0) continue;
 			if (ls < fli_size[v] - 3) {
 				// Fourth note must be chord tone
-				if (!cchnv[shp[fli[v][ls + 3] % npm]][pcc[v][fli[v][ls + 3]]]) continue;
+				if (!nih[v][fli[v][ls + 3]]) continue;
 				// Note 4 is short
 				if (llen[v][ls + 3] < 2) continue;
 				// Note 3 is longer than 4
@@ -5121,13 +5141,13 @@ void CP2R::DetectSus() {
 	msh[v][hstart] = pSusHarm;
 	msh[v][fli[v][ls]] = pSusStart;
 	// Allow if not discord
-	if (cchnv[shp[s % npm]][pcc[v][s]]) {
+	if (nih[v][s]) {
 		// Are there enough notes for resolution ornament?
 		if (ls < fli_size[v] - 2 && fli2[v][ls + 1] < hend) {
 			s3 = fli2[v][ls + 1];
 			s4 = fli2[v][ls + 2];
 			// Is there a dissonance between two consonances, forming stepwise descending movement?
-			if (!cchnv[shp[s3 % npm]][pcc[v][s3]] && cchnv[shp[s4 % npm]][pcc[v][s4]] && c[v][s2] - c[v][s4] == 1 &&
+			if (!nih[v][s3] && nih[v][s4] && c[v][s2] - c[v][s4] == 1 &&
 				llen[v][ls + 2] >= 2 && beat[v][ls + 2] < 10) {
 				// Detect stepwise+leap or leap+stepwise
 				if ((c[v][s3] - c[v][s2] == 1 && c[v][s3] - c[v][s4] == 2) ||
@@ -5185,9 +5205,9 @@ void CP2R::DetectSus() {
 	}
 	// Notes not harmonic?
 	if (!accept[sp][vc][0][220]) {
-		if (s3 && !cchnv[shp[s3 % npm]][pcc[v][s3]]) s3 = 0;
-		if (s4 && !cchnv[shp[s4 % npm]][pcc[v][s4]]) s4 = 0;
-		if (s5 && !cchnv[shp[s5 % npm]][pcc[v][s5]]) s5 = 0;
+		if (s3 && !nih[v][s3]) s3 = 0;
+		if (s4 && !nih[v][s4]) s4 = 0;
+		if (s5 && !nih[v][s5]) s5 = 0;
 		FLAGAR(v, 220, s, s, v, 100);
 	}
 	// Resolution by leap
@@ -5223,11 +5243,11 @@ void CP2R::DetectSus() {
 		FLAGAR(v, 296, s, s, v, 100);
 	}
 	// Mark insertion as non-harmonic in basic msh if resolution is harmonic, sus ends with dissonance and not both movements are leaps
-	if (s3 && ls3 == ls + 2 && cchnv[shp[fli[v][ls + 2] % npm]][pcc[v][fli[v][ls + 2]]] &&
+	if (s3 && ls3 == ls + 2 && nih[v][fli[v][ls + 2]] &&
 		leap[v][fli2[v][ls]] * leap[v][fli2[v][ls + 1]] == 0) msh[v][fli[v][ls + 1]] = pAux;
-	if (s4 && ls4 == ls + 2 && cchnv[shp[fli[v][ls + 2] % npm]][pcc[v][fli[v][ls + 2]]] &&
+	if (s4 && ls4 == ls + 2 && nih[v][fli[v][ls + 2]] &&
 		leap[v][fli2[v][ls]] * leap[v][fli2[v][ls + 1]] == 0) msh[v][fli[v][ls + 1]] = pAux;
-	if (s5 && ls5 == ls + 2 && cchnv[shp[fli[v][ls + 2] % npm]][pcc[v][fli[v][ls + 2]]] &&
+	if (s5 && ls5 == ls + 2 && nih[v][fli[v][ls + 2]] &&
 		leap[v][fli2[v][ls]] * leap[v][fli2[v][ls + 1]] == 0) msh[v][fli[v][ls + 1]] = pAux;
 	// Mark resolution as obligatory harmonic in basic msh and ending as non-harmonic
 	// In this case all resolutions are marked, although one of them is enough, but this is a very rare case that several resolutions pass all checks
@@ -5265,7 +5285,7 @@ void CP2R::DetectPDD() {
 	// Note must not start before harmony start
 	if (fli[v][ls] != hstart) return;
 	// Second note must be non-chord tone
-	if (cchnv[shp[s2 % npm]][pcc[v][s2]]) return;
+	if (nih[v][s2]) return;
 	// No pauses
 	if (!cc[v][s] || !cc[v][s - 1] || !cc[v][s2 + 1]) return;
 	// Stepwize downward movement
@@ -5285,7 +5305,7 @@ void CP2R::DetectPDD() {
 		// Note 2 is not longer than 3
 		if (llen[v][ls] > llen[v][ls + 1] && (ep2 == c_len || ls < fli_size[v] - 2)) return;
 		// Third note must be chord note
-		if (!cchnv[shp[(s2 + 1) % npm]][pcc[v][s2 + 1]]) return;
+		if (!nih[v][s2 + 1]) return;
 		// Apply pattern
 		msh[v][fli[v][ls]] = pAuxPDD;
 		msh[v][fli[v][ls + 1]] = pHarmonicPDD;
