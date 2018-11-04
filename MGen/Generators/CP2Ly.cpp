@@ -71,6 +71,7 @@ void CP2Ly::AddNLink(int f) {
 	lyi[s3].fvl.push_back(fvl[v][s][f]);
 	// Check that this flag was already sent at this step
 	pair<set<int>::iterator, bool> ufl_p = ly_ufl.insert(fl);
+	// Check if insertion did not take place, which means that it is not unique
 	if (!ufl_p.second) {
 		lyi[s3].nfn.push_back(0);
 	}

@@ -4202,21 +4202,31 @@ int CP2R::FailPco() {
 			// Harmonic note in suspension resolution or other melodic shape without leap
 			else if (msh[v][s] > 0 || msh[v2][s] > 0) Flag(v, 553, s, v2);
 		}
+		if (ssus[v][ls - 1] > ssus[v2][ls2 - 1]) {
+			s3 = ssus[v][ls - 1];
+			v3 = v;
+			v4 = v2;
+		}
+		else {
+			s3 = ssus[v2][ls2 - 1];
+			v3 = v2;
+			v4 = v;
+		}
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
 		// Prohibit consecutive last - first
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				if (civlc == 7) FlagL(v, 84, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-				else FlagL(v, 481, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				if (civlc == 7) FlagL(v3, 84, s3, s, v4);
+				else FlagL(v3, 481, s3, s, v4);
 			}
 		}
 		else {
 			// Prohibit contrary movement
 			if (civlc == civlc2) {
-				if (civlc == 7) FlagL(v, 85, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-				else FlagL(v, 482, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				if (civlc == 7) FlagL(v3, 85, s3, s, v4);
+				else FlagL(v3, 482, s3, s, v4);
 			}
 		}
 	}

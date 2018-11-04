@@ -190,7 +190,7 @@ protected:
 
 	// Indexes
 	int s, s0, s1, s2, s3, s4, s5, s_1, s_2;
-	int v, v2, vi;
+	int v, v2, v3, v4, vi;
 	int ls, ls2, ls3, ls4, ls5, ls6;
 	int ms;
 	int hs;
