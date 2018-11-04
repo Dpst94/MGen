@@ -224,8 +224,8 @@ void CP2Ly::ParseLyI() {
 		int prev_note_step = fli[v][max(0, ls - 1)];
 		// Mark msh
 		if (cc[v][s] && msh[v][s] < 0) SetLyShape(s, s, 0, 0, 0, vCircle);
-		// Mark msh
-		if (cc[v][s] && nih[v][s] > 0) SetLyShape(s, s, 0, 0, 0, vStac);
+		// Mark nih
+		//if (cc[v][s] && nih[v][s] > 0) SetLyShape(s, s, 0, 0, 0, vStac);
 		// Parse flags
 		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
 			fl = lyi[s].nflags[f];
