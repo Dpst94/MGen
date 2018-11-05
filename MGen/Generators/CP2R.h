@@ -262,6 +262,7 @@ protected:
 	inline int FailPcoApart();
 	inline int FailUnison();
 	inline int FailSyncVIntervals();
+	inline void FlagDirectDis();
 	inline int FailMsh();
 	inline int FailPco();
 	inline int FailVRLimit();

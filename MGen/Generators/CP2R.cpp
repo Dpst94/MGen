@@ -4201,9 +4201,38 @@ int CP2R::FailSyncVIntervals() {
 			if (!cc[v][s - 1]) continue;
 			if (!cc[v2][s - 1]) continue;
 			if (FailPco()) return 1;
+			if (!v && v2 == av_cnt - 1) {
+				FlagDirectDis();
+			}
 		}
 	}
 	return 0;
+}
+
+void CP2R::FlagDirectDis() {
+	if (civlc == 11 || civlc == 10 ||
+		((civlc == 1 || civlc == 2) && civl > 12)) {
+		if (ssus[v][ls - 1] > ssus[v2][ls2 - 1]) {
+			s3 = ssus[v][ls - 1];
+			v3 = v;
+			v4 = v2;
+		}
+		else {
+			s3 = ssus[v2][ls2 - 1];
+			v3 = v2;
+			v4 = v;
+		}
+		if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0) {
+			// Minor 7th
+			if (civlc == 10) FlagL(v3, 169, s3, s, v4);
+			// Major 7th
+			else if (civlc == 11) FlagL(v3, 276, s3, s, v4);
+			// Minor 9th
+			else if (civlc == 1) FlagL(v3, 173, s3, s, v4);
+			// Major 9th
+			else if (civlc == 2) FlagL(v3, 174, s3, s, v4);
+		}
+	}
 }
 
 int CP2R::FailPco() {
