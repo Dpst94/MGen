@@ -5396,7 +5396,7 @@ void CP2R::DetectPDD() {
 	}
 	*/
 	if (ls < fli_size[v] - 1) {
-		// Stepwize downward movement
+		// Stepwise descending movement
 		if (c[v][s2 + 1] - c[v][s2] != -1) return;
 		// Note 2 is not longer than 3
 		if (llen[v][ls] > llen[v][ls + 1] && (ep2 == c_len || ls < fli_size[v] - 2)) return;
