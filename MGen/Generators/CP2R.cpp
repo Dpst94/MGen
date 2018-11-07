@@ -5194,7 +5194,7 @@ void CP2R::DetectCambiata() {
 			// Note 2 is longer than 1
 			if (llen[v][ls + 1] > llen[v][ls]) continue;
 			// Note 3 is long
-			if (llen[v][ls + 2] > 4) continue;
+			if (llen[v][ls + 2] > 2) continue;
 			// Wrong
 			if (abs(leap[v][fli2[v][ls + 1]]) != 2) continue;
 			// Leap has other direction
