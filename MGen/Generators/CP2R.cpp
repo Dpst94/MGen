@@ -323,12 +323,14 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 			}
 			if (found) break;
 		}
+		// Flag non-adjacent voices crossing
 		if (found) {
 			FlagL(v, 520, cross_start, cross_end, v2);
 		}
 	}
 	// Only if not first note and not oblique motion
-	if (cross_start && cc[v][cross_start - 1] && cc[v2][cross_start - 1] && cc[v][cross_start - 1] != cc[v][cross_start] && cc[v2][cross_start - 1] != cc[v2][cross_start]) {
+	if (cross_start && cc[v][cross_start - 1] && cc[v2][cross_start - 1] && 
+		cc[v][cross_start - 1] != cc[v][cross_start] && cc[v2][cross_start - 1] != cc[v2][cross_start]) {
 		int int1 = abs(c[v][cross_start] - c[v2][cross_start]);
 		int int2 = abs(c[v][cross_start - 1] - c[v2][cross_start - 1]);
 		// 2 x 2nd intervals (sequential)
@@ -349,9 +351,11 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 			if (leap[v][cross_start - 1] && leap[v2][cross_start - 1]) {
 				FlagL(v, 547, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
 			}
+			// One leap
 			else {
 				FlagL(v, 546, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
 			}
+			// Zero leaps is impossible, because this will not lead to voice crossing
 		}
 	}
 	// Only if not last note and not oblique motion
@@ -3911,6 +3915,7 @@ void CP2R::GetHarmBass() {
 					}
 					else {
 						int found = 0;
+						// Search for note repeat
 						for (int ls2 = bli[v][hli[hs]]; ls2 <= bli[v][hli2[hs]]; ++ls2) if (ls2 != ls) {
 							if (cc[0][s] == cc[0][fli[v][ls2]]) found = 1;
 						}
@@ -4267,6 +4272,7 @@ int CP2R::FailPco() {
 			// Harmonic note in suspension resolution or other melodic shape without leap
 			else if (msh[v][s] > 0 || msh[v2][s] > 0) Flag(v, 553, s, v2);
 		}
+		// Choose best voices for flag visualization
 		if (ssus[v][ls - 1] > ssus[v2][ls2 - 1]) {
 			s3 = ssus[v][ls - 1];
 			v3 = v;
