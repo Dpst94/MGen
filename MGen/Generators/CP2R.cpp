@@ -163,6 +163,7 @@ int CP2R::EvaluateCP() {
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
+	FlagLtLt();
 	FlagSus2();
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
@@ -844,10 +845,25 @@ int CP2R::FailIntervals() {
 		else if (cc[v][s1] - cc[v][s] == -12) FlagV(v, 185, s0);
 		else if (cc[v][s1] - cc[v][s] > 12) FlagV(v, 180, s0);
 		else if (cc[v][s1] - cc[v][s] < -12) FlagV(v, 186, s0);
-		// Prohibit BB
-		if (pcc[v][fli[v][ls + 1]] == 11 && pcc[v][s] == 11) FlagV(v, 348, s0);
 	}
 	return 0;
+}
+
+void CP2R::FlagLtLt() {
+	CHECK_READY(DR_pc, DR_c, DR_fli);
+	CHECK_READY(DR_islt);
+	for (v = 0; v < av_cnt; ++v) {
+		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+			s0 = fli[v][ls];
+			s = fli2[v][ls];
+			s1 = fli2[v][ls + 1];
+			// Ignore pauses
+			if (!cc[v][s1]) continue;
+			if (!cc[v][s]) continue;
+			// Prohibit BB
+			if (islt[v][fli[v][ls + 1]] && islt[v][s0]) FlagV(v, 348, s0);
+		}
+	}
 }
 
 void CP2R::GetLClimax() {
@@ -3140,6 +3156,7 @@ void CP2R::FlagSus() {
 }
 
 void CP2R::FlagSus2() {
+	CHECK_READY(DR_islt);
 	for (v = 0; v < av_cnt; ++v) {
 		// Species 2
 		if (vsp[v] != 2) continue;
@@ -3160,6 +3177,7 @@ void CP2R::FlagSus2() {
 }
 
 void CP2R::GetLT() {
+	SET_READY(DR_islt);
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
