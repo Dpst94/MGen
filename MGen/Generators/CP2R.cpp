@@ -3144,11 +3144,35 @@ void CP2R::FlagSus2() {
 		// Species 2
 		if (vsp[v] != 2) continue;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
+			// Skip pause
+			if (!cc[v][fli[v][ls]]) continue;
 			// I -> LT penultimate
 			if (bmli[sus[v][ls]] == mli.size() - 2 && ls < fli_size[v] - 1 &&
 				pcc[v][sus[v][ls]] == 0 && pcc[v][fli[v][ls + 1]] == 11) FlagV(v, 387, sus[v][ls]);
 			// Other
 			else FlagV(v, 388, sus[v][ls]);
+		}
+	}
+}
+
+void CP2R::GetLT() {
+	for (v = 0; v < av_cnt; ++v) {
+		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			islt[v][s] = 0;
+			// Skip pause
+			if (!cc[v][s]) continue;
+			if (pcc[v][s] == 11 && nih[v][s]) {
+				hs = bhli[s];
+				// Last harmony
+				if (hs >= hli.size() - 1) continue;
+				// D or DVII harmony
+				if (chm[hs] == 4 || chm[hs] == 6) islt[v][s] = 1;
+				else {
+					// DTIII followed by T chord
+					if (chm[hs] == 2 && chm[hs + 1] == 0) islt[v][s] = 1;
+				}
+			}
 		}
 	}
 }
@@ -3575,6 +3599,7 @@ int CP2R::FailHarm() {
 	}
 	if (EvalHarm()) return 1;
 	if (FailTonicCP()) return 1;
+	GetLT();
 	return 0;
 }
 

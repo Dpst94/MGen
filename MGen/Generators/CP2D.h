@@ -407,6 +407,7 @@ protected:
 	vector<vector<int>> mshb; // [v][s] Best msh
 	vector<vector<int>> nih; // [v][s] Is current note in harmony?
 	vector<vector<int>> nihb; // [v][s] Best nih
+	vector<vector<int>> islt; // [v][s] Is current note a leading tone?
 	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
 	vector<int> chn; // [pc] Diatonic pitch classes in chord
@@ -421,7 +422,7 @@ protected:
 	vector<int> hbcc; // [hs] Bass note of each harmony (chromatic)
 	vector<int> hbc; // [hs] Bass note of each harmony (diatonic)
 	vector<int> bhli; // [s] Back links to first notes of each harmony
-	vector <int> chm; // [hs] Current harmonic meaning
+	vector <int> chm; // [hs] Current harmonic meaning (diatonic)
 	vector <int> chm_alter; // [hs] Type of harmonic meaning
 	int hv; // Current harmony variant being analysed
 	int hv_alt; // Current harmony alteration variant being analysed
