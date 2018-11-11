@@ -3161,6 +3161,8 @@ void CP2R::GetLT() {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			islt[v][s] = 0;
+			// Set lt only for major and melodic minor
+			if (mode != 0 && (mode != 9 || !mminor)) continue;
 			// Skip pause
 			if (!cc[v][s]) continue;
 			if (pcc[v][s] == 11 && nih[v][s]) {
