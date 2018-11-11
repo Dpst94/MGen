@@ -3148,7 +3148,8 @@ void CP2R::FlagSus2() {
 			if (!cc[v][fli[v][ls]]) continue;
 			// I -> LT penultimate
 			if (bmli[sus[v][ls]] == mli.size() - 2 && ls < fli_size[v] - 1 &&
-				pcc[v][sus[v][ls]] == 0 && pcc[v][fli[v][ls + 1]] == 11) FlagV(v, 387, sus[v][ls]);
+				pcc[v][sus[v][ls]] == 0 && 
+				islt[v][fli[v][ls + 1]]) FlagV(v, 387, sus[v][ls]);
 			// Other
 			else FlagV(v, 388, sus[v][ls]);
 		}
