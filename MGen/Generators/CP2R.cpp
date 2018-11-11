@@ -3144,8 +3144,11 @@ void CP2R::FlagSus2() {
 		// Species 2
 		if (vsp[v] != 2) continue;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
+			s = fli[v][ls];
+			// Skip not sus
+			if (!sus[v][ls]) continue;
 			// Skip pause
-			if (!cc[v][fli[v][ls]]) continue;
+			if (!cc[v][s]) continue;
 			// I -> LT penultimate
 			if (bmli[sus[v][ls]] == mli.size() - 2 && ls < fli_size[v] - 1 &&
 				pcc[v][sus[v][ls]] == 0 && 
