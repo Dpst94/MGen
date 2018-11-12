@@ -1062,7 +1062,7 @@ int CP2R::FailMinor() {
 
 int CP2R::FailMinorStepwise() {
 	CHECK_READY(DR_pc, DR_fli);
-	CHECK_READY(DR_msh);
+	CHECK_READY(DR_msh, DR_nih);
 	// For non-border notes only, because border notes have their own rules
 	for (ls = 1; ls < fli_size[v] - 1; ++ls) {
 		s = fli[v][ls];
@@ -1848,7 +1848,7 @@ int CP2R::FailFirstNotes() {
 }
 
 int CP2R::FailLastNotes() {
-	CHECK_READY(DR_fli, DR_pc);
+	CHECK_READY(DR_fli, DR_pc, DR_nih);
 	if (v == av_cnt - 1) vp = vpExt;
 	else if (v == 0) vp = vpBas;
 	else vp = vpNbs;
@@ -3178,7 +3178,7 @@ void CP2R::FlagSus2() {
 }
 
 void CP2R::GetLT() {
-	SET_READY(DR_islt);
+	SET_READY(DR_islt, DR_nih);
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
@@ -4660,7 +4660,7 @@ void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 }
 
 void CP2R::GetMsh() {
-	SET_READY(DR_msh);
+	SET_READY(DR_msh, DR_nih);
 	flaga.clear();
 	for (ms = 0; ms < mli.size(); ++ms) {
 		hpenalty = 0;
