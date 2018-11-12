@@ -104,7 +104,6 @@ int CP2R::EvaluateCP() {
 			if (FailNoteRepeat()) return 1;
 		}
 		if (FailFirstNotes()) return 1;
-		if (FailLastNotes()) return 1;
 		if (FailCross()) return 1;
 		if (FailOverlap()) return 1;
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
@@ -168,6 +167,7 @@ int CP2R::EvaluateCP() {
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		vaccept = &accept[sp][av_cnt][0];
+		if (FailLastNotes()) return 1;
 		if (mminor) {
 			if (FailMinorStepwise()) return 1;
 		}
@@ -856,12 +856,15 @@ void CP2R::FlagLtLt() {
 		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 			s0 = fli[v][ls];
 			s = fli2[v][ls];
-			s1 = fli2[v][ls + 1];
+			s1 = fli[v][ls + 1];
 			// Ignore pauses
 			if (!cc[v][s1]) continue;
 			if (!cc[v][s]) continue;
 			// Prohibit BB
 			if (islt[v][fli[v][ls + 1]] && islt[v][s0]) FlagV(v, 348, s0);
+			// Prohibit major second up to tonic
+			if (pcc[v][s1] == 0 && pcc[v][s0] == 10 && nih[v][s1] && nih[v][s0]) 
+				FlagVL(v, 74, s0, s1);
 		}
 	}
 }
@@ -1866,7 +1869,6 @@ int CP2R::FailLastNotes() {
 	}
 	if (mminor) {
 		// Prohibit major second up before I
-		if (pcc[v][s] == 0 && pcc[v][s_1] == 10 && nih[v][s] && nih[v][s_1]) FlagVL(v, 74, s_1, s);
 		if (pcc[v][s] == 0 && pcc[v][s_2] == 10 && nih[v][s] && nih[v][s_2]) FlagVL(v, 74, s_2, s);
 	}
 	return 0;
@@ -3886,6 +3888,7 @@ void CP2R::EvalHarmAmbig(int hvar) {
 	int downbeat_harm = 0;
 	for (v = 0; v < av_cnt; ++v) {
 		ls = bli[v][hstart];
+		if (!cc[v][hstart]) continue;
 		if (fli[v][ls] == hstart && msh[v][hstart] > 0) ++downbeat_harm;
 	}
 	// Not a single harmonic note on first beat
@@ -3893,7 +3896,8 @@ void CP2R::EvalHarmAmbig(int hvar) {
 }
 
 void CP2R::EvalHarmIncomplete(int hvar) {
-	if (accept[0][av_cnt][0][559]) return;
+	vc = vca[hstart];
+	if (accept[0][vc][0][559]) return;
 	// Get harmonic notes
 	int de1 = hvar;
 	int de2 = (de1 + 2) % 7;
@@ -3904,6 +3908,8 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 	int dc3 = 0;
 	for (v = 0; v < av_cnt; ++v) {
 		ls = bli[v][hstart];
+		// Skip pauses
+		if (!cc[v][hstart]) continue;
 		// Incomplete
 		if (msh[v][hstart] > 0 && nih[v][hstart]) {
 			if (de1 == pc[v][hstart]) ++dc1;
