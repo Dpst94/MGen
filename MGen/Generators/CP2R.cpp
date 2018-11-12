@@ -1866,8 +1866,8 @@ int CP2R::FailLastNotes() {
 	}
 	if (mminor) {
 		// Prohibit major second up before I
-		if (pcc[v][s] == 0 && pcc[v][s_1] == 10) FlagVL(v, 74, s_1, s);
-		if (pcc[v][s] == 0 && pcc[v][s_2] == 10) FlagVL(v, 74, s_2, s);
+		if (pcc[v][s] == 0 && pcc[v][s_1] == 10 && nih[v][s] && nih[v][s_1]) FlagVL(v, 74, s_1, s);
+		if (pcc[v][s] == 0 && pcc[v][s_2] == 10 && nih[v][s] && nih[v][s_2]) FlagVL(v, 74, s_2, s);
 	}
 	return 0;
 }
