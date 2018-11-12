@@ -2406,6 +2406,7 @@ int CP2R::FailTritones() {
 		if (mode == 9) {
 			if (FailTritone(3, 5, 11, 0)) return 1;
 			if (FailTritone(7, 8, 2, 3)) return 1;
+			if (FailTritone(10, 9, 3, 2)) return 1;
 		}
 		else {
 			if (FailTritone(4, 5, 11, 0)) return 1;
@@ -3183,7 +3184,7 @@ void CP2R::GetLT() {
 			s = fli[v][ls];
 			islt[v][s] = 0;
 			// Set lt only for major and melodic minor
-			if (mode != 0 && (mode != 9 || !mminor)) continue;
+			if (mode && !mminor) continue;
 			// Skip pause
 			if (!cc[v][s]) continue;
 			if (pcc[v][s] == 11 && nih[v][s]) {
@@ -4561,7 +4562,7 @@ void CP2R::GetMeasureMsh(int sec_hp) {
 		else if (s2 < ep2 - 1 && leap[v][s2]) msh[v][s] = pLeapFrom;
 	}
 	// Make last leading tone in penultimate measure harmonic
-	if (ms == mli.size() - 2) {
+	if (ms == mli.size() - 2 && (!mode || mminor)) {
 		int s9 = fli[v][fli_size[v] - 2];
 		if (fli_size[v] >= 2 && pcc[v][s9] == 11 && msh[v][fli[v][fli_size[v] - 2]] < 0) {
 			msh[v][fli[v][fli_size[v] - 2]] = pLastLT;
@@ -4631,7 +4632,7 @@ void CP2R::GetMinimumMsh() {
 		}
 	}
 	// Make last leading tone in penultimate measure harmonic
-	if (ms == mli.size() - 2) {
+	if (ms == mli.size() - 2 && (!mode || mminor)) {
 		int s9 = fli[v][fli_size[v] - 2];
 		if (fli_size[v] >= 2 && pcc[v][s9] == 11 && msh[v][fli[v][fli_size[v] - 2]] < 0) {
 			msh[v][fli[v][fli_size[v] - 2]] = pLastLT;
@@ -5367,9 +5368,9 @@ void CP2R::DetectSus() {
 	}
 	// Resolution up not LT
 	if (!accept[sp][vc][0][219]) {
-		if (s3 && cc[v][s3] > cc[v][s2] && pcc[v][s2] != 11) s3 = 0;
-		if (s4 && cc[v][s4] > cc[v][s2] && pcc[v][s2] != 11) s4 = 0;
-		if (s5 && cc[v][s5] > cc[v][s2] && pcc[v][s2] != 11) s5 = 0;
+		if (s3 && cc[v][s3] > cc[v][s2] && (pcc[v][s2] != 11 || mode == 5)) s3 = 0;
+		if (s4 && cc[v][s4] > cc[v][s2] && (pcc[v][s2] != 11 || mode == 5)) s4 = 0;
+		if (s5 && cc[v][s5] > cc[v][s2] && (pcc[v][s2] != 11 || mode == 5)) s5 = 0;
 		FLAGAR(v, 219, s, s, v, 100);
 	}
 	// Notes have too many insertions?
