@@ -278,6 +278,7 @@ public:
 	static void ClearBit(unsigned char & ch, int bit);
 	static int GetBit(unsigned char ch, int bit);
 	static int NumDigits(int number);
+	static int RunBackground(CString fname, CString par, int delay, int nShow);
 	static float Lighten(float col, float coef) { return 255.0 - (255.0 - col) / coef; }
 	static DWORD GetRed(DWORD col) { return (col >> 16) & 0xff; }
 	static DWORD GetGreen(DWORD col) { return (col >> 8) & 0xff; }

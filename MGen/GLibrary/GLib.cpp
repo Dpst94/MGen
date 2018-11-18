@@ -1203,3 +1203,29 @@ int CGLib::NumDigits(int number) {
 	}
 	return digits;
 }
+
+// Start process, wait a little and check if process exited with error prematurely
+// Then report error
+int CGLib::RunBackground(CString fname, CString par, int delay, int nShow) {
+	DWORD ecode;
+	SHELLEXECUTEINFO sei = { 0 };
+	sei.cbSize = sizeof(SHELLEXECUTEINFO);
+	sei.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI;
+	sei.hwnd = NULL;
+	sei.lpVerb = NULL;
+	sei.lpFile = fname;
+	sei.lpParameters = par;
+	sei.lpDirectory = NULL;
+	sei.nShow = nShow;
+	sei.hInstApp = NULL;
+	ShellExecuteEx(&sei);
+	WaitForSingleObject(sei.hProcess, delay);
+	if (!GetExitCodeProcess(sei.hProcess, &ecode)) ecode = 102;
+	if (ecode != 0 && ecode != STILL_ACTIVE) { // 259
+		CString est;
+		est.Format("Exit code %d: %s %s", ecode, fname, par);
+		WriteLog(5, est);
+		return ecode;
+	}
+	return 0;
+}

@@ -5029,7 +5029,7 @@ void CP2R::GetMsh2() {
 								cchnv[1][11] = 1;
 							}
 							else continue;
-						}
+						}  
 						else {
 							if (cchnv[1][8]) {
 								// Skip if this variant conflicts with detected notes
