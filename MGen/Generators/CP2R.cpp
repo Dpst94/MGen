@@ -5582,14 +5582,20 @@ void CP2R::FlagLTUnresolved() {
 			if (fli2[v][ls] < s5) continue;
 			// Check if this is last harmony
 			if (hli.size() <= hs + 1) continue;
-			// Check if lt has to resolve
+			vc = vca[s];
+			sp = vsp[v];
+			s2 = fli[v][ls + 1];
+			// Check if lt has to resolve up
 			if (chm[hs + 1] == 0 || (chm[hs] != 2 && chm[hs + 1] == 5)) {
-				vc = vca[s];
-				sp = vsp[v];
-				s2 = fli[v][ls + 1];
-				// Check if lt resolves
-				if (c[v][s2] != 1) {
+				// Check if lt resolves up
+				if (pc[v][s2] != 0) {
 					FlagVL(v, 197, s, s2);
+				}
+			} 
+			else {
+				// Check if lt resolves up or down
+				if (pc[v][s2] != 0 && pc[v][s2] != 5) {
+					FlagVL(v, 198, s, s2);
 				}
 			}
 		}
