@@ -236,6 +236,7 @@ protected:
 	inline int FailMissSlurs();
 	inline int FailSlurs();
 	inline int FailStartPause();
+	inline void FlagLTUnresolved();
 	inline void EvaluateHarmTriRes();
 	inline int FailOverlap();
 	inline int FailMaxNoteLen();

@@ -162,6 +162,7 @@ int CP2R::EvaluateCP() {
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
+	FlagLTUnresolved();
 	FlagLtLt();
 	FlagSus2();
 	for (v = 0; v < av_cnt; ++v) {
@@ -5372,7 +5373,7 @@ void CP2R::DetectSus() {
 		if (s5 && abs(c[v][s5] - c[v][s2]) > 1) s5 = 0;
 		FLAGAR(v, 221, s, s, v, 100);
 	}
-	// Resolution up not LT
+	// Resolution up not LT (support only major and melodic minor)
 	if (!accept[sp][vc][0][219]) {
 		if (s3 && cc[v][s3] > cc[v][s2] && (pcc[v][s2] != 11 || mode == 5)) s3 = 0;
 		if (s4 && cc[v][s4] > cc[v][s2] && (pcc[v][s2] != 11 || mode == 5)) s4 = 0;
@@ -5563,4 +5564,34 @@ int CP2R::FailStartPause() {
 		}
 	}
 	return 0;
+}
+
+void CP2R::FlagLTUnresolved() {
+	CHECK_READY(DR_islt);
+	for (v = 0; v < av_cnt; ++v) {
+		// Up to penultimate note
+		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+			s = fli[v][ls];
+			// Skip not lt
+			if (!islt[v][s]) continue;
+			// Skip pause
+			if (!cc[v][s]) continue;
+			hs = bhli[s];
+			s5 = hli2[hs];
+			// Check if note touches harmony end
+			if (fli2[v][ls] < s5) continue;
+			// Check if this is last harmony
+			if (hli.size() <= hs + 1) continue;
+			// Check if lt has to resolve
+			if (chm[hs + 1] == 0 || (chm[hs] != 2 && chm[hs + 1] == 5)) {
+				vc = vca[s];
+				sp = vsp[v];
+				s2 = fli[v][ls + 1];
+				// Check if lt resolves
+				if (c[v][s2] != 1) {
+					FlagVL(v, 197, s, s2);
+				}
+			}
+		}
+	}
 }

@@ -210,7 +210,9 @@ void CP2D::LoadRules(CString fname) {
 			//est.Format("Found rule %s - %d", rule, rid);
 			//WriteLog(0, est);
 			if (rid >= ruleinfo.size()) ruleinfo.resize(rid + 1);
-			if (rid >= ruleinfo2.size()) ruleinfo2.resize(rid + 1);
+			if (rid >= ruleinfo2.size()) {
+				ruleinfo2.resize(rid + 1);
+			}
 			if (rid >= rdetailed.size()) rdetailed.resize(rid + 1);
 			ruleinfo[rid].RuleClass = ast[5];
 			ruleinfo[rid].RuleGroup = ast[6];
