@@ -5585,14 +5585,15 @@ void CP2R::FlagLTUnresolved() {
 			vc = vca[s];
 			sp = vsp[v];
 			s2 = fli[v][ls + 1];
-			// Check if lt has to resolve up
-			if (chm[hs + 1] == 0 || (chm[hs] != 2 && chm[hs + 1] == 5)) {
+			// Check if lt has to resolve up (do not check current chord, because we are already working with situations where islt=1)
+			if (chm[hs + 1] == 0 || chm[hs + 1] == 5) {
 				// Check if lt resolves up
 				if (pc[v][s2] != 0) {
 					FlagVL(v, 197, s, s2);
 				}
 			} 
-			else {
+			// Check if lt has to resolve up or down
+			else if (chm[hs + 1] == 1 || chm[hs + 1] == 3) {
 				// Check if lt resolves up or down
 				if (pc[v][s2] != 0 && pc[v][s2] != 5) {
 					FlagVL(v, 198, s, s2);
