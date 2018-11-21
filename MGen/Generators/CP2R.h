@@ -274,5 +274,6 @@ protected:
 	inline int FailMeasureLen();
 	inline int FailParallelIco();
 	inline int GetTriRes(int cc1, int cc2);
+	inline void FlagLTDouble();
 };
 

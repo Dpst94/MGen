@@ -163,6 +163,7 @@ int CP2R::EvaluateCP() {
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
 	FlagHarmTriRes();
+	FlagLTDouble();
 	FlagLTUnresolved();
 	FlagLtLt();
 	FlagSus2();
@@ -4311,28 +4312,6 @@ int CP2R::FailPco() {
 		}
 	}
 	if (civlc == 7 || civlc == 12 || civlc == 0) {
-		// Prohibit leading tone octave
-		if (pcc[v][s] == 11 && pcc[v2][s] == 11) {
-			// Downbeat
-			if (!beat[v][ls]) Flag(v, 324, s, v2);
-			// Leaps
-			else if (s > 0 && (leap[v][s - 1] || leap[v2][s - 1])) Flag(v, 324, s, v2);
-			else if (ls < fli_size[v] - 1 && (leap[v][fli2[v][ls]] || leap[v2][fli2[v2][ls2]]))
-				Flag(v, 324, s, v2);
-			// Harmonic note in suspension resolution or other melodic shape without leap
-			else if (msh[v][s] > 0 || msh[v2][s] > 0) Flag(v, 324, s, v2);
-		}
-		// Prohibit F# octave
-		if (mminor && pcc[v][s] == 9 && pcc[v2][s] == 9) {
-			// Downbeat
-			if (!beat[v][ls]) Flag(v, 553, s, v2);
-			// Leaps
-			else if (s > 0 && (leap[v][s - 1] || leap[v2][s - 1])) Flag(v, 553, s, v2);
-			else if (ls < fli_size[v] - 1 && (leap[v][fli2[v][ls]] || leap[v2][fli2[v2][ls2]]))
-				Flag(v, 553, s, v2);
-			// Harmonic note in suspension resolution or other melodic shape without leap
-			else if (msh[v][s] > 0 || msh[v2][s] > 0) Flag(v, 553, s, v2);
-		}
 		// Choose best voices for flag visualization
 		if (ssus[v][ls - 1] > ssus[v2][ls2 - 1]) {
 			s3 = ssus[v][ls - 1];
@@ -5604,6 +5583,34 @@ int CP2R::GetTriRes(int cc1, int cc2) {
 		if (pcc1 == 5) {
 			if (pcc2 == 4 || (cm != 0 && cm != 2 && cm != 5)) return 1;
 			else return 0;
+		}
+	}
+}
+
+void CP2R::FlagLTDouble() {
+	for (v = 0; v < av_cnt; ++v) {
+		for (v2 = v + 1; v2 < av_cnt; ++v2) {
+			for (s = 0; s < ep2; ++s) {
+				// Skip not octave / unison
+				if (pcc[v][s] != pcc[v2][s]) continue;
+				ls = bli[v][s];
+				ls2 = bli[v2][s];
+				// Skip no note start
+				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
+				// Skip if both are not leading tones
+				if (!islt[v][fli[v][ls]] && !islt[v2][fli[v2][ls2]]) continue;
+				// Skip pauses
+				if (!cc[v][s]) continue;
+				if (!cc[v2][s]) continue;
+				GetVp();
+				vc = vca[s];
+				if (fli[v][ls] < fli[v2][ls2]) {
+					Flag(v2, 324, fli[v2][ls2], v);
+				}
+				else {
+					Flag(v, 324, fli[v][ls], v2);
+				}
+			}
 		}
 	}
 }
