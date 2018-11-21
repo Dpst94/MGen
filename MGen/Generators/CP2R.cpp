@@ -162,6 +162,7 @@ int CP2R::EvaluateCP() {
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
+	FlagHarmTriRes();
 	FlagLTUnresolved();
 	FlagLtLt();
 	FlagSus2();
@@ -4447,96 +4448,6 @@ void CP2R::EvaluateMshSteps() {
 	}
 }
 
-void CP2R::EvaluateHarmTriRes() {
-	// Get last measure step
-	int mea_end = mli[ms] + npm - 1;
-	// Prevent going out of window
-	if (mea_end >= ep2) return;
-	// Check all voices except bass
-	for (v = 1; v < av_cnt; ++v) {
-		for (v2 = v + 1; v2 < av_cnt; ++v2) {
-			for (s = s0; s <= mea_end; ++s) {
-				ls = bli[v][s];
-				ls2 = bli[v2][s];
-				GetVp();
-				// Skip no note start
-				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
-				// Skip non-chord tones
-				if (msh[v][ssus[v][ls]] <= 0) continue;
-				if (msh[v2][ssus[v2][ls2]] <= 0) continue;
-				// Skip pauses
-				if (!cc[v][s]) continue;
-				if (!cc[v2][s]) continue;
-				vc = vca[s];
-				// Prepare data
-				civl = abs(cc[v][s] - cc[v2][s]);
-				// Process only tritones
-				if (civl % 12 != 6) continue;
-				// Check if first note touches harmony end
-				if (fli2[v][ls] >= hend) {
-					if (ls >= fli_size[v] - 1)
-						FlagA(v, 379, fli[v][ls], fli[v][ls], v, 0);
-					else if (!GetTriRes(cc[v][s], cc[v][fli[v][ls + 1]]))
-						FlagA(v, 379, fli[v][ls], fli[v][ls + 1], v, 0);
-				}
-				// Check if second note touches harmony end
-				if (fli2[v2][ls2] >= hend) {
-					if (ls2 >= fli_size[v2] - 1)
-						FlagA(v2, 379, fli[v2][ls2], fli[v2][ls2], v2, 0);
-					else if (!GetTriRes(cc[v2][s], cc[v2][fli[v2][ls2 + 1]]))
-						FlagA(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v2, 0);
-				}
-			}
-		}
-	}
-}
-
-int CP2R::GetTriRes(int cc1, int cc2) {
-	if (mminor) {
-		// Major notes
-		int pcc1 = (cc1 - bn + 12) % 12;
-		int pcc2 = (cc2 - bn + 12) % 12;
-		// CONFIRM
-		if (pcc1 == 11) {
-			if (pcc2 == 0) return 1;
-			else return 0;
-		}
-		if (pcc1 == 9) {
-			if (pcc2 == 10) return 1;
-			else return 0;
-		}
-		if (pcc1 == 8) {
-			if (pcc2 == 7) return 1;
-			else return 0;
-		}
-		if (pcc1 == 5) {
-			if (pcc2 == 3) return 1;
-			else return 0;
-		}
-		if (pcc1 == 3) {
-			if (pcc2 == 2) return 1;
-			else return 0;
-		}
-		if (pcc1 == 2) {
-			if (pcc2 == 3) return 1;
-			else return 0;
-		}
-	}
-	else {
-		// Major notes
-		int mn1 = (cc1 - bn + 12 + mode) % 12;
-		int mn2 = (cc2 - bn + 12 + mode) % 12;
-		if (mn1 == 11) {
-			if (mn2 == 0) return 1;
-			else return 0;
-		}
-		if (mn1 == 5) {
-			if (mn2 == 4) return 1;
-			else return 0;
-		}
-	}
-}
-
 void CP2R::GetMeasureMsh(int sec_hp) {
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
@@ -4785,7 +4696,6 @@ void CP2R::GetMsh() {
 				EvalMshHarm(hv);
 				EvalHarmAmbig(hv);
 				EvalHarmIncomplete(hv);
-				EvaluateHarmTriRes();
 #if defined(_DEBUG)
 				CString st, est;
 				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %d, flags %d:",
@@ -5081,14 +4991,12 @@ void CP2R::GetMsh2() {
 					EvalMshHarm(hv);
 					EvalHarmAmbig(hv);
 					EvalHarmIncomplete(hv);
-					EvaluateHarmTriRes();
 					// Second harmony
 					hstart = s0 + sec_hp;
 					hend = s0 + npm - 1;
 					EvalMshHarm(hv3);
 					EvalHarmAmbig(hv3);
 					EvalHarmIncomplete(hv3);
-					EvaluateHarmTriRes();
 #if defined(_DEBUG)
 					CString st, est;
 					est.Format("Checked chords %s%s %s%s in measure %d:%d, hpenalty %d, flags %d:",
@@ -5602,3 +5510,96 @@ void CP2R::FlagLTUnresolved() {
 		}
 	}
 }
+
+void CP2R::FlagHarmTriRes() {
+	// Get last measure step
+	int mea_end = mli[ms] + npm - 1;
+	// Prevent going out of window
+	if (mea_end >= ep2) return;
+	// Check all voices except bass
+	for (v = 1; v < av_cnt; ++v) {
+		for (v2 = v + 1; v2 < av_cnt; ++v2) {
+			for (s = 0; s < ep2; ++s) {
+				ls = bli[v][s];
+				ls2 = bli[v2][s];
+				// Skip no note start
+				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
+				// Skip non-chord tones
+				if (!nih[v][ssus[v][ls]]) continue;
+				if (!nih[v2][ssus[v2][ls2]]) continue;
+				// Skip pauses
+				if (!cc[v][s]) continue;
+				if (!cc[v2][s]) continue;
+				GetVp();
+				vc = vca[s];
+				// Prepare data
+				civl = abs(cc[v][s] - cc[v2][s]);
+				// Process only tritones
+				if (civl % 12 != 6) continue;
+				hs = bhli[s];
+				s5 = hli2[hs];
+				// Check if first note touches harmony end
+				if (fli2[v][ls] >= s5) {
+					if (ls >= fli_size[v] - 1)
+						FlagA(v, 379, fli[v][ls], fli[v][ls], v, 0);
+					else if (!GetTriRes(cc[v][s], cc[v][fli[v][ls + 1]]))
+						FlagA(v, 379, fli[v][ls], fli[v][ls + 1], v, 0);
+				}
+				// Check if second note touches harmony end
+				if (fli2[v2][ls2] >= s5) {
+					if (ls2 >= fli_size[v2] - 1)
+						FlagA(v2, 379, fli[v2][ls2], fli[v2][ls2], v2, 0);
+					else if (!GetTriRes(cc[v2][s], cc[v2][fli[v2][ls2 + 1]]))
+						FlagA(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v2, 0);
+				}
+			}
+		}
+	}
+}
+
+int CP2R::GetTriRes(int cc1, int cc2) {
+	if (mminor) {
+		// Major notes
+		int pcc1 = (cc1 - bn + 12) % 12;
+		int pcc2 = (cc2 - bn + 12) % 12;
+		// CONFIRM
+		if (pcc1 == 11) {
+			if (pcc2 == 0) return 1;
+			else return 0;
+		}
+		if (pcc1 == 9) {
+			if (pcc2 == 10) return 1;
+			else return 0;
+		}
+		if (pcc1 == 8) {
+			if (pcc2 == 7) return 1;
+			else return 0;
+		}
+		if (pcc1 == 5) {
+			if (pcc2 == 3) return 1;
+			else return 0;
+		}
+		if (pcc1 == 3) {
+			if (pcc2 == 2) return 1;
+			else return 0;
+		}
+		if (pcc1 == 2) {
+			if (pcc2 == 3) return 1;
+			else return 0;
+		}
+	}
+	else {
+		// Major notes
+		int mn1 = (cc1 - bn + 12 + mode) % 12;
+		int mn2 = (cc2 - bn + 12 + mode) % 12;
+		if (mn1 == 11) {
+			if (mn2 == 0) return 1;
+			else return 0;
+		}
+		if (mn1 == 5) {
+			if (mn2 == 4) return 1;
+			else return 0;
+		}
+	}
+}
+
