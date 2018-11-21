@@ -5512,10 +5512,6 @@ void CP2R::FlagLTUnresolved() {
 }
 
 void CP2R::FlagHarmTriRes() {
-	// Get last measure step
-	int mea_end = mli[ms] + npm - 1;
-	// Prevent going out of window
-	if (mea_end >= ep2) return;
 	// Check all voices except bass
 	for (v = 1; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
@@ -5541,63 +5537,64 @@ void CP2R::FlagHarmTriRes() {
 				// Check if first note touches harmony end
 				if (fli2[v][ls] >= s5) {
 					if (ls >= fli_size[v] - 1)
-						FlagA(v, 379, fli[v][ls], fli[v][ls], v, 0);
+						FlagL(v, 379, fli[v][ls], fli[v][ls], v);
 					else if (!GetTriRes(cc[v][s], cc[v][fli[v][ls + 1]]))
-						FlagA(v, 379, fli[v][ls], fli[v][ls + 1], v, 0);
+						FlagL(v, 379, fli[v][ls], fli[v][ls + 1], v);
 				}
 				// Check if second note touches harmony end
 				if (fli2[v2][ls2] >= s5) {
 					if (ls2 >= fli_size[v2] - 1)
-						FlagA(v2, 379, fli[v2][ls2], fli[v2][ls2], v2, 0);
+						FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2], v2);
 					else if (!GetTriRes(cc[v2][s], cc[v2][fli[v2][ls2 + 1]]))
-						FlagA(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v2, 0);
+						FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v2);
 				}
 			}
 		}
 	}
 }
 
+// Return 1 if tritone is resolved or if there are no resolution notes in next chord
 int CP2R::GetTriRes(int cc1, int cc2) {
+	// Unresolved if this is last harmony
+	if (hli.size() <= hs + 1) return 0;
+	int cm = chm[hs + 1];
+	// Chromatic pitch classes
+	int pcc1 = (cc1 - bn + 12) % 12;
+	int pcc2 = (cc2 - bn + 12) % 12;
 	if (mminor) {
-		// Major notes
-		int pcc1 = (cc1 - bn + 12) % 12;
-		int pcc2 = (cc2 - bn + 12) % 12;
 		// CONFIRM
 		if (pcc1 == 11) {
-			if (pcc2 == 0) return 1;
+			if (pcc2 == 0 || (cm != 0 && cm != 3 && cm != 5)) return 1;
 			else return 0;
 		}
 		if (pcc1 == 9) {
-			if (pcc2 == 10) return 1;
+			if (pcc2 == 10 || (cm != 2 && cm != 4 && cm != 6)) return 1;
 			else return 0;
 		}
 		if (pcc1 == 8) {
-			if (pcc2 == 7) return 1;
+			if (pcc2 == 7 || (cm != 0 && cm != 2 && cm != 4)) return 1;
 			else return 0;
 		}
 		if (pcc1 == 5) {
-			if (pcc2 == 3) return 1;
+			if (pcc2 == 3 || (cm != 0 && cm != 2 && cm != 5)) return 1;
 			else return 0;
 		}
 		if (pcc1 == 3) {
-			if (pcc2 == 2) return 1;
+			if (pcc2 == 2 || (cm != 1 && cm != 6 && cm != 4)) return 1;
 			else return 0;
 		}
 		if (pcc1 == 2) {
-			if (pcc2 == 3) return 1;
+			if (pcc2 == 3 || (cm != 0 && cm != 2 && cm != 5)) return 1;
 			else return 0;
 		}
 	}
 	else {
-		// Major notes
-		int mn1 = (cc1 - bn + 12 + mode) % 12;
-		int mn2 = (cc2 - bn + 12 + mode) % 12;
-		if (mn1 == 11) {
-			if (mn2 == 0) return 1;
+		if (pcc1 == 11) {
+			if (pcc2 == 0 || (cm != 0 && cm != 3 && cm != 5)) return 1;
 			else return 0;
 		}
-		if (mn1 == 5) {
-			if (mn2 == 4) return 1;
+		if (pcc1 == 5) {
+			if (pcc2 == 4 || (cm != 0 && cm != 2 && cm != 5)) return 1;
 			else return 0;
 		}
 	}
