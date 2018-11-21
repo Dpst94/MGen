@@ -5534,6 +5534,11 @@ void CP2R::FlagHarmTriRes() {
 				if (civl % 12 != 6) continue;
 				hs = bhli[s];
 				s5 = hli2[hs];
+				// Always prohibit harmonic tritone in archaic modes
+				if (mode && !mminor) {
+					Flag(v, 331, s, v2);
+					continue;
+				}
 				// Check if first note touches harmony end
 				if (fli2[v][ls] >= s5) {
 					if (ls >= fli_size[v] - 1)
