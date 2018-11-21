@@ -979,7 +979,7 @@ int CP2R::FailFisTrail() {
 			}
 			// Find VII before
 			pos1 = max(0, ls - _fis_g_max);
-			for (int x = pos1; x < ls; ++x) {
+			for (int x = pos1; x < ls - 1; ++x) {
 				s2 = fli[v][x];
 				if (cc[v][s2] && pcc[v][s2] == 10) {
 					FlagVL(v, 349, s, s2);
@@ -988,7 +988,7 @@ int CP2R::FailFisTrail() {
 			}
 			// Find VII after
 			pos2 = min(fli_size[v] - 1, ls + _fis_g_max2);
-			for (int x = ls + 1; x <= pos2; ++x) {
+			for (int x = ls + 2; x <= pos2; ++x) {
 				s2 = fli[v][x];
 				if (cc[v][s2] && pcc[v][s2] == 10) {
 					FlagVL(v, 350, s, s);
@@ -1007,6 +1007,9 @@ int CP2R::FailMinor() {
 		s_1 = fli[v][ls - 1];
 		// Prohibit minor second up before VII - absorbed
 		// Prohibit augmented second up before VII - absorbed
+		// Prohibit immediate F# - G and G - F#
+		if (pcc[v][s] == 10 && pcc[v][s_1] == 9 ) FlagVL(v, 203, s_1, s);
+		if (pcc[v][s] == 9  && pcc[v][s_1] == 10) FlagVL(v, 203, s_1, s);
 		// Prohibit unaltered VI or VII two steps from altered VI or VII
 		if (pcc[v][s] == 11) {
 			if (pcc[v][s_1] == 10) FlagVL(v, 153, s_1, s);
