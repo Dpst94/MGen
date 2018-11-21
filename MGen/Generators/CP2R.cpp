@@ -864,7 +864,10 @@ void CP2R::FlagLtLt() {
 			if (!cc[v][s1]) continue;
 			if (!cc[v][s]) continue;
 			// Prohibit BB
-			if (islt[v][fli[v][ls + 1]] && islt[v][s0]) FlagV(v, 348, s0);
+			if (islt[v][fli[v][ls + 1]] || islt[v][s0]) {
+				if (pcc[v][s] == pcc[v][s1])
+					FlagVL(v, 348, s0, s1);
+			}
 			// Prohibit major second up to tonic
 			if (pcc[v][s1] == 0 && pcc[v][s0] == 10 && nih[v][s1] && nih[v][s0]) 
 				FlagVL(v, 74, s0, s1);
