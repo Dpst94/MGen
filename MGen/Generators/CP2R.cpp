@@ -146,7 +146,6 @@ int CP2R::EvaluateCP() {
 		}
 		if (mminor) {
 			if (FailMinor()) return 1;
-			if (FailGisTrail()) return 1;
 			if (FailFisTrail()) return 1;
 		}
 		if (FailMsh()) return 1;
@@ -173,6 +172,7 @@ int CP2R::EvaluateCP() {
 		vaccept = &accept[sp][av_cnt][0];
 		if (FailLastNotes()) return 1;
 		if (mminor) {
+			if (FailGisTrail()) return 1;
 			if (FailMinorStepwise()) return 1;
 		}
 	}
@@ -935,12 +935,12 @@ void CP2R::GetNoteTypes() {
 }
 
 int CP2R::FailGisTrail() {
-	CHECK_READY(DR_fli, DR_pc);
+	CHECK_READY(DR_fli, DR_pc, DR_nih);
 	int gis_trail = 0;
 	int _gis_trail_max = gis_trail_max[sp][av_cnt][0];
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
-		if (cc[v][s]) {
+		if (cc[v][s] && nih[v][s]) {
 			if (pcc[v][s] == 11) {
 				// Set to maximum on new G# note
 				gis_trail = _gis_trail_max;
