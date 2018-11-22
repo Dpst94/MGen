@@ -144,9 +144,6 @@ int CP2R::EvaluateCP() {
 		if (sp == 5) {
 			FailSusCount();
 		}
-		if (mminor) {
-			if (FailFisTrail()) return 1;
-		}
 		if (FailMsh()) return 1;
 		GetDtp();
 		if (FailLeap()) return 1;
@@ -174,6 +171,7 @@ int CP2R::EvaluateCP() {
 			if (FailMinor()) return 1;
 			if (FailGisTrail()) return 1;
 			if (FailMinorStepwise()) return 1;
+			if (FailFisTrail()) return 1;
 		}
 	}
 	return 0;
@@ -959,14 +957,14 @@ int CP2R::FailGisTrail() {
 }
 
 int CP2R::FailFisTrail() {
-	CHECK_READY(DR_fli, DR_pc);
+	CHECK_READY(DR_fli, DR_pc, DR_nih);
 	int pos1, pos2, found;
 	int _fis_gis_max = fis_gis_max[sp][av_cnt][0];
 	int _fis_g_max = fis_g_max[sp][av_cnt][0];
 	int _fis_g_max2 = fis_g_max2[sp][av_cnt][0];
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
-		if (cc[v][s] && pcc[v][s] == 9) {
+		if (cc[v][s] && pcc[v][s] == 9 && nih[v][s]) {
 			// Find VII#
 			pos1 = max(0, ls - _fis_gis_max);
 			pos2 = min(fli_size[v] - 1, ls + _fis_gis_max);
@@ -986,7 +984,7 @@ int CP2R::FailFisTrail() {
 			pos1 = max(0, ls - _fis_g_max);
 			for (int x = pos1; x < ls - 1; ++x) {
 				s2 = fli[v][x];
-				if (cc[v][s2] && pcc[v][s2] == 10) {
+				if (cc[v][s2] && pcc[v][s2] == 10 && nih[v][s2]) {
 					FlagVL(v, 349, s, s2);
 					break;
 				}
@@ -995,7 +993,7 @@ int CP2R::FailFisTrail() {
 			pos2 = min(fli_size[v] - 1, ls + _fis_g_max2);
 			for (int x = ls + 2; x <= pos2; ++x) {
 				s2 = fli[v][x];
-				if (cc[v][s2] && pcc[v][s2] == 10) {
+				if (cc[v][s2] && pcc[v][s2] == 10 && nih[v][s2]) {
 					FlagVL(v, 350, s, s);
 					break;
 				}
