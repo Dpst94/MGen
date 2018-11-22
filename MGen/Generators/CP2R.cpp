@@ -145,7 +145,6 @@ int CP2R::EvaluateCP() {
 			FailSusCount();
 		}
 		if (mminor) {
-			if (FailMinor()) return 1;
 			if (FailFisTrail()) return 1;
 		}
 		if (FailMsh()) return 1;
@@ -172,6 +171,7 @@ int CP2R::EvaluateCP() {
 		vaccept = &accept[sp][av_cnt][0];
 		if (FailLastNotes()) return 1;
 		if (mminor) {
+			if (FailMinor()) return 1;
 			if (FailGisTrail()) return 1;
 			if (FailMinorStepwise()) return 1;
 		}
@@ -1006,7 +1006,7 @@ int CP2R::FailFisTrail() {
 }
 
 int CP2R::FailMinor() {
-	CHECK_READY(DR_pc, DR_fli);
+	CHECK_READY(DR_pc, DR_fli, DR_nih);
 	for (ls = 1; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
 		s_1 = fli[v][ls - 1];
@@ -1032,7 +1032,7 @@ int CP2R::FailMinor() {
 			}
 			if (ls > 1) {
 				s_2 = fli[v][ls - 2];
-				if (pcc[v][s_2] == 10) FlagVL(v, 159, s_2, s);
+				if (pcc[v][s_2] == 10 && nih[v][s_2] && nih[v][s]) FlagVL(v, 159, s_2, s);
 			}
 			if (ls < fli_size[v] - 1) {
 				s1 = fli[v][ls + 1];
@@ -1041,7 +1041,7 @@ int CP2R::FailMinor() {
 				if (pcc[v][s1] == 3) FlagVL(v, 156, s1, s);
 				if (ls < fli_size[v] - 2) {
 					s2 = fli[v][ls + 2];
-					if (pcc[v][s2] == 10) FlagVL(v, 159, s2, s);
+					if (pcc[v][s2] == 10 && nih[v][s2] && nih[v][s]) FlagVL(v, 159, s2, s);
 				}
 			}
 		}
@@ -1050,7 +1050,7 @@ int CP2R::FailMinor() {
 			if (pcc[v][s_1] == 3) FlagVL(v, 155, s_1, s);
 			if (ls > 1) {
 				s_2 = fli[v][ls - 2];
-				if (pcc[v][s_2] == 8) FlagVL(v, 158, s_2, s);
+				if (pcc[v][s_2] == 8 && nih[v][s_2] && nih[v][s]) FlagVL(v, 158, s_2, s);
 			}
 			if (ls < fli_size[v] - 1) {
 				s1 = fli[v][ls + 1];
@@ -1058,7 +1058,7 @@ int CP2R::FailMinor() {
 				if (pcc[v][s1] == 3) FlagVL(v, 155, s1, s);
 				if (ls < fli_size[v] - 2) {
 					s2 = fli[v][ls + 2];
-					if (pcc[v][s2] == 8) FlagVL(v, 158, s2, s);
+					if (pcc[v][s2] == 8 && nih[v][s2] && nih[v][s]) FlagVL(v, 158, s2, s);
 				}
 			}
 		}
