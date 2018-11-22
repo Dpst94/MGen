@@ -1033,8 +1033,6 @@ int CP2R::FailMinor() {
 			if (ls > 1) {
 				s_2 = fli[v][ls - 2];
 				if (pcc[v][s_2] == 10) FlagVL(v, 159, s_2, s);
-				if (pcc[v][s_2] == 8) FlagVL(v, 160, s_2, s);
-				if (pcc[v][s_2] == 3) FlagVL(v, 163, s_2, s);
 			}
 			if (ls < fli_size[v] - 1) {
 				s1 = fli[v][ls + 1];
@@ -1044,8 +1042,6 @@ int CP2R::FailMinor() {
 				if (ls < fli_size[v] - 2) {
 					s2 = fli[v][ls + 2];
 					if (pcc[v][s2] == 10) FlagVL(v, 159, s2, s);
-					if (pcc[v][s2] == 8) FlagVL(v, 160, s2, s);
-					if (pcc[v][s2] == 3) FlagVL(v, 162, s2, s);
 				}
 			}
 		}
@@ -1055,7 +1051,6 @@ int CP2R::FailMinor() {
 			if (ls > 1) {
 				s_2 = fli[v][ls - 2];
 				if (pcc[v][s_2] == 8) FlagVL(v, 158, s_2, s);
-				if (pcc[v][s_2] == 3) FlagVL(v, 161, s_2, s);
 			}
 			if (ls < fli_size[v] - 1) {
 				s1 = fli[v][ls + 1];
@@ -1064,7 +1059,6 @@ int CP2R::FailMinor() {
 				if (ls < fli_size[v] - 2) {
 					s2 = fli[v][ls + 2];
 					if (pcc[v][s2] == 8) FlagVL(v, 158, s2, s);
-					if (pcc[v][s2] == 3) FlagVL(v, 161, s2, s);
 				}
 			}
 		}
