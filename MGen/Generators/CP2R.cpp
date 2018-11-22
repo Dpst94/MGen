@@ -948,7 +948,7 @@ int CP2R::FailGisTrail() {
 			else {
 				if (pcc[v][s] == 10) {
 					// Prohibit G note close to G#
-					if (gis_trail) FlagVL(v, 200, s, fli[v][max(0, ls - _gis_trail_max + gis_trail)]);
+					if (gis_trail && gis_trail < _gis_trail_max - 2) FlagVL(v, 200, s, fli[v][max(0, ls - _gis_trail_max + gis_trail)]);
 				}
 			}
 		}
@@ -5685,4 +5685,3 @@ void CP2R::FlagTriDouble() {
 		}
 	}
 }
-
