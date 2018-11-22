@@ -3634,6 +3634,7 @@ int CP2R::FailHarm() {
 		FlagV(0, 531, hli[chm.size() - 1]);
 	}
 	if (EvalHarm()) return 1;
+	GetChordTones();
 	if (FailTonicCP()) return 1;
 	GetLT();
 	return 0;
@@ -5591,6 +5592,59 @@ int CP2R::GetTriRes(int cc1, int cc2) {
 }
 
 void CP2R::FlagLTDouble() {
+	for (v = 0; v < av_cnt; ++v) {
+		for (v2 = v + 1; v2 < av_cnt; ++v2) {
+			for (s = 0; s < ep2; ++s) {
+				// Skip not octave / unison
+				if (pcc[v][s] != pcc[v2][s]) continue;
+				ls = bli[v][s];
+				ls2 = bli[v2][s];
+				// Skip no note start
+				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
+				// Skip if both are not leading tones
+				if (!islt[v][fli[v][ls]] && !islt[v2][fli[v2][ls2]]) continue;
+				// Skip pauses
+				if (!cc[v][s]) continue;
+				if (!cc[v2][s]) continue;
+				GetVp();
+				vc = vca[s];
+				if (fli[v][ls] < fli[v2][ls2]) {
+					Flag(v2, 324, fli[v2][ls2], v);
+				}
+				else {
+					Flag(v, 324, fli[v][ls], v2);
+				}
+			}
+		}
+	}
+}
+
+void CP2R::GetChordTones() {
+	for (hs = 0; hs < hli.size(); ++hs) {
+		GetHarmNotes(chm[hs], chm_alter[hs], cct[hs]);
+	}
+}
+
+void CP2R::GetHarmNotes(int lchm, int lchm_alter, vector<int> &lcct) {
+	lcct[0] = (c_cc[lchm + 7] - bn + 12) % 12;
+	lcct[1] = (c_cc[lchm + 9] - bn + 12) % 12;
+	lcct[2] = (c_cc[lchm + 11] - bn + 12) % 12;
+	if (lchm_alter) {
+		if (lcct[0] == 8) lcct[0] = 9;
+		else if (lcct[0] == 10) lcct[0] = 11;
+		if (lcct[1] == 8) lcct[1] = 9;
+		else if (lcct[1] == 10) lcct[1] = 11;
+		if (lcct[2] == 8) lcct[2] = 9;
+		else if (lcct[2] == 10) lcct[2] = 11;
+	}
+}
+
+void CP2R::FlagTriDouble() {
+	// Find chords that contain tritone
+	// Check if both notes of this tritone exist in voices
+	// Find duplication of one of tritone notes
+	for (hs = 0; hs < hli.size(); ++hs) {
+	}
 	for (v = 0; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
 			for (s = 0; s < ep2; ++s) {
