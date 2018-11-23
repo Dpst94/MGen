@@ -3032,7 +3032,11 @@ int CP2R::FailAnapaest() {
 		// Detect note start at beat 2 if there is no beat 4
 		for (v = 0; v < av_cnt; ++v) {
 			if (fli[v][bli[v][s0 + 2]] == s0 + 2) {
-				FlagV(v, 240, s0 + 2);
+				// If this is the only sp5 voice, check if it ends with slur
+				if (sp5_count == 1 && sus[v][bli[v][s0 + npm - 1]]) {
+					FlagV(v, 239, s0 + 2);
+				}
+				else FlagV(v, 240, s0 + 2);
 				break;
 			}
 		}
