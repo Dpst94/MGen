@@ -228,6 +228,7 @@ protected:
 	inline void FlagFullParallel();
 	inline void FlagMultiSlur();
 	inline int FailAnapaest();
+	inline void FlagRhythmStagnation();
 	inline int FailRhythm();
 	inline int FailRhythm2();
 	inline int FailRhythm4();

@@ -86,6 +86,7 @@ int CP2R::EvaluateCP() {
 	if (FailVocalRanges()) return 1;
 	if (FailMeasureLen()) return 1;
 	FailStartPause();
+	FlagRhythmStagnation();
 
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
@@ -2694,7 +2695,7 @@ int CP2R::FailRhythm2() {
 	}
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		// Slurred note inside measure
-		if (llen[v][ls] == nlen[v] * 2 && !sus[v][ls] && cc[v][fli[v][ls]]) FlagV(v, 236, fli[v][ls]);
+		if (llen[v][ls] > nlen[v] && !sus[v][ls] && cc[v][fli[v][ls]]) FlagV(v, 160, fli[v][ls]);
 	}
 	return 0;
 }
@@ -2708,7 +2709,7 @@ int CP2R::FailRhythm4() {
 	}
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		// Slurred note inside measure
-		if (llen[v][ls] == nlen[v] * 2 && !sus[v][ls] && cc[v][fli[v][ls]]) FlagV(v, 236, fli[v][ls]);
+		if (llen[v][ls] > nlen[v] && !sus[v][ls] && cc[v][fli[v][ls]]) FlagV(v, 160, fli[v][ls]);
 	}
 	return 0;
 }
@@ -2776,7 +2777,7 @@ int CP2R::FailRhythm5() {
 				// Last measure without whole note
 				if (ms == mli.size() - 1 && l_len.size() && cc[v][fli[v][ls2]]) FlagV(v, 267, fli[v][fli_size[v] - 1]);
 				// Whole inside if it starts not from first measure, from first step and is not a suspension
-				if (llen[v][ls2] >= 8 && ms && !pos && !sus[v][ls2] && cc[v][fli[v][ls2]]) FlagV(v, 236, s);
+				//if (llen[v][ls2] >= 8 && ms && !pos && !sus[v][ls2] && cc[v][fli[v][ls2]]) FlagV(v, 160, s);
 				// 1/8 syncope
 				else if (llen[v][ls2] > 1 && pos % 2) FlagV(v, 232, fli[v][ls2]);
 				// 1/4 syncope (not last, because it is flagged in suspension)
@@ -2906,7 +2907,7 @@ int CP2R::FailRhythm5() {
 			if (l_len.size() > 1 && l_len[0] == fin[v] && l_len[0] != l_len[1]) FlagV(v, 237, s);
 		}
 		// Whole inside
-		if (l_len[0] >= 8 && ms < mli.size() - 1 && ms && cc[v][s]) FlagV(v, 236, s);
+		//if (l_len[0] >= 8 && ms < mli.size() - 1 && ms && cc[v][s]) FlagV(v, 160, s);
 		// 1/2.
 		else if (l_len[0] == 6 && !slur1 && cc[v][s]) FlagV(v, 233, s);
 		else if (l_len.size() > 1 && l_len[1] == 6 && cc[v][fli[v][l_ls[1]]]) 
@@ -3042,6 +3043,34 @@ int CP2R::FailAnapaest() {
 		}
 	}
 	return 0;
+}
+
+void CP2R::FlagRhythmStagnation() {
+	CHECK_READY(DR_fli);
+	// Do not run check if there are no sp5 voices
+	int sp5_count = 0;
+	for (v = 0; v < av_cnt; ++v) {
+		if (vsp[v] == 5) {
+			++sp5_count;
+			v2 = v;
+		}
+	}
+	if (sp5_count < 1) return;
+	// Skip first and last measure
+	for (ms = 1; ms < mli.size() - 1; ++ms) {
+		s0 = mli[ms];
+		// Detect note start inside measure
+		int plain_measure = 1;
+		for (v = 0; v < av_cnt; ++v) {
+			if (fli2[v][bli[v][s0]] < s0 + npm - 1) {
+				plain_measure = 0;
+				break;
+			}
+		}
+		if (!plain_measure) continue;
+		// Send flag to any voice in species 5
+		FlagV(v2, 236, s0);
+	}
 }
 
 // Detect missing slurs
