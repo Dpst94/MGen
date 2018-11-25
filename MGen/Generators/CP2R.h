@@ -279,5 +279,6 @@ protected:
 	inline void GetChordTones();
 	inline void GetHarmNotes(int lchm, int lchm_alter, vector<int>& lcct);
 	inline void FlagTriDouble();
+	inline void FlagPcoApart();
 };
 

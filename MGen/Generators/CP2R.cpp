@@ -158,6 +158,7 @@ int CP2R::EvaluateCP() {
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
+	FlagPcoApart();
 	FlagHarmTriRes();
 	FlagTriDouble();
 	FlagLTDouble();
@@ -4207,45 +4208,6 @@ int CP2R::FailVIntervals() {
 	return 0;
 }
 
-int CP2R::FailPcoApart() {
-	CHECK_READY(DR_fli, DR_msh, DR_sus);
-	for (v2 = v + 1; v2 < av_cnt; ++v2) {
-		pco5_last = -1;
-		pco8_last = -1;
-		pco5_last2 = -1;
-		pco8_last2 = -1;
-		for (s = fin[v]; s < ep2; ++s) {
-			ls = bli[v][s];
-			ls2 = bli[v2][s];
-			// Skip no note start
-			if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
-			// Skip pauses
-			if (!cc[v][s]) continue;
-			if (!cc[v2][s]) continue;
-			GetVp();
-			vc = vca[s];
-			// Prepare data
-			civl = abs(cc[v][s] - cc[v2][s]);
-			// Skip first note 
-			if (ls <= fil[v]) continue;
-			if (ls2 <= fil[v2]) continue;
-
-			if (sus[v][ls]) {
-				s2 = sus[v][ls] - 1;
-				//if (FailPcoApartStep()) return 1;
-				s = sus[v][ls];
-				s2 = fli2[v][ls];
-				//if (FailPcoApartStep()) return 1;
-			}
-			else {
-				s2 = fli2[v][ls];
-				//if (FailPcoApartStep()) return 1;
-			}
-		}
-	}
-	return 0;
-}
-
 int CP2R::FailUnison() {
 	// Unison
 	if (!civl && fli[v][ls] != fli[v2][ls2]) {
@@ -5710,3 +5672,64 @@ void CP2R::FlagTriDouble() {
 		}
 	}
 }
+
+void CP2R::FlagPcoApart() {
+	CHECK_READY(DR_nih);
+	for (v = 0; v < av_cnt; ++v) {
+		for (v2 = v + 1; v2 < av_cnt; ++v2) {
+			for (s = 0; s < ep2; ++s) {
+				ls = bli[v][s];
+				ls2 = bli[v2][s];
+				// Skip no note start
+				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
+				// Skip pauses
+				if (!cc[v][s]) continue;
+				if (!cc[v2][s]) continue;
+				civl = abs(cc[v][s] - cc[v2][s]);
+				// Skip not octave / unison / 5th
+				if (civl % 12 != 0 && civl % 12 != 7) continue;
+				// Skip if one note is non-harmonic
+				if (!nih[v][fli[v][ls]] || !nih[v2][fli[v2][ls2]]) continue;
+				GetVp();
+				vc = vca[s];
+				// Get interval end
+				int iend = min(fli2[v][ls], fli2[v2][ls2]);
+				// Scan for second interval
+				int scan_end = iend + 8;
+				if (scan_end > ep2) scan_end = ep2;
+				for (s2 = iend + 2; s2 < scan_end; ++s2) {
+					ls3 = bli[v][s2];
+					ls4 = bli[v2][s2];
+					// Skip no note start
+					if (s2 != fli[v][ls3] && s2 != fli[v2][ls4]) continue;
+					// Skip pauses
+					if (!cc[v][s2]) continue;
+					if (!cc[v2][s2]) continue;
+					civl2 = abs(cc[v][s2] - cc[v2][s2]);
+					// Skip different interval
+					if (civl2 % 12 != civl % 12) continue;
+					// Skip if one note is non-harmonic
+					if (!nih[v][fli[v][ls3]] || !nih[v2][fli[v2][ls4]]) continue;
+					// Downbeat
+					if (s2 % npm == 0) {
+						// Suspension
+						if (sus[v][ls3]) {
+						}
+						else if (sus[v2][ls4]) {
+
+						}
+						// Normal downbeat or anticipation
+						else {
+
+						}
+					}
+					// Upbeat
+					else {
+
+					}
+				}
+			}
+		}
+	}
+}
+
