@@ -349,6 +349,8 @@ protected:
 	vector<vector<int>> rh_pid;
 
 	// Intervals
+	int ivl, ivl2; // Diatonic interval between voices
+	int ivlc, ivlc2; // Diatonic interval class between voices
 	int civl, civl2; // Chromatic interval between voices
 	int civlc, civlc2; // Chromatic interval class between voices
 

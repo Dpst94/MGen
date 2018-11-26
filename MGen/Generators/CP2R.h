@@ -174,7 +174,6 @@ protected:
 	inline int FailMinor();
 	inline int FailMinorStepwise();
 	void MergeNotes(int step1, int step2);
-	inline void GetBasicMsh();
 	inline void GetMinimumMsh();
 	inline void GetHarmVar(vector<int>& cpos, int &poss_vars);
 	inline void GetMsh();
@@ -265,7 +264,6 @@ protected:
 	inline int FailVocalRanges();
 	inline int FailVocalRangesConflict();
 	inline int FailVIntervals();
-	inline int FailPcoApart();
 	inline int FailUnison();
 	inline int FailSyncVIntervals();
 	inline void FlagDirectDis();
@@ -273,7 +271,7 @@ protected:
 	inline int FailPco();
 	inline int FailVRLimit();
 	inline int FailMeasureLen();
-	inline int FailParallelIco();
+	inline void FlagParallelIco();
 	inline int GetTriRes(int cc1, int cc2);
 	inline void FlagLTDouble();
 	inline void GetChordTones();
