@@ -3451,7 +3451,7 @@ void CP2R::GetHarm(int found_gis, int found_fis, int &lchm, int &lchm_alter, int
 int CP2R::FailHarm() {
 	CHECK_READY(DR_fli, DR_c, DR_pc);
 	SET_READY(DR_hli);
-	if (av_cnt < 2) return 0;
+	//if (av_cnt < 2) return 0;
 	int n, hcount, rat;
 	int last_b; // First harmony in measure has b
 	int found_gis, found_fis;

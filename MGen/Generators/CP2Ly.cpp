@@ -721,7 +721,7 @@ void CP2Ly::SendLyIntervals() {
 
 void CP2Ly::SendLyHarm() {
 	CString st, lst;
-	if (av_cnt < 2) return;
+	//if (av_cnt < 2) return;
 	//if (!ly_flags) return;
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", 0);
 	lst += st;
