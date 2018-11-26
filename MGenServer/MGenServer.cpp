@@ -123,7 +123,7 @@ void SendProgress(CString st) {
 
 void WriteLog(CString st) {
 	db.WriteLog(st);
-	if (db.db.IsOpen() && CDb::j_id) {
+	if (db.db && db.db->IsOpen() && CDb::j_id) {
 		SendProgress(st);
 	}
 }
@@ -919,7 +919,7 @@ void TakeJob() {
 			"LEFT JOIN files USING (f_id) "
 			"WHERE j_state=1 AND j_class<2 ORDER BY j_priority, j_id LIMIT 1");
 	}
-	if (!err && !db.rs.IsEOF()) {
+	if (!err && !db.rs->IsEOF()) {
 		// Load job
 		CDb::j_id = db.GetInt("j_id");
 		j_priority = db.GetInt("j_priority");
@@ -964,7 +964,7 @@ void Init() {
 	CString q;
 	q.Format("SELECT COUNT(*) as cnt FROM jobs WHERE s_id='%d' AND j_state=2", CDb::server_id);
 	db.Fetch(q);
-	if (!db.rs.IsEOF()) {
+	if (db.rs && !db.rs->IsEOF()) {
 		db.GetFields();
 		int cnt = db.GetInt("cnt");
 		if (cnt) {
@@ -977,7 +977,7 @@ void Init() {
 	db.Query(q);
 	// Get client hostname
 	db.Fetch("SELECT SUBSTRING_INDEX(host,':',1) as 'ip' from information_schema.processlist WHERE ID=connection_id()");
-	if (!db.rs.IsEOF()) {
+	if (db.rs && !db.rs->IsEOF()) {
 		client_host = db.GetSt("ip");
 	}
 }
