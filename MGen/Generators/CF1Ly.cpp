@@ -148,7 +148,6 @@ void CF1Ly::AddNLink(int i, int i2, int v, int fl, int ln, int foreign) {
 }
 
 void CF1Ly::ParseNLinks(int i, int i2, int v, int foreign) {
-	CString com;
 	int x = 0;
 	for (auto const& it : nlink[i][v]) {
 		if (foreign && !rule_viz_v2[it.first / 10]) continue;

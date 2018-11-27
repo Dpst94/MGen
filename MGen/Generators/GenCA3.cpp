@@ -864,7 +864,6 @@ int CGenCA3::AnalyseCP() {
 }
 
 int CGenCA3::FailSpeciesCombination() {
-	CString est;
 	// [sp] Species stats
 	vector <int> sps; 
 	sps.resize(MAX_SPECIES + 1);

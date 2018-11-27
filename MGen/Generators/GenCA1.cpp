@@ -404,7 +404,7 @@ void CGenCA1::LoadExpect() {
 }
 
 void CGenCA1::ExportExpectToDb() {
-	CString st, est;
+	CString est;
 	int max_x = enflags.size();
 	int fl;
 	// Prepare to insert expected flags
@@ -465,7 +465,7 @@ void CGenCA1::CreateExpectDb(CString path, CCsvDb &cdb) {
 }
 
 void CGenCA1::ConfirmExpect() {
-	CString st, est;
+	CString st;
 	map <CString, CString> row;
 	vector <vector<short>> flag_exported;
 	flag_exported.resize(MAX_RULES, vector<short>(c_len));

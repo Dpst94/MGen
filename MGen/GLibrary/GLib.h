@@ -243,9 +243,11 @@ public:
 	static int MatchVectors(vector <int> &v1, vector <int> &v2, int i1, int i2);
 	static void vfill(vector<int> &v, int value);
 	static int vsum(vector<int> &v);
+	template<typename T> void vpop_front(vector<T>& v, size_t count);
+	template<typename T> void vpush_front(vector<T>& v, T element, size_t count);
 	template<typename T> static T vmax(vector<T> &v);
 	template<typename T> static T vmin(vector<T> &v);
-	template<typename T>  static void verase(vector<T> &v, int i);
+	template<typename T> void verase(vector<T>& v, size_t i);
 
 	static CString HumanFloat(float f);
 
@@ -354,8 +356,6 @@ protected:
 	static long long first_time;
 
 	static int error;
-	template<typename T> void vpop_front(vector<T> &v, int count);
-	template<typename T> void vpush_front(vector<T> &v, T element, int count);
 	static void GetRealNote(int no, int key, int mi, int & no2, int & oct, int & alter);
 	CString GetAlterName(int alter);
 	CString GetRealNoteName(int no, int key, int mi);
@@ -363,40 +363,40 @@ protected:
 };
 
 // Pop front vector elements
-template<typename T> void CGLib::vpop_front(vector<T> &v, int count) {
+template<typename T> void CGLib::vpop_front(vector<T> &v, size_t count) {
 	// Copy vector back
-	for (int i = 0; i < v.size() - count; ++i) v[i] = v[i + count];
+	for (size_t i = 0; i < v.size() - count; ++i) v[i] = v[i + count];
 	// Remove last elements
-	for (int i = 0; i < count; ++i) v.pop_back();
+	for (size_t i = 0; i < count; ++i) v.pop_back();
 }
 
 // Push front vector elements
-template<typename T> void CGLib::vpush_front(vector<T> &v, T element, int count) {
+template<typename T> void CGLib::vpush_front(vector<T> &v, T element, size_t count) {
 	// Grow vector (actually, elements are loaded, but it is not important which elements because they will be overwritten in the next step)
-	for (int i = 0; i < count; ++i) v.push_back(element);
+	for (size_t i = 0; i < count; ++i) v.push_back(element);
 	// Copy vector forward
-	for (int i = v.size() - count - 1; i >= 0 ; --i) v[i + count] = v[i];
+	for (size_t i = v.size() - count - 1; i >= 0 ; --i) v[i + count] = v[i];
 	// Assign new elements
-	for (int i = 0; i < count; ++i) v[i] = element;
+	for (size_t i = 0; i < count; ++i) v[i] = element;
 }
 
 // Maximum in vector
 template<typename T> T CGLib::vmax(vector<T> &v) {
 	T res = v[0];
-	int x2 = v.size();
-	for (int x = 1; x < x2; ++x) if (v[x] > res) res = v[x];
+	size_t x2 = v.size();
+	for (size_t x = 1; x < x2; ++x) if (v[x] > res) res = v[x];
 	return res;
 }
 
 // Minimum in vector
 template<typename T> T CGLib::vmin(vector<T> &v) {
 	T res = v[0];
-	int x2 = v.size();
-	for (int x = 1; x < x2; ++x) if (v[x] < res) res = v[x];
+	size_t x2 = v.size();
+	for (size_t x = 1; x < x2; ++x) if (v[x] < res) res = v[x];
 	return res;
 }
 
 // Erase element in vector
-template<typename T> void CGLib::verase(vector<T> &v, int i) {
+template<typename T> void CGLib::verase(vector<T> &v, size_t i) {
 	v.erase(v.begin() + i);
 }

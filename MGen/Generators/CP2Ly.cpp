@@ -135,7 +135,6 @@ void CP2Ly::AddNLinkSep(int f) {
 }
 
 void CP2Ly::ParseNLinks() {
-	CString com;
 	ly_ufl.clear();
 	for (int f = 0; f < flag[v][s].size(); ++f) {
 		AddNLink(f);
@@ -152,7 +151,6 @@ void CP2Ly::ParseNLinks() {
 }
 
 void CP2Ly::ParseNLinksSep() {
-	CString com;
 	for (v = 0; v < av_cnt; ++v) {
 		for (int f = 0; f < flag[v][s].size(); ++f) {
 			if (!fsep[v][s][f]) continue;
@@ -483,10 +481,6 @@ void CP2Ly::SaveLyCP() {
 	int pos, pos2, le, le2, pause_accum, pause_pos, pause_i;
 	ly_com_st.Empty();
 	ly_ly_st.Empty();
-	// Voice melody min pitch
-	vector<int> vm_min;
-	// Voice melody max pitch
-	vector<int> vm_max;
 	for (v = 0; v < av_cnt; ++v) {
 		GetMelodyInterval(0, c_len);
 	}

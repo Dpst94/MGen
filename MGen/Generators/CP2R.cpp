@@ -236,7 +236,6 @@ int CP2R::FailOverlap() {
 				// Detect non-adjacent
 				int nonadj = 0;
 				if (v2 - v > 1) {
-					int found = 0;
 					for (int i = s; i <= fli2[v][ls + 1]; ++i) {
 						for (int v3 = v + 1; v3 < v2; ++v3) {
 							if (cc[v3][i]) {
@@ -5594,6 +5593,7 @@ int CP2R::GetTriRes(int cc1, int cc2) {
 			else return 0;
 		}
 	}
+	return 0;
 }
 
 void CP2R::FlagLTDouble() {

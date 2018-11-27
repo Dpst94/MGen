@@ -859,7 +859,7 @@ void CGAdapt::CalculateVoiceStages() {
 	vector<int> stage_reverb(icf.size()); // Reverb for each stage
 	vector<map<int, int>> tracks_in_instr(icf.size()); // How many tracks use each instrument
 	map<int, int> voices_in_trackchan; // How many voices use each resulting track/channel
-	map<int, int> stages_in_trackchan; // How many stages use each resulting track/channel
+	//map<int, int> stages_in_trackchan; // How many stages use each resulting track/channel
 	map<int, map<int, int>> tcs_instr; // instrument for each trackchan/stage
 	v_stage.resize(MAX_VOICE);
 	int max_stage = 0;
