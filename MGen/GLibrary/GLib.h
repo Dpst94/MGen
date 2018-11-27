@@ -375,7 +375,7 @@ template<typename T> void CGLib::vpush_front(vector<T> &v, T element, size_t cou
 	// Grow vector (actually, elements are loaded, but it is not important which elements because they will be overwritten in the next step)
 	for (size_t i = 0; i < count; ++i) v.push_back(element);
 	// Copy vector forward
-	for (size_t i = v.size() - count - 1; i >= 0 ; --i) v[i + count] = v[i];
+	for (size_t i = v.size() - count - 1; i < v.size(); --i) v[i + count] = v[i];
 	// Assign new elements
 	for (size_t i = 0; i < count; ++i) v[i] = element;
 }

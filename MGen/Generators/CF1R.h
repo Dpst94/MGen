@@ -150,7 +150,7 @@
 } while (0)
 
 #define SCAN_VISUAL_CODE_BASE 3
-const char scan_visual_code[] = { '!', '.', ',', ':', ';', '`', '|', '(', ')', '[', ']', '{', '}', ' / ', '\\' };
+const char scan_visual_code[] = { '!', '.', ',', ':', ';', '`', '|', '(', ')', '[', ']', '{', '}', '/', '\\' };
 
 const CString TaskNames[] = {
 	"evaluate", // 0

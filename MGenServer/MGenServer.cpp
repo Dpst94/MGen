@@ -459,7 +459,6 @@ void LoadVoices() {
 void MakeRenderLua(int sta) {
 	vector<CString> sv;
 	ofstream fs;
-	CString title;
 	CString st;
 	fs.open("server\\scripts\\render-midi.lua");
 	CGLib::read_file_sv("server\\scripts\\templates\\render-midi.lua", sv);
