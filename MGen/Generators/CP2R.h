@@ -215,7 +215,6 @@ protected:
 	inline int FailLocalPiCount(int notes, int picount, int flag);
 	inline float GetTonicWeight(int l_ls, int tt);
 	inline int FailTonic(int tt);
-	inline int FailLastNoteRes();
 	inline void GetTritoneResolution(int ta, int t1, int t2, int tb, int & res1, int & res2);
 	inline int FailTritone(int ta, int t1, int t2, int tb);
 	inline int FailTritones();

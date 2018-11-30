@@ -117,7 +117,6 @@ int CP2R::EvaluateCP() {
 		if (FailMultiCulm()) return 1;
 		if (FailTonic(0)) return 1;
 		if (FailTonic(1)) return 1;
-		if (FailLastNoteRes()) return 1;
 		if (sp > 1) {
 			if (FailAdjacentTritones()) return 1;
 			if (FailTritones2()) return 1;
@@ -2271,17 +2270,6 @@ int CP2R::FailTonic(int tt) {
 		}
 		tweight[v][ls] = vmax(tcount);
 	}
-	return 0;
-}
-
-int CP2R::FailLastNoteRes() {
-	CHECK_READY(DR_pc, DR_fli);
-	if (ep2 < c_len) return 0;
-	if (fli_size[v] < 2) return 0;
-	if (pcc[v][fli[v][fli_size[v] - 2]] == 11 && pc[v][c_len - 1] != 0) 
-		FlagV(v, 52, fli[v][fli_size[v] - 2]);
-	if (pc[v][fli[v][fli_size[v] - 2]] == 3 && pc[v][c_len - 1] != 2) 
-		FlagV(v, 87, fli[v][fli_size[v] - 2]);
 	return 0;
 }
 
