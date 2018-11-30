@@ -3883,9 +3883,9 @@ void CP2R::EvalMshHarm(int hvar) {
 		}
 	}
 	// Detect 6/4 chord
-	if (lhbc % 7 == (hv + 4) % 7) hpenalty += 10;
+	if (lhbc % 7 == (hvar + 4) % 7) hpenalty += 10;
 	// Detect 6th chord
-	if (lhbc % 7 == (hv + 2) % 7) hpenalty += 1;
+	if (lhbc % 7 == (hvar + 2) % 7) hpenalty += 1;
 	// Find root in harmonic notes
 	int found_de1 = 0;
 	for (v = 0; v < av_cnt; ++v) {
