@@ -5606,13 +5606,13 @@ void CP2R::FlagLTDouble() {
 				ls2 = bli[v2][s];
 				// Skip no note start
 				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
-				// Skip if both are not leading tones
-				if (!islt[v][fli[v][ls]] && !islt[v2][fli[v2][ls2]]) continue;
 				// Skip pauses
 				if (!cc[v][s]) continue;
 				if (!cc[v2][s]) continue;
 				GetVp();
 				vc = vca[s];
+				// Skip if both are not leading tones
+				if (!islt[v][fli[v][ls]] && !islt[v2][fli[v2][ls2]]) continue;
 				if (fli[v][ls] < fli[v2][ls2]) {
 					Flag(v2, 324, fli[v2][ls2], v);
 				}
