@@ -164,6 +164,7 @@ int CP2R::EvaluateCP() {
 	FlagLTDouble();
 	FlagLTUnresolved();
 	FlagLtLt();
+	FlagSus();
 	FlagSus2();
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
@@ -3152,7 +3153,7 @@ int CP2R::FailMaxNoteLen() {
 	return 0;
 }
 
-// Detect sus mistakes: short preparation
+// Detect sus mistakes: short preparation and sus sounding with res 
 // TODO: need to implement
 void CP2R::FlagSus() {
 	for (v = 0; v < av_cnt; ++v) {
@@ -3160,22 +3161,69 @@ void CP2R::FlagSus() {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			s2 = fli2[v][ls];
-			if (sus[v][ls]) {
-			  // Preparation is shorter then suspension
-				if ((sus[v][ls] - s) * 2 < llen[v][ls])
-					FlagV(v, 1, s);
-				// Preparation is too short for measure size
-				if (npm == 12 && btype == 4) {
-					if (sus[v][ls] - s < 6)
-						FlagV(v, 1, s);
-				}
-				else if (npm == 4 || npm == 6) {
-					if (sus[v][ls] - s < 2)
-						FlagV(v, 1, s);
-				}
+			hs = bhli[s2];
+			hstart = hli[hs];
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			// No intermeasure or intrameasure suspension
+			if (hstart <= s) continue;
+			hend = hli2[hs];
+			// Preparation is shorter then suspension
+			if ((hstart - s) * 2 < llen[v][ls])
+				FlagV(v, 427, s);
+			// Preparation is too short for measure size
+			if (npm == 12 && btype == 4) {
+				if (hstart - s < 6)
+					FlagV(v, 274, s);
 			}
-			else {
-				if (hli[bhli[s2]] > s) {
+			else if (npm == 4 || npm == 6) {
+				if (hstart - s < 2)
+					FlagV(v, 274, s);
+			}
+			// Get suspension resolution pitch class
+			int lpcc = pcc[v][resol[v][hstart]];
+			// Scan all voices from last harmony start to sus end and find simultaneous resolution note
+			for (v2 = 0; v2 < av_cnt; ++v2) {
+				// Skip same voice
+				if (v2 == v) continue;
+				for (s3 = hstart; s3 <= s2; ++s3) {
+					// Skip wrong pcñ
+					if (pcc[v2][s3] != lpcc) continue;
+					// Skip pauses
+					if (!cc[v2][s3]) continue;
+					ls2 = bli[v2][s3];
+					// Skip if not first step of harmony and not new note
+					if (s3 > hstart && fli[v2][ls2] < s3) continue;
+					civl = cc[v][s3] - cc[v2][s3];
+					// Interval is 2nd
+					if (abs(civl) == 1 || abs(civl) == 2) {
+						Flag(v2, 218, s3, v);
+						continue;
+					}
+					// Above sus
+					if (civl < 0) {
+						Flag(v2, 216, s3, v);
+						continue;
+					}
+					// Sus resolution is in bass
+					if (!v2) continue;
+					// Less than 4 voices
+					if (vca[s3] < 4) {
+						Flag(v2, 217, s3, v);
+						continue;
+					}
+					// Find chord tone between sus and susres
+					int found = 0;
+					for (v3 = v2 + 1; v3 < v; ++v3) {
+						s4 = max(hstart, fli[v3][bli[v3][s3]]);
+						if (nih[v3][s4]) {
+							found = 1;
+							break;
+						}
+					}
+					if (!found) {
+						Flag(v2, 217, s3, v);
+					}
 				}
 			}
 		}
