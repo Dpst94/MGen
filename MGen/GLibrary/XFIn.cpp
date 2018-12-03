@@ -214,9 +214,17 @@ void XFIn::LoadXML(CString pth) {
 			m_pos += note[vi][m][ni].dur * 0.25 / divisions;
 		}
 	}
-	// Set same measure number for all voices
 	for (int vi = 0; vi < voice.size(); ++vi) {
+		// Set same measure number for all voices
 		note[vi].resize(max_mea + 1);
+		// Fill empty measures
+		for (int m = 1; m < mea.size(); ++m) {
+			// Do not fill measures with notes
+			if (note[vi][m].size()) continue;
+			note[vi][m].resize(1);
+			note[vi][m][0].dur_div = 1024 / mea[m].beat_type;
+			note[vi][m][0].dur = 1024 * mea[m].beats / mea[m].beat_type;
+		}
 	}
 }
 
