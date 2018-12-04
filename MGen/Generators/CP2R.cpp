@@ -5741,8 +5741,6 @@ void CP2R::FlagPcoApart() {
 				civl = abs(cc[v][s] - cc[v2][s]);
 				// Skip not octave / unison / 5th
 				if (civl % 12 != 0 && civl % 12 != 7) continue;
-				// Skip if one note is non-harmonic
-				if (!nih[v][fli[v][ls]] || !nih[v2][fli[v2][ls2]]) continue;
 				GetVp();
 				vc = vca[s];
 				// Get interval end
@@ -5761,24 +5759,49 @@ void CP2R::FlagPcoApart() {
 					civl2 = abs(cc[v][s2] - cc[v2][s2]);
 					// Skip different interval
 					if (civl2 % 12 != civl % 12) continue;
-					// Skip if one note is non-harmonic
-					if (!nih[v][fli[v][ls3]] || !nih[v2][fli[v2][ls4]]) continue;
+					int is_contrary = (cc[v][s2] - cc[v][s]) * (cc[v2][s2] - cc[v2][s]) < 0;
+					// Last contrary
+					if (ls3 == fli_size[v] - 1 && ls4 == fli_size[v2] - 1 &&
+						is_contrary) {
+						if (civl % 12 == 0) FlagL(v, 485, s2, s, v2);
+						else FlagL(v, 376, s2, s, v2);
+					}
 					// Downbeat
-					if (s2 % npm == 0) {
+					else if (s2 % npm == 0) {
 						// Suspension
-						if (sus[v][ls3]) {
+						if (sus[v][ls3] == s2) {
+							if (civl % 12 == 0) FlagL(v, 491, s2, s, v2);
+							else FlagL(v, 385, s2, s, v2);
 						}
-						else if (sus[v2][ls4]) {
-
+						else if (sus[v2][ls4] == s2) {
+							if (civl % 12 == 0) FlagL(v, 491, s2, s, v2);
+							else FlagL(v, 385, s2, s, v2);
 						}
 						// Normal downbeat or anticipation
 						else {
-
+							if (civl % 12 == 0) FlagL(v, 490, s2, s, v2);
+							else FlagL(v, 316, s2, s, v2);
 						}
 					}
 					// Upbeat
 					else {
-
+						int is_oblique = (s != fli[v][ls] || s != fli[v2][ls2]);
+						// Oblique contrary
+						if (is_oblique && is_contrary) {
+							if (civl % 12 == 0) FlagL(v, 484, s2, s, v2);
+							else FlagL(v, 248, s2, s, v2);
+						}
+						// Oblique nct in sp3/5
+						else if ((vsp[v] == 3 || vsp[v] == 5 || vsp[v2] == 3 || vsp[v2] == 5) && 
+							is_oblique &&	(msh[v][fli[v][ls]] < 0 || msh[v2][fli[v2][ls2]] < 0)) {
+							if (civl % 12 == 0) FlagL(v, 488, s2, s, v2);
+							else FlagL(v, 249, s2, s, v2);
+						}
+						// Other upbeat
+						else {
+							if (civl % 12 == 0) FlagL(v, 492, s2, s, v2);
+							else FlagL(v, 250, s2, s, v2);
+						}
 					}
 				}
 			}
