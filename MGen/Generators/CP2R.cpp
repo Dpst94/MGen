@@ -4407,9 +4407,9 @@ void CP2R::EvaluateMsh() {
 		if (!cc[v][s]) continue;
 		if (msh[v][s] <= 0) {
 			// Detect auxiliary tone, not surrounded by chord tones
-			if (cc[v][fli[v][ls - 1]] == cc[v][fli[v][ls + 1]] && abs(c[v][fli[v][ls - 1]] - c[v][s]) == 1 && 
-				(!nih[v][fli[v][ls - 1]] || 
-					!nih[v][fli[v][ls + 1]])) {
+			if (ls < bli[v][mea_end] &&
+				cc[v][fli[v][ls - 1]] == cc[v][fli[v][ls + 1]] && abs(c[v][fli[v][ls - 1]] - c[v][s]) == 1 && 
+				(!nih[v][fli[v][ls - 1]] || !nih[v][fli[v][ls + 1]])) {
 				msh[v][s] = pAuxWrong;
 				if (!nih[v][s])
 					FlagA(v, 170, s, s, v, 50);
