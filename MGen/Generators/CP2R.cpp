@@ -3180,6 +3180,8 @@ void CP2R::FlagSus() {
 				if (hstart - s < 2)
 					FlagV(v, 274, s);
 			}
+			// Skip resolution analysis if it does not exist
+			if (!resol[v][hstart]) continue;
 			// Get suspension resolution pitch class
 			int lpcc = pcc[v][resol[v][hstart]];
 			// Scan all voices from last harmony start to sus end and find simultaneous resolution note
