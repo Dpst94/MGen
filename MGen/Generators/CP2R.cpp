@@ -5750,59 +5750,60 @@ void CP2R::FlagPcoApart() {
 				// Scan for second interval
 				int scan_end = iend + 8;
 				if (scan_end > ep2) scan_end = ep2;
-				for (s2 = iend + 2; s2 < scan_end; ++s2) {
-					ls3 = bli[v][s2];
-					ls4 = bli[v2][s2];
+				for (s3 = iend + 2; s3 < scan_end; ++s3) {
+					ls3 = bli[v][s3];
+					ls4 = bli[v2][s3];
 					// Skip no note start
-					if (s2 != fli[v][ls3] && s2 != fli[v2][ls4]) continue;
+					if (s3 != fli[v][ls3] && s3 != fli[v2][ls4]) continue;
 					// Skip pauses
-					if (!cc[v][s2]) continue;
-					if (!cc[v2][s2]) continue;
-					civl2 = abs(cc[v][s2] - cc[v2][s2]);
+					if (!cc[v][s3]) continue;
+					if (!cc[v2][s3]) continue;
+					civl2 = abs(cc[v][s3] - cc[v2][s3]);
 					// Skip different interval
 					if (civl2 % 12 != civl % 12) continue;
-					int is_contrary = (cc[v][s2] - cc[v][s]) * (cc[v2][s2] - cc[v2][s]) < 0;
+					int is_contrary = (cc[v][s3] - cc[v][s]) * (cc[v2][s3] - cc[v2][s]) < 0;
 					// Last contrary
 					if (ls3 == fli_size[v] - 1 && ls4 == fli_size[v2] - 1 &&
 						is_contrary) {
-						if (civl % 12 == 0) FlagL(v, 485, s2, s, v2);
-						else FlagL(v, 376, s2, s, v2);
+						if (civl % 12 == 0) FlagL(v, 485, s3, s, v2);
+						else FlagL(v, 376, s3, s, v2);
 					}
 					// Downbeat
-					else if (s2 % npm == 0) {
+					else if (s3 % npm == 0) {
 						// Suspension
-						if (sus[v][ls3] == s2) {
-							if (civl % 12 == 0) FlagL(v, 491, s2, s, v2);
-							else FlagL(v, 385, s2, s, v2);
+						if (sus[v][ls3] == s3) {
+							if (civl % 12 == 0) FlagL(v, 491, s3, s, v2);
+							else FlagL(v, 385, s3, s, v2);
 						}
-						else if (sus[v2][ls4] == s2) {
-							if (civl % 12 == 0) FlagL(v, 491, s2, s, v2);
-							else FlagL(v, 385, s2, s, v2);
+						else if (sus[v2][ls4] == s3) {
+							if (civl % 12 == 0) FlagL(v, 491, s3, s, v2);
+							else FlagL(v, 385, s3, s, v2);
 						}
 						// Normal downbeat or anticipation
 						else {
-							if (civl % 12 == 0) FlagL(v, 490, s2, s, v2);
-							else FlagL(v, 316, s2, s, v2);
+							if (civl % 12 == 0) FlagL(v, 490, s3, s, v2);
+							else FlagL(v, 316, s3, s, v2);
 						}
 					}
 					// Upbeat
 					else {
-						int is_oblique = (s != fli[v][ls] || s != fli[v2][ls2]);
+						int is_oblique = (s3 != fli[v][ls3] || s3 != fli[v2][ls4]);
 						// Oblique contrary
 						if (is_oblique && is_contrary) {
-							if (civl % 12 == 0) FlagL(v, 484, s2, s, v2);
-							else FlagL(v, 248, s2, s, v2);
+							if (civl % 12 == 0) FlagL(v, 484, s3, s, v2);
+							else FlagL(v, 248, s3, s, v2);
 						}
 						// Oblique nct in sp3/5
 						else if ((vsp[v] == 3 || vsp[v] == 5 || vsp[v2] == 3 || vsp[v2] == 5) && 
-							is_oblique &&	(msh[v][fli[v][ls]] < 0 || msh[v2][fli[v2][ls2]] < 0)) {
-							if (civl % 12 == 0) FlagL(v, 488, s2, s, v2);
-							else FlagL(v, 249, s2, s, v2);
+							is_oblique &&	(msh[v][fli[v][ls]] < 0 || msh[v2][fli[v2][ls2]] < 0 ||
+								msh[v][fli[v][ls3]] < 0 || msh[v2][fli[v2][ls4]] < 0)) {
+							if (civl % 12 == 0) FlagL(v, 488, s3, s, v2);
+							else FlagL(v, 249, s3, s, v2);
 						}
 						// Other upbeat
 						else {
-							if (civl % 12 == 0) FlagL(v, 492, s2, s, v2);
-							else FlagL(v, 250, s2, s, v2);
+							if (civl % 12 == 0) FlagL(v, 492, s3, s, v2);
+							else FlagL(v, 250, s3, s, v2);
 						}
 					}
 				}
