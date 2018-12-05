@@ -5562,8 +5562,8 @@ void CP2R::FlagHarmTriRes() {
 				// Skip no note start
 				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
 				// Skip non-chord tones
-				if (!nih[v][ssus[v][ls]]) continue;
-				if (!nih[v2][ssus[v2][ls2]]) continue;
+				if (msh[v][ssus[v][ls]] < 0) continue;
+				if (msh[v2][ssus[v2][ls2]] < 0) continue;
 				// Skip pauses
 				if (!cc[v][s]) continue;
 				if (!cc[v2][s]) continue;
