@@ -44,6 +44,7 @@ private:
 	void SendLyViz(int phase);
 	void SaveLyComments();
 	CString GetLyNoteCP();
+	inline int GetNoteStart(int voice, int step);
 	inline void AddNLink(int f);
 	inline void AddNLinkForeign(int f);
 	void AddNLinkSep(int f);

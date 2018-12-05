@@ -153,6 +153,7 @@ protected:
 	inline void FlagVL(int voice, int fid, int step, int step2);
 	inline void Flag(int voice, int fid, int step, int voice2);
 	inline void FlagL(int voice, int fid, int step, int step2, int voice2);
+	inline void AutoFlagL(int voice, int fid, int step, int step2, int voice2);
 	inline void FlagA(int voice, int fid, int step, int step2, int voice2, int ihpe);
 	inline void AssertRule(int fid);
 

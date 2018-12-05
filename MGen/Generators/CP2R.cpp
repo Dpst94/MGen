@@ -50,6 +50,19 @@ inline void CP2R::FlagL(int voice, int fid, int step, int step2, int voice2) {
 	fvl[voice][step].push_back(voice2);
 }
 
+inline void CP2R::AutoFlagL(int voice, int fid, int step, int step2, int voice2) {
+	int avoice, avoice2;
+	if (fli[voice][bli[voice][step]] == step) {
+		avoice = voice;
+		avoice2 = voice2;
+	}
+	else {
+		avoice = voice2;
+		avoice2 = voice;
+	}
+	FlagL(avoice, fid, step, step2, avoice2);
+}
+
 // Accumulate flag
 inline void CP2R::FlagA(int voice, int fid, int step, int step2, int voice2, int ihpe) {
 	AssertRule(fid);
@@ -473,7 +486,7 @@ void CP2R::SendComment(int pos, int x, int i) {
 		else st = "+ ";
 		com = st + GetRuleName(fl, sp, vc, vp) + " (" + GetSubRuleName(fl, sp, vc, vp) + ")";
 		if (show_severity) {
-			st.Format(" [%d/%d] (%d-%d|%d)", fl, 
+			st.Format(" [%d/%d] (%d/%d|%d)", fl, 
 				severity[sp][vc][vp][fl], x, fsl[v][x][f], fvl[v][x][f]);
 			com += st;
 		}
@@ -4358,7 +4371,7 @@ int CP2R::FailPco() {
 		}
 	}
 	if (civlc == 7 || civlc == 12 || civlc == 0) {
-		// Choose best voices for flag visualization
+		// Choose best voices for flag visualization: send to 
 		if (ssus[v][ls - 1] > ssus[v2][ls2 - 1]) {
 			s3 = ssus[v][ls - 1];
 			v3 = v;
@@ -5730,6 +5743,7 @@ void CP2R::FlagTriDouble() {
 
 void CP2R::FlagPcoApart() {
 	CHECK_READY(DR_nih);
+	int av, av2;
 	for (v = 0; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
 			for (s = 0; s < ep2; ++s) {
@@ -5754,7 +5768,15 @@ void CP2R::FlagPcoApart() {
 					ls3 = bli[v][s3];
 					ls4 = bli[v2][s3];
 					// Skip no note start
-					if (s3 != fli[v][ls3] && s3 != fli[v2][ls4]) continue;
+					if (s3 == fli[v][ls3]) {
+						av = v;
+						av2 = v2;
+					} 
+					else if (s3 == fli[v2][ls4]) {
+						av = v2;
+						av2 = v;
+					}
+					else continue;
 					// Skip pauses
 					if (!cc[v][s3]) continue;
 					if (!cc[v2][s3]) continue;
@@ -5765,24 +5787,24 @@ void CP2R::FlagPcoApart() {
 					// Last contrary
 					if (ls3 == fli_size[v] - 1 && ls4 == fli_size[v2] - 1 &&
 						is_contrary) {
-						if (civl % 12 == 0) FlagL(v, 485, s3, s, v2);
-						else FlagL(v, 376, s3, s, v2);
+						if (civl % 12 == 0) AutoFlagL(v, 485, s3, s, v2);
+						else AutoFlagL(v, 376, s3, s, v2);
 					}
 					// Downbeat
 					else if (s3 % npm == 0) {
 						// Suspension
 						if (sus[v][ls3] == s3) {
-							if (civl % 12 == 0) FlagL(v, 491, s3, s, v2);
-							else FlagL(v, 385, s3, s, v2);
+							if (civl % 12 == 0) AutoFlagL(v, 491, s3, s, v2);
+							else AutoFlagL(v, 385, s3, s, v2);
 						}
 						else if (sus[v2][ls4] == s3) {
-							if (civl % 12 == 0) FlagL(v, 491, s3, s, v2);
-							else FlagL(v, 385, s3, s, v2);
+							if (civl % 12 == 0) AutoFlagL(v, 491, s3, s, v2);
+							else AutoFlagL(v, 385, s3, s, v2);
 						}
 						// Normal downbeat or anticipation
 						else {
-							if (civl % 12 == 0) FlagL(v, 490, s3, s, v2);
-							else FlagL(v, 316, s3, s, v2);
+							if (civl % 12 == 0) AutoFlagL(v, 490, s3, s, v2);
+							else AutoFlagL(v, 316, s3, s, v2);
 						}
 					}
 					// Upbeat
@@ -5790,20 +5812,20 @@ void CP2R::FlagPcoApart() {
 						int is_oblique = (s3 != fli[v][ls3] || s3 != fli[v2][ls4]);
 						// Oblique contrary
 						if (is_oblique && is_contrary) {
-							if (civl % 12 == 0) FlagL(v, 484, s3, s, v2);
-							else FlagL(v, 248, s3, s, v2);
+							if (civl % 12 == 0) AutoFlagL(v, 484, s3, s, v2);
+							else AutoFlagL(v, 248, s3, s, v2);
 						}
 						// Oblique nct in sp3/5
 						else if ((vsp[v] == 3 || vsp[v] == 5 || vsp[v2] == 3 || vsp[v2] == 5) && 
 							is_oblique &&	(msh[v][fli[v][ls]] < 0 || msh[v2][fli[v2][ls2]] < 0 ||
 								msh[v][fli[v][ls3]] < 0 || msh[v2][fli[v2][ls4]] < 0)) {
-							if (civl % 12 == 0) FlagL(v, 488, s3, s, v2);
-							else FlagL(v, 249, s3, s, v2);
+							if (civl % 12 == 0) AutoFlagL(v, 488, s3, s, v2);
+							else AutoFlagL(v, 249, s3, s, v2);
 						}
 						// Other upbeat
 						else {
-							if (civl % 12 == 0) FlagL(v, 492, s3, s, v2);
-							else FlagL(v, 250, s3, s, v2);
+							if (civl % 12 == 0) AutoFlagL(v, 492, s3, s, v2);
+							else AutoFlagL(v, 250, s3, s, v2);
 						}
 					}
 				}

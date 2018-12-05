@@ -26,6 +26,16 @@ CString CP2Ly::GetLyNoteCP() {
 	return LyNoteSharp[no2] + GetLyAlter(alter) + LyOctave[oct];
 }
 
+// Get start of real note
+int CP2Ly::GetNoteStart(int voice, int step) {
+	int lstep = bli[voice][step];
+	if (sus[voice][lstep]) {
+		if (step < sus[voice][lstep]) return fli[voice][lstep];
+		else return sus[voice][lstep];
+	}
+	else return fli[voice][lstep];
+}
+
 void CP2Ly::AddNLink(int f) {
 	GetFlag(f);
 	// Send comments and color only if rule is not ignored
@@ -38,8 +48,8 @@ void CP2Ly::AddNLink(int f) {
 	int s3 = s;
 	int s4 = fsl[v][s][f];
 	if (ruleinfo[fl].viz == vGlis) {
-		s3 = ssus[v][bli[v][s]];
-		s4 = ssus[v][bli[v][fsl[v][s][f]]];
+		s3 = GetNoteStart(v, s);
+		s4 = GetNoteStart(v, fsl[v][s][f]);
 	}
 	lyi[s3].fhide.push_back(0);
 	// Check if this shape is not allowed at hidden position
@@ -89,8 +99,8 @@ void CP2Ly::AddNLinkForeign(int f) {
 	int s3 = s;
 	int s4 = fsl[v][s][f];
 	if (ruleinfo[fl].viz == vGlis) {
-		s3 = ssus[v2][bli[v2][s]];
-		s4 = ssus[v2][bli[v2][fsl[v][s][f]]];
+		s3 = GetNoteStart(v2, s);
+		s4 = GetNoteStart(v2, fsl[v][s][f]);
 	}
 	lyi[s3].fhide.push_back(0);
 	// Do not check for hidden positions, because gliss pos is corrected and notecolor pos will be corrected
