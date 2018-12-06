@@ -3657,12 +3657,6 @@ int CP2R::FailHarm() {
 			}
 			RemoveHarmDuplicate();
 		}
-		// If penultimate measure
-		if (ms == mli.size() - 2 && hcount) {
-			// Prohibit D or DVII harmony in penultimate measure before non-D / DVII harmony
-			if (chm.size() > 1 && (chm[chm.size() - 2] == 4 || chm[chm.size() - 2] == 6) &&
-				(chm[chm.size() - 1] > -1 && chm[chm.size() - 1] != 4 && chm[chm.size() - 1] != 6)) FlagV(0, 322, hli[chm.size() - 1]);
-		}
 		if (hli2.size()) hli2[hli2.size() - 1] = mea_end;
 	}
 	GetBhli();
