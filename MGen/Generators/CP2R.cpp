@@ -4485,7 +4485,11 @@ void CP2R::EvaluateMshSteps() {
 		civl = abs(cc[v][s] - cc[0][s]);
 		// Flag 4th or tritone with bass
 		if (civl % 12 == 5) FlagA(v, 171, s, s, 0, 100);
-		if (civl % 12 == 6) FlagA(v, 331, s, s, 0, 100);
+		if (civl % 12 == 6) {
+			// Flag if not suspension resolution to lt
+			if (pcc[0][s] != 11 || !nih[0][fli[0][ls2]] || resol[0][hstart] != fli[0][ls2])
+				FlagA(v, 331, s, s, 0, 100);
+		}
 	}
 }
 
@@ -5553,8 +5557,9 @@ void CP2R::FlagLTUnresolved() {
 }
 
 void CP2R::FlagHarmTriRes() {
+	CHECK_READY(DR_nih);
 	// Check all voices except bass
-	for (v = 1; v < av_cnt; ++v) {
+	for (v = 0; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
 			for (s = 0; s < ep2; ++s) {
 				ls = bli[v][s];
@@ -5567,6 +5572,14 @@ void CP2R::FlagHarmTriRes() {
 				// Skip pauses
 				if (!cc[v][s]) continue;
 				if (!cc[v2][s]) continue;
+				// Skip bass if not suspension resolution to lt
+				if (v == 0) {
+					hs = bhli[s];
+					hstart = hli[hs];
+					if (pcc[0][s] != 11 || !nih[0][fli[0][ls]] || resol[0][hstart] != fli[0][ls]) {
+						continue;
+					}
+				}
 				GetVp();
 				vc = vca[s];
 				// Prepare data
@@ -5582,15 +5595,19 @@ void CP2R::FlagHarmTriRes() {
 				}
 				// Check if first note touches harmony end
 				if (fli2[v][ls] >= s5) {
+					// Last note
 					if (ls >= fli_size[v] - 1)
 						FlagL(v, 379, fli[v][ls], fli[v][ls], v);
+					// Not last note
 					else if (!GetTriRes(cc[v][s], cc[v][fli[v][ls + 1]]))
 						FlagL(v, 379, fli[v][ls], fli[v][ls + 1], v);
 				}
 				// Check if second note touches harmony end
 				if (fli2[v2][ls2] >= s5) {
+					// Last note
 					if (ls2 >= fli_size[v2] - 1)
 						FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2], v2);
+					// Not last note
 					else if (!GetTriRes(cc[v2][s], cc[v2][fli[v2][ls2 + 1]]))
 						FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v2);
 				}
