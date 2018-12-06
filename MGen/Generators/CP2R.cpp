@@ -5387,6 +5387,7 @@ void CP2R::DetectSus() {
 }
 
 void CP2R::DetectPDD() {
+	if (!accept[sp][vc][0][282]) return;
 	// First measure
 	if (!ms) return;
 	if (!cc[v][s]) return;
