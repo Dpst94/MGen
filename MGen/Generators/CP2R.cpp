@@ -5757,6 +5757,9 @@ void CP2R::FlagPcoApart() {
 				civl = abs(cc[v][s] - cc[v2][s]);
 				// Skip not octave / unison / 5th
 				if (civl % 12 != 0 && civl % 12 != 7) continue;
+				// Skip nct
+				if ((vsp[v] == 3 || vsp[v] == 5) && msh[v][fli[v][ls]] < 0) continue;
+				if ((vsp[v2] == 3 || vsp[v2] == 5) && msh[v2][fli[v2][ls2]] < 0) continue;
 				GetVp();
 				vc = vca[s];
 				// Get interval end
@@ -5768,6 +5771,7 @@ void CP2R::FlagPcoApart() {
 					ls3 = bli[v][s3];
 					ls4 = bli[v2][s3];
 					// Skip no note start
+					// Calculate best voices for flags
 					if (s3 == fli[v][ls3]) {
 						av = v;
 						av2 = v2;
@@ -5783,6 +5787,12 @@ void CP2R::FlagPcoApart() {
 					civl2 = abs(cc[v][s3] - cc[v2][s3]);
 					// Skip different interval
 					if (civl2 % 12 != civl % 12) continue;
+					// Skip same notes (oblique motion)
+					if (cc[v][s] == cc[v][s3]) continue;
+					if (cc[v2][s] == cc[v2][s3]) continue;
+					// Skip nct
+					if ((vsp[v] == 3 || vsp[v] == 5) && msh[v][fli[v][ls3]] < 0) continue;
+					if ((vsp[v2] == 3 || vsp[v2] == 5) && msh[v2][fli[v2][ls4]] < 0) continue;
 					int is_contrary = (cc[v][s3] - cc[v][s]) * (cc[v2][s3] - cc[v2][s]) < 0;
 					// Last contrary
 					if (ls3 == fli_size[v] - 1 && ls4 == fli_size[v2] - 1 &&
@@ -5815,7 +5825,7 @@ void CP2R::FlagPcoApart() {
 							if (civl % 12 == 0) AutoFlagL(v, 484, s3, s, v2);
 							else AutoFlagL(v, 248, s3, s, v2);
 						}
-						// Oblique nct in sp3/5
+						// Oblique nct in sp3/5 - currently disabled, because nct are filtered out early
 						else if ((vsp[v] == 3 || vsp[v] == 5 || vsp[v2] == 3 || vsp[v2] == 5) && 
 							is_oblique &&	(msh[v][fli[v][ls]] < 0 || msh[v2][fli[v2][ls2]] < 0 ||
 								msh[v][fli[v][ls3]] < 0 || msh[v2][fli[v2][ls4]] < 0)) {
