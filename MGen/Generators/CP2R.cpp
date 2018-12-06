@@ -2371,17 +2371,6 @@ int CP2R::FailTritone(int ta, int t1, int t2, int tb) {
 	// Do not check tritone if it is at the end of not-last window
 	if (ls == fli_size[v] - 2 && ep2 != c_len) return 0;
 	if (found) {
-		/*
-		// Check if tritone is highest leap if this is last window
-		if (ep2 == c_len && (av_cnt == 1 || !cantus_high)) {
-		if ((cc[v][leap_start] >= lclimax[v][leap_start]) || (cc[v][s1] >= lclimax[v][leap_start])) {
-		// Consecutive
-		if (found == 1) FlagVL(v, 32, s0, fli[v][ls + 1]);
-		// Compound framed
-		else if (found == 2) FlagVL(v, 373, fli[v][ls - 1], fli[v][ls + 1]); //-V547
-		}
-		}
-		*/
 		// Check if resolution is correct
 		GetTritoneResolution(ta, t1, t2, tb, res1, res2);
 		// Flag resolution for consecutive tritone
@@ -2495,16 +2484,6 @@ int CP2R::FailAdjacentTritone2(int ta, int t1, int t2, int tb) {
 		}
 	}
 	//if (!found) return 0;
-	// Check if tritone is highest leap if this is last window
-	/*
-	if (ep2 == c_len && !cantus_high) {
-	if ((cc[v][s] >= lclimax[v][s]) || (cc[v][s2] >= lclimax[v][s2])) {
-	if (found == 0) FlagVL(v, 370, fli[v][fleap_start], fli[v][fleap_end]);
-	else if (found == 1) FlagVL(v, 367, fli[v][fleap_start], fli[v][fleap_end]);
-	else FlagVL(v, 362, fli[v][fleap_start], fli[v][fleap_end]);
-	}
-	}
-	*/
 	GetTritoneResolution(ta, t1, t2, tb, res1, res2);
 	// Flag resolution for normal tritone
 	if (found == 0) {
@@ -2644,16 +2623,6 @@ int CP2R::FailTritones2() {
 					}
 					// Probably next line can be moved higher (before GetTritoneResolution) for performance optimization
 					if (!found) continue;
-					/*
-					// Check if tritone is highest leap if this is last window
-					if (ep2 == c_len && !cantus_high) {
-					if ((cc[v][fli[v][fleap_start]] >= lclimax[v][fli[v][fleap_start]]) ||
-					(cc[v][fli[v][fleap_end]] >= lclimax[v][fli[v][fleap_end]])) {
-					if (found == 1) FlagVL(v, 363, fli[v][fleap_start], fli[v][fleap_end]);
-					else FlagVL(v, 364, fli[v][fleap_start], fli[v][fleap_end]);
-					}
-					}
-					*/
 					// Flag resolution for framed tritone
 					if (found == 1) {
 						if (res1*res2 == 0) FlagVL(v, 19, fli[v][fleap_start], fli[v][fleap_end]);
