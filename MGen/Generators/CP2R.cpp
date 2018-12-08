@@ -4438,8 +4438,8 @@ void CP2R::EvaluateMshSteps() {
 		// Skip no note start
 		if (s != fli[v][ls] && s != fli[0][ls2]) continue;
 		// Skip non-chord tones
-		if (msh[v][ssus[v][ls]] <= 0) continue;
-		if (msh[0][ssus[0][ls2]] <= 0) continue;
+		if (msh[v][max(hstart, fli[v][ls])] < 0) continue;
+		if (msh[0][max(hstart, fli[0][ls2])] < 0) continue;
 		// Skip pauses
 		if (!cc[v][s]) continue;
 		if (!cc[0][s]) continue;
@@ -5530,16 +5530,16 @@ void CP2R::FlagHarmTriRes() {
 				ls2 = bli[v2][s];
 				// Skip no note start
 				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
+				hs = bhli[s];
+				hstart = hli[hs];
 				// Skip non-chord tones
-				if (msh[v][ssus[v][ls]] < 0) continue;
-				if (msh[v2][ssus[v2][ls2]] < 0) continue;
+				if (msh[v][max(hstart, fli[v][ls])] < 0) continue;
+				if (msh[v2][max(hstart, fli[v2][ls2])] < 0) continue;
 				// Skip pauses
 				if (!cc[v][s]) continue;
 				if (!cc[v2][s]) continue;
 				// Skip bass if not suspension resolution to lt
 				if (v == 0) {
-					hs = bhli[s];
-					hstart = hli[hs];
 					if (pcc[0][s] != 11 || !nih[0][fli[0][ls]] || resol[0][hstart] != fli[0][ls]) {
 						continue;
 					}
