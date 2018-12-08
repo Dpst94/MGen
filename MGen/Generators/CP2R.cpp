@@ -5557,22 +5557,32 @@ void CP2R::FlagHarmTriRes() {
 					Flag(v, 331, s, v2);
 					continue;
 				}
+				// Last first note
+				if (ls >= fli_size[v] - 1) {
+					FlagL(v, 379, fli[v][ls], fli[v][ls], v);
+				}
 				// Check if first note touches harmony end
-				if (fli2[v][ls] >= s5) {
-					// Last note
-					if (ls >= fli_size[v] - 1)
-						FlagL(v, 379, fli[v][ls], fli[v][ls], v);
-					// Not last note
-					else if (!GetTriRes(cc[v][s], cc[v][fli[v][ls + 1]]))
+				else if (fli2[v][ls] >= s5) {
+					if (!GetTriRes(cc[v][s], cc[v][fli[v][ls + 1]]))
 						FlagL(v, 379, fli[v][ls], fli[v][ls + 1], v);
 				}
+				// Check if first note touches anticipation
+				else if (ls < fli_size[v] - 2 && cc[v][fli[v][ls + 1]] == cc[v][fli[v][ls + 2]] && hs < hli.size() - 1 && fli[v][ls + 2] == hli[hs + 1]) {
+					if (!GetTriRes(cc[v][s], cc[v][fli[v][ls + 1]]))
+						FlagL(v, 379, fli[v][ls], fli[v][ls + 1], v);
+				}
+				// Last second note
+				if (ls2 >= fli_size[v2] - 1) {
+					FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2], v2);
+				}
 				// Check if second note touches harmony end
-				if (fli2[v2][ls2] >= s5) {
-					// Last note
-					if (ls2 >= fli_size[v2] - 1)
-						FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2], v2);
-					// Not last note
-					else if (!GetTriRes(cc[v2][s], cc[v2][fli[v2][ls2 + 1]]))
+				else if (fli2[v2][ls2] >= s5) {
+					if (!GetTriRes(cc[v2][s], cc[v2][fli[v2][ls2 + 1]]))
+						FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v2);
+				}
+				// Check if second note touches anticipation
+				else if (ls2 < fli_size[v2] - 2 && cc[v2][fli[v2][ls2 + 1]] == cc[v2][fli[v2][ls2 + 2]] && hs < hli.size() - 1 && fli[v2][ls2 + 2] == hli[hs + 1]) {
+					if (!GetTriRes(cc[v2][s], cc[v2][fli[v2][ls2 + 1]]))
 						FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v2);
 				}
 			}
