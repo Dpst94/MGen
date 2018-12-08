@@ -103,7 +103,6 @@ int CP2R::EvaluateCP() {
 
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
-		vaccept = &accept[sp][av_cnt][0];
 		GetMelodyInterval(0, c_len);
 		// Analysis
 		if (FailRetrInside()) return 1;
@@ -181,7 +180,6 @@ int CP2R::EvaluateCP() {
 	FlagSus2();
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
-		vaccept = &accept[sp][av_cnt][0];
 		if (FailLastNotes()) return 1;
 		if (mminor) {
 			if (FailMinor()) return 1;

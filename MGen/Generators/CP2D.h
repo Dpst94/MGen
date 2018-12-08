@@ -231,7 +231,7 @@ protected:
 	vector<vector<vector<vector<RuleInfo2>>>> ruleinfo2; // [sp][vc][vp][rid]
 	vector<vector<vector<vector<int>>>> accept; // [sp][vc][vp][rid]
 	vector<vector<vector<vector<int>>>> severity; // [sp][vc][vp][rid]
-	vector<int>* vaccept;
+	//vector<int>* vaccept;
 	vector <vector <int>> hsp; // [pc][pc] Harmonic sequence penalty
 
 	// Parameters
