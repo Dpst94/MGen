@@ -395,7 +395,6 @@ int CGenCA3::GetCP() {
 		}
 		bmli[s] = mli.size() - 1;
 	}
-
 	// If there are no measures, then it is a single measure
 	if (!npm) npm = c_len;
 	for (v = 0; v < av_cnt; ++v) {
@@ -407,6 +406,22 @@ int CGenCA3::GetCP() {
 			cc[v][s] = cp[cp_id][v][s];
 			src_alter[v][s] = cp_alter[cp_id][v][s];
 			retr[v][s] = cp_retr[cp_id][v][s];
+		}
+	}
+
+	// Check if not enough notes are imported
+	if (c_len % npm && av_cnt > 1) {
+		est.Format("Exercise %d finishes before measure end",
+			cp_id + 1);
+		WriteLogLy(5, est, 0);
+		return 1;
+	}
+	for (v = 0; v < av_cnt; ++v) {
+		if (!cc[v][c_len - 1]) {
+			est.Format("Voice %d ends before the end of exercise %d",
+				v + 1, cp_id + 1);
+			WriteLogLy(5, est, 0);
+			return 1;
 		}
 	}
 
@@ -504,7 +519,7 @@ int CGenCA3::GetCPSpecies() {
 		}
 	}
 	else if (vsp.size() != av_cnt) {
-		est.Format("Check species parameter in config or MusicXML file: found %zu voices, but there are %d voices in counterpoint %d. Parameter in MusicXML will have precedence",
+		est.Format("Check species parameter in config or MusicXML file: %zu voices specified, but there are %d voices in counterpoint %d. Parameter in MusicXML will have precedence",
 			vsp.size(), av_cnt, cp_id + 1);
 		WriteLogLy(5, est, 0);
 		return 1;
