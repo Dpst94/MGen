@@ -51,6 +51,7 @@ inline void CP2R::FlagL(int voice, int fid, int step, int step2, int voice2) {
 }
 
 inline void CP2R::AutoFlagL(int voice, int fid, int step, int step2, int voice2) {
+	CHECK_READY(DR_fli);
 	int avoice, avoice2;
 	if (fli[voice][bli[voice][step]] == step) {
 		avoice = voice;
@@ -192,6 +193,7 @@ int CP2R::EvaluateCP() {
 }
 
 int CP2R::FailMode() {
+	CHECK_READY(DR_fli);
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
 		// Skip pause
@@ -211,7 +213,7 @@ int CP2R::FailMode() {
 
 // Find situations when one voice goes over previous note of another voice without actual crossing
 int CP2R::FailOverlap() {
-	CHECK_READY(DR_fli);
+	CHECK_READY(DR_fli, DR_vca);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 			s = fli[v][ls];
@@ -275,6 +277,7 @@ int CP2R::FailOverlap() {
 }
 
 int CP2R::FailCross() {
+	CHECK_READY(DR_vca);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		int cross_start = -1;
 		for (s = 0; s < ep2; ++s) {
@@ -304,6 +307,8 @@ int CP2R::FailCross() {
 }
 
 int CP2R::FailOneCross(int cross_start, int cross_end) {
+	CHECK_READY(DR_c, DR_fli, DR_leap);
+	CHECK_READY(DR_sus);
 	// Is any crossing prohibited?
 	if (!accept[sp][vc][0][543]) {
 		FlagL(v, 543, cross_start, cross_end, v2);
@@ -503,6 +508,7 @@ void CP2R::SendComment(int pos, int x, int i) {
 }
 
 void CP2R::SendLining(int pos, int x, int i) {
+	CHECK_READY(DR_fli, DR_msh, DR_hli);
 	if (v % 2) {
 		lining[pos + i][vi] = HatchStyleDiagonalCross;
 	}
@@ -524,6 +530,7 @@ void CP2R::SendLining(int pos, int x, int i) {
 }
 
 void CP2R::SendCP() {
+	CHECK_READY(DR_fli);
 	CString st;
 	//CreateLinks();
 	int real_len = cc[0].size();
@@ -578,6 +585,7 @@ void CP2R::MakeBellDyn(int v, int step1, int step2, int dyn1, int dyn2, int dyn_
 }
 
 void CP2R::SendHarmMarks() {
+	CHECK_READY(DR_hli, DR_hbc);
 	for (hs = 0; hs < hli.size(); ++hs) {
 		s = hli[hs];
 		// Find lowest voice with note
@@ -711,7 +719,7 @@ inline void CP2R::CheckReadyPersist(int id, int id2, int id3) {
 
 int CP2R::FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int mleapsteps,
 	int mleaps_flag1, int mleaps_flag2, int mleaps_flag3, int mleaps_flag4) {
-	CHECK_READY(DR_fli, DR_c);
+	CHECK_READY(DR_fli, DR_c, DR_leap);
 	int leap_sum = 0;
 	int leaped_sum = 0;
 	int leap_sum_i = 0;
@@ -839,7 +847,7 @@ void CP2R::GetLeapSmooth() {
 }
 
 int CP2R::FailIntervals() {
-	CHECK_READY(DR_pc, DR_c, DR_fli);
+	CHECK_READY(DR_fli);
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		s0 = fli[v][ls];
 		s = fli2[v][ls];
@@ -865,8 +873,8 @@ int CP2R::FailIntervals() {
 }
 
 void CP2R::FlagLtLt() {
-	CHECK_READY(DR_pc, DR_c, DR_fli);
-	CHECK_READY(DR_islt);
+	CHECK_READY(DR_pc, DR_fli);
+	CHECK_READY(DR_islt, DR_nih);
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 			s0 = fli[v][ls];
@@ -896,7 +904,7 @@ void CP2R::GetLClimax() {
 }
 
 void CP2R::GetNoteTypes() {
-	CHECK_READY(DR_fli);
+	CHECK_READY(DR_fli, DR_nlen);
 	SET_READY(DR_beat, DR_sus);
 	for (v = 0; v < av_cnt; ++v) {
 		int l;
@@ -1080,7 +1088,7 @@ int CP2R::FailMinor() {
 
 int CP2R::FailMinorStepwise() {
 	CHECK_READY(DR_pc, DR_fli);
-	CHECK_READY(DR_msh, DR_nih);
+	CHECK_READY(DR_nih, DR_c);
 	// For non-border notes only, because border notes have their own rules
 	for (ls = 1; ls < fli_size[v] - 1; ++ls) {
 		s = fli[v][ls];
@@ -1148,6 +1156,7 @@ void CP2R::GetDtp() {
 }
 
 void CP2R::CountFillInit(int tail_len, int pre, int &t1, int &t2, int &fill_end) {
+	CHECK_READY(DR_fli, DR_c);
 	// Create leap tail
 	tc.clear();
 	if (pre) {
@@ -1191,6 +1200,7 @@ void CP2R::CountFillInit(int tail_len, int pre, int &t1, int &t2, int &fill_end)
 }
 
 void CP2R::CountFill(int tail_len, int &skips, int &fill_to, int pre, int &fill_to_pre, int &fill_from_pre, int &fill_from, int &deviates, int &dev_count, int leap_prev, int &fill_end, int &fill_goal) {
+	CHECK_READY(DR_fli, DR_c);
 	// Leap starting and finishing note
 	int t1, t2;
 	int cur_deviation = 0;
@@ -1273,6 +1283,7 @@ void CP2R::CountFillSkips(int leap_prev, int &skips, int t1, int t2) {
 }
 
 void CP2R::CountFillLimits(int pre, int t1, int t2, int &fill_to, int &fill_to_pre, int &fill_from_pre, int &fill_from) {
+	CHECK_READY(DR_fli, DR_c);
 	fill_to = leap_size;
 	fill_to_pre = fill_to;
 	fill_from_pre = fill_to;
@@ -1347,6 +1358,8 @@ void CP2R::CountFillLimits(int pre, int t1, int t2, int &fill_to, int &fill_to_p
 }
 
 void CP2R::FailLeapInit(int &late_leap, int &presecond, int &leap_next, int &leap_prev, int &arpeg, int &overflow) {
+	CHECK_READY(DR_fli, DR_c, DR_leap);
+	CHECK_READY(DR_dtp);
 	presecond = 0; // If leap has a filled second
 	leap_next = 0; // Multiply consecutive leaps
 	leap_prev = 0; // Multiply consecutive leaps
@@ -1369,8 +1382,10 @@ void CP2R::FailLeapInit(int &late_leap, int &presecond, int &leap_next, int &lea
 }
 
 int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_leap) {
+	CHECK_READY(DR_fli, DR_c, DR_leap);
+	CHECK_READY(DR_sus);
 	child_leap = 0; // If we have a child_leap
-									// Check if leap is third
+	// Check if leap is third
 	if (fleap_end < fli_size[v] - 1) {
 		// Next leap in same direction
 		if (leap_next > 0) {
@@ -1428,11 +1443,7 @@ int CP2R::FailLeapMulti(int leap_next, int &arpeg, int &overflow, int &child_lea
 }
 
 int CP2R::FailLeap() {
-	CHECK_READY(DR_leap, DR_c, DR_fli);
-	CHECK_READY(DR_dtp);
-	if (sp > 1) {
-		CHECK_READY(DR_beat);
-	}
+	CHECK_READY(DR_fli, DR_leap);
 	// Get leap size, start, end
 	// Check if leap is compensated (without violating compensation rules)
 	// If leap is not compensated, check uncompensated rules
@@ -1459,6 +1470,7 @@ int CP2R::FailLeap() {
 }
 
 int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
+	CHECK_READY(DR_fli, DR_sus);
 	// Prefill parameters
 	int ptail_len, pfill_to, pfill_to_pre, pfill_from_pre, pfill_from, pdeviates, pfill_end, pdev_count, pfill_goal;
 	// Fill parameters
@@ -1555,6 +1567,7 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 }
 
 int CP2R::FailLeapMDC() {
+	CHECK_READY(DR_fli, DR_sus, DR_leap);
 	// Melody direction change (MDC)
 	// 0 = close, 1 = far, 2 = no
 	// Default mdc is close, because beginning equals to close mdc
@@ -1848,7 +1861,7 @@ int CP2R::FailMultiCulm() {
 }
 
 int CP2R::FailFirstNotes() {
-	CHECK_READY(DR_fli, DR_pc);
+	CHECK_READY(DR_fli, DR_pc, DR_sus);
 	if (v == av_cnt - 1) vp = vpExt;
 	else if (v == 0) vp = vpBas;
 	else vp = vpNbs;
@@ -1891,7 +1904,7 @@ int CP2R::FailLastNotes() {
 
 // Search for adjacent or symmetric repeats
 int CP2R::FailAdSymRepeat(int relen) {
-	CHECK_READY(DR_fli, DR_c);
+	CHECK_READY(DR_fli);
 	// Check only same beat
 	int sym_period = npm;
 	// Cycle through all notes that can be repeated
@@ -1966,6 +1979,7 @@ int CP2R::FailAdSymRepeat(int relen) {
 }
 
 int CP2R::IsRepeat(int ls1, int ls2, int relen) {
+	CHECK_READY(DR_fli, DR_c);
 	int found = 1;
 	for (int i = 0; i < relen; ++i) {
 		if (c[v][fli[v][ls1 + i]] != c[v][fli[v][ls2 + i]]) {
@@ -2016,6 +2030,7 @@ void CP2R::maVector(vector<int> &v, vector<float> &v2, int range) {
 }
 
 void CP2R::mawVector(vector<int> &v, vector<float> &v2, int range) {
+	CHECK_READY(DR_macc);
 	int pos1, pos2;
 	float ma, maw_sum;
 	for (int s = 0; s < ep2; ++s) {
@@ -2033,6 +2048,7 @@ void CP2R::mawVector(vector<int> &v, vector<float> &v2, int range) {
 }
 
 void CP2R::mawVector(vector<float> &v, vector<float> &v2, int range) {
+	CHECK_READY(DR_macc);
 	int pos1, pos2;
 	float ma, maw_sum;
 	for (int s = 0; s < ep2; ++s) {
@@ -2051,6 +2067,7 @@ void CP2R::mawVector(vector<float> &v, vector<float> &v2, int range) {
 
 void CP2R::MakeMacc() {
 	SET_READY(DR_macc);
+	CHECK_READY(DR_fli);
 	int pos1, pos2;
 	int ma_range = 2 * minl[v];
 	macc_range = ma_range;
@@ -2211,6 +2228,8 @@ int CP2R::FailLocalPiCount(int notes, int picount, int pic_fl) {
 }
 
 float CP2R::GetTonicWeight(int l_ls, int tonic_type) {
+	CHECK_READY(DR_fli, DR_c, DR_lclimax);
+	CHECK_READY(DR_beat);
 	int l_s = fli[v][l_ls];
 	// Not species 3 or 5?
 	if (sp != 3 && sp != 5) return 1.0;
@@ -2229,10 +2248,6 @@ float CP2R::GetTonicWeight(int l_ls, int tonic_type) {
 
 int CP2R::FailTonic(int tonic_type) {
 	CHECK_READY(DR_pc, DR_fli);
-	CHECK_READY(DR_lclimax);
-	if (sp) {
-		CHECK_READY(DR_beat);
-	}
 	vector<float> tcount;
 	int s9;
 	tcount.resize(13);
@@ -2285,6 +2300,7 @@ int CP2R::FailTonic(int tonic_type) {
 
 // Check tritone t1-t2 which has to resolve from ta to tb. Use fleap_start/fleap_end
 void CP2R::GetTritoneResolution(int ta, int t1, int t2, int tb, int &res1, int &res2) {
+	CHECK_READY(DR_fli, DR_pc);
 	res1 = 0;
 	res2 = 0;
 	// Real resolution notes
@@ -2336,6 +2352,8 @@ void CP2R::GetTritoneResolution(int ta, int t1, int t2, int tb, int &res1, int &
 
 // Check tritone t1-t2 which has to resolve from ta to tb
 int CP2R::FailTritone(int ta, int t1, int t2, int tb) {
+	CHECK_READY(DR_fli, DR_c, DR_leap);
+	CHECK_READY(DR_pc);
 	int found;
 	int res1 = 0; // First note resolution flag
 	int res2 = 0; // Second note resolution flag
@@ -2385,8 +2403,7 @@ int CP2R::FailTritone(int ta, int t1, int t2, int tb) {
 }
 
 int CP2R::FailTritones() {
-	CHECK_READY(DR_pc, DR_c, DR_fli);
-	CHECK_READY(DR_leap, DR_lclimax);
+	CHECK_READY(DR_fli);
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		s0 = fli[v][ls];
 		s = fli2[v][ls];
@@ -2410,7 +2427,7 @@ int CP2R::FailTritones() {
 
 // Calculate global fill
 int CP2R::FailGlobalFill() {
-	CHECK_READY(DR_nmin, DR_c);
+	CHECK_READY(DR_nmin, DR_c, DR_fli);
 	// Clear nstat2
 	for (int i = nmind[v]; i <= nmaxd[v]; ++i) nstat2[i] = 0;
 	// Count nstat2
@@ -2434,6 +2451,7 @@ int CP2R::FailGlobalFill() {
 }
 
 int CP2R::FailAdjacentTritone2(int ta, int t1, int t2, int tb) {
+	CHECK_READY(DR_fli, DR_pc, DR_leap);
 	int found = 0;
 	int res1 = 0;
 	int res2 = 0;
@@ -2502,8 +2520,7 @@ int CP2R::FailAdjacentTritone2(int ta, int t1, int t2, int tb) {
 // This function is for species 2-5
 int CP2R::FailAdjacentTritones() {
 	// Find adjacent notes
-	CHECK_READY(DR_pc, DR_c, DR_fli);
-	CHECK_READY(DR_leap);
+	CHECK_READY(DR_fli);
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		s = fli2[v][ls];
 		s2 = fli[v][ls + 1];
@@ -2521,8 +2538,8 @@ int CP2R::FailAdjacentTritones() {
 
 // This function is for species 2-5
 int CP2R::FailTritones2() {
-	CHECK_READY(DR_pc, DR_c, DR_fli);
-	CHECK_READY(DR_leap, DR_lclimax);
+	CHECK_READY(DR_pc, DR_fli);
+	CHECK_READY(DR_leap);
 	// Find both tritone notes in measure (non-adjacent)
 	int mea_end, ls1, ls2, lpcc, cch, ccl, exceed, found, res1, res2, last_repeat;
 	for (ms = 0; ms < mli.size(); ++ms) {
@@ -2637,8 +2654,6 @@ int CP2R::FailTritones2() {
 }
 
 int CP2R::FailRhythm() {
-	CHECK_READY(DR_fli, DR_beat, DR_sus);
-	CHECK_READY(DR_leap, DR_nlen);
 	if (sp == 2) {
 		if (FailRhythm2()) return 1;
 	}
@@ -2656,6 +2671,7 @@ int CP2R::FailRhythm() {
 
 // Fail rhythm for species 2
 int CP2R::FailRhythm2() {
+	CHECK_READY(DR_fli, DR_sus, DR_nlen);
 	// Last measure not whole
 	if (c_len - fli[v][fli_size[v] - 1] < npm || 
 		(c_len == ep2 && llen[v][fli_size[v] - 1] != npm)) {
@@ -2670,6 +2686,7 @@ int CP2R::FailRhythm2() {
 
 // Fail rhythm for species 4
 int CP2R::FailRhythm4() {
+	CHECK_READY(DR_fli, DR_sus, DR_nlen);
 	// Last measure not whole
 	if (c_len - fli[v][fli_size[v] - 1] < npm ||
 		(c_len == ep2 && llen[v][fli_size[v] - 1] != npm)) {
@@ -2684,6 +2701,7 @@ int CP2R::FailRhythm4() {
 
 // Fail rhythm for species 3
 int CP2R::FailRhythm3() {
+	CHECK_READY(DR_fli);
 	// Check uneven pause
 	if (fli_size[v] > 2 && !cc[v][0] && llen[v][0] % npm != llen[v][1]) FlagV(v, 237, 0);
 	// Last measure not whole
@@ -2697,6 +2715,7 @@ int CP2R::FailRhythm3() {
 
 // Fail rhythm for species 5
 int CP2R::FailRhythm5() {
+	CHECK_READY(DR_fli, DR_sus, DR_leap);
 	// Rhythm id
 	rh_id[v].resize(mli.size());
 	int rid_cur = 0;
@@ -2901,8 +2920,7 @@ int CP2R::FailRhythm5() {
 }
 
 int CP2R::FailRhythmRepeat() {
-	CHECK_READY(DR_fli, DR_beat, DR_sus);
-	CHECK_READY(DR_leap, DR_nlen);
+	CHECK_READY(DR_fli);
 	for (v = 0; v < av_cnt; ++v) {
 		// Only for sp5
 		if (vsp[v] != 5) continue;
@@ -2925,7 +2943,7 @@ int CP2R::FailRhythmRepeat() {
 }
 
 void CP2R::FlagFullParallel() {
-	CHECK_READY(DR_fli);
+	CHECK_READY(DR_fli, DR_c);
 	// Skip if not all voices are in whole notes
 	for (v = 0; v < av_cnt; ++v) {
 		if (vsp[v] > 1) return;
@@ -2955,7 +2973,6 @@ void CP2R::FlagFullParallel() {
 }
 
 void CP2R::FlagMultiSlur() {
-	CHECK_READY(DR_fli);
 	for (ms = 1; ms < mli.size(); ++ms) {
 		s = mli[ms];
 		int scount = 0;
@@ -2976,7 +2993,7 @@ void CP2R::FlagMultiSlur() {
 }
 
 int CP2R::FailAnapaest() {
-	CHECK_READY(DR_fli);
+	CHECK_READY(DR_fli, DR_sus);
 	// Check only for 4/4
 	if (npm != 8) return 0;
 	// Do not run check if there are no sp5 voices
@@ -3043,6 +3060,7 @@ void CP2R::FlagRhythmStagnation() {
 
 // Detect missing slurs
 int CP2R::FailMissSlurs() {
+	CHECK_READY(DR_fli);
 	// Check only for species 4
 	if (sp != 4) return 0;
 	// Missing slurs array
@@ -3134,6 +3152,8 @@ int CP2R::FailMaxNoteLen() {
 // Detect sus mistakes: short preparation and sus sounding with res 
 // TODO: need to implement
 void CP2R::FlagSus() {
+	CHECK_READY(DR_fli, DR_vca, DR_nih);
+	CHECK_READY(DR_hli, DR_resol, DR_pc);
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		for (ls = 0; ls < fli_size[v]; ++ls) {
@@ -3211,6 +3231,7 @@ void CP2R::FlagSus() {
 }
 
 void CP2R::FlagSus2() {
+	CHECK_READY(DR_fli, DR_sus, DR_pc);
 	CHECK_READY(DR_islt);
 	for (v = 0; v < av_cnt; ++v) {
 		// Species 2
@@ -3233,6 +3254,7 @@ void CP2R::FlagSus2() {
 
 void CP2R::GetLT() {
 	CHECK_READY(DR_nih, DR_pc, DR_hli);
+	CHECK_READY(DR_fli);
 	SET_READY(DR_islt);
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
@@ -3258,7 +3280,7 @@ void CP2R::GetLT() {
 }
 
 int CP2R::FailSusCount() {
-	CHECK_READY(DR_sus);
+	CHECK_READY(DR_sus, DR_fli);
 	int c_sus = 0;
 	int c_anti = 0;
 	for (ls = 0; ls < fli_size[v]; ++ls) {
@@ -3278,6 +3300,7 @@ int CP2R::FailSusCount() {
 
 // Detect repeating notes. Step2 excluding
 int CP2R::FailNoteRepeat() {
+	CHECK_READY(DR_fli);
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		if (cc[v][fli[v][ls]] == cc[v][fli[v][ls + 1]]) FlagV(v, 30, fli[v][ls]);
 	}
@@ -3286,6 +3309,7 @@ int CP2R::FailNoteRepeat() {
 
 // Detect pauses
 int CP2R::FailPauses() {
+	CHECK_READY(DR_fli);
 	for (ls = 1; ls < fli_size[v]; ++ls) {
 		if (!cc[v][fli[v][ls]]) FlagV(v, 517, fli[v][ls]);
 	}
@@ -3310,7 +3334,7 @@ void CP2R::GetNoteLen() {
 
 // Detect repeating notes. Step2 excluding
 int CP2R::FailNoteLen() {
-	CHECK_READY(DR_nlen);
+	CHECK_READY(DR_nlen, DR_fli);
 	// Get min sus length
 	min_sus = 6;
 	//if (npm == 8) min_sus = 6;
@@ -3376,7 +3400,7 @@ int CP2R::FailNoteLen() {
 
 // Detect repeating notes. Step2 excluding
 int CP2R::FailBeat() {
-	CHECK_READY(DR_nlen);
+	CHECK_READY(DR_fli, DR_beat);
 	if (sp == 0) {
 		if (av_cnt == 1) return 0;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
@@ -3411,6 +3435,7 @@ int CP2R::FailBeat() {
 
 // Detect retriggers inside measure
 int CP2R::FailRetrInside() {
+	CHECK_READY(DR_fli, DR_beat);
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		if (!beat[v][ls]) continue;
 		s = fli[v][ls];
@@ -3465,8 +3490,9 @@ void CP2R::GetHarm(int found_gis, int found_fis, int &lchm, int &lchm_alter, int
 }
 
 int CP2R::FailHarm() {
-	CHECK_READY(DR_fli, DR_c, DR_pc);
-	SET_READY(DR_hli);
+	CHECK_READY(DR_fli, DR_sus, DR_pc);
+	CHECK_READY(DR_msh);
+	SET_READY(DR_hli, DR_hbc);
 	//if (av_cnt < 2) return 0;
 	int n, hcount, rat;
 	int last_b; // First harmony in measure has b
@@ -3679,6 +3705,8 @@ int CP2R::FailHarm() {
 }
 
 int CP2R::EvalHarm() {
+	CHECK_READY(DR_fli, DR_pc, DR_hli);
+	CHECK_READY(DR_hbc);
 	int pen1;
 	int p2c = 0; // Count of consecutive penalty 2
 	int p3c = 0; // Count of consecutive penalty 3
@@ -3767,7 +3795,7 @@ int CP2R::EvalHarm() {
 }
 
 int CP2R::FailTonicCP() {
-	CHECK_READY(DR_hbc);
+	CHECK_READY(DR_hbc, DR_hli);
 	float tcount = 0;
 	int fire, fired = 0;
 	// Do not check if melody is short
@@ -3807,6 +3835,7 @@ int CP2R::FailTonicCP() {
 }
 
 void CP2R::RemoveHarmDuplicate() {
+	CHECK_READY(DR_hli);
 	int chm_id = hli.size() - 1;
 	// Need to be at least two harmonies
 	if (chm_id == 0) return;
@@ -3827,6 +3856,7 @@ void CP2R::RemoveHarmDuplicate() {
 }
 
 int CP2R::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat_letters, int miss_letters, int hrepeat_flag, int hmiss_flag) {
+	CHECK_READY(DR_hli);
 	if (hv[chm[i]]) {
 		++count;
 		wcount = 0;
@@ -3857,6 +3887,7 @@ int CP2R::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat
 }
 
 void CP2R::GetBhli() {
+	CHECK_READY(DR_hli);
 	fill(bhli.begin(), bhli.end(), 0);
 	for (int hs = 0; hs < chm.size(); ++hs) {
 		for (s = hli[hs]; s <= hli2[hs]; ++s) {
@@ -3866,6 +3897,7 @@ void CP2R::GetBhli() {
 }
 
 void CP2R::EvalMshHarm(int hvar) {
+	CHECK_READY(DR_fli, DR_c, DR_msh);
 	// Get harmonic notes
 	int de1 = hvar;
 	int de2 = (de1 + 2) % 7;
@@ -3932,6 +3964,7 @@ void CP2R::EvalMshHarm(int hvar) {
 
 // Detect ambiguous harmony
 void CP2R::EvalHarmAmbig(int hvar) {
+	CHECK_READY(DR_fli, DR_msh);
 	// Downbeat harmonic notes
 	int downbeat_harm = 0;
 	for (v = 0; v < av_cnt; ++v) {
@@ -3944,6 +3977,8 @@ void CP2R::EvalHarmAmbig(int hvar) {
 }
 
 void CP2R::EvalHarmIncomplete(int hvar) {
+	CHECK_READY(DR_vca, DR_pc, DR_msh);
+	CHECK_READY(DR_nih, DR_resol, DR_fli);
 	vc = vca[hstart];
 	if (accept[0][vc][0][559]) return;
 	// Get harmonic notes
@@ -3984,6 +4019,8 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 
 void CP2R::GetHarmBass() {
 	SET_READY(DR_hbc);
+	CHECK_READY(DR_fli, DR_c);
+	SET_READY(DR_beat, DR_hli);
 	int ls1, ls2;
 	int harm_end, nt;
 	int de1, de2, de3;
@@ -4057,6 +4094,7 @@ int CP2R::FailVocalRanges() {
 }
 
 int CP2R::FailVocalRangesConflict() {
+	CHECK_READY(DR_vca);
 	int conf_start = -1;
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (s = 0; s < c_len; ++s) {
@@ -4156,7 +4194,7 @@ int CP2R::FailMeasureLen() {
 }
 
 void CP2R::FlagParallelIco() {
-	CHECK_READY(DR_fli);
+	CHECK_READY(DR_fli, DR_vca, DR_c);
 	// Do not run check if there are no sp5 voices
 	int sp_count = 0;
 	for (v = 0; v < av_cnt; ++v) {
@@ -4211,7 +4249,7 @@ void CP2R::FlagParallelIco() {
 }
 
 int CP2R::FailVIntervals() {
-	CHECK_READY(DR_fli, DR_sus);
+	CHECK_READY(DR_fli, DR_vca);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (s = fin[v]; s < ep2; ++s) {
 			ls = bli[v][s];
@@ -4236,6 +4274,7 @@ int CP2R::FailVIntervals() {
 }
 
 int CP2R::FailUnison() {
+	CHECK_READY(DR_fli, DR_sus);
 	// Unison
 	if (!civl && fli[v][ls] != fli[v2][ls2]) {
 		// Find previous interval
@@ -4262,7 +4301,7 @@ int CP2R::FailUnison() {
 }
 
 int CP2R::FailSyncVIntervals() {
-	CHECK_READY(DR_fli, DR_sus);
+	CHECK_READY(DR_fli, DR_vca);
 	for (v2 = v + 1; v2 < av_cnt; ++v2) {
 		for (ls = 1; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
@@ -4296,6 +4335,7 @@ int CP2R::FailSyncVIntervals() {
 }
 
 void CP2R::FlagDirectDis() {
+	CHECK_READY(DR_sus);
 	if (civlc == 11 || civlc == 10 ||
 		((civlc == 1 || civlc == 2) && civl > 12)) {
 		if (ssus[v][ls - 1] > ssus[v2][ls2 - 1]) {
@@ -4322,6 +4362,8 @@ void CP2R::FlagDirectDis() {
 }
 
 int CP2R::FailPco() {
+	CHECK_READY(DR_vca, DR_beat, DR_sus);
+	CHECK_READY(DR_fli);
 	if (!civl) {
 		// Unison (inside) downbeat without suspension
 		if (!beat[v][ls] && ls < fli_size[v] - 1 && ls2 < fli_size[v2] - 1 && !sus[v][ls] && !sus[v2][ls2]) {
@@ -4370,6 +4412,8 @@ int CP2R::FailMsh() {
 }
 
 void CP2R::EvaluateMsh() {
+	CHECK_READY(DR_fli, DR_nih, DR_msh);
+	CHECK_READY(DR_c, DR_hli);
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
@@ -4421,6 +4465,8 @@ void CP2R::EvaluateMsh() {
 }
 
 void CP2R::EvaluateMshSteps() {
+	CHECK_READY(DR_fli, DR_vca, DR_msh);
+	CHECK_READY(DR_nih, DR_resol, DR_pc);
 	// Skip bass
 	if (!v) return;
 	// Get last measure step
@@ -4454,6 +4500,8 @@ void CP2R::EvaluateMshSteps() {
 }
 
 void CP2R::GetMeasureMsh(int sec_hp) {
+	CHECK_READY(DR_fli, DR_leap, DR_sus);
+	CHECK_READY(DR_msh, DR_pc);
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
@@ -4495,6 +4543,8 @@ void CP2R::GetMeasureMsh(int sec_hp) {
 
 // Mark only notes in measure, which are definitely harmonic
 void CP2R::GetMinimumMsh() {
+	CHECK_READY(DR_fli, DR_leap, DR_sus);
+	CHECK_READY(DR_msh, DR_pc);
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
@@ -4584,6 +4634,7 @@ void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 
 void CP2R::GetMsh() {
 	SET_READY(DR_msh, DR_nih, DR_resol);
+	CHECK_READY(DR_fli, DR_vca, DR_pc);
 	flaga.clear();
 	for (ms = 0; ms < mli.size(); ++ms) {
 		hpenalty = 0;
@@ -4766,6 +4817,7 @@ void CP2R::GetMsh() {
 }
 
 void CP2R::GetNotesInHarm() {
+	CHECK_READY(DR_fli, DR_nih, DR_pc);
 	for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
 		s = fli[v][ls];
 		// Skip pauses
@@ -4786,6 +4838,8 @@ void CP2R::GetHarmVars(int &lchm, int &lchm_alter, int &rat, vector<int> & cpos,
 }
 
 void CP2R::GetMsh2() {
+	CHECK_READY(DR_msh, DR_nih, DR_resol);
+	CHECK_READY(DR_fli, DR_sus, DR_pc);
 	// Detect second chord position
 	// Main chord
 	vector<int> lchm;
@@ -5081,6 +5135,8 @@ void CP2R::GetMsh2() {
 }
 
 void CP2R::DetectDNT() {
+	CHECK_READY(DR_fli, DR_leap, DR_sus);
+	CHECK_READY(DR_msh, DR_nih);
 	if (!accept[sp][vc][0][258]) return;
 	// Suspension will conflict with DNT
 	int ls0 = bli[v][mli[ms]];
@@ -5145,6 +5201,8 @@ void CP2R::DetectDNT() {
 }
 
 void CP2R::DetectCambiata() {
+	CHECK_READY(DR_fli, DR_leap, DR_sus);
+	CHECK_READY(DR_msh, DR_nih);
 	if (!accept[sp][vc][0][256]) return;
 	// Suspension will conflict with cambiata
 	int ls0 = bli[v][mli[ms]];
@@ -5201,6 +5259,9 @@ void CP2R::DetectCambiata() {
 }
 
 void CP2R::DetectSus() {
+	CHECK_READY(DR_fli, DR_c, DR_leap);
+	CHECK_READY(DR_beat, DR_msh, DR_nih);
+	CHECK_READY(DR_resol, DR_pc);
 	// Skip first measure
 	if (!ms) return;
 	// Skip pause
@@ -5347,6 +5408,8 @@ void CP2R::DetectSus() {
 }
 
 void CP2R::DetectPDD() {
+	CHECK_READY(DR_fli, DR_c, DR_resol);
+	CHECK_READY(DR_msh, DR_nih);
 	if (!accept[sp][vc][0][282]) return;
 	// First measure
 	if (!ms) return;
@@ -5387,7 +5450,7 @@ void CP2R::DetectPDD() {
 }
 
 int CP2R::FailStartPause() {
-	CHECK_READY(DR_nlen);
+	CHECK_READY(DR_nlen, DR_fli);
 	// Last measure with starting voice
 	int last_start = 0;
 	// How many voices start in this measure
@@ -5481,7 +5544,8 @@ int CP2R::FailStartPause() {
 }
 
 void CP2R::FlagLTUnresolved() {
-	CHECK_READY(DR_islt);
+	CHECK_READY(DR_islt, DR_fli, DR_vca);
+	CHECK_READY(DR_pc, DR_hli);
 	for (v = 0; v < av_cnt; ++v) {
 		// Up to penultimate note
 		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
@@ -5518,7 +5582,9 @@ void CP2R::FlagLTUnresolved() {
 }
 
 void CP2R::FlagHarmTriRes() {
-	CHECK_READY(DR_nih);
+	CHECK_READY(DR_nih, DR_fli, DR_vca);
+	CHECK_READY(DR_msh, DR_hli, DR_resol);
+	CHECK_READY(DR_pc);
 	// Check all voices except bass
 	for (v = 0; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
@@ -5589,6 +5655,7 @@ void CP2R::FlagHarmTriRes() {
 
 // Return 1 if tritone is resolved or if there are no resolution notes in next chord
 int CP2R::GetTriRes(int cc1, int cc2) {
+	CHECK_READY(DR_hli);
 	// Unresolved if this is last harmony
 	if (hli.size() <= hs + 1) return 0;
 	int cm = chm[hs + 1];
@@ -5636,6 +5703,8 @@ int CP2R::GetTriRes(int cc1, int cc2) {
 }
 
 void CP2R::FlagLTDouble() {
+	CHECK_READY(DR_fli, DR_vca, DR_islt);
+	CHECK_READY(DR_pc);
 	for (v = 0; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
 			for (s = 0; s < ep2; ++s) {
@@ -5664,6 +5733,7 @@ void CP2R::FlagLTDouble() {
 }
 
 void CP2R::GetChordTones() {
+	CHECK_READY(DR_hli);
 	for (hs = 0; hs < hli.size(); ++hs) {
 		GetHarmNotes(chm[hs], chm_alter[hs], cct[hs]);
 	}
@@ -5684,6 +5754,8 @@ void CP2R::GetHarmNotes(int lchm, int lchm_alter, vector<int> &lcct) {
 }
 
 void CP2R::FlagTriDouble() {
+	CHECK_READY(DR_fli, DR_vca, DR_hli);
+	CHECK_READY(DR_pc);
 	for (hs = 0; hs < hli.size(); ++hs) {
 		// Skip chords without tritone
 		if ((cct[hs][2] - cct[hs][0] + 12) % 12 != 6) continue;
@@ -5730,7 +5802,8 @@ void CP2R::FlagTriDouble() {
 }
 
 void CP2R::FlagPcoApart() {
-	CHECK_READY(DR_nih);
+	CHECK_READY(DR_fli, DR_vca, DR_sus);
+	CHECK_READY(DR_msh);
 	int av, av2;
 	for (v = 0; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
