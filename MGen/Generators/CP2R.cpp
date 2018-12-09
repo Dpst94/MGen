@@ -4413,7 +4413,7 @@ int CP2R::FailMsh() {
 
 void CP2R::EvaluateMsh() {
 	CHECK_READY(DR_fli, DR_nih, DR_msh);
-	CHECK_READY(DR_c, DR_hli);
+	CHECK_READY(DR_c);
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	// Prevent going out of window
@@ -4422,6 +4422,7 @@ void CP2R::EvaluateMsh() {
 		s = fli[v][ls];
 		// Skip pauses
 		if (!cc[v][s]) continue;
+		// If non-harmonic tone
 		if (msh[v][s] <= 0) {
 			// Detect auxiliary tone, not surrounded by chord tones
 			if (ls < bli[v][mea_end] &&
@@ -4438,17 +4439,20 @@ void CP2R::EvaluateMsh() {
 				if (!nih[v][s])
 					FlagA(v, 223, s, s, v, 50);
 			}
-			// Skip non-harmonic tones
+			// Skip other non-harmonic tones
 			continue;
 		}
-		// Check if note started in previous measure
-		if (s < s0) {
-			// Check if note traverses multiple harmonies in current measure
-			if (bhli[fli2[v][ls]] - bhli[s0] > 0) {
+		// Check if note started in previous harmony
+		if (s < hstart) {
+			// Check if note continues to the next harmony
+			if (fli2[v][ls] > hend) {
 				// Set msh and check to measure start
 				s = s0;
 				msh[v][s] = pSusStart;
 			}
+			// If note finishes in this harmony, it can either be resolved non-harmonic sus, or harmonic
+			// If it is resolved correctly and marked as nht, there is no reason to flag it
+			// If it is harmonic, but not part of current harmony, it will be flagged in DetectSus
 			else continue;
 		}
 		if (!nih[v][s]) {
