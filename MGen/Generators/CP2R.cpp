@@ -2911,7 +2911,6 @@ int CP2R::FailRhythm5() {
 		if (cc[v][s]) {
 			if (slur1 == 4 && l_len[0] == 2) FlagV(v, 241, s);
 			else if (slur1 == 4 && l_len[0] == 4) FlagV(v, 242, s);
-			//else if (slur1 == 2) FlagV(v, 251, s)
 			if (slur1 && l_len[0] == 6) FlagV(v, 243, s);
 			if (slur1 == 6) FlagV(v, 244, s);
 		}
