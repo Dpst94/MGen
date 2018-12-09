@@ -29,6 +29,7 @@
 #define DR_hbc					16
 #define DR_nlen					17
 #define DR_nih					18
+#define DR_resol				19
 
 #ifdef CF_DEBUG
 

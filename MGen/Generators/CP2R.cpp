@@ -710,7 +710,7 @@ inline void CP2R::CheckReadyPersist(int id, int id2, int id3) {
 }
 
 int CP2R::FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int mleapsteps,
-	int flag1, int flag2, int flag3, int flag4) {
+	int mleaps_flag1, int mleaps_flag2, int mleaps_flag3, int mleaps_flag4) {
 	CHECK_READY(DR_fli, DR_c);
 	int leap_sum = 0;
 	int leaped_sum = 0;
@@ -746,26 +746,26 @@ int CP2R::FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int 
 		g_leaped[v][ls] = leaped_sum;
 		// Calculate penalty 
 		if (leap_sum > mleaps) {
-			if (!accept[sp][av_cnt][0][flag1]) ++fpenalty;
+			if (!accept[sp][av_cnt][0][mleaps_flag1]) ++fpenalty;
 		}
 		else if (leap_sum > mleaps2) {
-			if (!accept[sp][av_cnt][0][flag3]) ++fpenalty;
+			if (!accept[sp][av_cnt][0][mleaps_flag3]) ++fpenalty;
 		}
 		if (leaped_sum > mleaped) {
-			if (!accept[sp][av_cnt][0][flag2]) ++fpenalty;
+			if (!accept[sp][av_cnt][0][mleaps_flag2]) ++fpenalty;
 		}
 		else if (leaped_sum > mleaped2) {
-			if (!accept[sp][av_cnt][0][flag4]) ++fpenalty;
+			if (!accept[sp][av_cnt][0][mleaps_flag4]) ++fpenalty;
 		}
 	}
 	if (win_leaps > mleaps2)
-		FlagVL(v, flag3, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
+		FlagVL(v, mleaps_flag3, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
 	else if (win_leaps > mleaps)
-		FlagVL(v, flag1, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
+		FlagVL(v, mleaps_flag1, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
 	if (win_leapnotes > mleaped2)
-		FlagVL(v, flag4, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
+		FlagVL(v, mleaps_flag4, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
 	else if (win_leapnotes > mleaped)
-		FlagVL(v, flag2, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
+		FlagVL(v, mleaps_flag2, fli[v][leap_sum_i + 1], fli[v][max(0, leap_sum_i - mleapsteps)]);
 	return 0;
 }
 
@@ -1662,7 +1662,7 @@ void CP2R::GetMelodyInterval(int step1, int step2) {
 
 // Check if too many leaps
 int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, int csel2,
-	int flag1, int flag2, int flag3, int flag4, int first_run) {
+	int leaps_flag1, int leaps_flag2, int leaps_flag3, int leaps_flag4, int first_run) {
 	CHECK_READY(DR_leap, DR_c, DR_fli);
 	// Clear variables
 	int leap_sum2 = 0;
@@ -1695,18 +1695,18 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 		}
 		// Calculate penalty
 		if (leap_sum_corrected == csel) {
-			if (accept[sp][av_cnt][0][flag3] > 0) ++fpenalty;
+			if (accept[sp][av_cnt][0][leaps_flag3] > 0) ++fpenalty;
 		}
-		if (leap_sum_corrected > csel2 && accept[sp][av_cnt][0][flag4] > 0) ++fpenalty;
+		if (leap_sum_corrected > csel2 && accept[sp][av_cnt][0][leaps_flag4] > 0) ++fpenalty;
 		// Prohibit long smooth movement
 		if (smooth[v][s] != 0) {
 			++smooth_sum;
 			if (smooth_sum >= l_max_smooth) {
 				if (fired4) {
-					fpenalty += severity[sp][av_cnt][0][flag1] + 1;
+					fpenalty += severity[sp][av_cnt][0][leaps_flag1] + 1;
 				}
 				else {
-					FlagVL(v, flag1, fli[v][ls + 1], fli[v][ls - smooth_sum + 1]);
+					FlagVL(v, leaps_flag1, fli[v][ls + 1], fli[v][ls - smooth_sum + 1]);
 					fired4 = 1;
 				}
 			}
@@ -1718,10 +1718,10 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 				++smooth_sum2;
 				if (smooth_sum2 >= l_max_smooth_direct) {
 					if (fired5) {
-						fpenalty += severity[sp][av_cnt][0][flag2] + 1;
+						fpenalty += severity[sp][av_cnt][0][leaps_flag2] + 1;
 					}
 					else {
-						FlagVL(v, flag2, fli[v][ls + 1], fli[v][ls - smooth_sum2 + 1]);
+						FlagVL(v, leaps_flag2, fli[v][ls + 1], fli[v][ls - smooth_sum2 + 1]);
 						fired5 = 1;
 					}
 				}
@@ -1771,19 +1771,19 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 	}
 	if (first_run && max_leap_sum2 >= csel) {
 		if (max_leap_sum2 > csel2)
-			FlagVL(v, flag4, fli[v][bli[v][leap_sum_s2] + 1],
+			FlagVL(v, leaps_flag4, fli[v][bli[v][leap_sum_s2] + 1],
 				fli[v][max(0, bli[v][leap_sum_s2] - max_leap_sum3 + 1)]);
 		else
-			FlagVL(v, flag3, fli[v][bli[v][leap_sum_s2] + 1],
+			FlagVL(v, leaps_flag3, fli[v][bli[v][leap_sum_s2] + 1],
 				fli[v][max(0, bli[v][leap_sum_s2] - max_leap_sum3 + 1)]);
 	}
 	return 0;
 }
 
-int CP2R::FailStagnation(int steps, int notes, int fl) {
+int CP2R::FailStagnation(int steps, int notes, int stag_fl) {
 	CHECK_READY(DR_nmin, DR_fli);
 	// Do not test if flag disabled and not evaluating
-	if (task != tEval && accept[sp][av_cnt][0][fl] == -1) return 0;
+	if (task != tEval && accept[sp][av_cnt][0][stag_fl] == -1) return 0;
 	// Clear nstat
 	for (int i = nmin[v]; i <= nmax[v]; ++i) nstat[i] = 0;
 	nstat[0] = 0;
@@ -1795,7 +1795,7 @@ int CP2R::FailStagnation(int steps, int notes, int fl) {
 		if (ls >= steps) --nstat[cc[v][fli[v][ls - steps]]];
 		// Check if too many repeating notes
 		if (nstat[cc[v][s]] > notes) 
-			FlagVL(v, fl, s, fli[v][max(0, ls - steps)]);
+			FlagVL(v, stag_fl, s, fli[v][max(0, ls - steps)]);
 	}
 	return 0;
 }
@@ -1894,8 +1894,6 @@ int CP2R::FailAdSymRepeat(int relen) {
 	CHECK_READY(DR_fli, DR_c);
 	// Check only same beat
 	int sym_period = npm;
-	// Do not test if flag disabled and not testing
-	//if (task != tEval && accept[sp][av_cnt][0][flag] == -1) return 0;
 	// Cycle through all notes that can be repeated
 	for (ls = 0; ls <= fli_size[v] - relen * 2; ++ls) {
 		int rpos1 = 0;
@@ -2084,10 +2082,10 @@ void CP2R::MakeMacc() {
 	mawVector(decc, decc2, ma_range);
 }
 
-int CP2R::FailLocalMacc(int notes, float mrange, int fl) {
+int CP2R::FailLocalMacc(int notes, float mrange, int macc_fl) {
 	CHECK_READY(DR_fli, DR_macc);
 	// Do not test if flag disabled and not testing
-	if (task != tEval && accept[sp][av_cnt][0][fl] == -1) return 0;
+	if (task != tEval && accept[sp][av_cnt][0][macc_fl] == -1) return 0;
 	// Do not test if not enough notes. If melody is short, than global range check is enough
 	if (fli_size[v] < notes) return 0;
 	float lmin, lmax, maccr;
@@ -2114,10 +2112,10 @@ int CP2R::FailLocalMacc(int notes, float mrange, int fl) {
 		// Check range
 		if (lmin < MAX_NOTE && lmax > 0 && maccr < mrange) {
 			if (fired) {
-				fpenalty += severity[sp][av_cnt][0][fl] + 1;
+				fpenalty += severity[sp][av_cnt][0][macc_fl] + 1;
 			}
 			else {
-				FlagVL(v, fl, fli[v][ls], fli[v][ls_max2 - 1]);
+				FlagVL(v, macc_fl, fli[v][ls], fli[v][ls_max2 - 1]);
 				fired = 1;
 			}
 		}
@@ -2125,10 +2123,10 @@ int CP2R::FailLocalMacc(int notes, float mrange, int fl) {
 	return 0;
 }
 
-int CP2R::FailLocalRange(int notes, int mrange, int fl) {
+int CP2R::FailLocalRange(int notes, int mrange, int range_fl) {
 	CHECK_READY(DR_fli, DR_c);
 	// Do not test if flag disabled and not testing
-	//if (task != tEval && accept[sp][av_cnt][0][fl] == -1) return 0;
+	//if (task != tEval && accept[sp][av_cnt][0][range_fl] == -1) return 0;
 	// Do not test if not enough notes. If melody is short, than global range check is enough
 	if (fli_size[v] < notes) return 0;
 	int lmin, lmax, s;
@@ -2163,10 +2161,10 @@ int CP2R::FailLocalRange(int notes, int mrange, int fl) {
 		// Check range
 		if (lmax - lmin < mrange) {
 			if (fired) {
-				fpenalty += severity[sp][av_cnt][0][fl] + 1;
+				fpenalty += severity[sp][av_cnt][0][range_fl] + 1;
 			}
 			else {
-				FlagVL(v, fl, fli[v][ls], fli[v][ls_max2 - 1]);
+				FlagVL(v, range_fl, fli[v][ls], fli[v][ls_max2 - 1]);
 				fired = 1;
 			}
 		}
@@ -2174,10 +2172,10 @@ int CP2R::FailLocalRange(int notes, int mrange, int fl) {
 	return 0;
 }
 
-int CP2R::FailLocalPiCount(int notes, int picount, int fl) {
+int CP2R::FailLocalPiCount(int notes, int picount, int pic_fl) {
 	CHECK_READY(DR_fli, DR_nmin);
 	// Do not test if flag disabled and not testing
-	if (task != tEval && accept[sp][av_cnt][0][fl] == -1) return 0;
+	if (task != tEval && accept[sp][av_cnt][0][pic_fl] == -1) return 0;
 	// Do not test if not enough notes
 	if (fli_size[v] < notes) return 0;
 	int picount2, i;
@@ -2204,7 +2202,7 @@ int CP2R::FailLocalPiCount(int notes, int picount, int fl) {
 			// For long windows do nothing - this shortens window a little, but this is not very important
 			if (picount2 < picount) {
 				if (ls - last_flag_ls > 1)
-					FlagVL(v, fl, fli[v][ls - notes + 1], s);
+					FlagVL(v, pic_fl, fli[v][ls - notes + 1], s);
 				last_flag_ls = ls;
 			}
 		}
@@ -2212,7 +2210,7 @@ int CP2R::FailLocalPiCount(int notes, int picount, int fl) {
 	return 0;
 }
 
-float CP2R::GetTonicWeight(int l_ls, int tt) {
+float CP2R::GetTonicWeight(int l_ls, int tonic_type) {
 	int l_s = fli[v][l_ls];
 	// Not species 3 or 5?
 	if (sp != 3 && sp != 5) return 1.0;
@@ -2229,7 +2227,7 @@ float CP2R::GetTonicWeight(int l_ls, int tt) {
 	return 0.9;
 }
 
-int CP2R::FailTonic(int tt) {
+int CP2R::FailTonic(int tonic_type) {
 	CHECK_READY(DR_pc, DR_fli);
 	CHECK_READY(DR_lclimax);
 	if (sp) {
@@ -2256,26 +2254,26 @@ int CP2R::FailTonic(int tt) {
 	}
 	// Do not check if melody is short
 	if (fli_size[v] < 3) return 0;
-	int tw = tonic_window[tt][sp][av_cnt][0];
-	int tm = tonic_max[tt][sp][av_cnt][0];
+	int tw = tonic_window[tonic_type][sp][av_cnt][0];
+	int tm = tonic_max[tonic_type][sp][av_cnt][0];
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
 		// Decrement for previous tonic note
 		if (ls >= tw) {
 			s9 = fli[v][ls - tw];
 			if (!pc[v][s9])
-				tcount[cc[v][s9] / 12] -= GetTonicWeight(ls - tw, tt);
+				tcount[cc[v][s9] / 12] -= GetTonicWeight(ls - tw, tonic_type);
 		}
 		if (!pc[v][s]) {
 			// Increment for current tonic note
-			tcount[cc[v][s] / 12] += GetTonicWeight(ls, tt);
+			tcount[cc[v][s] / 12] += GetTonicWeight(ls, tonic_type);
 			// Check count of tonic notes
 			if (tcount[cc[v][s] / 12] >= tm) {
 				if (fired) {
-					fpenalty += severity[sp][av_cnt][0][70 + tt] + 1;
+					fpenalty += severity[sp][av_cnt][0][70 + tonic_type] + 1;
 				}
 				else {
-					FlagVL(v, 70 + tt, s, fli[v][max(0, ls - tw)]);
+					FlagVL(v, 70 + tonic_type, s, fli[v][max(0, ls - tw)]);
 					fired = 1;
 				}
 			}
@@ -3234,7 +3232,8 @@ void CP2R::FlagSus2() {
 }
 
 void CP2R::GetLT() {
-	SET_READY(DR_islt, DR_nih);
+	CHECK_READY(DR_nih, DR_pc, DR_hli);
+	SET_READY(DR_islt);
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
@@ -3827,7 +3826,7 @@ void CP2R::RemoveHarmDuplicate() {
 	ha64.resize(chm_id);
 }
 
-int CP2R::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat_letters, int miss_letters, int flagr, int flagm) {
+int CP2R::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat_letters, int miss_letters, int hrepeat_flag, int hmiss_flag) {
 	if (hv[chm[i]]) {
 		++count;
 		wcount = 0;
@@ -3838,20 +3837,20 @@ int CP2R::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat
 	}
 	if (count > repeat_letters && !hrepeat_fired) {
 		if (count == repeat_letters + 1) {
-			FlagVL(0, flagr, s, hli[i - count + 1]);
+			FlagVL(0, hrepeat_flag, s, hli[i - count + 1]);
 			hrepeat_fired = 1;
 		}
 		else {
-			fpenalty += severity[sp][av_cnt][0][flagr] + 1;
+			fpenalty += severity[sp][av_cnt][0][hrepeat_flag] + 1;
 		}
 	}
 	if (wcount > miss_letters && !hmiss_fired) {
 		if (wcount == miss_letters + 1) {
-			FlagVL(0, flagm, s, hli[i - wcount + 1]);
+			FlagVL(0, hmiss_flag, s, hli[i - wcount + 1]);
 			hmiss_fired = 1;
 		}
 		else {
-			fpenalty += severity[sp][av_cnt][0][flagm] + 1;
+			fpenalty += severity[sp][av_cnt][0][hmiss_flag] + 1;
 		}
 	}
 	return 0;
@@ -4584,7 +4583,7 @@ void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 }
 
 void CP2R::GetMsh() {
-	SET_READY(DR_msh, DR_nih);
+	SET_READY(DR_msh, DR_nih, DR_resol);
 	flaga.clear();
 	for (ms = 0; ms < mli.size(); ++ms) {
 		hpenalty = 0;
