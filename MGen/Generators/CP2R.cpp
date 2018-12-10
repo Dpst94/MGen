@@ -171,6 +171,7 @@ int CP2R::EvaluateCP() {
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
+	FlagFCR();
 	FlagPcoApart();
 	FlagHarmTriRes();
 	FlagTriDouble();
@@ -3740,15 +3741,6 @@ int CP2R::EvalHarm() {
 				pc[0][s] == 0 && pc[1][s] == 0 &&
 				s > 0 && pc[0][s - 1] == 4) FlagV(v, 48, s);
 			if (mminor) {
-				// Prohibit VI<->VI# containing progression
-				if (chm[i] % 2 && chm[i - 1] % 2 && chm_alter[i] * chm_alter[i - 1] == -1) {
-					FlagV(v, 377, s);
-				}
-				// Prohibit VII<->VII# containing progression
-				if (chm[i] && chm[i] % 2 == 0 && chm[i - 1] && chm[i - 1] % 2 == 0 &&
-					chm_alter[i] * chm_alter[i - 1] == -1) {
-					FlagV(v, 378, s);
-				}
 				// Prohibit dVII (GBD) in root position after S (DF#A) in root position
 				if (chm[i] == 6 && chm[i - 1] == 3 && chm_alter[i]<1 && chm_alter[i - 1] == 1) {
 					if (ls > 0 && pc[0][s] == 6 && pc[0][fli[v][ls - 1]] == 3) FlagV(v, 308, s);
@@ -5906,4 +5898,91 @@ void CP2R::FlagPcoApart() {
 			}
 		}
 	}
+}
+
+void CP2R::FlagFCR() {
+	CHECK_READY(DR_hli);
+	if (!mminor) return;
+	// Find pair of neighboring chords, which contain FCR notes as chord tones
+	for (hs = 1; hs < hli.size(); ++hs) {
+		int fcr = 0;
+		// Prohibit VI<->VI# containing progression
+		if (chm[hs] % 2 && chm[hs - 1] % 2) {
+			if (chm_alter[hs] == 1 && chm_alter[hs - 1] == -1) {
+				fcr = FindFCRNotes(8, 9);
+			}
+			else if (chm_alter[hs] == -1 && chm_alter[hs - 1] == 1) {
+				fcr = FindFCRNotes(9, 8);
+			}
+		}
+		// If both notes exist in external voices, flag red
+		if (fcr == 2) {
+			FlagV(v2, 377, s4);
+		}
+		// If one of notes exist in internal voice and the other - in any voice, flag yellow
+		else if (fcr == 1) {
+			FlagV(v2, 164, s4);
+		}
+		// If one or both of notes does not exist in voices, do not flag
+		fcr = 0;
+		// Prohibit VII<->VII# containing progression
+		if (chm[hs] && chm[hs] % 2 == 0 && chm[hs - 1] && chm[hs - 1] % 2 == 0) {
+			if (chm_alter[hs] == 1 && chm_alter[hs - 1] == -1) {
+				fcr = FindFCRNotes(10, 11);
+			}
+			else if (chm_alter[hs] == -1 && chm_alter[hs - 1] == 1) {
+				fcr = FindFCRNotes(11, 10);
+			}
+		}
+		// If both notes exist in external voices, flag red
+		if (fcr == 2) {
+			FlagV(v2, 378, s4);
+		}
+		// If one of notes exist in internal voice and the other - in any voice, flag yellow
+		else if (fcr == 1) {
+			FlagV(v2, 165, s4);
+		}
+		// If one or both of notes does not exist in voices, do not flag
+	}
+}
+
+int CP2R::FindFCRNotes(int pcc1, int pcc2) {
+	// Scan first chord
+	int found1 = FindFCRNote(hs - 1, pcc1);
+	int found2 = FindFCRNote(hs, pcc2);
+	// If both notes exist in external voices, return 2
+	if (found1 == 2 && found2 == 2) return 2;
+	// If one or both of notes does not exist in voices, return 0
+	else if (found1 == 0 || found2 == 0) return 0;
+	// If one of notes exist in internal voice and the other - in any voice, return 1
+	else return 1;
+}
+
+int CP2R::FindFCRNote(int lhs, int lpcc) {
+	CHECK_READY(DR_fli, DR_hli, DR_pc);
+	hstart = hli[lhs];
+	hend = hli2[lhs];
+	s0 = mli[bmli[hstart]];
+	int found = 0;
+	// Scan each voice and detect for each note, if it exists only in internal voice, or in external voice
+	for (v = 0; v < av_cnt; ++v) {
+		for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
+			s = fli[v][ls];
+			// No need to skip pause, because pcc being searched are never 0
+			if (pcc[v][s] == lpcc) {
+				if (v == 0 || v == av_cnt - 1) {
+					s4 = s;
+					v2 = v;
+					found = 2;
+					return found;
+				}
+				else {
+					s4 = s;
+					v2 = v;
+					found = max(found, 1);
+				}
+			}
+		}
+	}
+	return found;
 }

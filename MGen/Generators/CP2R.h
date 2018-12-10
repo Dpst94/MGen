@@ -279,5 +279,8 @@ protected:
 	inline void GetHarmNotes(int lchm, int lchm_alter, vector<int>& lcct);
 	inline void FlagTriDouble();
 	inline void FlagPcoApart();
+	inline void FlagFCR();
+	inline int FindFCRNotes(int pcc1, int pcc2);
+	inline int FindFCRNote(int lhs, int lpcc);
 };
 
