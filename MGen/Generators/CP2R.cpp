@@ -1027,6 +1027,7 @@ int CP2R::FailFisTrail() {
 
 int CP2R::FailMinor() {
 	CHECK_READY(DR_pc, DR_fli, DR_nih);
+	CHECK_READY(DR_hli);
 	for (ls = 1; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
 		s_1 = fli[v][ls - 1];
@@ -1052,7 +1053,8 @@ int CP2R::FailMinor() {
 			}
 			if (ls > 1) {
 				s_2 = fli[v][ls - 2];
-				if (pcc[v][s_2] == 10 && nih[v][s_2] && nih[v][s]) FlagVL(v, 159, s_2, s);
+				if (pcc[v][s_2] == 10 && nih[v][s_2] && nih[v][s] &&
+					bhli[s] - bhli[s_2] == 1) FlagVL(v, 159, s_2, s);
 			}
 			if (ls < fli_size[v] - 1) {
 				s1 = fli[v][ls + 1];
@@ -1061,7 +1063,8 @@ int CP2R::FailMinor() {
 				if (pcc[v][s1] == 3) FlagVL(v, 156, s1, s);
 				if (ls < fli_size[v] - 2) {
 					s2 = fli[v][ls + 2];
-					if (pcc[v][s2] == 10 && nih[v][s2] && nih[v][s]) FlagVL(v, 159, s2, s);
+					if (pcc[v][s2] == 10 && nih[v][s2] && nih[v][s] &&
+						bhli[s2] - bhli[s] == 1) FlagVL(v, 159, s2, s);
 				}
 			}
 		}
@@ -1070,7 +1073,8 @@ int CP2R::FailMinor() {
 			if (pcc[v][s_1] == 3) FlagVL(v, 155, s_1, s);
 			if (ls > 1) {
 				s_2 = fli[v][ls - 2];
-				if (pcc[v][s_2] == 8 && nih[v][s_2] && nih[v][s]) FlagVL(v, 158, s_2, s);
+				if (pcc[v][s_2] == 8 && nih[v][s_2] && nih[v][s] &&
+					bhli[s] - bhli[s_2] == 1) FlagVL(v, 158, s_2, s);
 			}
 			if (ls < fli_size[v] - 1) {
 				s1 = fli[v][ls + 1];
@@ -1078,7 +1082,8 @@ int CP2R::FailMinor() {
 				if (pcc[v][s1] == 3) FlagVL(v, 155, s1, s);
 				if (ls < fli_size[v] - 2) {
 					s2 = fli[v][ls + 2];
-					if (pcc[v][s2] == 8 && nih[v][s2] && nih[v][s]) FlagVL(v, 158, s2, s);
+					if (pcc[v][s2] == 8 && nih[v][s2] && nih[v][s] &&
+						bhli[s2] - bhli[s] == 1) FlagVL(v, 158, s2, s);
 				}
 			}
 		}
@@ -5909,47 +5914,47 @@ void CP2R::FlagFCR() {
 		// Prohibit VI<->VI# containing progression
 		if (chm[hs] % 2 && chm[hs - 1] % 2) {
 			if (chm_alter[hs] == 1 && chm_alter[hs - 1] == -1) {
-				fcr = FindFCRNotes(8, 9);
+				fcr = FindFCRNotes(8, 9, s4, s5);
 			}
 			else if (chm_alter[hs] == -1 && chm_alter[hs - 1] == 1) {
-				fcr = FindFCRNotes(9, 8);
+				fcr = FindFCRNotes(9, 8, s4, s5);
 			}
 		}
 		// If both notes exist in external voices, flag red
 		if (fcr == 2) {
-			FlagV(v2, 377, s4);
+			FlagV(v3, 377, s5);
 		}
 		// If one of notes exist in internal voice and the other - in any voice, flag yellow
 		else if (fcr == 1) {
-			FlagV(v2, 164, s4);
+			FlagV(v3, 164, s5);
 		}
 		// If one or both of notes does not exist in voices, do not flag
 		fcr = 0;
 		// Prohibit VII<->VII# containing progression
 		if (chm[hs] && chm[hs] % 2 == 0 && chm[hs - 1] && chm[hs - 1] % 2 == 0) {
 			if (chm_alter[hs] == 1 && chm_alter[hs - 1] == -1) {
-				fcr = FindFCRNotes(10, 11);
+				fcr = FindFCRNotes(10, 11, s4, s5);
 			}
 			else if (chm_alter[hs] == -1 && chm_alter[hs - 1] == 1) {
-				fcr = FindFCRNotes(11, 10);
+				fcr = FindFCRNotes(11, 10, s4, s5);
 			}
 		}
 		// If both notes exist in external voices, flag red
 		if (fcr == 2) {
-			FlagV(v2, 378, s4);
+			FlagV(v3, 378, s5);
 		}
 		// If one of notes exist in internal voice and the other - in any voice, flag yellow
 		else if (fcr == 1) {
-			FlagV(v2, 165, s4);
+			FlagV(v3, 165, s5);
 		}
 		// If one or both of notes does not exist in voices, do not flag
 	}
 }
 
-int CP2R::FindFCRNotes(int pcc1, int pcc2) {
+int CP2R::FindFCRNotes(int pcc1, int pcc2, int &step1, int &step2) {
 	// Scan first chord
-	int found1 = FindFCRNote(hs - 1, pcc1);
-	int found2 = FindFCRNote(hs, pcc2);
+	int found1 = FindFCRNoteRight(hs - 1, pcc1, step1);
+	int found2 = FindFCRNoteLeft(hs, pcc2, step2);
 	// If both notes exist in external voices, return 2
 	if (found1 == 2 && found2 == 2) return 2;
 	// If one or both of notes does not exist in voices, return 0
@@ -5958,28 +5963,74 @@ int CP2R::FindFCRNotes(int pcc1, int pcc2) {
 	else return 1;
 }
 
-int CP2R::FindFCRNote(int lhs, int lpcc) {
+// Find rightmost FCR note in harmony
+int CP2R::FindFCRNoteRight(int lhs, int lpcc, int &right_s) {
 	CHECK_READY(DR_fli, DR_hli, DR_pc);
 	hstart = hli[lhs];
 	hend = hli2[lhs];
 	s0 = mli[bmli[hstart]];
 	int found = 0;
+	right_s = hstart;
+	// Scan each voice and detect for each note, if it exists only in internal voice, or in external voice
+	for (v = 0; v < av_cnt; ++v) {
+		for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
+			s2 = fli2[v][ls];
+			// No need to skip pause, because pcc being searched are never 0
+			if (pcc[v][s2] == lpcc) {
+				// For outer voices always set to found = 2
+				if (v == 0 || v == av_cnt - 1) {
+					if (found == 1) right_s = hstart;
+					if (right_s < s) {
+						right_s = s2;
+						v2 = v;
+						found = 2;
+					}
+				}
+				// For inner voices set to found = 1 if outer voice was not yet found
+				else if (found < 2) {
+					if (right_s < s) {
+						right_s = s2;
+						v2 = v;
+						found = 1;
+					}
+				}
+			}
+		}
+	}
+	return found;
+}
+
+// Find leftmost FCR note in harmony
+int CP2R::FindFCRNoteLeft(int lhs, int lpcc, int &left_s) {
+	CHECK_READY(DR_fli, DR_hli, DR_pc);
+	hstart = hli[lhs];
+	hend = hli2[lhs];
+	s0 = mli[bmli[hstart]];
+	int found = 0;
+	left_s = hend;
 	// Scan each voice and detect for each note, if it exists only in internal voice, or in external voice
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
 			s = fli[v][ls];
 			// No need to skip pause, because pcc being searched are never 0
 			if (pcc[v][s] == lpcc) {
+				// For outer voices always set to found = 2
 				if (v == 0 || v == av_cnt - 1) {
-					s4 = s;
-					v2 = v;
-					found = 2;
-					return found;
+					// If already found == 1, then reset step to rightmost
+					if (found == 1) left_s = hend;
+					if (left_s > s) {
+						left_s = s;
+						v3 = v;
+						found = 2;
+					}
 				}
-				else {
-					s4 = s;
-					v2 = v;
-					found = max(found, 1);
+				// For inner voices set to found = 1 if outer voice was not yet found
+				else if (found < 2) {
+					if (left_s > s) {
+						left_s = s;
+						v3 = v;
+						found = 1;
+					}
 				}
 			}
 		}

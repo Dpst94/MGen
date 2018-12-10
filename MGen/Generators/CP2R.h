@@ -280,7 +280,8 @@ protected:
 	inline void FlagTriDouble();
 	inline void FlagPcoApart();
 	inline void FlagFCR();
-	inline int FindFCRNotes(int pcc1, int pcc2);
-	inline int FindFCRNote(int lhs, int lpcc);
+	inline int FindFCRNotes(int pcc1, int pcc2, int & step1, int & step2);
+	inline int FindFCRNoteRight(int lhs, int lpcc, int & right_s);
+	inline int FindFCRNoteLeft(int lhs, int lpcc, int & left_s);
 };
 
