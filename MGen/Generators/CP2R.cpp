@@ -3751,8 +3751,14 @@ int CP2R::EvalHarm() {
 					if (ls > 0 && pc[0][s] == 6 && pc[0][fli[v][ls - 1]] == 3) FlagV(v, 308, s);
 				}
 				// Prohibit DTIII (CEG) in root position after dVII (GBD) in root position
-				if (chm[i] == 2 && chm[i - 1] == 6 && chm_alter[i]<1 && chm_alter[i - 1]<1) {
+				if (chm[i] == 2 && chm[i - 1] == 6 && chm_alter[i] < 1 && chm_alter[i - 1] < 1) {
 					if (ls > 0 && pc[0][s] == 2 && pc[0][fli[v][ls - 1]] == 6) FlagV(v, 309, s);
+				}
+			}
+			if (mode == 9) {
+				// Prohibit DTIII (CEG) in root position after SII (BDF)
+				if (chm[i] == 2 && chm[i - 1] == 1 && chm_alter[i] < 1 && chm_alter[i - 1] < 1) {
+					if (ls > 0 && pc[0][s] == 2) FlagV(v, 139, s);
 				}
 			}
 			// Check harmonic penalty	
@@ -5951,6 +5957,9 @@ void CP2R::FlagFCR() {
 	}
 }
 
+// hs should be set to second harmony
+// step1 is set to last step of rightmost FCR note in first harmony
+// step2 is set to first step of leftmost FCR note in second harmony
 int CP2R::FindFCRNotes(int pcc1, int pcc2, int &step1, int &step2) {
 	// Scan first chord
 	int found1 = FindFCRNoteRight(hs - 1, pcc1, step1);
