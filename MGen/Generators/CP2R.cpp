@@ -4340,25 +4340,15 @@ void CP2R::FlagDirectDis() {
 	CHECK_READY(DR_sus);
 	if (civlc == 11 || civlc == 10 ||
 		((civlc == 1 || civlc == 2) && civl > 12)) {
-		if (ssus[v][ls - 1] > ssus[v2][ls2 - 1]) {
-			s3 = ssus[v][ls - 1];
-			v3 = v;
-			v4 = v2;
-		}
-		else {
-			s3 = ssus[v2][ls2 - 1];
-			v3 = v2;
-			v4 = v;
-		}
 		if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0) {
 			// Minor 7th
-			if (civlc == 10) FlagL(v3, 169, s3, s, v4);
+			if (civlc == 10) AutoFlagL(v3, 169, max(ssus[v][ls - 1], ssus[v][ls2 - 1]), s, v4);
 			// Major 7th
-			else if (civlc == 11) FlagL(v3, 276, s3, s, v4);
+			else if (civlc == 11) AutoFlagL(v3, 276, max(ssus[v][ls - 1], ssus[v][ls2 - 1]), s, v4);
 			// Minor 9th
-			else if (civlc == 1) FlagL(v3, 173, s3, s, v4);
+			else if (civlc == 1) AutoFlagL(v3, 173, max(ssus[v][ls - 1], ssus[v][ls2 - 1]), s, v4);
 			// Major 9th
-			else if (civlc == 2) FlagL(v3, 174, s3, s, v4);
+			else if (civlc == 2) AutoFlagL(v3, 174, max(ssus[v][ls - 1], ssus[v][ls2 - 1]), s, v4);
 		}
 	}
 }
@@ -4374,10 +4364,10 @@ int CP2R::FailPco() {
 				Flag(v, 91, s, v2);
 		}
 	}
-	if (civlc == 7 || civlc == 12 || civlc == 0) {
+	if (civlc == 7 || civlc == 0) {
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
-		// Prohibit consecutive last - first
+		// Prohibit consecutive last - first parallel movement
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
@@ -4385,12 +4375,30 @@ int CP2R::FailPco() {
 				else AutoFlagL(v, 481, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 			}
 		}
-		else {
-			// Prohibit contrary movement
-			if (civlc == civlc2) {
-				if (civlc == 7) AutoFlagL(v, 85, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-				else AutoFlagL(v, 482, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+		// Prohibit similar movement in outer voices
+		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
+			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
+				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
+					if (civlc == 7) AutoFlagL(v, 208, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					else if (!civl) AutoFlagL(v, 72, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					else AutoFlagL(v, 209, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				}
+				else {
+					if (civlc == 7) AutoFlagL(v, 212, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					else if (!civl) AutoFlagL(v, 73, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					else AutoFlagL(v, 213, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				}
 			}
+			else {
+				if (civlc == 7) AutoFlagL(v, 210, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				else if (!civl) AutoFlagL(v, 76, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				else AutoFlagL(v, 211, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			}
+		}
+		// Prohibit consecutive contrary movement
+		else if (civlc == civlc2) {
+			if (civlc == 7) AutoFlagL(v, 85, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			else AutoFlagL(v, 482, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 		}
 	}
 	return 0;
