@@ -3142,15 +3142,13 @@ int CP2R::FailSlurs() {
 
 int CP2R::FailMaxNoteLen() {
 	CHECK_READY(DR_fli);
-	/*
 	// Never check last note, either end of scan window or end of counterpoint
-	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
-	if (rlen[v][ls] > max_note_len[sp][av_cnt][0] * 2)
-	FlagV(v, 336, fli[v][ls]);
+	//for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+	//if (rlen[v][ls] > max_note_len[sp][av_cnt][0] * 2)
+	//FlagV(v, 336, fli[v][ls]);
 	// Check notes crossing multiple measures
-	if (bmli[fli2[v][ls]] - bmli[fli[v][ls]] > 1) FlagV(v, 41, fli[v][ls]);
-	}
-	*/
+	//if (bmli[fli2[v][ls]] - bmli[fli[v][ls]] > 1) FlagV(v, 41, fli[v][ls]);
+	//}
 	return 0;
 }
 
@@ -3613,16 +3611,14 @@ int CP2R::FailHarm() {
 							}
 						}
 						else {
-							/*
 							// Stepwize resolution of 5th to 6th or 6th to 5th with two harmonies in measure
-							if ((sp == 4 ||
-							(sp == 5 && sus[ls1] && fli2[ls1] - sus[ls1] == 3 && rlen[ls1 + 1] >= 4)) && (
-							(ivlc[mli[ms]] == 4 && ivlc[s] == 5) ||
-							(ivlc[mli[ms]] == 5 && ivlc[s] == 4)) &&
-							abs(ac[cpv][mli[ms]] - ac[cpv][s]) < 2)
-							FLAG2L(329, s, mli[ms]);
-							else FLAG2L(307, s, mli[ms]);
-							*/
+							//if ((sp == 4 ||
+							//(sp == 5 && sus[ls1] && fli2[ls1] - sus[ls1] == 3 && rlen[ls1 + 1] >= 4)) && (
+							//(ivlc[mli[ms]] == 4 && ivlc[s] == 5) ||
+							//(ivlc[mli[ms]] == 5 && ivlc[s] == 4)) &&
+							//abs(ac[cpv][mli[ms]] - ac[cpv][s]) < 2)
+							//FLAG2L(329, s, mli[ms]);
+							//else FLAG2L(307, s, mli[ms]);
 							FlagVL(0, 307, s, mli[ms]);
 							chm[hs] = -1;
 							chm_alter[hs] = 0;
@@ -4355,7 +4351,7 @@ void CP2R::FlagDirectDis() {
 
 int CP2R::FailPco() {
 	CHECK_READY(DR_vca, DR_beat, DR_sus);
-	CHECK_READY(DR_fli);
+	CHECK_READY(DR_fli, DR_c);
 	if (!civl) {
 		// Unison (inside) downbeat without suspension
 		if (!beat[v][ls] && ls < fli_size[v] - 1 && ls2 < fli_size[v2] - 1 && !sus[v][ls] && !sus[v2][ls2]) {
@@ -5432,12 +5428,10 @@ void CP2R::DetectPDD() {
 	// Note 2 is not too long
 	if (llen[v][ls] > 4) return;
 	// Find at least one dissonance
-	/*
-	int has_dissonance = 0;
-	for (v2 = 0; v2 < av_cnt; ++v2) {
-		if (v2 == v) continue;
-	}
-	*/
+	//int has_dissonance = 0;
+	//for (v2 = 0; v2 < av_cnt; ++v2) {
+		//if (v2 == v) continue;
+	//}
 	if (ls < fli_size[v] - 1) {
 		// Stepwise descending movement
 		if (c[v][s2 + 1] - c[v][s2] != -1) return;
