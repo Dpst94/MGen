@@ -4338,13 +4338,13 @@ void CP2R::FlagDirectDis() {
 		((civlc == 1 || civlc == 2) && civl > 12)) {
 		if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0) {
 			// Minor 7th
-			if (civlc == 10) AutoFlagL(v3, 169, max(ssus[v][ls - 1], ssus[v][ls2 - 1]), s, v4);
+			if (civlc == 10) AutoFlagL(v, 169, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 			// Major 7th
-			else if (civlc == 11) AutoFlagL(v3, 276, max(ssus[v][ls - 1], ssus[v][ls2 - 1]), s, v4);
+			else if (civlc == 11) AutoFlagL(v, 276, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 			// Minor 9th
-			else if (civlc == 1) AutoFlagL(v3, 173, max(ssus[v][ls - 1], ssus[v][ls2 - 1]), s, v4);
+			else if (civlc == 1) AutoFlagL(v, 173, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 			// Major 9th
-			else if (civlc == 2) AutoFlagL(v3, 174, max(ssus[v][ls - 1], ssus[v][ls2 - 1]), s, v4);
+			else if (civlc == 2) AutoFlagL(v, 174, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 		}
 	}
 }
