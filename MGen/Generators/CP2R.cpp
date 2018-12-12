@@ -3289,6 +3289,11 @@ void CP2R::FlagNoLT() {
 	if (hli.size() < 2) return;
 	if (fli_size[0] < 2) return;
 	hs = hli.size() - 2;
+	// Check penultimate harmony not D / DVII - then do not check for leading tone
+	if (chm[hs] > -1 && chm[hs] != 4 && chm[hs] != 6) {
+		FlagV(0, 335, hli[hs]);
+		return;
+	}
 	hstart = hli[hs];
 	hend = hli2[hs];
 	int found = 0;
@@ -3712,11 +3717,6 @@ int CP2R::FailHarm() {
 		if (hli2.size()) hli2[hli2.size() - 1] = mea_end;
 	}
 	GetBhli();
-	// Check penultimate harmony not D / DVII
-	if (ep2 == c_len && hli.size() > 1) {
-		hs = hli.size() - 2;
-		if (chm[hs] > -1 && chm[hs] != 4 && chm[hs] != 6) FlagV(0, 335, hli[hs]);
-	}
 	GetHarmBass();
 	// Check first harmony not T
 	if (chm.size() && chm[0] > -1 && (chm[0] || hbc[0] % 7)) {
