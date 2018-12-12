@@ -178,6 +178,7 @@ int CP2R::EvaluateCP() {
 	FlagLTDouble();
 	FlagLTUnresolved();
 	FlagLtLt();
+	FlagNoLT();
 	FlagSus();
 	FlagSus2();
 	for (v = 0; v < av_cnt; ++v) {
@@ -3280,6 +3281,33 @@ void CP2R::GetLT() {
 			}
 		}
 	}
+}
+
+void CP2R::FlagNoLT() {
+	CHECK_READY(DR_nih, DR_pc, DR_hli);
+	CHECK_READY(DR_islt);
+	if (hli.size() < 2) return;
+	if (fli_size[0] < 2) return;
+	hs = hli.size() - 2;
+	hstart = hli[hs];
+	hend = hli2[hs];
+	int found = 0;
+	// Search all voices in penultimate measure for leading tone
+	for (v = 0; v < av_cnt; ++v) {
+		for (s = hstart; s < hend; ++s) {
+			if (islt[v][s]) {
+				found = 1;
+				break;
+			}
+		}
+		if (found) break;
+	}
+	// Do not flag if found LT
+	if (found) return;
+	ls = fli_size[0] - 1;
+	// If there are no V-I notes in bass, flag
+	if (pcc[0][fli[0][ls]] != 0 || pcc[0][fli[0][ls - 1]] != 0 ||
+		fli[0][ls] != hend + 1) FlagV(0, 47, hstart);
 }
 
 int CP2R::FailSusCount() {

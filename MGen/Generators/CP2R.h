@@ -244,6 +244,7 @@ protected:
 	inline void FlagSus();
 	inline void FlagSus2();
 	inline void GetLT();
+	inline void FlagNoLT();
 	inline int FailSusCount();
 	inline int FailNoteRepeat();
 	inline int FailPauses();
