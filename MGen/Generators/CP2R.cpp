@@ -111,6 +111,7 @@ int CP2R::EvaluateCP() {
 		if (FailPauses()) return 1;
 		if (FailNoteLen()) return 1;
 		if (FailBeat()) return 1;
+		FlagSusSus();
 
 		if (FailVRLimit()) return 1;
 		if (FailVocalRangesConflict()) return 1;
@@ -3142,7 +3143,6 @@ int CP2R::FailSlurs() {
 }
 
 int CP2R::FailMaxNoteLen() {
-	CHECK_READY(DR_fli);
 	// Never check last note, either end of scan window or end of counterpoint
 	//for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 	//if (rlen[v][ls] > max_note_len[sp][av_cnt][0] * 2)
@@ -3432,6 +3432,16 @@ int CP2R::FailNoteLen() {
 		}
 	}
 	return 0;
+}
+
+// Detect notes going through more than 2 measures
+void CP2R::FlagSusSus() {
+	CHECK_READY(DR_sus, DR_fli);
+	for (ls = 0; ls < fli_size[v]; ++ls) {
+		if (sus[v][ls] && sus[v][ls] - fli[v][ls] > npm) {
+			FlagV(v, 41, fli[v][ls]);
+		}
+	}
 }
 
 // Detect repeating notes. Step2 excluding
