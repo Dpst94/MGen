@@ -3284,7 +3284,7 @@ void CP2R::GetLT() {
 }
 
 void CP2R::FlagNoLT() {
-	CHECK_READY(DR_nih, DR_pc, DR_hli);
+	CHECK_READY(DR_fli, DR_pc, DR_hli);
 	CHECK_READY(DR_islt);
 	if (hli.size() < 2) return;
 	if (fli_size[0] < 2) return;
@@ -3536,7 +3536,7 @@ void CP2R::GetHarm(int found_gis, int found_fis, int &lchm, int &lchm_alter, int
 }
 
 int CP2R::FailHarm() {
-	CHECK_READY(DR_fli, DR_sus, DR_pc);
+	CHECK_READY(DR_fli, DR_pc);
 	CHECK_READY(DR_msh);
 	SET_READY(DR_hli, DR_hbc);
 	//if (av_cnt < 2) return 0;
