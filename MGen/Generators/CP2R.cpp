@@ -4553,7 +4553,8 @@ void CP2R::GetMeasureMsh(int sec_hp) {
 		// First note in harmony
 		else if (s == sec_hp) msh[v][s] = pDownbeat;
 		// Anticipation
-		else if (ls == bli[v][mea_end] && s2 < ep2 - 1 && s2 == s0 + npm - 1 &&
+		else if (accept[sp][vc][0][287] && 
+			ls == bli[v][mea_end] && s2 < ep2 - 1 && s2 == s0 + npm - 1 &&
 			cc[v][s2] == cc[v][s2 + 1] && llen[v][ls] <= 4 && ms == mli.size() - 2 &&
 			llen[v][ls + 1] <= npm && llen[v][ls - 1] >= llen[v][ls]) msh[v][s] = pAux;
 		else if (s > 0 && leap[v][s - 1]) msh[v][s] = pLeapTo;
