@@ -115,7 +115,7 @@ int CP2R::EvaluateCP() {
 
 		if (FailVRLimit()) return 1;
 		if (FailVocalRangesConflict()) return 1;
-		if (av_cnt == 1) {
+		if (sp == 0) {
 			if (FailNoteRepeat()) return 1;
 		}
 		if (FailFirstNotes()) return 1;
