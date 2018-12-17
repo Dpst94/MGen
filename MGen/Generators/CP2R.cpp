@@ -4398,41 +4398,90 @@ int CP2R::FailPco() {
 				Flag(v, 91, s, v2);
 		}
 	}
-	if (civlc == 7 || civlc == 0) {
+	if (civlc == 0) {
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
 		// Prohibit consecutive last - first parallel movement
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				if (civlc == 7) AutoFlagL(v, 84, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-				else AutoFlagL(v, 481, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				AutoFlagL(v, 481, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 			}
 		}
 		// Prohibit similar movement in outer voices
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
 			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
+				// Penultimate measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
-					if (civlc == 7) AutoFlagL(v, 208, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-					else if (!civl) AutoFlagL(v, 72, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					if (!civl) AutoFlagL(v, 72, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 					else AutoFlagL(v, 209, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 				}
+				// Penultimate measure
 				else {
-					if (civlc == 7) AutoFlagL(v, 212, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-					else if (!civl) AutoFlagL(v, 73, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					if (!civl) AutoFlagL(v, 73, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 					else AutoFlagL(v, 213, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 				}
 			}
+			// Non-penultimate measure
 			else {
-				if (civlc == 7) AutoFlagL(v, 210, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-				else if (!civl) AutoFlagL(v, 76, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				if (!civl) AutoFlagL(v, 76, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 				else AutoFlagL(v, 211, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 			}
 		}
 		// Prohibit consecutive contrary movement
 		else if (civlc == civlc2) {
-			if (civlc == 7) AutoFlagL(v, 85, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-			else AutoFlagL(v, 482, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			AutoFlagL(v, 482, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+		}
+	}
+	if (civlc == 7) {
+		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
+		// because they are detected as pco apart now
+		// Prohibit consecutive last - first parallel movement
+		if (civl == civl2) {
+			// Only if notes are different (ignore interval repeat)
+			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
+				AutoFlagL(v, 84, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			}
+		}
+		// Prohibit similar movement in outer voices
+		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
+			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
+				// Penultimate measure with stepwise motion in higher voice
+				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
+					AutoFlagL(v, 208, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				}
+				// Penultimate measure
+				else {
+					AutoFlagL(v, 212, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				}
+			}
+			// Non-penultimate measure
+			else {
+				AutoFlagL(v, 210, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			}
+		}
+		// Prohibit consecutive contrary movement
+		else if (civlc == civlc2) {
+			AutoFlagL(v, 85, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+		}
+	}
+	if (civlc == 6) {
+		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
+		// because they are detected as pco apart now
+		// Prohibit consecutive last - first parallel movement
+		if (civl == civl2) {
+			// Only if notes are different (ignore interval repeat)
+			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
+				AutoFlagL(v, 162, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			}
+		}
+		// Prohibit similar movement in outer voices
+		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
+			AutoFlagL(v, 161, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+		}
+		// Prohibit consecutive contrary movement
+		else if (civlc == civlc2) {
+			AutoFlagL(v, 163, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
 		}
 	}
 	return 0;
