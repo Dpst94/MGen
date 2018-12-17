@@ -168,6 +168,7 @@ int CGenCA3::XML_to_CP() {
 		// Position of note inside xml measure
 		float xpos2 = 0;
 		vname[v] = xfi.voice[vi].name;
+		vname[v].Replace("MusicXML ", "");
 		for (int m = 1; m < xfi.mea.size(); ++m) {
 			xpos2 = 0;
 			int posm = pos;
