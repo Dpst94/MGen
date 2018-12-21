@@ -4669,28 +4669,12 @@ void CP2R::GetMinimumMsh() {
 		else if (abs(leap[v][s - 1]) > 2) msh[v][s] = pLeapTo;
 		else if (s2 < ep2 - 1 && abs(leap[v][s2]) > 2) msh[v][s] = pLeapFrom;
 		else if (leap[v][s - 1]) {
-			// leap * leap/pause (only if not sus resolution ornament)
-			if (s2 < ep2 - 1 && fli[v][ls - 1] >= hstart) {
-				if (leap[v][s2] || !cc[v][s2 + 1]) msh[v][s] = pLeapTo;
-			}
 			// leap between measures
 			if (ls == bli[v][s0]) msh[v][s] = pLeapTo;
-			// leap/pause + leap *
-			if (ls > 1 && fli[v][ls - 2] >= hstart) {
-				if (leap[v][fli2[v][ls - 2]] || !cc[v][fli2[v][ls - 2]]) msh[v][s] = pLeapTo;
-			}
 		}
 		else if (s2 < ep2 - 1 && leap[v][s2]) {
-			// leap/pause * leap
-			if (fli[v][ls - 1] >= hstart) {
-				if (leap[v][s - 1] || !cc[v][s - 1]) msh[v][s] = pLeapFrom;
-			}
 			// leap between measures
 			if (ls == bli[v][mea_end]) msh[v][s] = pLeapFrom;
-			// * leap + leap/pause
-			if (ls < fli_size[v] - 2 && fli[v][ls] >= hstart) {
-				if (leap[v][fli2[v][ls + 1]] || !cc[v][fli[v][ls + 2]]) msh[v][s] = pLeapFrom;
-			}
 		}
 	}
 	// Make last leading tone in penultimate measure harmonic
@@ -4730,7 +4714,9 @@ void CP2R::GetMsh() {
 		fill(chn.begin(), chn.end(), 0);
 		fill(cchn.begin(), cchn.end(), 0);
 		s0 = mli[ms];
+		// Temporary harmony
 		hstart = s0;
+		hend = s0 + npm;
 		vc = vca[s0];
 		int s9;
 		// Get last measure step
