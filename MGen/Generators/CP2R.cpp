@@ -2951,6 +2951,8 @@ int CP2R::FailRhythmRepeat() {
 
 void CP2R::FlagFullParallel() {
 	CHECK_READY(DR_fli, DR_c);
+	// Skip if below 3 voices
+	if (av_cnt < 3) return;
 	// Skip if not all voices are in whole notes
 	for (v = 0; v < av_cnt; ++v) {
 		if (vsp[v] > 1) return;
