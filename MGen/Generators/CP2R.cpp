@@ -1055,7 +1055,7 @@ int CP2R::FailMinor() {
 			}
 			if (ls > 1) {
 				s_2 = fli[v][ls - 2];
-				if (pcc[v][s_2] == 10 && nih[v][s_2] && nih[v][s] &&
+				if (pcc[v][s_2] == 10 && 
 					bhli[s] - bhli[s_2] == 1) FlagVL(v, 159, s_2, s);
 			}
 			if (ls < fli_size[v] - 1) {
@@ -1065,7 +1065,7 @@ int CP2R::FailMinor() {
 				if (pcc[v][s1] == 3) FlagVL(v, 156, s1, s);
 				if (ls < fli_size[v] - 2) {
 					s2 = fli[v][ls + 2];
-					if (pcc[v][s2] == 10 && nih[v][s2] && nih[v][s] &&
+					if (pcc[v][s2] == 10 && 
 						bhli[s2] - bhli[s] == 1) FlagVL(v, 159, s2, s);
 				}
 			}
@@ -1075,7 +1075,7 @@ int CP2R::FailMinor() {
 			if (pcc[v][s_1] == 3) FlagVL(v, 155, s_1, s);
 			if (ls > 1) {
 				s_2 = fli[v][ls - 2];
-				if (pcc[v][s_2] == 8 && nih[v][s_2] && nih[v][s] &&
+				if (pcc[v][s_2] == 8 && 
 					bhli[s] - bhli[s_2] == 1) FlagVL(v, 158, s_2, s);
 			}
 			if (ls < fli_size[v] - 1) {
@@ -1084,7 +1084,7 @@ int CP2R::FailMinor() {
 				if (pcc[v][s1] == 3) FlagVL(v, 155, s1, s);
 				if (ls < fli_size[v] - 2) {
 					s2 = fli[v][ls + 2];
-					if (pcc[v][s2] == 8 && nih[v][s2] && nih[v][s] &&
+					if (pcc[v][s2] == 8 && 
 						bhli[s2] - bhli[s] == 1) FlagVL(v, 158, s2, s);
 				}
 			}
