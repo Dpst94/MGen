@@ -2873,9 +2873,9 @@ int CP2R::FailRhythm5() {
 				else if (l_len[lp] > 2 && pos == 2 && cc[v][s2]) FlagV(v, 235, s2);
 			}
 			// Uneven starting rhythm
-			if (!ms && lp > 0 && l_len[lp] != l_len[lp - 1] && !uneven_start_fired) {
+			if (!ms && !cc[v][0] && lp > 0 && l_len[lp] != l_len[lp - 1] && !uneven_start_fired) {
 				// Check for exception: (pause + 1/4 + 1/2 slurred)
-				if (!cc[v][0] && llen[v][0] == 2 && lp == 2 && l_len[lp] >= 4 && l_len[lp - 1] == 2 && slur2) {}
+				if (llen[v][0] == 2 && lp == 2 && l_len[lp] >= 4 && l_len[lp - 1] == 2 && slur2) {}
 				else {
 					uneven_start_fired = 1;
 					FlagVL(v, 254, s2, fin[v]);
@@ -5594,6 +5594,10 @@ int CP2R::FailStartPause() {
 			}
 		}
 	}
+	// Allow only one voice of sp2-5 starting without pause if there are no species 0-1
+	int sp2345_nopause = 1;
+	for (v = 0; v < av_cnt; ++v)
+		if (vsp[v] < 2) sp2345_nopause = 0;
 	// Prohibit wrong pause length in measure
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
@@ -5602,14 +5606,26 @@ int CP2R::FailStartPause() {
 			if (fin[v] > 0) FlagV(v, 138, fin[v]);
 		}
 		else if (sp == 2 || sp == 4) {
+			if (fin[v] == 0 && sp2345_nopause) {
+				sp2345_nopause = 0;
+				continue;
+			}
 			// Only halfnote pause is allowed
 			if (fin[v] % npm != nlen[v]) FlagV(v, 138, fin[v]);
 		}
 		else if (sp == 3) {
+			if (fin[v] == 0 && sp2345_nopause) {
+				sp2345_nopause = 0;
+				continue;
+			}
 			// Only particular pauses are allowed
 			if (fin[v] % npm != 2) FlagV(v, 138, fin[v]);
 		}
 		else if (sp == 5) {
+			if (fin[v] == 0 && sp2345_nopause) {
+				sp2345_nopause = 0;
+				continue;
+			}
 			// Only particular pauses are allowed
 			if (fin[v] % npm != 2 && fin[v] % npm != 4) FlagV(v, 138, fin[v]);
 		}
