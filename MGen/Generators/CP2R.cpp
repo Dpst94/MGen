@@ -4378,13 +4378,13 @@ void CP2R::FlagDirectDis() {
 		((civlc == 1 || civlc == 2) && civl > 12)) {
 		if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0) {
 			// Minor 7th
-			if (civlc == 10) AutoFlagL(v, 169, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			if (civlc == 10) AutoFlagL(v, 169, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			// Major 7th
-			else if (civlc == 11) AutoFlagL(v, 276, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			else if (civlc == 11) AutoFlagL(v, 276, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			// Minor 9th
-			else if (civlc == 1) AutoFlagL(v, 173, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			else if (civlc == 1) AutoFlagL(v, 173, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			// Major 9th
-			else if (civlc == 2) AutoFlagL(v, 174, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			else if (civlc == 2) AutoFlagL(v, 174, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
 }
@@ -4407,7 +4407,7 @@ int CP2R::FailPco() {
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				AutoFlagL(v, 481, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				FlagL(v, 481, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit similar movement in outer voices
@@ -4415,24 +4415,24 @@ int CP2R::FailPco() {
 			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
 				// Penultimate measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
-					if (!civl) AutoFlagL(v, 72, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-					else AutoFlagL(v, 209, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					if (!civl) FlagL(v, 72, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					else FlagL(v, 209, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 				// Penultimate measure
 				else {
-					if (!civl) AutoFlagL(v, 73, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-					else AutoFlagL(v, 213, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					if (!civl) FlagL(v, 73, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					else FlagL(v, 213, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
 			// Non-penultimate measure
 			else {
-				if (!civl) AutoFlagL(v, 76, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
-				else AutoFlagL(v, 211, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				if (!civl) FlagL(v, 76, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				else FlagL(v, 211, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit consecutive contrary movement
 		else if (civlc == civlc2) {
-			AutoFlagL(v, 482, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			FlagL(v, 482, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
 	if (civlc == 7) {
@@ -4442,7 +4442,7 @@ int CP2R::FailPco() {
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				AutoFlagL(v, 84, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				FlagL(v, 84, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit similar movement in outer voices
@@ -4450,21 +4450,21 @@ int CP2R::FailPco() {
 			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
 				// Penultimate measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
-					AutoFlagL(v, 208, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					FlagL(v, 208, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 				// Penultimate measure
 				else {
-					AutoFlagL(v, 212, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+					FlagL(v, 212, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
 			// Non-penultimate measure
 			else {
-				AutoFlagL(v, 210, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				FlagL(v, 210, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit consecutive contrary movement
 		else if (civlc == civlc2) {
-			AutoFlagL(v, 85, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			FlagL(v, 85, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
 	if (civlc == 6) {
@@ -4474,16 +4474,16 @@ int CP2R::FailPco() {
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				AutoFlagL(v, 162, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+				FlagL(v, 162, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit similar movement in outer voices
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
-			AutoFlagL(v, 161, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			FlagL(v, 161, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 		// Prohibit consecutive contrary movement
 		else if (civlc == civlc2) {
-			AutoFlagL(v, 163, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), s, v2);
+			FlagL(v, 163, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
 	return 0;
