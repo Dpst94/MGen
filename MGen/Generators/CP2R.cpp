@@ -4588,7 +4588,8 @@ void CP2R::EvaluateMshSteps() {
 		if (civl % 12 == 5) FlagA(v, 171, s, s, 0, 100);
 		if (civl % 12 == 6) {
 			// Flag if not suspension resolution to lt
-			if (pcc[0][s] != 11 || !nih[0][fli[0][ls2]] || resol[0][hstart] != fli[0][ls2])
+			if (pcc[0][s] != 11 || fli2[0][ls2] != mli[bmli[s]] + npm - 1 || 
+				!nih[0][fli[0][ls2]] || resol[0][hstart] != fli[0][ls2])
 				FlagA(v, 331, s, s, 0, 100);
 		}
 	}
@@ -5702,7 +5703,8 @@ void CP2R::FlagHarmTriRes() {
 				if (!cc[v2][s]) continue;
 				// Skip bass if not suspension resolution to lt
 				if (v == 0) {
-					if (pcc[0][s] != 11 || !nih[0][fli[0][ls]] || resol[0][hstart] != fli[0][ls]) {
+					if (pcc[0][s] != 11 || fli2[0][ls] != mli[bmli[s]] + npm - 1 ||
+						!nih[0][fli[0][ls]] || resol[0][hstart] != fli[0][ls]) {
 						continue;
 					}
 				}
