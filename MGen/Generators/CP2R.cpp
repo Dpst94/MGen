@@ -6013,129 +6013,121 @@ void CP2R::FlagFCR() {
 		// Prohibit VI<->VI# containing progression
 		if (chm[hs] % 2 && chm[hs - 1] % 2) {
 			if (chm_alter[hs] == 1 && chm_alter[hs - 1] == -1) {
-				fcr = FindFCRNotes(8, 9, s4, s5);
+				fcr = FindFCRNotes(8, 9);
 			}
 			else if (chm_alter[hs] == -1 && chm_alter[hs - 1] == 1) {
-				fcr = FindFCRNotes(9, 8, s4, s5);
+				fcr = FindFCRNotes(9, 8);
+			}
+			// If both notes exist in external voices, flag red
+			if (fcr == 2) {
+				FlagV(v2, 377, s2);
+			}
+			// If one of notes exist in internal voice and the other - in any voice, flag yellow
+			else if (fcr == 1) {
+				FlagV(v2, 164, s2);
 			}
 		}
-		// If both notes exist in external voices, flag red
-		if (fcr == 2) {
-			FlagV(v3, 377, s5);
-		}
-		// If one of notes exist in internal voice and the other - in any voice, flag yellow
-		else if (fcr == 1) {
-			FlagV(v3, 164, s5);
-		}
-		// If one or both of notes does not exist in voices, do not flag
 		fcr = 0;
 		// Prohibit VII<->VII# containing progression
 		if (chm[hs] && chm[hs] % 2 == 0 && chm[hs - 1] && chm[hs - 1] % 2 == 0) {
 			if (chm_alter[hs] == 1 && chm_alter[hs - 1] == -1) {
-				fcr = FindFCRNotes(10, 11, s4, s5);
+				fcr = FindFCRNotes(10, 11);
 			}
 			else if (chm_alter[hs] == -1 && chm_alter[hs - 1] == 1) {
-				fcr = FindFCRNotes(11, 10, s4, s5);
+				fcr = FindFCRNotes(11, 10);
+			}
+			// If both notes exist in external voices, flag red
+			if (fcr == 2) {
+				FlagV(v2, 378, s2);
+			}
+			// If one of notes exist in internal voice and the other - in any voice, flag yellow
+			else if (fcr == 1) {
+				FlagV(v2, 165, s2);
 			}
 		}
-		// If both notes exist in external voices, flag red
-		if (fcr == 2) {
-			FlagV(v3, 378, s5);
-		}
-		// If one of notes exist in internal voice and the other - in any voice, flag yellow
-		else if (fcr == 1) {
-			FlagV(v3, 165, s5);
-		}
-		// If one or both of notes does not exist in voices, do not flag
 	}
 }
 
 // hs should be set to second harmony
 // step1 is set to last step of rightmost FCR note in first harmony
 // step2 is set to first step of leftmost FCR note in second harmony
-int CP2R::FindFCRNotes(int pcc1, int pcc2, int &step1, int &step2) {
+int CP2R::FindFCRNotes(int pcc1, int pcc2) {
+	// FCR voices array
+	vector<int> fva, fva2;
+	// FCR steps array
+	vector<int> fsa, fsa2;
 	// Scan first chord
-	int found1 = FindFCRNoteRight(hs - 1, pcc1, step1);
-	int found2 = FindFCRNoteLeft(hs, pcc2, step2);
-	// If both notes exist in external voices, return 2
-	if (found1 == 2 && found2 == 2) return 2;
-	// If one or both of notes does not exist in voices, return 0
-	else if (found1 == 0 || found2 == 0) return 0;
-	// If one of notes exist in internal voice and the other - in any voice, return 1
-	else return 1;
+	FindFCRNoteRight(hs - 1, pcc1, fva, fsa);
+	FindFCRNoteLeft(hs, pcc2, fva2, fsa2);
+	int found = 0;
+	// No results
+	if (!fva.size()) return 0;
+	if (!fva2.size()) return 0;
+	for (int x = 0; x < fva.size(); ++x) {
+		for (int y = 0; y < fva2.size(); ++y) {
+			// Check if notes are separated by at least measure size
+			if (fsa2[y] - fsa[x] > npm + 1) continue;
+			// Same voice
+			if (fva[x] == fva2[y]) continue;
+			// Check outer voices
+			if ((fva[x] == 0 && fva2[y] == av_cnt - 1) || (fva[x] == av_cnt - 1 && fva2[y] == 0)) {
+				// If outer voices, save and return, because it is best variant
+				v = fva[x];
+				v2 = fva2[y];
+				s = fsa[x];
+				s2 = fsa2[x];
+				return 2;
+			}
+			else {
+				// If not outer voices, save and wait for outer voices
+				found = 1;
+				v = fva[x];
+				v2 = fva2[y];
+				s = fsa[x];
+				s2 = fsa2[x];
+			}
+		}
+	}
+	// If only non-outer voices found, return
+	if (found) return 1;
+	// Not found anything special
+	return 0;
 }
 
-// Find rightmost FCR note in harmony
-int CP2R::FindFCRNoteRight(int lhs, int lpcc, int &right_s) {
+// Find FCR note in harmony and return vector of s2 steps
+void CP2R::FindFCRNoteRight(int lhs, int lpcc, vector<int> &voices, vector<int> &steps) {
 	CHECK_READY(DR_fli, DR_hli, DR_pc);
 	hstart = hli[lhs];
 	hend = hli2[lhs];
 	s0 = mli[bmli[hstart]];
-	int found = 0;
-	right_s = hstart;
 	// Scan each voice and detect for each note, if it exists only in internal voice, or in external voice
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
 			s2 = fli2[v][ls];
 			// No need to skip pause, because pcc being searched are never 0
 			if (pcc[v][s2] == lpcc) {
-				// For outer voices always set to found = 2
-				if (v == 0 || v == av_cnt - 1) {
-					if (found == 1) right_s = hstart;
-					if (right_s < s) {
-						right_s = s2;
-						v2 = v;
-						found = 2;
-					}
-				}
-				// For inner voices set to found = 1 if outer voice was not yet found
-				else if (found < 2) {
-					if (right_s < s) {
-						right_s = s2;
-						v2 = v;
-						found = 1;
-					}
-				}
+				voices.push_back(v);
+				steps.push_back(s2);
 			}
 		}
 	}
-	return found;
 }
 
-// Find leftmost FCR note in harmony
-int CP2R::FindFCRNoteLeft(int lhs, int lpcc, int &left_s) {
+// Find FCR note in harmony and return vector of s steps
+void CP2R::FindFCRNoteLeft(int lhs, int lpcc, vector<int> &voices, vector<int> &steps) {
 	CHECK_READY(DR_fli, DR_hli, DR_pc);
 	hstart = hli[lhs];
 	hend = hli2[lhs];
 	s0 = mli[bmli[hstart]];
-	int found = 0;
-	left_s = hend;
 	// Scan each voice and detect for each note, if it exists only in internal voice, or in external voice
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
 			s = fli[v][ls];
 			// No need to skip pause, because pcc being searched are never 0
 			if (pcc[v][s] == lpcc) {
-				// For outer voices always set to found = 2
-				if (v == 0 || v == av_cnt - 1) {
-					// If already found == 1, then reset step to rightmost
-					if (found == 1) left_s = hend;
-					if (left_s > s) {
-						left_s = s;
-						v3 = v;
-						found = 2;
-					}
-				}
-				// For inner voices set to found = 1 if outer voice was not yet found
-				else if (found < 2) {
-					if (left_s > s) {
-						left_s = s;
-						v3 = v;
-						found = 1;
-					}
-				}
+				voices.push_back(v);
+				steps.push_back(s);
 			}
 		}
 	}
-	return found;
 }
