@@ -341,7 +341,7 @@ void CP2D::LoadRules(CString fname) {
 						// Copy info
 						ResizeRuleVariantVector(ruleinfo2[rid]);
 						for (sp = 0; sp <= MAX_SPECIES; ++sp) {
-							for (vc = 1; vc <= MAX_VC; ++vc) {
+							for (vc = 0; vc <= MAX_VC; ++vc) {
 								for (vp = 0; vp <= MAX_VP; ++vp) {
 									SaveRuleVariant(sp, vc, vp, rid, ruleinfo[rid].RuleName, 
 										ruleinfo[rid].SubRuleName, ruleinfo[rid].RuleComment, ruleinfo[rid].SubRuleComment);
@@ -353,7 +353,7 @@ void CP2D::LoadRules(CString fname) {
 			}
 			if (!ruleinfo2[rid].size()) {
 				for (sp = 0; sp <= MAX_SPECIES; ++sp) {
-					for (vc = 1; vc <= MAX_VC; ++vc) {
+					for (vc = 0; vc <= MAX_VC; ++vc) {
 						for (vp = 0; vp <= MAX_VP; ++vp) {
 							// Resize
 							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1, -1);
@@ -370,7 +370,7 @@ void CP2D::LoadRules(CString fname) {
 			}
 			else {
 				for (sp = 0; sp <= MAX_SPECIES; ++sp) {
-					for (vc = 1; vc <= MAX_VC; ++vc) {
+					for (vc = 0; vc <= MAX_VC; ++vc) {
 						for (vp = 0; vp <= MAX_VP; ++vp) {
 							// Resize
 							if (rid >= RULE_ALLOC && accept[sp][vc][vp].size() <= rid) accept[sp][vc][vp].resize(rid + 1, -1);
@@ -428,7 +428,7 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<vector<int>>>> &ve) {
 	ve.resize(MAX_SPECIES + 1);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		ve[sp].resize(MAX_VC + 1);
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
+		for (int vc = 0; vc <= MAX_VC; ++vc) {
 			ve[sp][vc].resize(MAX_VP + 1);
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
 				ve[sp][vc][vp].resize(RULE_ALLOC);
@@ -441,7 +441,7 @@ void CP2D::ResizeRuleVariantVectorNegative(vector<vector<vector<vector<int>>>> &
 	ve.resize(MAX_SPECIES + 1);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		ve[sp].resize(MAX_VC + 1);
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
+		for (int vc = 0; vc <= MAX_VC; ++vc) {
 			ve[sp][vc].resize(MAX_VP + 1);
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
 				ve[sp][vc][vp].resize(RULE_ALLOC, -1);
@@ -454,7 +454,7 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<int>>> &ve) {
 	ve.resize(MAX_SPECIES + 1);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		ve[sp].resize(MAX_VC + 1);
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
+		for (int vc = 0; vc <= MAX_VC; ++vc) {
 			ve[sp][vc].resize(MAX_VP + 1);
 		}
 	}
@@ -464,7 +464,7 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<float>>> &ve) {
 	ve.resize(MAX_SPECIES + 1);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		ve[sp].resize(MAX_VC + 1);
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
+		for (int vc = 0; vc <= MAX_VC; ++vc) {
 			ve[sp][vc].resize(MAX_VP + 1);
 		}
 	}
@@ -474,7 +474,7 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<RuleInfo2>>> &ve) {
 	ve.resize(MAX_SPECIES + 1);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
 		ve[sp].resize(MAX_VC + 1);
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
+		for (int vc = 0; vc <= MAX_VC; ++vc) {
 			ve[sp][vc].resize(MAX_VP + 1);
 		}
 	}
@@ -482,7 +482,7 @@ void CP2D::ResizeRuleVariantVector(vector<vector<vector<RuleInfo2>>> &ve) {
 
 void CP2D::ResizeRuleVariantVectors2() {
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
+		for (int vc = 0; vc <= MAX_VC; ++vc) {
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
 				if (accept[sp][vc][vp].size() <= max_rule) accept[sp][vc][vp].resize(max_rule + 1, -1);
 				if (severity[sp][vc][vp].size() <= max_rule) severity[sp][vc][vp].resize(max_rule + 1);
@@ -671,7 +671,7 @@ void CP2D::ParseRules() {
 		// If rule is detailed
 		else {
 			for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-				for (int vc = 1; vc <= MAX_VC; ++vc) {
+				for (int vc = 0; vc <= MAX_VC; ++vc) {
 					for (int vp = 0; vp <= MAX_VP; ++vp) {
 						for (int rs = 0; rs < 4; ++rs) {
 							ParseRule2(sp, vc, vp, rid, rs);
@@ -690,7 +690,7 @@ void CP2D::ParseRules() {
 void CP2D::SetRuleParam(vector<vector<vector<int>>> &par, int rid, int type, int id) {
 	ResizeRuleVariantVector(par);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
+		for (int vc = 0; vc <= MAX_VC; ++vc) {
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
 				par[sp][vc][vp] = GetRuleParam(sp, vc, vp, rid, type, id);
 			}
@@ -701,7 +701,7 @@ void CP2D::SetRuleParam(vector<vector<vector<int>>> &par, int rid, int type, int
 void CP2D::SetRuleParamI2C(vector<vector<vector<int>>> &par, int rid, int type, int id) {
 	ResizeRuleVariantVector(par);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
+		for (int vc = 0; vc <= MAX_VC; ++vc) {
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
 				par[sp][vc][vp] = Interval2Chromatic(GetRuleParam(sp, vc, vp, rid, type, id));
 			}
@@ -712,7 +712,7 @@ void CP2D::SetRuleParamI2C(vector<vector<vector<int>>> &par, int rid, int type, 
 void CP2D::SetRuleParam(vector<vector<vector<float>>> &par, int rid, int type, int id) {
 	ResizeRuleVariantVector(par);
 	for (int sp = 0; sp <= MAX_SPECIES; ++sp) {
-		for (int vc = 1; vc <= MAX_VC; ++vc) {
+		for (int vc = 0; vc <= MAX_VC; ++vc) {
 			for (int vp = 0; vp <= MAX_VP; ++vp) {
 				par[sp][vc][vp] = GetRuleParamF(sp, vc, vp, rid, type, id);
 			}

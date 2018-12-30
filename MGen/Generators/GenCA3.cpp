@@ -438,7 +438,7 @@ int CGenCA3::GetCP() {
 		est.Format("Counterpoint %d starts not on downbeat. Please check counterpoint.",
 			cp_id + 1);
 		WriteLogLy(5, est, 0);
-		return 1;
+		//return 1;
 	}
 
 	ep2 = c_len;

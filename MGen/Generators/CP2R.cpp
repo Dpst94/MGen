@@ -605,6 +605,7 @@ void CP2R::SendHarmMarks() {
 				mark[step0 + s][vi] += "6/4";
 			}
 		}
+		if (v == av_cnt) v = 0;
 		SendHarmColor();
 	}
 }
@@ -4024,6 +4025,9 @@ void CP2R::EvalHarmAmbig(int hvar) {
 void CP2R::EvalHarmIncomplete(int hvar) {
 	CHECK_READY(DR_vca, DR_pc, DR_msh);
 	CHECK_READY(DR_nih, DR_resol, DR_fli);
+	// Skip incomplete harmony in first and last measure
+	if (!hstart) return;
+	if (hend == c_len - 1) return;
 	vc = vca[hstart];
 	if (accept[0][vc][0][559]) return;
 	// Get harmonic notes
