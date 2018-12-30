@@ -3164,7 +3164,6 @@ int CP2R::FailMaxNoteLen() {
 }
 
 // Detect sus mistakes: short preparation and sus sounding with res 
-// TODO: need to implement
 void CP2R::FlagSus() {
 	CHECK_READY(DR_fli, DR_vca, DR_nih);
 	CHECK_READY(DR_hli, DR_resol, DR_pc);
@@ -3192,7 +3191,7 @@ void CP2R::FlagSus() {
 				if (hstart - s < 2)
 					FlagV(v, 274, s);
 			}
-			// Skip resolution analysis if it does not exist
+			// Skip interbar or intrabar resolution analysis if it does not exist
 			if (!resol[v][hstart]) continue;
 			// Get suspension resolution pitch class
 			int lpcc = pcc[v][resol[v][hstart]];
