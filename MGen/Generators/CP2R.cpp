@@ -4024,7 +4024,8 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 	if (!hstart) return;
 	if (hend == c_len - 1) return;
 	vc = vca[hstart];
-	if (accept[0][vc][0][559]) return;
+	// Do not check for single voice
+	if (vc < 2) return;
 	// Get harmonic notes
 	int de1 = hvar;
 	int de2 = (de1 + 2) % 7;
@@ -4037,27 +4038,35 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 		ls = bli[v][hstart];
 		// Skip pauses
 		if (!cc[v][hstart]) continue;
-		// Incomplete
+		// Detect downbeat chord tones
 		if (msh[v][hstart] > 0 && nih[v][hstart]) {
-			if (de1 == pc[v][hstart]) ++dc1;
-			else if (de2 == pc[v][hstart]) ++dc2;
-			else if (de3 == pc[v][hstart]) ++dc3;
+			if (de1 == pc[v][hstart]) dc1 = 1;
+			else if (de2 == pc[v][hstart]) dc2 = 1;
+			else if (de3 == pc[v][hstart]) dc3 = 1;
 		}
+		// Detect PDD and sus resolutions
 		else {
 			if (resol[v][hstart]) {
-				if (de1 == pc[v][resol[v][hstart]]) ++dc1;
-				else if (de2 == pc[v][resol[v][hstart]]) ++dc2;
-				else if (de3 == pc[v][resol[v][hstart]]) ++dc3;
+				if (de1 == pc[v][resol[v][hstart]]) dc1 = 1;
+				else if (de2 == pc[v][resol[v][hstart]]) dc2 = 1;
+				else if (de3 == pc[v][resol[v][hstart]]) dc3 = 1;
 			}
 		}
 	}
-	// Penultimate incomplete D
-	if (mli.size() > 1 && hvar == 4 && hend == mli[mli.size() - 1] - 1) {
-		if (!dc1 || !dc2 || !dc3) FlagA(0, 172, hstart, hstart, 0, 0);
+	// Any chord in penultimate measure
+	if (mli.size() > 1 && bmli[hstart] == mli.size() - 1) {
+		if (vc == 2) {
+			if (!dc2 || (!dc1 && !dc3)) FlagA(0, 172, hstart, hstart, 0, 0);
+		}
+		else {
+			if (!dc1 || !dc2 || !dc3) FlagA(0, 172, hstart, hstart, 0, 0);
+		}
 	}
 	// Non penultimate incomplete
 	else {
-		if (!dc1 || !dc2) FlagA(0, 559, hstart, hstart, 0, 0);
+		if (vc > 2) {
+			if (!dc2 || (!dc1 && !dc3)) FlagA(0, 559, hstart, hstart, 0, 0);
+		}
 	}
 }
 
