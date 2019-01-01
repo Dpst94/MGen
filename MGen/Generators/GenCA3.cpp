@@ -435,9 +435,8 @@ int CGenCA3::GetCP() {
 		}
 	}
 	if (!has_note) {
-		est.Format("Counterpoint %d starts not on downbeat. Please check counterpoint.",
-			cp_id + 1);
-		WriteLog(1, est, 0);
+		//est.Format("Counterpoint %d starts not on downbeat. Please check counterpoint.", cp_id + 1);
+		//WriteLog(1, est);
 		//return 1;
 	}
 
@@ -892,7 +891,7 @@ int CGenCA3::FailSpeciesCombination() {
 	}
 	// Species 5 should not be combined with species 2, 3, 4
 	if (sps[5] && (sps[2] || sps[3] || sps[4])) {
-		WriteLogLy(5, "Species 5 should not be combined with species 2, 3, or 4", 1);
+		//WriteLog(1, "Species 5 usually should not be combined with species 2, 3, or 4");
 	}
 	return 0;
 }
