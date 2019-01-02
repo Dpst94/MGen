@@ -888,11 +888,12 @@ void CP2R::FlagLtLt() {
 			if (!cc[v][s1]) continue;
 			if (!cc[v][s]) continue;
 			// Prohibit BB
-			if (islt[v][fli[v][ls + 1]] || islt[v][s0]) {
+			if (islt[v][s1] || islt[v][s0]) {
 				if (pcc[v][s] == pcc[v][s1])
 					FlagVL(v, 348, s0, s1);
 			}
 			// Prohibit major second up to tonic
+			// This rule additionally limits movement from non-harmonic suspension bVII to next harmonic note I - which is ok, because it is always prohibited
 			if (pcc[v][s1] == 0 && pcc[v][s0] == 10 && nih[v][s1] && nih[v][s0]) 
 				FlagVL(v, 74, s0, s1);
 		}
@@ -1905,7 +1906,7 @@ int CP2R::FailLastNotes() {
 		else Flag(v, 538, s, v);
 	}
 	if (mminor) {
-		// Prohibit major second up before I
+		// Prohibit major second up before I (far)
 		if (pcc[v][s] == 0 && pcc[v][s_2] == 10 && nih[v][s] && nih[v][s_2]) FlagVL(v, 74, s_2, s);
 		// Prohibit last VI# or VII natural
 		if (pcc[v][s] == 9) FlagV(v, 201, s_1);
@@ -4510,14 +4511,13 @@ int CP2R::FailMsh() {
 	return 0;
 }
 
+// This function evaluates whole measure, not harmony
 void CP2R::EvaluateMsh() {
 	CHECK_READY(DR_fli, DR_nih, DR_msh);
 	CHECK_READY(DR_c);
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
-	// Prevent going out of window
-	if (mea_end >= ep2) return;
-	for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
+	for (ls = bli[0][hstart]; ls <= bli[0][hend]; ++ls) {
 		s = fli[v][ls];
 		// Skip pauses
 		if (!cc[v][s]) continue;
@@ -4546,7 +4546,7 @@ void CP2R::EvaluateMsh() {
 			// Check if note continues to the next harmony
 			if (fli2[v][ls] > hend) {
 				// Set msh and check to measure start
-				s = s0;
+				s = hstart;
 				msh[v][s] = pSusStart;
 			}
 			// If note finishes in this harmony, it can either be resolved non-harmonic sus, or harmonic
@@ -4574,11 +4574,9 @@ void CP2R::EvaluateMshSteps() {
 	if (!v) return;
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
-	// Prevent going out of window
-	if (mea_end >= ep2) return;
 	v2 = 0;
 	GetVp();
-	for (s = s0; s <= mea_end; ++s) {
+	for (s = hstart; s <= hend; ++s) {
 		ls = bli[v][s];
 		ls2 = bli[0][s];
 		// Skip no note start
@@ -5133,8 +5131,17 @@ void CP2R::GetMsh2() {
 						DetectSus();
 						DetectPDD();
 						// Full measure
+						hstart = s0;
 						DetectDNT();
 						DetectCambiata();
+						// First harmony
+						hstart = s0;
+						hend = s0 + sec_hp - 1;
+						EvaluateMsh();
+						EvaluateMshSteps();
+						// Second harmony
+						hstart = s0 + sec_hp;
+						hend = s0 + npm - 1;
 						EvaluateMsh();
 						EvaluateMshSteps();
 					}
