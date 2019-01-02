@@ -4712,7 +4712,7 @@ void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 		cpos[hv] = 1;
 		++poss_vars;
 #if defined(_DEBUG)
-		CString st, est;
+		CString est;
 		est.Format("Possible chord %s in measure %d:%d",
 			degree_name[hv], cp_id + 1, ms + 1);
 		WriteLog(3, est);
