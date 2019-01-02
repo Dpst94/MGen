@@ -3444,7 +3444,7 @@ int CP2R::FailNoteLen() {
 void CP2R::FlagSusSus() {
 	CHECK_READY(DR_sus, DR_fli);
 	for (ls = 0; ls < fli_size[v]; ++ls) {
-		if (sus[v][ls] && sus[v][ls] - fli[v][ls] > npm) {
+		if (sus[v][ls] - fli[v][ls] > npm) {
 			FlagV(v, 41, fli[v][ls]);
 		}
 	}
@@ -4659,7 +4659,6 @@ void CP2R::GetMinimumMsh() {
 		msh[v][s] = pAux;
 		if (!cc[v][s]) continue;
 		s2 = fli2[v][ls];
-		// Skip first suspension, mark last suspension
 		if (sus[v][ls]) {
 			// Mark sus start
 			msh[v][sus[v][ls]] = pAux;
