@@ -118,7 +118,10 @@ void SendProgress(CString st) {
 	long long timestamp = CGLib::time();
 	q.Format("UPDATE jobs SET j_updated=NOW(), j_progress='%s' WHERE j_id='%ld'",
 		db.Escape(j_progress), CDb::j_id);
-	db.Query(q);
+	if (db.Query(q)) {
+		nRetCode = 8;
+		return;
+	}
 }
 
 void WriteLog(CString st) {
@@ -195,7 +198,10 @@ void SendStatus() {
 		rChild["lilypond-windows.exe"] ? (timestamp - tChild["lilypond-windows.exe"]) / 1000 : -1,
 		CDb::j_id, (screenshot_id + max_screenshot - 1) % max_screenshot);
 	CGLib::OverwriteFile("server\\status.txt", q);
-	db.Query(q);
+	if (db.Query(q)) {
+		nRetCode = 8;
+		return;
+	}
 }
 
 void KillProcessByName(const char *filename) {
@@ -306,7 +312,7 @@ void CheckChildrenPath() {
 			}
 			else {
 				WriteLog("Not found program file: " + fChild[cn] + cn);
-				nRetCode = 3;
+				//nRetCode = 3;
 				return;
 			}
 		}
@@ -419,12 +425,17 @@ int Connect() {
 }
 
 int FinishJob(int res, CString st) {
+	// Prevent changing database if there is db error (need to restart)
+	if (nRetCode) return res;
 	int state = 3;
 	if (j_autorestart && !res) state = 1;
 	CString q;
 	q.Format("UPDATE jobs SET j_updated=NOW(), j_duration=TIMESTAMPDIFF(SECOND, j_started, NOW()), j_finished=NOW(), j_state='%d', j_result='%d', j_progress='%s', j_cleaned=0, j_size='%llu' WHERE j_id='%ld'",
 		state, res, db.Escape(st), CGLib::FolderSize(share + j_folder), CDb::j_id);
-	db.Query(q);
+	if (db.Query(q)) {
+		nRetCode = 8;
+		return res;
+	}
 	WriteLog(st);
 	return res;
 }
@@ -906,7 +917,11 @@ int RunJob() {
 
 void TakeJob() {
 	CString q, est;
-	db.Query("LOCK TABLES jobs WRITE, files WRITE, j_logs WRITE, s_status WRITE, users WRITE");
+	q = "LOCK TABLES jobs WRITE, files WRITE, j_logs WRITE, s_status WRITE, users WRITE";
+	if (db.Query(q)) {
+		nRetCode = 8;
+		return;
+	}
 	int err;
 	if (can_render) {
 		err = db.Fetch("SELECT * FROM jobs "
@@ -917,6 +932,10 @@ void TakeJob() {
 		err = db.Fetch("SELECT * FROM jobs "
 			"LEFT JOIN files USING (f_id) "
 			"WHERE j_state=1 AND j_class<2 ORDER BY j_priority, j_id LIMIT 1");
+	}
+	if (err) {
+		nRetCode = 8;
+		return;
 	}
 	if (db.result.size()) {
 		// Load job
@@ -937,11 +956,20 @@ void TakeJob() {
 		// Load defaults
 		if (!j_timeout) j_timeout = 600;
 		if (!j_timeout2) j_timeout2 = 640;
+		// Prevent changing database if there is db error (need to restart)
+		if (nRetCode) return;
 		// Take job
 		q.Format("UPDATE jobs SET j_started=NOW(), j_updated=NOW(), s_id='%d', j_state=2, j_progress='Job assigned' WHERE j_id='%ld'",
 			CDb::server_id, CDb::j_id);
-		db.Query(q);
-		db.Query("UNLOCK TABLES");
+		if (db.Query(q)) {
+			nRetCode = 8;
+			return;
+		}
+		q = "UNLOCK TABLES";
+		if (db.Query(q)) {
+			nRetCode = 8;
+			return;
+		}
 		// Log
 		est.Format("Taking job #%ld: %s, %s%s (priority %d)", 
 			CDb::j_id, j_type, j_folder, f_name, j_priority);
@@ -953,7 +981,11 @@ void TakeJob() {
 		SendStatus();
 	}
 	else {
-		db.Query("UNLOCK TABLES");
+		q = "UNLOCK TABLES";
+		if (db.Query(q)) {
+			nRetCode = 8;
+			return;
+		}
 	}
 }
 
@@ -962,7 +994,10 @@ void Init() {
 	// On start, reset all jobs that did not finish correctly
 	CString q;
 	q.Format("SELECT COUNT(*) as cnt FROM jobs WHERE s_id='%d' AND j_state=2", CDb::server_id);
-	db.Fetch(q);
+	if (db.Fetch(q)) {
+		nRetCode = 8;
+		return;
+	}
 	if (db.result.size()) {
 		int cnt = db.GetInt("cnt");
 		if (cnt) {
@@ -972,9 +1007,16 @@ void Init() {
 		}
 	}
 	q.Format("UPDATE jobs SET j_updated=NOW(), j_state=1 WHERE s_id='%d' AND j_state=2", CDb::server_id);
-	db.Query(q);
+	if (db.Query(q)) {
+		nRetCode = 8;
+		return;
+	}
 	// Get client hostname
-	db.Fetch("SELECT SUBSTRING_INDEX(host,':',1) as 'ip' from information_schema.processlist WHERE ID=connection_id()");
+	q = "SELECT SUBSTRING_INDEX(host,':',1) as 'ip' from information_schema.processlist WHERE ID=connection_id()";
+	if (db.Fetch(q)) {
+		nRetCode = 8;
+		return;
+	}
 	if (db.result.size()) {
 		client_host = db.GetSt("ip");
 	}
