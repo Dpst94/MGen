@@ -1032,8 +1032,7 @@ int CP2R::FailFisTrail() {
 }
 
 int CP2R::FailMinor() {
-	CHECK_READY(DR_pc, DR_fli, DR_nih);
-	CHECK_READY(DR_hli);
+	CHECK_READY(DR_pc, DR_fli);
 	for (ls = 1; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
 		s_1 = fli[v][ls - 1];
