@@ -879,6 +879,8 @@ int CP2R::FailIntervals() {
 void CP2R::FlagLtLt() {
 	CHECK_READY(DR_pc, DR_fli);
 	CHECK_READY(DR_islt, DR_nih);
+	// Process only for major and melodic minor
+	if (!mminor && mode) return;
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 			s0 = fli[v][ls];
