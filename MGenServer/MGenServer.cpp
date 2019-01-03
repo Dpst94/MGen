@@ -1080,11 +1080,10 @@ int main() {
 		return PauseClose();
 	}
 	CheckChildrenPath();
-	if (Connect()) return PauseClose();
-	if (nRetCode) {
-		return PauseClose();
-	}
 	CleanChildren();
+	CheckChildren(1);
+	Connect();
+	if (nRetCode) return PauseClose();
 	Init();
 	for (;;) {
 		CheckChildren(1);
