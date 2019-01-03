@@ -141,9 +141,11 @@ void CGenRS1::Generate()
 				UpdateNoteMinMax(t_sent_old, t_generated - 1);
 			}
 			// Send
-			if (i == t_cnt - 1) t_sent = t_generated;
-			else t_sent = t_generated-3;
-			Adapt(t_sent_old, t_sent-1);
+			int to_send;
+			if (i == t_cnt - 1) to_send = t_generated;
+			else to_send = t_generated-3;
+			Adapt(t_sent_old, to_send -1);
+			t_sent = to_send;
 			// Interface
 			::PostMessage(m_hWnd, WM_GEN_FINISH, 1, 0);
 		}
