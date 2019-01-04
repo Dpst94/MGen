@@ -172,6 +172,7 @@ int CP2R::EvaluateCP() {
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	if (FailHarm()) return 1;
+	FlagFullMeasureNote();
 	FlagFCR();
 	FlagPcoApart();
 	FlagHarmTriRes();
@@ -3046,6 +3047,31 @@ int CP2R::FailAnapaest() {
 		}
 	}
 	return 0;
+}
+
+void CP2R::FlagFullMeasureNote() {
+	CHECK_READY(DR_fli);
+	// Check only for 4/4
+	if (npm != 8) return;
+	// Do not run check if there are no sp5 voices
+	int sp5_count = 0;
+	for (v = 0; v < av_cnt; ++v) {
+		if (vsp[v] == 5) ++sp5_count;
+	}
+	if (sp5_count < 1) return;
+	for (ms = 0; ms < mli.size() - 1; ++ms) {
+		s0 = mli[ms];
+		// Detect note start inside measure
+		int found_notestart = -1;
+		for (v = 0; v < av_cnt; ++v) {
+			if (fli2[v][bli[v][s0]] < s0 + npm - 1) {
+				found_notestart = v;
+				break;
+			}
+		}
+		if (found_notestart != -1) continue;
+		FlagV(0, 160, s0);
+	}
 }
 
 void CP2R::FlagRhythmStagnation() {
