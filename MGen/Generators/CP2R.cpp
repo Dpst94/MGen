@@ -353,7 +353,7 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 			FlagL(v, 520, cross_start, cross_end, v2);
 		}
 	}
-	// Only if not first note and not oblique motion
+	// Only if not first note and not oblique motion and not pauses
 	if (cross_start && cc[v][cross_start - 1] && cc[v2][cross_start - 1] && 
 		cc[v][cross_start - 1] != cc[v][cross_start] && cc[v2][cross_start - 1] != cc[v2][cross_start]) {
 		int int1 = abs(c[v][cross_start] - c[v2][cross_start]);
@@ -3437,7 +3437,9 @@ int CP2R::FailNoteLen() {
 			if (llen[v][ls] == 4) continue;
 			if (llen[v][ls] == 6) continue;
 			if (llen[v][ls] == 8) continue;
-			if (llen[v][ls] == 12) continue;
+			if (!beat[v][ls] && llen[v][ls] == 10) continue;
+			if (!beat[v][ls] && llen[v][ls] == 12) continue;
+			if (!beat[v][ls] && llen[v][ls] == 14) continue;
 			FlagV(v, 514, s);
 		}
 	}
@@ -5409,6 +5411,10 @@ void CP2R::DetectSus() {
 		s3 = 0;
 		s5 = 0;
 	}
+	// Check for pauses
+	if (!cc[v][s3]) s3 = 0;
+	if (!cc[v][s4]) s4 = 0;
+	if (!cc[v][s5]) s5 = 0;
 	// Check that beats are before or at sus note
 	if (s3 && s3 <= s2) s3 = 0;
 	if (s4 && s4 <= s2) s4 = 0;
