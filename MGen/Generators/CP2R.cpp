@@ -4556,7 +4556,7 @@ void CP2R::EvaluateMsh() {
 		// If non-harmonic tone
 		if (msh[v][s] <= 0) {
 			// Detect auxiliary tone, not surrounded by chord tones
-			if (ls < bli[v][mea_end] &&
+			if (ls < bli[v][mea_end] && llen[v][ls] > 1 && 
 				cc[v][fli[v][ls - 1]] == cc[v][fli[v][ls + 1]] && abs(c[v][fli[v][ls - 1]] - c[v][s]) == 1 && 
 				(!nih[v][fli[v][ls - 1]] || !nih[v][fli[v][ls + 1]])) {
 				msh[v][s] = pAuxWrong;
