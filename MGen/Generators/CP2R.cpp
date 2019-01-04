@@ -287,6 +287,7 @@ int CP2R::FailCross() {
 			vc = vca[s];
 			// Check if there is voice crossing
 			int is_cross;
+			// Check not pauses and voices cross
 			if (cc[v][s] && cc[v2][s] && cc[v2][s] < cc[v][s]) is_cross = 1;
 			else is_cross = 0;
 			// Search for start of crossing
@@ -821,7 +822,7 @@ void CP2R::GetDiatonic(int step1, int step2) {
 				c[v][s] = cc_c[cc[v][s]];
 			}
 			else {
-				c[v][s] = 0;
+				c[v][s] = -100;
 			}
 		}
 	}
@@ -1097,7 +1098,7 @@ int CP2R::FailMinorStepwise() {
 	CHECK_READY(DR_pc, DR_fli);
 	CHECK_READY(DR_nih, DR_c);
 	// For non-border notes only, because border notes have their own rules
-	for (ls = 1; ls < fli_size[v] - 1; ++ls) {
+	for (ls = fil[v] + 1; ls < fli_size[v] - 1; ++ls) {
 		s = fli[v][ls];
 		s_1 = fli[v][ls - 1];
 		s1 = fli[v][ls + 1];
@@ -1142,6 +1143,7 @@ void CP2R::MergeNotes(int step1, int step2) {
 	}
 }
 
+// Get distance to closest pause or exercise ending in notes
 void CP2R::GetDtp() {
 	CHECK_READY(DR_fli);
 	SET_READY(DR_dtp);
@@ -2445,7 +2447,8 @@ int CP2R::FailGlobalFill() {
 	// Clear nstat2
 	for (int i = nmind[v]; i <= nmaxd[v]; ++i) nstat2[i] = 0;
 	// Count nstat2
-	for (int x = 0; x < ep2; ++x) ++nstat2[c[v][x]];
+	for (int x = 0; x < ep2; ++x) 
+		if (cc[v][x]) ++nstat2[c[v][x]];
 	// Check nstat2
 	if (ep2 < c_len) return 0;
 	int skips = 0;

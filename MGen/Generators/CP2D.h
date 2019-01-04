@@ -376,7 +376,7 @@ protected:
 	vector<int> nstat; // [c]
 	vector<int> nstat2; // [c]
 	vector<int> nstat3; // [c]
-	vector<vector<int>> dtp; // [v][ls] Distance to closest pause in notes
+	vector<vector<int>> dtp; // [v][ls] Distance to closest pause or exercise ending in notes
 	vector<vector<int>> dtp_s; // [v][ls] Distance to closest pause in notes
 	vector<float> macc; // [s] CC moving average
 	vector<float> macc2; // [s] CC moving average smoothed
