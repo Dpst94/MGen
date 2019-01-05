@@ -5458,8 +5458,20 @@ void CP2R::DetectSus() {
 	}
 	// For species 2 and 4 check only 3rd beat
 	else if (sp == 2 || sp == 4) {
-		s3 = 0;
-		s5 = 0;
+		if (npm == 8) {
+			s3 = 0;
+			s5 = 0;
+		}
+		else if (npm == 12) {
+			if (btype == 4) {
+				s3 = 0;
+				s4 = 0;
+			}
+			else {
+				s3 = 0;
+				s5 = 0;
+			}
+		}
 	}
 	// Check that beats are before or at sus note
 	if (s3 && s3 <= s2) s3 = 0;
@@ -5935,22 +5947,22 @@ void CP2R::FlagTriDouble() {
 		// Skip chords without tritone
 		if ((cct[hs][2] - cct[hs][0] + 12) % 12 != 6) continue;
 		// Check if both notes of this tritone exist in voices
-		int found0 = 0;
-		int found2 = 0;
+		int found0 = -1;
+		int found2 = -1;
 		for (v = 0; v < av_cnt; ++v) {
 			ls2 = bli[v][hli2[hs]];
 			for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
 				s = fli[v][ls];
-				if (pcc[v][s] == cct[hs][0]) found0 = 1;
-				else if (pcc[v][s] == cct[hs][2]) found2 = 1;
+				if (pcc[v][s] == cct[hs][0]) found0 = v;
+				else if (pcc[v][s] == cct[hs][2]) found2 = v;
 			}
 		}
-		if (!found0 || !found2) continue;
+		if (found0 == -1 || found2 == -1) continue;
 		// Find duplication of one of tritone notes
 		for (v = 0; v < av_cnt; ++v) {
 			sp = vsp[v];
 			for (v2 = v + 1; v2 < av_cnt; ++v2) {
-				for (s = 0; s < ep2; ++s) {
+				for (s = hli[hs]; s <= hli2[hs]; ++s) {
 					// Skip not octave / unison
 					if (pcc[v][s] != pcc[v2][s]) continue;
 					ls = bli[v][s];
