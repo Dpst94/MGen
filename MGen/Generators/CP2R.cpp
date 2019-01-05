@@ -4650,6 +4650,10 @@ void CP2R::GetMeasureMsh(int sec_hp) {
 		// First note is always downbeat
 		if (s == fin[v]) msh[v][s] = pFirst;
 		else if (ls == fli_size[v] - 1) msh[v][s] = pLast;
+		// Before pause
+		else if (s2 < ep2 - 1 && !cc[v][s2 + 1]) msh[v][s] = pLast;
+		// After pause
+		else if (s && !cc[v][s - 1]) msh[v][s] = pFirst;
 		// Sus start is always harmonic
 		else if (sus[v][ls]) {
 			msh[v][s] = pSusStart;
@@ -4699,6 +4703,10 @@ void CP2R::GetMinimumMsh() {
 		// First note
 		else if (s == fin[v]) msh[v][s] = pFirst;
 		else if (ls == fli_size[v] - 1) msh[v][s] = pLast;
+		// Before pause
+		else if (s2 < ep2 - 1 && !cc[v][s2 + 1]) msh[v][s] = pLast;
+		// After pause
+		else if (s && !cc[v][s - 1]) msh[v][s] = pFirst;
 		// Downbeat
 		else if (s % npm == 0) {
 			// Long on downbeat
