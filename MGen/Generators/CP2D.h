@@ -156,6 +156,7 @@ protected:
 	inline void GetSpVcVp();
 	inline void GetVp();
 	void LoadHarmNotation();
+	void LoadIntNames();
 	CString GetHarmName(int pitch, int alter);
 	static CString GetPrintKey(int lbn, int lmode, int mminor = -1);
 	void TestCC_C2();
@@ -331,6 +332,9 @@ protected:
 	vector <CString> HarmName_m;
 	vector <CString> HarmName_ma;
 	vector <CString> harm_notation_name;
+
+	// Interval names
+	vector<vector<CString>> IntName; // [lower_note][higher_note] Interval name
 
 	// Voice vectors
 	vector<int> vid; // [v] Voice id for each voice

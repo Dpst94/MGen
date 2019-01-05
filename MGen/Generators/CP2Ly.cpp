@@ -1114,17 +1114,19 @@ CString CP2Ly::GetRealIntName(int s, int v1, int v2) {
 	int no2, oct2, alter2;
 	GetRealNote(cc[v][s], maj_bn, 0, no, oct, alter);
 	GetRealNote(cc[v2][s], maj_bn, 0, no2, oct2, alter2);
+	// Full base note (with octave, but without alteration)
 	int fno = no + oct * 12;
 	int fno2 = no2 + oct2 * 12;
+	// Interval between full base notes
 	int bin = abs(fno - fno2);
 	if (bin > 14) {
 		bin = bin % 12;
 		if (bin < 3) bin += 12;
 	}
 	// Diatonic interval
-	int din = CC_C(abs(cc[v][s] - cc[v2][s]), 0, 0) - 7;
+	int din = cc_c[abs(cc[v][s] - cc[v2][s])];
 	// Base diatonic interval
-	int bdin = CC_C(abs(fno - fno2), 0, 0) - 7;
+	int bdin = cc_c[abs(fno - fno2)];
 	int bdin2 = bdin;
 	if (bdin2 > 8) {
 		bdin2 = bdin2 % 7;

@@ -9,6 +9,7 @@
 #endif
 
 CP2D::CP2D() {
+	LoadIntNames();
 	ResizeRuleVariantVectorNegative(accept);
 	ResizeRuleVariantVector(severity);
 	// Set rule colors
@@ -912,6 +913,58 @@ void CP2D::LoadHarmNotation() {
 		est.Format("Error loading harmonic notation");
 		WriteLog(5, est);
 		error = 1;
+	}
+}
+
+void CP2D::LoadIntNames() {
+	CString fname = "configs\\intnames\\intnames.csv";
+	if (!CGLib::fileExists(fname)) {
+		CString est;
+		est.Format("Cannot find file: %s", fname);
+		WriteLog(5, est);
+		error = 1;
+		return;
+	}
+	CCsvDb db;
+	CString est;
+	db.Open(fname);
+	if (est != "") {
+		WriteLog(5, est);
+		error = 1;
+		return;
+	}
+	est = db.Select();
+	if (est != "") {
+		WriteLog(5, est);
+		error = 1;
+		return;
+	}
+	// Clear names
+	IntName.resize(12);
+	for (int i = 0; i < 12; ++i) {
+		IntName[i].resize(12);
+		for (int x = 0; x < 12; ++x) {
+			IntName[i][x] = "?";
+		}
+	}
+	// Load names
+	for (int i = 0; i < db.result.size(); ++i) {
+		// Skip header strings
+		if (db.result[i]["LN2"] == "") continue;
+		int lnote = atoi(db.result[i]["LN1"]);
+		for (int x = 0; x < 12; ++x) {
+			CString hnote_st;
+			hnote_st.Format("%d", x);
+			if (db.result[i][hnote_st] == "") {
+				continue;
+			}
+			IntName[lnote][x] = db.result[i][hnote_st];
+		}
+	}
+	if (IntName[11][11] == "?") {
+		WriteLog(5, "Some interval names are not loaded: check file " + fname);
+		error = 1;
+		return;
 	}
 }
 
