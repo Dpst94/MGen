@@ -4549,7 +4549,7 @@ void CP2R::EvaluateMsh() {
 	CHECK_READY(DR_c);
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
-	for (ls = bli[0][hstart]; ls <= bli[0][hend]; ++ls) {
+	for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
 		s = fli[v][ls];
 		// Skip pauses
 		if (!cc[v][s]) continue;
