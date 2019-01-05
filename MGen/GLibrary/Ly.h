@@ -42,6 +42,42 @@ const CString LyMajorKey[] = {
 	"b" // 11
 };
 
+const CString LyMajorKeyByFifth[] = {
+	"c", // 0
+	"g", // 1
+	"d", // 2
+	"a", // 3
+	"e", // 4
+	"b", // 5
+	"fs", // 6
+	"cs", // 7
+	"gs", // 8
+	"ds", // 9
+	"as", // 10
+	"es", // 11
+	"bs", // 12
+	"fss", // 13
+	"css" // 14
+};
+
+const CString LyMajorKeyByFifthNegative[] = {
+	"c", // 0
+	"f", // 1
+	"bf", // 2
+	"ef", // 3
+	"af", // 4
+	"df", // 5
+	"gf", // 6
+	"cf", // 7
+	"ff", // 8
+	"bff", // 9
+	"eff", // 10
+	"aff", // 11
+	"dff", // 12
+	"gff", // 13
+	"cff" // 14
+};
+
 const int key_base_m[] = {
 	0, // 0
 	0, // 1

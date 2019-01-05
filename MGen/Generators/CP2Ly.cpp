@@ -612,7 +612,14 @@ void CP2Ly::SaveLyCP() {
 		st.Format("  \\set Staff.instrumentName = \\markup { \\teeny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" \"[%s]\"%s } }\n", vname2[vi].Mid(0, 10), st3, vocra_st);
 		//ly_ly_st += "    \\override #'(line-width . 100)  \n";
 		ly_ly_st += st;
-		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key " + LyMajorKey[maj_bn] + "\n";
+		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key ";
+		if (fifths > 0) {
+			ly_ly_st += LyMajorKeyByFifth[fifths];
+		}
+		else {
+			ly_ly_st += LyMajorKeyByFifthNegative[-fifths];
+		}
+		ly_ly_st += "\n";
 		ly_ly_st += "  \\major\n";
 		st.Format("  \\time %d/%d\n", npm * btype / 8, btype);
 		ly_ly_st += st;

@@ -636,6 +636,12 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 void CGenCA3::GetCPKey() {
 	CString est;
 	fifths = cp_fi[cp_id];
+	// Check if fifth index is supported
+	if (fifths > 14 || fifths < -14) {
+		est.Format("Specified key with %d fifths is not supported. Minimum supported is -14 and maximum supported is 14.",
+			fifths);
+		WriteLogLy(5, est, 1);
+	}
 	// Detect major base note
 	maj_bn = (fifths * 7 + 12 * 12) % 12;
 	// Temporarily set base note to major base note for last chord detection
