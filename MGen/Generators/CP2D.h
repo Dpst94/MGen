@@ -187,7 +187,7 @@ protected:
 	vector<int> fil; // [v] First note link (after starting pause)
 	int npm; // Steps per measure
 	int btype; // Beat type for current cp
-	vector<int> nlen; // Note length for species 2 and 4
+	vector<int> nlen; // Minimal note length for species 2 and 4
 
 	// Indexes
 	int s, s0, s1, s2, s3, s4, s5, s_1, s_2;

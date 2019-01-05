@@ -2925,13 +2925,6 @@ int CP2R::FailRhythm5() {
 			else FlagVL(v, 245, s, fli[v][bli[v][s + npm - 1]]);
 		}
 		else if (l_len.size() > 5) FlagVL(v, 246, s, fli[v][bli[v][s + npm - 1]]);
-		// Suspensions
-		if (cc[v][s]) {
-			if (slur1 == 4 && l_len[0] == 2) FlagV(v, 241, s);
-			else if (slur1 == 4 && l_len[0] == 4) FlagV(v, 242, s);
-			if (slur1 && l_len[0] == 6) FlagV(v, 243, s);
-			if (slur1 == 6) FlagV(v, 244, s);
-		}
 	}
 	return 0;
 }
@@ -3206,17 +3199,26 @@ void CP2R::FlagSus() {
 			// No intermeasure or intrameasure suspension
 			if (hstart <= s) continue;
 			hend = hli2[hs];
-			// Preparation is shorter then suspension
-			if ((hstart - s) * 2 < llen[v][ls])
-				FlagV(v, 427, s);
-			// Preparation is too short for measure size
-			if (npm == 12 && btype == 4) {
-				if (hstart - s < 6)
-					FlagV(v, 274, s);
-			}
-			else if (npm == 4 || npm == 6) {
-				if (hstart - s < 2)
-					FlagV(v, 274, s);
+			if (sp == 5) {
+				// Preparation is shorter then suspension
+				if ((hstart - s) * 2 < llen[v][ls])
+					FlagV(v, 427, s);
+				// Preparation has wrong length
+				if (hstart - s != 4 && hstart - s != 8) {
+  				FlagV(v, 274, s);
+				}
+				// Suspension has wrong length
+				if (btype == 4) {
+					if (s2 - hstart != 1 && s2 - hstart != 3 && 
+						s2 - hstart != 7) {
+						FlagV(v, 244, s);
+					}
+				}
+				else {
+					if (s2 - hstart != 3 && s2 - hstart != 7) {
+						FlagV(v, 244, s);
+					}
+				}
 			}
 			// Skip interbar or intrabar resolution analysis if it does not exist
 			if (!resol[v][hstart]) continue;
@@ -3392,14 +3394,22 @@ void CP2R::GetNoteLen() {
 	SET_READY(DR_nlen);
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
-		nlen[v] = sp_nlen[sp];
-		if (sp == 2 || sp == 4) {
+		if (sp < 2) {
+			nlen[v] = npm;
+		}
+		else if (sp == 2 || sp == 4) {
 			if (npm == 6 || (npm == 12 && btype == 2)) {
 				nlen[v] = npm / 3;
 			}
 			else {
 				nlen[v] = npm / 2;
 			}
+		}
+		else if (sp == 3) {
+			nlen[v] = 2;
+		}
+		else if (sp == 5) {
+			nlen[v] = 1;
 		}
 	}
 }
@@ -3440,7 +3450,8 @@ int CP2R::FailNoteLen() {
 			// Last note - do not check length, it is checked in FailRhythm
 			if (ls == fli_size[v] - 1) continue;
 			if (llen[v][ls] == nlen[v]) continue;
-			if (llen[v][ls] == nlen[v] * 2) continue;
+			if (llen[v][ls] == nlen[v] * 2 && 
+				fli[v][ls] % npm == npm - nlen[v]) continue;
 			FlagV(v, 514, s);
 		}
 	}
@@ -5440,15 +5451,16 @@ void CP2R::DetectSus() {
 	s3 = hstart + 2;
 	s4 = hstart + 4;
 	s5 = hstart + 6;
+	// For 2/4 and 3/4 time signature, check only beat 2
+	if (npm < 8) {
+		s4 = 0;
+		s5 = 0;
+	}
 	// For species 2 and 4 check only 3rd beat
-	if (sp == 2 || sp == 4) {
+	else if (sp == 2 || sp == 4) {
 		s3 = 0;
 		s5 = 0;
 	}
-	// Check for pauses
-	if (!cc[v][s3]) s3 = 0;
-	if (!cc[v][s4]) s4 = 0;
-	if (!cc[v][s5]) s5 = 0;
 	// Check that beats are before or at sus note
 	if (s3 && s3 <= s2) s3 = 0;
 	if (s4 && s4 <= s2) s4 = 0;
@@ -5457,6 +5469,10 @@ void CP2R::DetectSus() {
 	if (s3 && s3 >= mli[ms] + npm) s3 = 0;
 	if (s4 && s4 >= mli[ms] + npm) s4 = 0;
 	if (s5 && s5 >= mli[ms] + npm) s5 = 0;
+	// Check for pauses
+	if (s3 && !cc[v][s3]) s3 = 0;
+	if (s4 && !cc[v][s4]) s4 = 0;
+	if (s5 && !cc[v][s5]) s5 = 0;
 	// Check which beats are allowed by rules
 	if (!accept[sp][vc][0][419]) s3 = 0;
 	if (!accept[sp][vc][0][420]) s5 = 0;
