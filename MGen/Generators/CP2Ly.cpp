@@ -708,7 +708,7 @@ void CP2Ly::SendLyIntervals() {
 	ly_ly_st += "    \\lyricmode {\n";
 	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
 	ly_ly_st += "      \\set stanza = #\" Interval:\"\n";
-	ly_ly_st += "      \\override InstrumentName #'X-offset = #1\n";
+	//ly_ly_st += "      \\override InstrumentName #'X-offset = #1\n";
 	ly_ly_st += "      \\override InstrumentName #'font-series = #'bold\n";
 	ly_ly_st += "      \\override InstrumentName.font-size = #-2\n";
 	ly_ly_st += "      \\set shortVocalName = \"I:\"\n";
@@ -739,7 +739,7 @@ void CP2Ly::SendLyHarm() {
 	lst += "    \\lyricmode {\n";
 	lst += "      \\override StanzaNumber.font-size = #-2\n";
 	lst += "      \\set stanza = #\" Harmony:\"\n";
-	lst += "      \\override InstrumentName #'X-offset = #1\n";
+	//lst += "      \\override InstrumentName #'X-offset = #1\n";
 	lst += "      \\override InstrumentName #'font-series = #'bold\n";
 	lst += "      \\override InstrumentName.font-size = #-2\n";
 	lst += "      \\set shortVocalName = \"H:\"\n";
@@ -802,7 +802,7 @@ void CP2Ly::SendLyNoteNames() {
 	ly_ly_st += "    \\lyricmode {\n";
 	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
 	ly_ly_st += "      \\set stanza = #\" Note:\"\n";
-	ly_ly_st += "      \\override InstrumentName #'X-offset = #1\n";
+	//ly_ly_st += "      \\override InstrumentName #'X-offset = #1\n";
 	ly_ly_st += "      \\override InstrumentName #'font-series = #'bold\n";
 	ly_ly_st += "      \\override InstrumentName.font-size = #-2\n";
 	ly_ly_st += "      \\set shortVocalName = \"N:\"\n";
