@@ -988,6 +988,10 @@ void CP2Ly::SaveLyComments() {
 			com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
 		//st.Format("%d", lyi[s].fvl[f]);
 		//com += " " + st;
+		// Print link to other part
+		if (lyi[s].fvl[f] != v && av_cnt > 2) {
+			com += " - with " + vname2[vid[lyi[s].fvl[f]]].Mid(0, 10);
+		}
 		// Send note number with first comment
 		if (!found) {
 			found = 1;
