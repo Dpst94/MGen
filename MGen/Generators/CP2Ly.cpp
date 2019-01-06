@@ -255,16 +255,42 @@ void CP2Ly::ParseLyI() {
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
 			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
 			// Highlight notes if flag is multivoice and is not gliss (gliss does not need note color)
-			if (vlink != lyi[s].fv[f] && vtype != vGlis) {
-				for (ls = bli[v][s1]; ls <= bli[v][s2]; ++ls) {
-					// Highlight first part of note
-					SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor);
-					// Highlight second part of note after tie
-					if (sus[v][ls]) {
+			if (vlink != lyi[s].fv[f]) {
+				if (ruleinfo[fl].viz_notecolor == 1) {
+					for (ls = bli[v][s1]; ls <= bli[v][s2]; ++ls) {
+						// Highlight first part of note
+						SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor);
+						// Highlight second part of note after tie
+						if (sus[v][ls]) {
+							SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor);
+						}
+					}
+					SetLyShape(link_note_step, link_note_step, f, fl, sev, vNoteColor);
+				}
+				else if (ruleinfo[fl].viz_notecolor == 2) {
+					// Highlight left step
+					ls = bli[v][s1];
+					if (sus[v][ls] && s1 >= sus[v][ls]) {
+						// Highlight second part of note after tie
 						SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor);
 					}
+					else {
+						// Highlight first part of note
+						SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor);
+					}
 				}
-				SetLyShape(link_note_step, link_note_step, f, fl, sev, vNoteColor);
+				else if (ruleinfo[fl].viz_notecolor == 3) {
+					// Highlight right step
+					ls = bli[v][s2];
+					if (s2 >= sus[v][ls]) {
+						// Highlight second part of note after tie
+						SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor);
+					}
+					else {
+						// Highlight first part of note
+						SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor);
+					}
+				}
 			}
 			// Set interval if not debugexpect. If debugexpect, do not set for red flags
 			if (!ly_debugexpect || sev != 100) {

@@ -81,6 +81,7 @@ struct RuleInfo {
 	int viz_harm;
 	int viz_sep;
 	int viz_int;
+	int viz_notecolor;
 	CString viz_text;
 	int false_positives_global;
 	int false_positives_ignore;
