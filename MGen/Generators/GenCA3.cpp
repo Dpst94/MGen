@@ -624,11 +624,11 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 		}
 	}
 	ly_fs << ly_ly_st;
-	ly_fs << "\\header {tagline = \"This file was created by MGen CA3 ";
-	ly_fs << APP_VERSION << " at " << CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S") << "\"}\n";
+	ly_fs << "\\header {tagline = \\markup \\tiny {\"This file was created by MGen CA3 ";
+	ly_fs << APP_VERSION << " at " << CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S") << "\"}}\n";
 	read_file_sv("configs\\ly\\footer.ly", sv);
 	write_file_sv(ly_fs, sv);
-	ly_fs << "\\markup { \\vspace #1.5\n Harmonic notation: " + harm_notation_name[harm_notation] + " }\n";
+	ly_fs << "\\markup \\tiny { \\vspace #1.5\n Harmonic notation: " + harm_notation_name[harm_notation] + " }\n";
 	ly_fs.close();
 	ly_saved = 1;
 }
