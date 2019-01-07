@@ -92,6 +92,7 @@ void XFIn::LoadXML(CString pth) {
 	char beat_type = 4;
 	float m_pos = 0;
 	float m_pos_prev = 0;
+	int dur_prev;
 	float tempo = 0;
 	// Init
 	path = pth;
@@ -219,7 +220,12 @@ void XFIn::LoadXML(CString pth) {
 					alter;
 				note[vi][m][ni].alter = alter;
 			}
-			note[vi][m][ni].dur = nd.child("duration").text().as_int();
+			if (chord) {
+				note[vi][m][ni].dur = dur_prev;
+			}
+			else {
+				note[vi][m][ni].dur = nd.child("duration").text().as_int();
+			}
 			note[vi][m][ni].dur_div = divisions;
 			// Load text
 			note[vi][m][ni].lyric = nd.child("lyric").child("text").text().as_string();
@@ -228,6 +234,7 @@ void XFIn::LoadXML(CString pth) {
 				words[staff].Empty();
 			}
 			m_pos_prev = m_pos;
+			dur_prev = note[vi][m][ni].dur;
 			m_pos += note[vi][m][ni].dur * 0.25 / divisions;
 		}
 	}
@@ -394,7 +401,7 @@ void XFIn::ValidateXML() {
 				}
 			}
 			// Do not check chord voices for note length stack
-			if (voice[vi].chord) continue;
+			//if (voice[vi].chord) continue;
 			// Add pause if measure is not full
 			if (stack < mea[m].len) {
 				XMLNote new_pause;
