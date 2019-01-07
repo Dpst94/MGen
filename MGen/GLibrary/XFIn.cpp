@@ -119,6 +119,8 @@ void XFIn::LoadXML(CString pth) {
 		return;
 	}
 	vector<CString> words;
+	CString old_part_id;
+	int old_m = -1;
 	for (xpath_node node : ns) {
 		xml_node nd = node.node();
 		if (!strcmp(nd.name(), "direction")) {
@@ -135,6 +137,16 @@ void XFIn::LoadXML(CString pth) {
 				//if (!tempo) tempo = 100;
 			}
 		}
+		if (!strcmp(nd.name(), "forward")) {
+			int cur_div = nd.parent().child("attributes").child("divisions").text().as_int();
+			if (cur_div) divisions = cur_div;
+			m_pos += nd.child("duration").text().as_int() * 0.25 / divisions;
+		}
+		if (!strcmp(nd.name(), "backup")) {
+			int cur_div = nd.parent().child("attributes").child("divisions").text().as_int();
+			if (cur_div) divisions = cur_div;
+			m_pos -= nd.child("duration").text().as_int() * 0.25 / divisions;
+		}
 		if (!strcmp(nd.name(), "note")) {
 			CString part_id = nd.parent().parent().attribute("id").as_string();
 			int cur_div = nd.parent().child("attributes").child("divisions").text().as_int();
@@ -143,6 +155,7 @@ void XFIn::LoadXML(CString pth) {
 			if (cur_v) v = cur_v;
 			int staff = nd.child("staff").text().as_int();
 			if (staff >= words.size()) words.resize(staff + 1);
+			// Get measure number
 			int m = nd.parent().attribute("number").as_int();
 			if (m > max_mea) max_mea = m;
 			if (nd.child("chord").name()[0] != '\0') {
@@ -156,8 +169,10 @@ void XFIn::LoadXML(CString pth) {
 				mea[m].barline = nd.parent().child("barline").child("bar-style").text().as_string();
 			}
 			// Load measure if this is first note in measure in this voice
-			if (note[vi].size() <= m) {
+			if (old_m != m || old_part_id != part_id) {
 				m_pos = 0;
+			}
+			if (old_m != m) {
 				if (nd.parent().child("attributes").child("key").child("fifths").name()[0] != '\0')
 					fifths = nd.parent().child("attributes").child("key").child("fifths").text().as_int();
 				mode = nd.parent().child("attributes").child("key").child("mode").text().as_string();
@@ -169,6 +184,8 @@ void XFIn::LoadXML(CString pth) {
 				mea[m].beat_type = beat_type;
 				mea[m].len = mea[m].beats * 1.0 / mea[m].beat_type;
 			}
+			old_m = m;
+			old_part_id = part_id;
 			if (chord)
 				m_pos = m_pos_prev;
 			note[vi].resize(m + 1);
@@ -217,7 +234,7 @@ void XFIn::LoadXML(CString pth) {
 	for (int vi = 0; vi < voice.size(); ++vi) {
 		// Set same measure number for all voices
 		note[vi].resize(max_mea + 1);
-		// Fill empty measures
+		// Fill empty measures with pause
 		for (int m = 1; m < mea.size(); ++m) {
 			// Do not fill measures with notes
 			if (note[vi][m].size()) continue;
@@ -235,6 +252,33 @@ void XFIn::ValidateXML() {
 			// Do not check measures without notes
 			if (!note[vi][m].size()) continue;
 			float stack = note[vi][m][0].pos;
+			for (int ni = 0; ni < note[vi][m].size(); ++ni) {
+				// Detect hidden pause
+				if (ni && note[vi][m][ni].pos > stack) {
+					/*
+					CString est;
+					est.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d: note %d of %d. Note starts at position %.3f that is more than stack of previous note lengths %.3f Adding pause automatically\n",
+						m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
+						mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size(),
+						note[vi][m][ni].pos, stack);
+					TRACE(est);
+					*/
+					XMLNote new_pause;
+					new_pause.pos = stack;
+					new_pause.dur_div = note[vi][m][ni - 1].dur_div;
+					new_pause.dur = (note[vi][m][ni].pos - stack) * 4 * new_pause.dur_div;
+					note[vi][m].insert(note[vi][m].begin() + ni, new_pause);
+				}
+				// Detect length error
+				if (ni && note[vi][m][ni].pos < stack) {
+					error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d: note %d of %d. Note starts at position %.3f that is less than stack of previous note lengths %.3f",
+						m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
+						mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size(),
+						note[vi][m][ni].pos, stack);
+					return;
+				}
+				stack += note[vi][m][ni].dur * 0.25 / note[vi][m][ni].dur_div;
+			}
 			for (int ni = 0; ni < note[vi][m].size(); ++ni) {
 				if (note[vi][m][ni].tie_start) {
 					if (ni < note[vi][m].size() - 1) {
@@ -348,18 +392,19 @@ void XFIn::ValidateXML() {
 						return;
 					}
 				}
-				if (ni && note[vi][m][ni].pos != stack) {
-					error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d: note %d of %d. Note starts at position %.3f that is not stack of previous note lengths %.3f",
-						m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
-						mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size(),
-						note[vi][m][ni].pos, stack);
-					return;
-				}
-				stack += note[vi][m][ni].dur * 0.25 / note[vi][m][ni].dur_div;
 			}
 			// Do not check chord voices for note length stack
 			if (voice[vi].chord) continue;
-			if (stack != mea[m].len) {
+			// Add pause if measure is not full
+			if (stack < mea[m].len) {
+				XMLNote new_pause;
+				new_pause.pos = stack;
+				new_pause.dur_div = note[vi][m][note[vi][m].size() - 1].dur_div;
+				new_pause.dur = (mea[m].len - stack) * 4 * new_pause.dur_div;
+				note[vi][m].push_back(new_pause);
+			}
+			// Detect length error
+			if (stack > mea[m].len) {
 				error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d: %d notes. Need %.3f time but got %.3f",
 					m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 					mea[m].beats, mea[m].beat_type, note[vi][m].size(),
