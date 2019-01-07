@@ -76,6 +76,21 @@ inline void CP2R::FlagA(int voice, int fid, int step, int step2, int voice2, int
 	if (!accept[sp][vc][0][fid]) hpenalty += ihpe;
 }
 
+// Accumulate flag
+inline void CP2R::AutoFlagA(int voice, int fid, int step, int step2, int voice2, int ihpe) {
+	CHECK_READY(DR_fli);
+	int avoice, avoice2;
+	if (fli[voice][bli[voice][step]] == step) {
+		avoice = voice;
+		avoice2 = voice2;
+	}
+	else {
+		avoice = voice2;
+		avoice2 = voice;
+	}
+	FlagA(avoice, fid, step, step2, avoice2, ihpe);
+}
+
 inline void CP2R::AssertRule(int fid) {
 	if (ruleinfo[fid].SubRuleName.IsEmpty() && warn_rule_undefined < 5) { 
 		++warn_rule_undefined; 
@@ -4633,13 +4648,13 @@ void CP2R::EvaluateMshSteps() {
 		vc = vca[s];
 		// Prepare data
 		civl = abs(cc[v][s] - cc[0][s]);
-		// Flag 4th or tritone with bass
-		if (civl % 12 == 5) FlagA(v, 171, s, s, 0, 100);
+		// Flag 4th or tritone with bass 
+		if (civl % 12 == 5) AutoFlagA(v, 171, s, s, 0, 100);
 		if (civl % 12 == 6) {
 			// Flag if not suspension resolution to lt
 			if (pcc[0][s] != 11 || fli2[0][ls2] != mli[bmli[s]] + npm - 1 || 
 				!nih[0][fli[0][ls2]] || resol[0][hstart] != fli[0][ls2])
-				FlagA(v, 331, s, s, 0, 100);
+				AutoFlagA(v, 331, s, s, 0, 100);
 		}
 	}
 }
@@ -5804,7 +5819,7 @@ void CP2R::FlagHarmTriRes() {
 				s5 = hli2[hs];
 				// Always prohibit harmonic tritone in archaic modes
 				if (mode && !mminor) {
-					Flag(v, 331, s, v2);
+					AutoFlagL(v, 331, s, s, v2);
 					continue;
 				}
 				// Last first note
