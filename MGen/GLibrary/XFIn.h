@@ -65,7 +65,7 @@ public:
 private:
 	void GetTextV(CString xpath, vector<CString>& sa);
 	CString GetText(CString xpath);
-	int AllocateVoice(CString id, int staff, int v, int chord);
+	int AllocateVoice(CString part_id, int staff, int v, int chord);
 	int GetPitchByName(CString pitch);
 
 	xml_document d;

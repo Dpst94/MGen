@@ -48,20 +48,20 @@ CString XFIn::GetText(CString xpath) {
 	}
 }
 
-int XFIn::AllocateVoice(CString id, int staff, int v, int chord) {
+int XFIn::AllocateVoice(CString part_id, int staff, int v, int chord) {
   // Check if this voice exists
 	for (int i = 0; i < voice.size(); ++i) {
-		if (voice[i].id == id && voice[i].staff == staff && 
+		if (voice[i].id == part_id && voice[i].staff == staff &&
 			voice[i].v == v && voice[i].chord == chord) return i;
 	}
 	// Create new voice
 	XMLVoice new_voice;
-	new_voice.id = id;
+	new_voice.id = part_id;
 	new_voice.staff = staff;
 	new_voice.v = v;
 	new_voice.chord = chord;
-	new_voice.name = GetText("score-partwise/part-list/score-part[@id = '" + id + "']/part-name");
-	new_voice.display = GetText("score-partwise/part-list/score-part[@id = '" + id + "']/part-name-display/display-text");
+	new_voice.name = GetText("score-partwise/part-list/score-part[@id = '" + part_id + "']/part-name");
+	new_voice.display = GetText("score-partwise/part-list/score-part[@id = '" + part_id + "']/part-name-display/display-text");
 	voice.push_back(new_voice);
 	note.resize(note.size() + 1);
 	return voice.size() - 1;
@@ -92,7 +92,7 @@ void XFIn::LoadXML(CString pth) {
 	char beat_type = 4;
 	float m_pos = 0;
 	float m_pos_prev = 0;
-	int dur_prev;
+	int dur_prev = 256;
 	float tempo = 0;
 	// Init
 	path = pth;
@@ -107,8 +107,8 @@ void XFIn::LoadXML(CString pth) {
 	}
 	// General information
 	encoding_date = GetText("score-partwise/identification/encoding/encoding-date");
-	encoder = GetText("score-partwise/identification/encoding/encoder");
-	software = GetText("score-partwise/identification/encoding/software");
+	encoder =				GetText("score-partwise/identification/encoding/encoder");
+	software =			GetText("score-partwise/identification/encoding/software");
 	encoding_description = GetText("score-partwise/identification/encoding/encoding-description");
 
 	try {
@@ -164,15 +164,16 @@ void XFIn::LoadXML(CString pth) {
 			}
 			else chord = 0;
 			vi = AllocateVoice(part_id, staff, v, chord);
-			// Load measure if it is first note in measure
+			// Load measure barline if it is first note in measure
 			if (mea.size() <= m) {
 				mea.resize(m + 1);
 				mea[m].barline = nd.parent().child("barline").child("bar-style").text().as_string();
 			}
-			// Load measure if this is first note in measure in this voice
+			// Load measure number if this is first note in measure in this voice
 			if (old_m != m || old_part_id != part_id) {
 				m_pos = 0;
 			}
+			// Load measure parameters if this is new measure in this part
 			if (old_m != m) {
 				if (nd.parent().child("attributes").child("key").child("fifths").name()[0] != '\0')
 					fifths = nd.parent().child("attributes").child("key").child("fifths").text().as_int();

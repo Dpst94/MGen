@@ -352,7 +352,7 @@ int CGenCA3::CheckXML() {
 				float len = xfi.note[vi][m][ni].dur * 0.25 / xfi.note[vi][m][ni].dur_div;
 				if (len < 0.125) {
 					CString est;
-					est.Format("Note length %.3f is shorter than 1/8 (0.125). Currently not supported. Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d",
+					est.Format("Note length %.3f is shorter than a quaver (0.125). Currently not supported. Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d",
 						len, m, vi, xfi.voice[vi].id, xfi.voice[vi].name, 
 						xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord,
 						xfi.mea[m].beats, xfi.mea[m].beat_type, ni + 1, xfi.note[vi][m].size());
@@ -385,7 +385,7 @@ int CGenCA3::GetCP() {
 			if (mli.size() > 1) {
 				if (npm) {
 					if (npm != mli.end()[-1] - mli.end()[-2]) {
-						est.Format("Measure %zu size is changed from %d to %d inside counterpoint %d",
+						est.Format("Measure %zu size is changed from %d to %d inside exercise %d",
 							mli.size(), npm, mli.end()[-1] - mli.end()[-2], cp_id + 1);
 						WriteLogLy(5, est, 0);
 						return 1;
