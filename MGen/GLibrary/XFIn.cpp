@@ -251,6 +251,32 @@ void XFIn::LoadXML(CString pth) {
 			note[vi][m][0].dur = 1024 * mea[m].beats / mea[m].beat_type;
 		}
 	}
+	ReorderChords();
+}
+
+void XFIn::ReorderChords() {
+	int first_cv = 0;
+	for (int vi = 1; vi < voice.size(); ++vi) {
+		// Find each chord
+		if (voice[vi].chord == 1) {
+			vector<int> va;
+			// Search all voices in this chord
+			for (int vi2 = 0; vi2 < voice.size(); ++vi2) {
+				// Skip different voices
+				if (voice[vi].id != voice[vi2].id) continue;
+				if (voice[vi].staff != voice[vi2].staff) continue;
+				if (voice[vi].v != voice[vi2].v) continue;
+				// Found voice needed
+				va.push_back(vi2);
+			}
+			// Reorder voices
+			int max_i = va.size() / 2;
+			for (int i = 0; i < max_i; ++i) {
+				iter_swap(voice.begin() + va[i], voice.begin() + va[va.size() - 1 - i]);
+				iter_swap(note.begin() + va[i], note.begin() + va[va.size() - 1 - i]);
+			}
+		}
+	}
 }
 
 void XFIn::ValidateXML() {

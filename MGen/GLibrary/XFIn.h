@@ -63,6 +63,7 @@ public:
 	vector<vector<vector<XMLNote>>> note; // [v][m][]
 
 private:
+	void ReorderChords();
 	void GetTextV(CString xpath, vector<CString>& sa);
 	CString GetText(CString xpath);
 	int AllocateVoice(CString part_id, int staff, int v, int chord);
