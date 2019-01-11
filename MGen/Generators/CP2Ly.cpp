@@ -626,8 +626,8 @@ void CP2Ly::SaveLyCP() {
 		st.Format("\\new Staff = \"staff%d\" {\n", v);
 		ly_ly_st += st;
 		if (av_cnt > 1) {
-			if (vsp[v]) st3.Format("species %d", vsp[v]);
-			else st3 = "c.f.";
+			if (vsp[v]) st3.Format(" \"[species %d]\" ", vsp[v]);
+			else st3 = " \"[c.f.]\" ";
 		}
 		else st3 = "";
 		CString vocra_st;
