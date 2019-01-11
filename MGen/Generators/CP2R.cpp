@@ -3839,7 +3839,7 @@ int CP2R::EvalHarm() {
 		else if (ha64[i] == 2) FlagV(v, 383, s);
 		if (i > 0 && chm[i - 1] > -1) {
 			// Check GC for low voice and not last note (last note in any window is ignored)
-			if (ls < fli_size[v] - 1 &&
+			if (ls < fli_size[v] - 1 && av_cnt == 2 &&
 				chm[i] == 0 && chm[i - 1] == 4 &&
 				pc[0][s] == 0 && pc[1][s] == 0 &&
 				s > 0 && pc[0][s - 1] == 4) FlagV(v, 48, s);
