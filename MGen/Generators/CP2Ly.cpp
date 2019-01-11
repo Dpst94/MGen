@@ -625,8 +625,11 @@ void CP2Ly::SaveLyCP() {
 		clef = DetectLyClef(nmin[v], nmax[v]);
 		st.Format("\\new Staff = \"staff%d\" {\n", v);
 		ly_ly_st += st;
-		if (vsp[v]) st3.Format("species %d", vsp[v]);
-		else st3 = "c.f.";
+		if (av_cnt > 1) {
+			if (vsp[v]) st3.Format("species %d", vsp[v]);
+			else st3 = "c.f.";
+		}
+		else st3 = "";
 		CString vocra_st;
 		if (vocra_detected[v] == 2) {
 			vocra_st = " \"[" + vocra_info[vocra[v]].name + "]\"";
@@ -635,7 +638,7 @@ void CP2Ly::SaveLyCP() {
 			clef = vocra_info[vocra[v]].clef;
 		}
 		ly_ly_st += "     \n";
-		st.Format("  \\set Staff.instrumentName = \\markup { \\teeny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" \"[%s]\"%s } }\n", vname2[vi].Mid(0, 10), st3, vocra_st);
+		st.Format("  \\set Staff.instrumentName = \\markup { \\teeny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" %s%s } }\n", vname2[vi].Mid(0, 10), st3, vocra_st);
 		//ly_ly_st += "    \\override #'(line-width . 100)  \n";
 		ly_ly_st += st;
 		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key ";

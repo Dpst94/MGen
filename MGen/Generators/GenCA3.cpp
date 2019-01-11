@@ -446,6 +446,11 @@ int CGenCA3::GetCP() {
 
 int CGenCA3::GetCPSpecies() {
 	CString st, est;
+	if (av_cnt == 1) {
+		vsp.resize(av_cnt);
+		vsp[0] = 0;
+		return 0;
+	}
 	LoadSpecies(conf_species);
 	// Check if species can be loaded from MusicXML
 	int found = 0;
