@@ -29,6 +29,8 @@ private:
 
 	XFIn xfi;
 
+	vector<int> instr_config; // Loaded instr vector from config
+
 	vector<vector<vector<int>>> cp; // [cp_id][v][s]
 	vector<vector<vector<int>>> cp_alter; // [cp_id][v][s]
 	vector<vector<vector<int>>> cp_retr; // [cp_id][v][s]

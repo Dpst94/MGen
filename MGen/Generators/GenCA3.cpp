@@ -879,6 +879,18 @@ int CGenCA3::AnalyseCP() {
 	skip_flags = 0;
 	GetCPKey();
 	if (GetVocalRanges()) return 1;
+	if (!instr_config.size()) {
+		// Save loaded instr
+		instr_config = instr;
+		// Clear instr
+		for (int i = 0; i < v_cnt; ++i) instr[i] = 0;
+	}
+	// Fill instr which is not set
+	// This will not overwrite on next cp, but will add instruments that were not set earlier
+	for (int i = 0; i < av_cnt; ++i) {
+		if (vocra[i] > 0 && !instr[vid[i]]) 
+			instr[vid[i]] = instr_config[vocra[i] - 1];
+	}
 	if (FailSpeciesCombination()) return 1;
 	EvaluateCP();
 	return 0;
