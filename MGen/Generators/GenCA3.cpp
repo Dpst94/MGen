@@ -151,6 +151,7 @@ int CGenCA3::XML_to_CP() {
 	vector<int> ibl; // Intermediate barlines vector
 	vector<int> ibt; // Intermediate beat type
 	vector<vector<int>> ial; // Intermediate alterations vector
+	set<CString> unique_part_id; // Unique part ids
 
 	av_cnt = xfi.voice.size();
 	ial.resize(av_cnt);
@@ -169,6 +170,9 @@ int CGenCA3::XML_to_CP() {
 		float xpos2 = 0;
 		vname[v] = xfi.voice[vi].name;
 		vname[v].Replace("MusicXML ", "");
+		unique_part_id.insert(xfi.voice[vi].id);
+		track_id[v] = unique_part_id.size();
+		track_name[v].Format("%s (%s), staff %d, voice %d, chord %d", vname[v], xfi.voice[vi].id, xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord);
 		for (int m = 1; m < xfi.mea.size(); ++m) {
 			xpos2 = 0;
 			int posm = pos;
@@ -225,6 +229,10 @@ int CGenCA3::XML_to_CP() {
 	im.resize(c_len);
 	ep2 = c_len;
 	ResizeVectors(t_allocated, av_cnt);
+	// Send track information
+	for (v = 0; v < av_cnt; ++v) {
+
+	}
 	// Explode music into separate exercises
 	// State: 0 - find note, 1 - find pause
 	int state = 0;
