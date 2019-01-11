@@ -151,13 +151,29 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 					if (found > 1)
 						WriteLog(5, "Instrument group " + ipath +
 							" is ambiguous. Please add instrument config name after slash in file " + fname);
+					// If instrument is found but is not loaded - load
+					if (!icf[instr_id].loaded)
+						LoadInstruments(icf[instr_id].group);
 				}
 				// Load instrument
 				else {
 					for (int i = 0; i < icf.size(); ++i) {
 						if (!sa[0].CompareNoCase(icf[i].group) && !sa[1].CompareNoCase(icf[i].name)) {
 							instr_id = i;
+							// If instrument is found but not loaded - load
+							if (!icf[i].loaded)
+								LoadInstruments(sa[0] + "/" + sa[1]);
 							break;
+						}
+					}
+					// Load instrument if it was not previously loaded - and search again
+					if (instr_id == -1) {
+						LoadInstruments(sa[0] + "/" + sa[1]);
+						for (int i = 0; i < icf.size(); ++i) {
+							if (!sa[0].CompareNoCase(icf[i].group) && !sa[1].CompareNoCase(icf[i].name)) {
+								instr_id = i;
+								break;
+							}
 						}
 					}
 				}
@@ -485,14 +501,14 @@ void CConf::LoadInstruments(CString ist) {
 			}
 			else {
 				for (int i = 0; i < iag.size(); ++i) {
-					if (iag[i] == icf[ii].group) {
+					if (!iag[i].CompareNoCase(icf[ii].group)) {
 						// Find default config
 						if (iac[i] == "" && icf[ii].name == cname) {
 							need_load = 1;
 							break;
 						}
 						// Find non-default config
-						else if (iac[i] == cname) {
+						else if (!iac[i].CompareNoCase(cname)) {
 							need_load = 1;
 							break;
 						}
@@ -520,7 +536,7 @@ void CConf::LoadInstruments(CString ist) {
 	// Log
 	long long time_stop = CGLib::time();
 	CString est;
-	est.Format("LoadInstruments loaded %d instruments in %lld ms", icf.size(), time_stop - time_start);
+	est.Format("LoadInstruments loaded %d instruments (%s) in %lld ms", icf.size(), ist, time_stop - time_start);
 	WriteLog(0, est);
 }
 
@@ -581,7 +597,7 @@ void CConf::LoadInstrument(int i, CString fname)
 	// Log
 	long long time_stop = CGLib::time();
 	CString est;
-	est.Format("LoadInstruments loaded %d lines from " + fname + " in %lld ms", x, time_stop - time_start);
+	est.Format("LoadInstrument (%s) loaded %d lines from " + fname + " in %lld ms", fname, x, time_stop - time_start);
 	//WriteLog(0, est);
 }
 

@@ -84,6 +84,7 @@ CDb db;
 void InitErrorMessages() {
 	errorMessages.resize(1000);
 	errorMessages[0] = "OK";
+	errorMessages[9] = "MGen detected warnings during run";
 	errorMessages[10] = "MGen detected critical errors during run";
 	errorMessages[11] = "MGen generator freeze on exit - possible error in generator";
 	errorMessages[100] = "GetExitCodeProcess error (for MGen.exe)";
@@ -428,6 +429,7 @@ int FinishJob(int res, CString st) {
 	// Prevent changing database if there is db error (need to restart)
 	if (nRetCode) return res;
 	int state = 3;
+	// Queue autorestarting job after finish
 	if (j_autorestart && !res) state = 1;
 	CString q;
 	q.Format("UPDATE jobs SET j_updated=NOW(), j_duration=TIMESTAMPDIFF(SECOND, j_started, NOW()), j_finished=NOW(), j_state='%d', j_result='%d', j_progress='%s', j_cleaned=0, j_size='%llu' WHERE j_id='%ld'",
@@ -871,18 +873,25 @@ int RunJobMGen() {
 			return FinishJob(1, est);
 		}
 	}
-	if (mgen_ret) {
+	if (mgen_ret > 9) {
 		est.Format("Error during algorithm run: %d - %s", mgen_ret, GetErrorMessage(mgen_ret));
-		return FinishJob(1, est);
+		return FinishJob(2, est);
 	}
 	if (!CGLib::fileExists("autotest\\exit.log")) {
 		est.Format("Algorithm process did not exit correctly - possible crash");
 		return FinishJob(1, est);
 	}
 	if (RunRender()) return 1;
-	est.Format("Success in %lld seconds", 
-		(CGLib::time() - time_job0) / 1000);
-	return FinishJob(0, est);
+	// Check if there were warnings
+	if (mgen_ret) {
+		est.Format("Warnings during algorithm run: %d - %s", mgen_ret, GetErrorMessage(mgen_ret));
+		return FinishJob(3, est);
+	}
+	else {
+		est.Format("Success in %lld seconds",
+			(CGLib::time() - time_job0) / 1000);
+		return FinishJob(0, est);
+	}
 }
 
 int RunJob() {

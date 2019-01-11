@@ -861,6 +861,7 @@ void CGLib::WriteLog(int i, CString st)
 {
 	if (i >= LOG_TABS) i = 0;
 	if (can_send_log) {
+		if (i == 1) exitcode = max(exitcode, 9);
 		// Check error log
 		if (i == 5) {
 			st = "! " + st;
