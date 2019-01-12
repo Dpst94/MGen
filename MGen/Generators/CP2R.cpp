@@ -4490,7 +4490,8 @@ int CP2R::FailPco() {
 				Flag(v, 91, s, v2);
 		}
 	}
-	if (civlc == 0) {
+	// Unison
+	if (civl == 0) {
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
 		// Prohibit consecutive last - first parallel movement
@@ -4500,24 +4501,21 @@ int CP2R::FailPco() {
 				FlagL(v, 481, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
-		// Prohibit similar movement in outer voices
-		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
+		// Prohibit similar movement to pco
+		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0) {
 			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
 				// Penultimate measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
-					if (!civl) FlagL(v, 72, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
-					else FlagL(v, 209, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					FlagL(v, 72, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 				// Penultimate measure
 				else {
-					if (!civl) FlagL(v, 73, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
-					else FlagL(v, 213, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					FlagL(v, 73, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
 			// Non-penultimate measure
 			else {
-				if (!civl) FlagL(v, 76, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
-				else FlagL(v, 211, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				FlagL(v, 76, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit consecutive contrary movement
@@ -4525,7 +4523,41 @@ int CP2R::FailPco() {
 			FlagL(v, 482, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
-	if (civlc == 7) {
+	// Octave
+	else if (civlc == 0) {
+		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
+		// because they are detected as pco apart now
+		// Prohibit consecutive last - first parallel movement
+		if (civl == civl2) {
+			// Only if notes are different (ignore interval repeat)
+			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
+				FlagL(v, 481, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			}
+		}
+		// Prohibit similar movement in outer voices to pco
+		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
+			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
+				// Penultimate measure with stepwise motion in higher voice
+				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
+					FlagL(v, 209, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				}
+				// Penultimate measure
+				else {
+					FlagL(v, 213, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				}
+			}
+			// Non-penultimate measure
+			else {
+				FlagL(v, 211, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			}
+		}
+		// Prohibit consecutive contrary movement
+		else if (civlc == civlc2) {
+			FlagL(v, 482, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+		}
+	}
+	// 5th
+	else if (civlc == 7) {
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
 		// Prohibit consecutive last - first parallel movement
@@ -4535,7 +4567,7 @@ int CP2R::FailPco() {
 				FlagL(v, 84, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
-		// Prohibit similar movement in outer voices
+		// Prohibit similar movement in outer voices to pco
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
 			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
 				// Penultimate measure with stepwise motion in higher voice
@@ -4557,7 +4589,8 @@ int CP2R::FailPco() {
 			FlagL(v, 85, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
-	if (civlc == 6) {
+	// Tritone
+	else if (civlc == 6) {
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
 		// Prohibit consecutive last - first parallel movement
@@ -4567,7 +4600,7 @@ int CP2R::FailPco() {
 				FlagL(v, 162, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
-		// Prohibit similar movement in outer voices
+		// Prohibit similar movement in outer voices to tritone
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
 			FlagL(v, 161, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
