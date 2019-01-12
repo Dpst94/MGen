@@ -33,7 +33,7 @@ void CF1M::LoadCantus(CString path)
 	MidiFile midifile;
 	if (!midifile.read(path.GetBuffer())) {
 		CString est;
-		est.Format("Error reading midi file %s", path);
+		est.Format("Error reading midi file %s: %s", path, MidiFile::est);
 		WriteLog(5, est);
 		return;
 	}
