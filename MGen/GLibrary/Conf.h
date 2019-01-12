@@ -46,6 +46,8 @@ public:
 	CString m_config;
 
 	// Configuration parameters
+	int ctools_task_id = 0; // Task id in composer tools
+	int ctools_file_id = 0; // File id in composer tools
 	int t_cnt = 1600; // Timeslot count (eighth notes) to stop generation
 	int v_cnt = 1; // Voice count
 	int t_allocated = 1600; // Timeslot count to initialize vectors

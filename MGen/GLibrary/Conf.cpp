@@ -79,6 +79,8 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 			int idata = atoi(st3);
 			float fdata = atof(st3);
 			parameter_found = 0;
+			CheckVar(&st2, &st3, "ctools_task_id", &ctools_task_id);
+			CheckVar(&st2, &st3, "ctools_file_id", &ctools_file_id);
 			CheckVar(&st2, &st3, "v_cnt", &v_cnt, 1, 10);
 			CheckVar(&st2, &st3, "t_cnt", &t_cnt, 1);
 			CheckVar(&st2, &st3, "t_allocated", &t_allocated, 0);
