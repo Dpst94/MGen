@@ -78,6 +78,7 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	CheckVar(sN, sV, "show_harmony_bass", &show_harmony_bass, 0, 2);
 	CheckVar(sN, sV, "first_steps_tonic", &first_steps_tonic, 1);
 	CheckVar(sN, sV, "show_hatch", &show_hatch, 0, 2);
+	CheckVar(sN, sV, "tempo_bell", &tempo_bell, 0, 100);
 	// Load species
 	if (*sN == "species") {
 		++parameter_found;

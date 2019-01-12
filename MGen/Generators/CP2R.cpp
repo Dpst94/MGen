@@ -549,6 +549,21 @@ void CP2R::SendLining(int pos, int x, int i) {
 	}
 }
 
+void CP2R::MakeBellTempo(int step1, int step2, int tempo1, int tempo2) {
+	// Do not process if steps are equal or wrong
+	if (step2 <= step1) return;
+	// Do not process if tempo is not uniform
+	for (int s = step1; s <= step2; ++s) {
+		if (tempo[s] != tempo[step1]) return;
+	}
+	int mids = (step1 + step2) / 2;
+	int counts = step2 - step1;
+	for (int s = step1; s <= step2; ++s) {
+		if (s <= mids)	tempo[s] = tempo1 + (tempo2 - tempo1) * pow((s - step1) * 2.0 / counts, 0.5);
+		else tempo[s] = tempo1 + (tempo2 - tempo1) * pow((step2 - s) * 2.0 / counts, 0.5);
+	}
+}
+
 void CP2R::SendCP() {
 	CHECK_READY(DR_fli);
 	CString st;
@@ -583,6 +598,7 @@ void CP2R::SendCP() {
 	}
 	SendHarmMarks();
 	for (int s = step0 + real_len; s < step0 + full_len; ++s) tempo[s] = tempo[s - 1];
+	if (tempo_bell) MakeBellTempo(step0, step0 + full_len - 1, tempo[step0], tempo_bell * tempo[step0]);
 	CountOff(step0, step0 + full_len - 1);
 	CountTime(step0, step0 + full_len - 1);
 	UpdateNoteMinMax(step0, step0 + full_len - 1);

@@ -247,6 +247,7 @@ protected:
 	int show_harmony_bass = 1; // 0 = do not show bass, 1 = Show harmony bass for higher cantus only, 2 = always show harmony bass
 	int first_steps_tonic = 3; // Number of first steps, which must contain tonic note
 	CString conf_species; // Species string
+	float tempo_bell = 0; // Increase tempo in the middle of cantus / counterpoint. 0 - preserve source tempo
 
 	// Rule parameters [sp][vc][vp]
 	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters

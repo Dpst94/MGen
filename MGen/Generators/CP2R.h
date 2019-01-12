@@ -126,6 +126,7 @@ protected:
 	inline void GetVca();
 	void SendComment(int pos, int x, int i);
 	void SendLining(int pos, int x, int i);
+	void MakeBellTempo(int step1, int step2, int tempo1, int tempo2);
 	void SendCP();
 	void MakeBellDyn(int v, int step1, int step2, int dyn1, int dyn2, int dyn_rand);
 	void SendHarmMarks();
