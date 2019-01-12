@@ -3,6 +3,7 @@
 #include "../stdafx.h"
 #include "CF1M.h"
 #include "../midifile/MidiFile.h"
+using namespace smf;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW 
@@ -30,7 +31,7 @@ void CF1M::LoadCantus(CString path)
 		return;
 	}
 	MidiFile midifile;
-	if (!midifile.read(path)) {
+	if (!midifile.read(path.GetBuffer())) {
 		CString est;
 		est.Format("Error reading midi file %s", path);
 		WriteLog(5, est);

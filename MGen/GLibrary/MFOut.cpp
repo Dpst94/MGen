@@ -4,6 +4,7 @@
 #include "MFOut.h"
 
 #include "../midifile/MidiFile.h"
+using namespace smf;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW 
@@ -135,10 +136,11 @@ void MFOut::ExportAdaptedMidi(CString dir, CString fname) {
 	for (int sta = 0; sta < stage_max; ++sta) {
 		smidifile[sta].sortTracks();         // ensure tick times are in correct order
 		st2.Format(dir + "\\" + fname + "_%d.midi", sta);
-		smidifile[sta].write(st2);
+		smidifile[sta].write(st2.GetBuffer());
 	}
 	midifile.sortTracks();         // ensure tick times are in correct order
-	midifile.write(dir + "\\" + fname + ".midi");
+	st2 = dir + "\\" + fname + ".midi";
+	midifile.write(st2.GetBuffer());
 
 	amidi_export = 0;
 	// Log
@@ -203,7 +205,8 @@ void MFOut::SaveMidi(CString dir, CString fname) {
 		}
 	}
 	midifile.sortTracks();         // ensure tick times are in correct order
-	midifile.write(dir + "\\" + fname + ".mid");
+	CString st2 = dir + "\\" + fname + ".mid";
+	midifile.write(st2.GetBuffer());
 	midi_saved = 1;
 }
 

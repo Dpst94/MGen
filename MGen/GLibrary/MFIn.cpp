@@ -4,6 +4,7 @@
 #include "MFIn.h"
 
 #include "../midifile/MidiFile.h"
+using namespace smf;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW 
@@ -31,7 +32,7 @@ void MFIn::LoadMidi(CString path)
 		return;
 	}
 	MidiFile midifile;
-	if (!midifile.read(path)) {
+	if (!midifile.read(path.GetBuffer())) {
 		CString est;
 		est.Format("Error reading midi file %s", path);
 		WriteLog(5, est);
