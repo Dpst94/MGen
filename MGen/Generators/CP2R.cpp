@@ -6096,9 +6096,11 @@ void CP2R::FlagPcoApart() {
 				// Get interval end
 				int iend = min(fli2[v][ls], fli2[v2][ls2]);
 				// Scan for second interval
-				int scan_end = iend + 8;
+				int scan_end = iend + npm;
 				if (scan_end > ep2) scan_end = ep2;
 				for (s3 = iend + 2; s3 < scan_end; ++s3) {
+					// Stop scanning as soon as there is a harmony between the intervals
+					if (bhli[s3] - bhli[s] > 1) break;
 					ls3 = bli[v][s3];
 					ls4 = bli[v2][s3];
 					// Skip no note start
