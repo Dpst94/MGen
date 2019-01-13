@@ -56,6 +56,26 @@ void CP2D::LoadVocalRanges(CString fname) {
 	}
 }
 
+void CP2D::LoadGlobalSpecies(CString st) {
+	vsp.clear();
+	if (st.GetLength() == 1) {
+		vsp.resize(1);
+		vsp[0] = atoi(st.Mid(0, 1));
+	}
+	else {
+		// Do not load if global species wrong
+		if (st.GetLength() != v_cnt) return;
+		vsp.resize(av_cnt);
+		for (int i = 0; i < st.GetLength(); ++i) {
+			for (int v = 0; v < av_cnt; ++v) {
+				if (vid[v] == i) {
+					vsp[v] = atoi(st.Mid(i, 1));
+				}
+			}
+		}
+	}
+}
+
 void CP2D::LoadSpecies(CString st) {
 	vsp.resize(st.GetLength());
 	for (int i = 0; i < st.GetLength(); ++i) {

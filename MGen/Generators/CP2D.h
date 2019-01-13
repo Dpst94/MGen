@@ -125,6 +125,7 @@ public:
 
 protected:
 	void LoadVocalRanges(CString fname);
+	void LoadGlobalSpecies(CString st);
 	void LoadSpecies(CString st);
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void LoadHSP(CString fname);

@@ -460,7 +460,7 @@ int CGenCA3::GetCPSpecies() {
 		vsp[0] = 0;
 		return 0;
 	}
-	LoadSpecies(conf_species);
+	LoadGlobalSpecies(conf_species);
 	// Check if species can be loaded from MusicXML
 	int found = 0;
 	xml_text = cp_text[cp_id];
@@ -577,6 +577,11 @@ void CGenCA3::Generate() {
 	}
 	if (CheckXML()) return;
 	if (XML_to_CP()) return;
+	if (conf_species.GetLength() > 1 && conf_species.GetLength() != v_cnt) {
+		CString est;
+		est.Format("Species in config is for %d voices ('%s'), but there are %d voices in file", conf_species.GetLength(), conf_species, v_cnt);
+		WriteLog(1, est);
+	}
 	for (cp_id = 0; cp_id < cp.size(); ++cp_id) if (!cp_error[cp_id]) {
 		st.Format("Analyzing: %d of %zu", cp_id + 1, cp.size());
 		SetStatusText(3, st);
@@ -924,10 +929,11 @@ int CGenCA3::FailSpeciesCombination() {
 	sps.resize(MAX_SPECIES + 1);
 	for (v = 0; v < av_cnt; ++v) {
 		++sps[vsp[v]];
+		if (!vsp[v] && sps[0] > 1) vsp[v] = 1;
 	}
 	// Multiple cantus firmus
 	if (sps[0] > 1) {
-		WriteLogLy(1, "Multiple cantus firmus detected", 1);
+		WriteLogLy(1, "Multiple cantus firmus detected. Replaced with species 1", 1);
 	}
 	// Species 5 should not be combined with species 2, 3, 4
 	if (sps[5] && (sps[2] || sps[3] || sps[4])) {
