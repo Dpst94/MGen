@@ -479,11 +479,21 @@ void CP2R::GetVca() {
 		vca[s] = 0;
 		hva[s] = 0;
 		lva[s] = av_cnt - 1;
+		int min_cc = 1000;
+		int max_cc = -1;
 		for (int v = 0; v < av_cnt; ++v) {
 			if (cc[v][s]) {
 				++vca[s];
-				if (v > hva[s]) hva[s] = v;
-				if (v < lva[s]) lva[s] = v;
+				// Highest voice with same pitches is selected
+				if (cc[v][s] >= max_cc) {
+					hva[s] = v;
+					max_cc = cc[v][s];
+				}
+				// Lowest voice with same pitches is selected
+				if (cc[v][s] < min_cc) {
+					lva[s] = v;
+					min_cc = cc[v][s];
+				}
 			}
 		}
 	}
@@ -1863,11 +1873,12 @@ int CP2R::FailMultiCulm() {
 	// Do not find culminations if too early
 	if (ep2 < c_len) return 0;
 	for (ls = 0; ls < fli_size[v]; ++ls) {
-		if (cc[v][fli[v][ls]] == nmax[v]) {
+		s = fli[v][ls];
+		if (cc[v][s] == nmax[v]) {
 			++culm_count;
 			culm_ls = ls;
 			if (culm_count > 1) {
-				if (v == av_cnt - 1 && av_cnt > 1) {
+				if (v == hva[s] && av_cnt > 1) {
 					if (multi_culm_fired) fpenalty += severity[sp][av_cnt][0][12] + 1;
 					else {
 						multi_culm_fired = 1;
@@ -1890,7 +1901,7 @@ int CP2R::FailMultiCulm() {
 		est.Format("Warning: culm_ls cannot be detected");
 		WriteLog(5, est);
 	}
-	if (v == av_cnt - 1) {
+	if (v == hva[fli[v][culm_ls]]) {
 		// Prohibit culminations at first steps
 		if (culm_ls < (early_culm3[sp][av_cnt][0] * fli_size[v]) / 100) FlagV(v, 193, fli[v][culm_ls]);
 		if (culm_ls < early_culm[sp][av_cnt][0] - 1) FlagV(v, 78, fli[v][culm_ls]);
@@ -1903,11 +1914,11 @@ int CP2R::FailMultiCulm() {
 
 int CP2R::FailFirstNotes() {
 	CHECK_READY(DR_fli, DR_pc, DR_sus);
-	if (v == av_cnt - 1) vp = vpExt;
-	else if (v == 0) vp = vpBas;
-	else vp = vpNbs;
 	// Prohibit first note not tonic
 	s = fin[v];
+	if (v == hva[s]) vp = vpExt;
+	else if (v == lva[s]) vp = vpBas;
+	else vp = vpNbs;
 	if (pc[v][s] != 0 && !bmli[s]) {
 		if (pc[v][s] == 4) Flag(v, 532, s, v);
 		else if (pc[v][s] == 2) {
@@ -1925,9 +1936,6 @@ int CP2R::FailFirstNotes() {
 
 int CP2R::FailLastNotes() {
 	CHECK_READY(DR_fli, DR_pc, DR_nih);
-	if (v == av_cnt - 1) vp = vpExt;
-	else if (v == 0) vp = vpBas;
-	else vp = vpNbs;
 	// Do not check if melody is short yet
 	if (fli_size[v] < 3) return 0;
 	// Prohibit last note not tonic
@@ -1935,6 +1943,9 @@ int CP2R::FailLastNotes() {
 	s = fli[v][fli_size[v] - 1];
 	s_1 = fli[v][fli_size[v] - 2];
 	s_2 = fli[v][fli_size[v] - 3];
+	if (v == hva[s]) vp = vpExt;
+	else if (v == lva[s]) vp = vpBas;
+	else vp = vpNbs;
 	if (pc[v][s] != 0) {
 		if (pc[v][s] == 4) Flag(v, 536, s, v);
 		else if (pc[v][s] == 2) Flag(v, 537, s, v);
@@ -3279,7 +3290,7 @@ void CP2R::FlagSus() {
 						continue;
 					}
 					// Sus resolution is in bass
-					if (!v2) continue;
+					if (v2 == lva[s3]) continue;
 					// Less than 4 voices
 					if (vca[s3] < 4) {
 						Flag(v2, 217, s3, v);
@@ -4454,7 +4465,7 @@ int CP2R::FailSyncVIntervals() {
 			if (!cc[v][s - 1]) continue;
 			if (!cc[v2][s - 1]) continue;
 			if (FailPco()) return 1;
-			if (!v && v2 == av_cnt - 1) {
+			if (v == lva[s] && v2 == hva[s]) {
 				FlagDirectDis();
 			}
 		}
@@ -4535,7 +4546,8 @@ int CP2R::FailPco() {
 			}
 		}
 		// Prohibit similar movement in outer voices to pco
-		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
+		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && 
+			v == lva[s] && v2 == hva[s]) {
 			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
 				// Penultimate measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
@@ -4568,7 +4580,8 @@ int CP2R::FailPco() {
 			}
 		}
 		// Prohibit similar movement in outer voices to pco
-		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
+		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && 
+			v == lva[s] && v2 == hva[s]) {
 			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
 				// Penultimate measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
@@ -4601,7 +4614,8 @@ int CP2R::FailPco() {
 			}
 		}
 		// Prohibit similar movement in outer voices to tritone
-		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && !v && v2 == av_cnt - 1) {
+		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && 
+			v == lva[s] && v2 == hva[s]) {
 			FlagL(v, 161, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 		// Prohibit consecutive contrary movement
@@ -4677,32 +4691,32 @@ void CP2R::EvaluateMsh() {
 void CP2R::EvaluateMshSteps() {
 	CHECK_READY(DR_fli, DR_vca, DR_msh);
 	CHECK_READY(DR_nih, DR_resol, DR_pc);
-	// Skip bass
-	if (!v) return;
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
-	v2 = 0;
 	GetVp();
 	for (s = hstart; s <= hend; ++s) {
+		v2 = lva[s];
 		ls = bli[v][s];
-		ls2 = bli[0][s];
+		ls2 = bli[v2][s];
+		// Skip same voice at this step
+		if (v == v2) continue;
 		// Skip no note start
-		if (s != fli[v][ls] && s != fli[0][ls2]) continue;
+		if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
 		// Skip non-chord tones
 		if (msh[v][max(hstart, fli[v][ls])] < 0) continue;
-		if (msh[0][max(hstart, fli[0][ls2])] < 0) continue;
+		if (msh[v2][max(hstart, fli[v][ls2])] < 0) continue;
 		// Skip pauses
 		if (!cc[v][s]) continue;
-		if (!cc[0][s]) continue;
+		if (!cc[v2][s]) continue;
 		vc = vca[s];
 		// Prepare data
-		civl = abs(cc[v][s] - cc[0][s]);
+		civl = abs(cc[v][s] - cc[v2][s]);
 		// Flag 4th or tritone with bass 
 		if (civl % 12 == 5) AutoFlagA(v, 171, s, s, 0, 100);
 		if (civl % 12 == 6) {
-			// Flag if not suspension resolution to lt
-			if (pcc[0][s] != 11 || fli2[0][ls2] != mli[bmli[s]] + npm - 1 || 
-				!nih[0][fli[0][ls2]] || resol[0][hstart] != fli[0][ls2])
+			// Flag if not suspension resolution to lt in bass
+			if (pcc[v2][s] != 11 || fli2[v2][ls2] != mli[bmli[s]] + npm - 1 || 
+				!nih[v2][fli[v2][ls2]] || resol[v2][hstart] != fli[v2][ls2])
 				AutoFlagA(v, 331, s, s, 0, 100);
 		}
 	}
@@ -5835,7 +5849,6 @@ void CP2R::FlagHarmTriRes() {
 	CHECK_READY(DR_nih, DR_fli, DR_vca);
 	CHECK_READY(DR_msh, DR_hli, DR_resol);
 	CHECK_READY(DR_pc);
-	// Check all voices except bass
 	for (v = 0; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
 			for (s = 0; s < ep2; ++s) {
@@ -5852,9 +5865,15 @@ void CP2R::FlagHarmTriRes() {
 				if (!cc[v][s]) continue;
 				if (!cc[v2][s]) continue;
 				// Skip bass if not suspension resolution to lt
-				if (v == 0) {
-					if (pcc[0][s] != 11 || fli2[0][ls] != mli[bmli[s]] + npm - 1 ||
-						!nih[0][fli[0][ls]] || resol[0][hstart] != fli[0][ls]) {
+				if (v == lva[s]) {
+					if (pcc[v][s] != 11 || fli2[v][ls] != mli[bmli[s]] + npm - 1 ||
+						!nih[v][fli[v][ls]] || resol[v][hstart] != fli[v][ls]) {
+						continue;
+					}
+				}
+				if (v2 == lva[s]) {
+					if (pcc[v2][s] != 11 || fli2[v2][ls] != mli[bmli[s]] + npm - 1 ||
+						!nih[v2][fli[v2][ls]] || resol[v2][hstart] != fli[v2][ls]) {
 						continue;
 					}
 				}
@@ -6222,12 +6241,12 @@ int CP2R::FindFCRNotes(int pcc1, int pcc2) {
 			// Same voice
 			if (fva[x] == fva2[y]) continue;
 			// Check outer voices
-			if ((fva[x] == 0 && fva2[y] == av_cnt - 1) || (fva[x] == av_cnt - 1 && fva2[y] == 0)) {
+			if ((fva[x] == lva[fsa[x]] && fva2[y] == hva[fsa2[x]]) || (fva[x] == hva[fsa[x]] && fva2[y] == lva[fsa2[x]])) {
 				// If outer voices, save and return, because it is best variant
 				v = fva[x];
 				v2 = fva2[y];
 				s = fsa[x];
-				s2 = fsa2[x];
+				s2 = fsa2[y];
 				return 2;
 			}
 			else {
@@ -6236,7 +6255,7 @@ int CP2R::FindFCRNotes(int pcc1, int pcc2) {
 				v = fva[x];
 				v2 = fva2[y];
 				s = fsa[x];
-				s2 = fsa2[x];
+				s2 = fsa2[y];
 			}
 		}
 	}
