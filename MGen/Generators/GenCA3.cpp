@@ -139,6 +139,7 @@ void CGenCA3::GetAnalysisVectors() {
 
 void CGenCA3::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	LoadVar(sN, sV, "musicxml_file", &musicxml_file);
+	CheckVar(sN, sV, "voices_order_pitch", &voices_order_pitch);
 
 	CGenCP2::LoadConfigLine(sN, sV, idata, fdata);
 }
@@ -565,8 +566,8 @@ void CGenCA3::Generate() {
 		error = 8;
 		return;
 	}
-	if (xfi.ReorderVoices(3)) {
-		WriteLog(5, "Voices reordered due to significant difference in average pitch");
+	if (xfi.ReorderVoices(voices_order_pitch)) {
+		WriteLog(1, "Voices reordered due to significant difference in average pitch");
 	}
 	xfi.ValidateXML();
 	if (!xfi.error.IsEmpty()) {

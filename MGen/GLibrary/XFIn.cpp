@@ -62,6 +62,19 @@ int XFIn::AllocateVoice(CString part_id, int staff, int v, int chord) {
 	new_voice.chord = chord;
 	new_voice.name = GetText("score-partwise/part-list/score-part[@id = '" + part_id + "']/part-name");
 	new_voice.display = GetText("score-partwise/part-list/score-part[@id = '" + part_id + "']/part-name-display/display-text");
+	// For chords search for previous voice
+	if (chord) {
+		for (int i = 0; i < voice.size(); ++i) {
+			if (voice[i].id == part_id && voice[i].staff == staff &&
+				voice[i].v == v && voice[i].chord == chord - 1) {
+				// Insert before previous voice
+				voice.insert(voice.begin() + i, new_voice);
+				vector<vector<XMLNote>> new_note;
+				note.insert(note.begin() + i, new_note);
+				return i;
+			}
+		}
+	}
 	voice.push_back(new_voice);
 	note.resize(note.size() + 1);
 	return voice.size() - 1;
@@ -251,35 +264,10 @@ void XFIn::LoadXML(CString pth) {
 			note[vi][m][0].dur = 1024 * mea[m].beats / mea[m].beat_type;
 		}
 	}
-	ReorderChords();
-}
-
-void XFIn::ReorderChords() {
-	int first_cv = 0;
-	for (int vi = 1; vi < voice.size(); ++vi) {
-		// Find each chord
-		if (voice[vi].chord == 1) {
-			vector<int> va;
-			// Search all voices in this chord
-			for (int vi2 = 0; vi2 < voice.size(); ++vi2) {
-				// Skip different voices
-				if (voice[vi].id != voice[vi2].id) continue;
-				if (voice[vi].staff != voice[vi2].staff) continue;
-				if (voice[vi].v != voice[vi2].v) continue;
-				// Found voice needed
-				va.push_back(vi2);
-			}
-			// Reorder voices
-			int max_i = va.size() / 2;
-			for (int i = 0; i < max_i; ++i) {
-				iter_swap(voice.begin() + va[i], voice.begin() + va[va.size() - 1 - i]);
-				iter_swap(note.begin() + va[i], note.begin() + va[va.size() - 1 - i]);
-			}
-		}
-	}
 }
 
 int XFIn::ReorderVoices(float pdif) {
+	if (!pdif) return 0;
 	// Calculate average pitch
 	for (int vi = 0; vi < voice.size(); ++vi) {
 		float apitch = 0;
@@ -308,18 +296,18 @@ int XFIn::ReorderVoices(float pdif) {
 }
 
 int XFIn::ReorderTwoVoices(float pdif) {
-	int reordered = 0;
 	for (int vi = 0; vi < voice.size() - 1; ++vi) {
-		// Do not reorder voices if either of them was not calculated
-		if (!voice[vi].average_pitch) continue;
-		if (!voice[vi + 1].average_pitch) continue;
-		// Reorder only if pitch difference is significant
-		if (voice[vi + 1].average_pitch - voice[vi].average_pitch < pdif) continue;
-		iter_swap(voice.begin() + vi, voice.begin() + vi + 1);
-		iter_swap(note.begin() + vi, note.begin() + vi + 1);
-		++reordered;
+		for (int vi2 = vi + 1; vi2 < voice.size(); ++vi2) {
+			// Do not reorder voices if either of them was not calculated
+			if (!voice[vi].average_pitch) continue;
+			if (!voice[vi2].average_pitch) continue;
+			// Reorder only if pitch difference is significant
+			if (voice[vi2].average_pitch - voice[vi].average_pitch < pdif) continue;
+			iter_swap(voice.begin() + vi, voice.begin() + vi2);
+			iter_swap(note.begin() + vi, note.begin() + vi2);
+			return 1;
+		}
 	}
-	return reordered;
 }
 
 void XFIn::ValidateXML() {

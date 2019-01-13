@@ -124,6 +124,7 @@ public:
 
 	// CA3
 	CString musicxml_file;
+	float voices_order_pitch = 0; // Difference in average pitch between adjacent voices to initiate voice swap. Set to 0 to disable swap
 
 protected:
 	void ValidateVectors(int step1, int step2);
