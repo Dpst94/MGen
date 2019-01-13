@@ -565,6 +565,9 @@ void CGenCA3::Generate() {
 		error = 8;
 		return;
 	}
+	if (xfi.ReorderVoices(3)) {
+		WriteLog(5, "Voices reordered due to significant difference in average pitch");
+	}
 	xfi.ValidateXML();
 	if (!xfi.error.IsEmpty()) {
 		WriteLog(5, xfi.error);

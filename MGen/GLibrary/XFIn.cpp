@@ -279,6 +279,49 @@ void XFIn::ReorderChords() {
 	}
 }
 
+int XFIn::ReorderVoices(float pdif) {
+	// Calculate average pitch
+	for (int vi = 0; vi < voice.size(); ++vi) {
+		float apitch = 0;
+		float alen = 0;
+		for (int m = 1; m < mea.size(); ++m) {
+			for (int ni = 0; ni < note[vi][m].size(); ++ni) {
+				if (!note[vi][m][ni].rest) {
+					apitch += note[vi][m][ni].dur * note[vi][m][ni].pitch;
+					alen += note[vi][m][ni].dur;
+				}
+			}
+		}
+		if (alen) {
+			voice[vi].average_pitch = apitch / alen;
+		}
+		else {
+			voice[vi].average_pitch = 0;
+		}
+	}
+	int reordered = 0;
+	for (int i = 0; i < 100; ++i) {
+		if (!ReorderTwoVoices(pdif)) break;
+		++reordered;
+	}
+	return reordered;
+}
+
+int XFIn::ReorderTwoVoices(float pdif) {
+	int reordered = 0;
+	for (int vi = 0; vi < voice.size() - 1; ++vi) {
+		// Do not reorder voices if either of them was not calculated
+		if (!voice[vi].average_pitch) continue;
+		if (!voice[vi + 1].average_pitch) continue;
+		// Reorder only if pitch difference is significant
+		if (voice[vi + 1].average_pitch - voice[vi].average_pitch < pdif) continue;
+		iter_swap(voice.begin() + vi, voice.begin() + vi + 1);
+		iter_swap(note.begin() + vi, note.begin() + vi + 1);
+		++reordered;
+	}
+	return reordered;
+}
+
 void XFIn::ValidateXML() {
 	// Check if measure is not filled with notes
 	for (int vi = 0; vi < voice.size(); ++vi) {

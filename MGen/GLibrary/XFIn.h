@@ -37,6 +37,7 @@ struct XMLVoice {
 	int staff;
 	int v;
 	int chord;
+	float average_pitch;
 };
 
 class XFIn
@@ -45,6 +46,7 @@ public:
 	XFIn();
 	~XFIn();
 	void LoadXML(CString pth);
+	int ReorderVoices(float pdif);
 	void ValidateXML();
 
 	// Input
@@ -64,6 +66,7 @@ public:
 
 private:
 	void ReorderChords();
+	int ReorderTwoVoices(float pdif);
 	void GetTextV(CString xpath, vector<CString>& sa);
 	CString GetText(CString xpath);
 	int AllocateVoice(CString part_id, int staff, int v, int chord);
