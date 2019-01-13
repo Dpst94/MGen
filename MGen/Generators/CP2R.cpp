@@ -4526,7 +4526,12 @@ int CP2R::FailPco() {
 			}
 			// Non-penultimate measure
 			else {
-				FlagL(v, 76, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				if (s % npm) {
+					FlagL(v, 167, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				}
+				else {
+					FlagL(v, 76, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				}
 			}
 		}
 		// Prohibit consecutive contrary movement
@@ -4560,7 +4565,12 @@ int CP2R::FailPco() {
 			}
 			// Non-penultimate measure
 			else {
-				FlagL(v, 211, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				if (s % npm) {
+					FlagL(v, 168, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				}
+				else {
+					FlagL(v, 211, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				}
 			}
 		}
 		// Prohibit consecutive contrary movement
@@ -4594,7 +4604,12 @@ int CP2R::FailPco() {
 			}
 			// Non-penultimate measure
 			else {
-				FlagL(v, 210, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				if (s % npm) {
+					FlagL(v, 166, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				}
+				else {
+					FlagL(v, 210, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				}
 			}
 		}
 		// Prohibit consecutive contrary movement
