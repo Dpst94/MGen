@@ -6241,7 +6241,8 @@ int CP2R::FindFCRNotes(int pcc1, int pcc2) {
 			// Same voice
 			if (fva[x] == fva2[y]) continue;
 			// Check outer voices
-			if ((fva[x] == lva[fsa[x]] && fva2[y] == hva[fsa2[x]]) || (fva[x] == hva[fsa[x]] && fva2[y] == lva[fsa2[x]])) {
+			if ((fva[x] == lva[fsa[x]] || fva[x] == hva[fsa[x]]) && 
+				(fva2[y] == hva[fsa2[x]] || fva2[y] == lva[fsa2[x]])) {
 				// If outer voices, save and return, because it is best variant
 				v = fva[x];
 				v2 = fva2[y];
