@@ -3594,7 +3594,7 @@ void CP2R::GetHarm(int found_gis, int found_fis, int &lchm, int &lchm_alter, int
 		rat += chn[x] + chn[(x + 2) % 7] ? 1 : 0 + 
 			chn[(x + 4) % 7] ? 1 : 0;
 		// VII note means 7th chord
-		if (chn[(x + 6) % 7]) rat -= 10;
+		//if (chn[(x + 6) % 7]) rat -= 10;
 		// VI note means other chord
 		if (chn[(x + 5) % 7]) rat -= 100;
 		// IV note means other chord
@@ -3693,7 +3693,7 @@ int CP2R::FailHarm() {
 				// Pitch class
 				n = pc[v][s];
 				// Find harmonic conflict
-				if (s > mli[ms] && (chn[(n + 1) % 7] || chn[(n + 6) % 7] ||
+				if (s > mli[ms] && (chn[(n + 6) % 7] ||
 					(chn[n] && !cchn[pcc[v][s]]))) {
 					// Remove notes of current step from chord, because this step belongs to next chord
 					for (v2 = 0; v2 < v; ++v2) {
