@@ -182,7 +182,7 @@ protected:
 	inline void GetHarmVar(vector<int>& cpos, int &poss_vars);
 	inline void GetMsh();
 	inline void GetNotesInHarm();
-	inline void GetHarmVars(int & lchm, int & lchm_alter, int & rat, vector<int>& cpos, int & poss_vars);
+	inline void GetHarmVars(int & lchm, int & rat, vector<int>& cpos, int & poss_vars);
 	inline void GetMsh2();
 	inline void EvaluateMsh();
 	inline void EvaluateMshSteps();
@@ -256,11 +256,10 @@ protected:
 	inline void FlagSusSus();
 	inline int FailBeat();
 	inline int FailRetrInside();
-	inline void GetHarm(int found_gis, int found_fis, int & lchm, int & lchm_alter, int & rating);
+	inline void GetHarm(int & lchm, int & rating);
 	inline int FailHarm();
 	inline int EvalHarm();
 	inline int FailTonicCP();
-	inline void RemoveHarmDuplicate();
 	inline int FailHarmStep(int i, const int * hv, int & count, int & wcount, int repeat_letters, int miss_letters, int flagr, int flagm);
 	inline void GetBhli();
 	inline void EvalMshHarm(int hvar);

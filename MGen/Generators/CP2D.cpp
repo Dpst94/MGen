@@ -9,6 +9,8 @@
 #endif
 
 CP2D::CP2D() {
+	empty_chn.resize(7, 0);
+	empty_cchn.resize(12, 0);
 	LoadIntNames();
 	ResizeRuleVariantVectorNegative(accept);
 	ResizeRuleVariantVector(severity);

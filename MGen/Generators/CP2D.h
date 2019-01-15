@@ -419,9 +419,10 @@ protected:
 	vector<vector<int>> islt; // [v][s] Is current note a leading tone?
 	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
-	vector<int> chn; // [pc] Diatonic pitch classes in chord
-	vector<int> cchn; // [pcc] Chromatic pitch classes in chord
-	vector<vector<int>> cchn2; // [harm][pcc] Chromatic pitch classes in chord for multiple chords in measure
+	vector<vector<int>> chn; // [pc] Diatonic pitch classes in chord
+	vector<vector<int>> cchn; // [pcc] Chromatic pitch classes in chord
+	vector<vector<int>> chns; // [pc] Diatonic pitch classes in chord (0 = not in harmony, 1 = only non-chord tones, 2 = chord tones)
+	vector<vector<int>> cchns; // [pcc] Chromatic pitch classes in chord (0 = not in harmony, 1 = only non-chord tones, 2 = chord tones)
 	vector<vector<int>> cpos; // [harm][pc] Possible chords for multiple chords in measure
 	vector<vector<int>> cchnv; // [harm][pcc] Chromatic pitch classes in variant chord
 	vector<int> shp; // [s] Harmony position for each step
@@ -438,6 +439,8 @@ protected:
 	vector <int> chm_alter2; // [hs] Type of harmonic meaning (detected in GetMsh)
 	int hv; // Current harmony variant being analysed
 	int hv_alt; // Current harmony alteration variant being analysed
+	vector<int> empty_chn;
+	vector<int> empty_cchn;
 
 	// Flags
 	vector<vector<vector<int>>> flag; // [v][s][] Note flags
