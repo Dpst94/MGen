@@ -81,7 +81,8 @@ void CGenCA3::InitAnalysis() {
 	hbcc.resize(c_len);
 	hbc.resize(c_len);
 	bhli.resize(c_len);
-	cct.resize(c_len, vector<int>(3));
+	cct.resize(c_len, vector<int>(4));
+	cctp.resize(c_len, vector<int>(4));
 	vca.resize(c_len);
 	hva.resize(c_len);
 	lva.resize(c_len);

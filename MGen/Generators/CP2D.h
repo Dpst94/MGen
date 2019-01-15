@@ -431,9 +431,11 @@ protected:
 	vector<int> hbcc; // [hs] Bass note of each harmony (chromatic)
 	vector<int> hbc; // [hs] Bass note of each harmony (diatonic)
 	vector<int> bhli; // [s] Back links to first notes of each harmony
-	vector <vector<int>> cct; // [hs][3] Chord tones for each harmony
+	vector <vector<int>> cct; // [hs][4] Chord tones for each harmony
+	vector <vector<int>> cctp; // [hs][4] Chord tones present for each harmony (1 - any msh, 2 - msh required)
 	vector <int> chm; // [hs] Current harmonic meaning (diatonic)
 	vector <int> chm_alter; // [hs] Type of harmonic meaning
+	vector <int> chm_alter2; // [hs] Type of harmonic meaning (detected in GetMsh)
 	int hv; // Current harmony variant being analysed
 	int hv_alt; // Current harmony alteration variant being analysed
 

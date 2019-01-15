@@ -3588,7 +3588,7 @@ void CP2R::GetHarm(int found_gis, int found_fis, int &lchm, int &lchm_alter, int
 	rating = -10000;
 	for (int x = 0; x < 7; ++x) {
 		// No root note
-		if (!chn[x]) continue;
+		//if (!chn[x]) continue;
 		int rat = 0;
 		// Each chord note adds to rating
 		rat += chn[x] + chn[(x + 2) % 7] ? 1 : 0 + 
@@ -4162,7 +4162,7 @@ void CP2R::GetHarmBass() {
 	SET_READY(DR_beat, DR_hli);
 	int ls1, ls2;
 	int harm_end, nt;
-	int de1, de2, de3;
+	int de1, de2, de3, de4;
 	for (int hs = 0; hs < hli.size(); ++hs) {
 		if (chm[hs] == -1) {
 			hbc[hs] = -1;
@@ -4173,6 +4173,7 @@ void CP2R::GetHarmBass() {
 		de1 = chm[hs];
 		de2 = (de1 + 2) % 7;
 		de3 = (de1 + 4) % 7;
+		de4 = (de1 + 6) % 7;
 		// Init habcc - lowest harmonic note, including audible or suggested
 		int habcc = 1000;
 		// Loop inside harmony
@@ -4183,7 +4184,7 @@ void CP2R::GetHarmBass() {
 				if (!cc[v][s]) continue;
 				nt = c[v][s] % 7;
 				// Do not process notes that are not harmonic
-				if (nt != de1 && nt != de2 && nt != de3) continue;
+				if (nt != de1 && nt != de2 && nt != de3 && nt != de4) continue;
 				// Process only lower notes
 				if (hbcc[hs] <= cc[v][s]) continue;
 				if (nt == de3) {
@@ -4868,6 +4869,7 @@ void CP2R::GetMsh() {
 	SET_READY(DR_msh, DR_nih, DR_resol);
 	CHECK_READY(DR_fli, DR_vca, DR_pc);
 	flaga.clear();
+	hs = 0;
 	for (ms = 0; ms < mli.size(); ++ms) {
 		hpenalty = 0;
 		fill(chn.begin(), chn.end(), 0);
@@ -4924,6 +4926,8 @@ void CP2R::GetMsh() {
 		int min_hpenalty = 1000000;
 		hstart = s0;
 		hend = s0 + npm - 1;
+		int best_hv;
+		int best_hv_alt;
 		// Scan all possible chords
 		for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
 			hv = hv2 % 7;
@@ -5020,6 +5024,8 @@ void CP2R::GetMsh() {
 					WriteLog(3, "Selected best hpenalty");
 #endif
 					min_hpenalty = hpenalty;
+					best_hv = hv;
+					best_hv_alt = hv_alt;
 					flagab = flaga;
 					for (s = s0; s < s0 + npm; ++s) {
 						for (v = 0; v < av_cnt; ++v) {
@@ -5047,7 +5053,17 @@ void CP2R::GetMsh() {
 				v = flagab[fl].voice;
 				FlagL(v, flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
 			}
+			chm.push_back(best_hv);
+			chm_alter2.push_back(best_hv_alt);
 		}
+		else {
+			chm.push_back(-1);
+			chm_alter2.push_back(0);
+		}
+		// Generate hli, hli2, bhli
+		hli.push_back(hstart);
+		hli2.push_back(hend);
+		++hs;
 	}
 }
 
@@ -5167,6 +5183,8 @@ void CP2R::GetMsh2() {
 		else shp[i] = 1;
 	}
 	int min_hpenalty = 1000000;
+	int best_hv, best_hv2;
+	int best_hv_alt, best_hv_alt2;
 	// Scan all possible chords
 	for (int hv2 = lchm[0] + 7; hv2 > lchm[0]; --hv2) {
 		hv = hv2 % 7;
@@ -5340,6 +5358,10 @@ void CP2R::GetMsh2() {
 						WriteLog(3, "Selected best hpenalty");
 #endif
 						min_hpenalty = hpenalty;
+						best_hv = hv;
+						best_hv_alt = hv_alt;
+						best_hv2 = hv3;
+						best_hv_alt2 = hv_alt2;
 						flagab = flaga;
 						for (s = s0; s < s0 + npm; ++s) {
 							for (v = 0; v < av_cnt; ++v) {
@@ -5373,7 +5395,28 @@ void CP2R::GetMsh2() {
 			v = flagab[fl].voice;
 			FlagL(v, flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
 		}
+		// Add first harmony
+		chm.push_back(best_hv);
+		chm_alter2.push_back(best_hv_alt);
+		hli.push_back(s0);
+		hli2.push_back(s0 + sec_hp - 1);
+		// Add second harmony
+		chm.push_back(best_hv2);
+		chm_alter2.push_back(best_hv_alt2);
+		hli.push_back(s0 + sec_hp);
+		hli2.push_back(s0 + npm - 1);
+		hs += 2;
+		++hs;
 	}
+	// Add one empty harmony
+	else {
+		chm.push_back(-1);
+		chm_alter2.push_back(0);
+		hli.push_back(s0);
+		hli2.push_back(s0 + npm - 1);
+		++hs;
+	}
+	// Generate hli, hli2, bhli
 	// Reset step harmony positions
 	fill(shp.begin(), shp.end(), 0);
 }
