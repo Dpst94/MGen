@@ -442,6 +442,12 @@ protected:
 	vector<int> empty_chn;
 	vector<int> empty_cchn;
 
+	// GetMsh
+	int min_hpenalty;
+	int best_hv, best_hv2;
+	int best_hv_alt, best_hv_alt2;
+	int best_shp; // Best second harmony position
+
 	// Flags
 	vector<vector<vector<int>>> flag; // [v][s][] Note flags
 	vector<vector<vector<int>>> fsl; // [v][s][] Note flags links to steps
