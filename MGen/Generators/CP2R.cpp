@@ -3666,31 +3666,6 @@ int CP2R::FailHarm() {
 	chns.resize(hli.size(), empty_chn);
 	cchns.resize(hli.size(), empty_cchn);
 	for (hs = 0; hs < hli.size(); ++hs) {
-		// Prohibit wrong second harmony position
-		int dist = hli[hs] % npm;
-		if (dist) {
-			s = hli[hs] - dist;
-			if (npm == 8) {
-				if (dist != 4 && dist != 6) FlagV(0, 556, s);
-			}
-			else if (npm == 4) {
-				if (dist != 2) FlagV(0, 556, s);
-			}
-			else if (npm == 6) {
-				if (dist != 4) FlagV(0, 556, s);
-			}
-			else if (npm == 10) {
-				if (dist != 6) FlagV(0, 556, s);
-			}
-			else if (npm == 12) {
-				if (btype == 4) {
-					if (dist != 6) FlagV(0, 556, s);
-				}
-				else {
-					if (dist != 8) FlagV(0, 556, s);
-				}
-			}
-		}
 		for (v = 0; v < av_cnt; ++v) {
 			ls2 = bli[v][hli2[hs]];
 			for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
@@ -4936,7 +4911,27 @@ void CP2R::GetMsh() {
 			if (!hpenalty) break;
 		}
 		if (min_hpenalty > 0 && ms == mli.size() - 2) {
-			GetMsh2(4);
+			if (npm == 8) {
+				GetMsh2(4);
+				GetMsh2(6);
+			}
+			else if (npm == 4) {
+				GetMsh2(2);
+			}
+			else if (npm == 6) {
+				GetMsh2(4);
+			}
+			else if (npm == 10) {
+				GetMsh2(6);
+			}
+			else if (npm == 12) {
+				if (btype == 4) {
+					GetMsh2(6);
+				}
+				else {
+					GetMsh2(8);
+				}
+			}
 		}
 		if (min_hpenalty < 1000000) {
 			// Apply best msh
