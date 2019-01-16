@@ -686,6 +686,9 @@ void CGenCA3::GetCPKey() {
 			cchn.clear();
 			chn.resize(1, empty_chn);
 			cchn.resize(1, empty_cchn);
+			sp = 0;
+			vc = av_cnt;
+			vp = 0;
 			hs = 0;
 			for (v = 0; v < av_cnt; ++v) {
 				++chn[0][pc[v][s]];

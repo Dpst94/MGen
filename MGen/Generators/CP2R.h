@@ -257,6 +257,7 @@ protected:
 	inline int FailBeat();
 	inline int FailRetrInside();
 	inline void GetHarm(int & lchm, int & rating);
+	inline void GetChordTonePresent();
 	inline int FailHarm();
 	inline int EvalHarm();
 	inline int FailTonicCP();

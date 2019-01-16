@@ -3588,13 +3588,16 @@ void CP2R::GetHarm(int &lchm, int &rating) {
 	rating = -10000;
 	for (int x = 0; x < 7; ++x) {
 		// No root note
-		//if (!chn[x]) continue;
+		if (!chn[hs][x]) continue;
 		int rat = 0;
 		// Each chord note adds to rating
 		rat += chn[hs][x] + chn[hs][(x + 2) % 7] ? 1 : 0 +
 			chn[hs][(x + 4) % 7] ? 1 : 0;
 		// VII note means 7th chord
-		//if (chn[(x + 6) % 7]) rat -= 10;
+		// Prohibit 7th only if its severity is red
+		if (severity[sp][vc][vp][194] > 60) {
+			if (chn[hs][(x + 6) % 7]) rat -= 10;
+		}
 		// VI note means other chord
 		if (chn[hs][(x + 5) % 7]) rat -= 100;
 		// IV note means other chord
@@ -3604,6 +3607,34 @@ void CP2R::GetHarm(int &lchm, int &rating) {
 		if (rat > rating) {
 			lchm = x;
 			rating = rat;
+		}
+	}
+}
+
+void CP2R::GetChordTonePresent() {
+	cctp.clear();
+	cctp.resize(hli.size(), vector<int>(4));
+	for (hs = 0; hs < hli.size(); ++hs) {
+		for (v = 0; v < av_cnt; ++v) {
+			ls2 = bli[v][hli2[hs]];
+			for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
+				s = fli[v][ls];
+				// Skip pauses
+				if (!cc[v][s]) continue;
+				s5 = max(hli[hs], s);
+				if (msh[v][s5]) {
+					for (int ct = 0; ct < 4; ++ct) {
+						if (cct[hs][ct] == pcc[v][s])
+							cctp[hs][ct] = 2;
+					}
+				}
+				else {
+					for (int ct = 0; ct < 4; ++ct) {
+						if (cct[hs][ct] == pcc[v][s])
+							cctp[hs][ct] = max(1, cctp[hs][ct]);
+					}
+				}
+			}
 		}
 	}
 }
@@ -3652,8 +3683,8 @@ int CP2R::FailHarm() {
 				if (!cc[v][s]) continue;
 				s5 = max(hli[hs], s);
 				if (msh[v][s5]) {
-					chns[hs][pc[v][s]] = max(2, chns[hs][pc[v][s]]);
-					cchns[hs][pcc[v][s]] = max(2, cchns[hs][pcc[v][s]]);
+					chns[hs][pc[v][s]] = 2;
+					cchns[hs][pcc[v][s]] = 2;
 				}
 				else {
 					chns[hs][pc[v][s]] = max(1, chn[hs][pc[v][s]]);
@@ -3677,6 +3708,7 @@ int CP2R::FailHarm() {
 	GetBhli();
 	GetHarmBass();
 	GetChordTones();
+	GetChordTonePresent();
 	// Check first harmony not T
 	if (chm.size() && chm[0] > -1 && (chm[0] || hbc[0] % 7)) {
 		FlagV(0, 137, hli[0]);
@@ -4695,7 +4727,11 @@ void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 		// At least one note exists
 		if (!chn[hs][hv] && !chn[hs][(hv + 2) % 7] && !chn[hs][(hv + 4) % 7]) continue;
 		// No other notes should exist
-		if (chn[hs][(hv + 1) % 7] || chn[hs][(hv + 3) % 7] || chn[hs][(hv + 5) % 7] || chn[hs][(hv + 6) % 7]) continue;
+		if (chn[hs][(hv + 1) % 7] || chn[hs][(hv + 3) % 7] || chn[hs][(hv + 5) % 7]) continue;
+		// Prohibit 7th only if its severity is red
+		if (severity[sp][vc][vp][194] > 60) {
+			if (chn[hs][(hv + 6) % 7]) continue;
+		}
 		cpos[hv] = 1;
 		++poss_vars;
 #if defined(_DEBUG)
@@ -5922,6 +5958,7 @@ void CP2R::GetHarmNotes(int lchm, int lchm_alter, vector<int> &lcct) {
 	lcct[0] = (c_cc[lchm + 7] - bn + 12) % 12;
 	lcct[1] = (c_cc[lchm + 9] - bn + 12) % 12;
 	lcct[2] = (c_cc[lchm + 11] - bn + 12) % 12;
+	lcct[3] = (c_cc[lchm + 13] - bn + 12) % 12;
 	if (lchm_alter) {
 		if (lcct[0] == 8) lcct[0] = 9;
 		else if (lcct[0] == 10) lcct[0] = 11;
@@ -5929,6 +5966,8 @@ void CP2R::GetHarmNotes(int lchm, int lchm_alter, vector<int> &lcct) {
 		else if (lcct[1] == 10) lcct[1] = 11;
 		if (lcct[2] == 8) lcct[2] = 9;
 		else if (lcct[2] == 10) lcct[2] = 11;
+		if (lcct[3] == 8) lcct[3] = 9;
+		else if (lcct[3] == 10) lcct[3] = 11;
 	}
 }
 

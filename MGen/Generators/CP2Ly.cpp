@@ -784,17 +784,35 @@ void CP2Ly::SendLyHarm() {
 		}
 		lst += "  \\pad-markup #0.4 \n";
 		st = GetHarmName(chm[hs], chm_alter[hs]);;
-		if (show_harmony_bass && hbc[hs] % 7 != chm[hs]) {
+		if (show_harmony_bass) {
 			if (show_harmony_bass == 1) {
-				st += "/" +
-					GetRealNoteNameCP(hbcc[hs] % 12);
+				if (hbc[hs] % 7 != chm[hs]) {
+					st += "/" +
+						GetRealNoteNameCP(hbcc[hs] % 12);
+				}
 			}
 			else {
-				if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 2) {
-					st += "6";
+				if (cctp[hs][3] == 2) {
+					if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 2) {
+						st += "6/5";
+					}
+					else if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 4) {
+						st += "4/3";
+					}
+					else if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 6) {
+						st += "4/2";
+					}
+					else {
+						st += "7";
+					}
 				}
 				else {
-					st += "6/4";
+					if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 2) {
+						st += "6";
+					}
+					else if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 4) {
+						st += "6/4";
+					}
 				}
 			}
 		}
@@ -804,6 +822,10 @@ void CP2Ly::SendLyHarm() {
 			st.Replace("6", " \\raise #0.7 6");
 			lst += "\\concat { " + st + " } ";
 		}
+		else if (st.Right(1) == "7") {
+			st.Replace("7", " \\raise #0.7 7");
+			lst += "\\concat { " + st + " } ";
+		}
 		else if (st.Right(3) == "6/4") {
 			lst += "  \\concat { \n";
 			lst += "    \\general-align #Y #0.5 {" + st.Left(st.GetLength() - 3) + "}\n";
@@ -811,6 +833,33 @@ void CP2Ly::SendLyHarm() {
 			lst += "    \\override #'(baseline-skip . 1.5) \n";
 			lst += "    \\override #'(line-width . 100)  \n";
 			lst += "    \\center-column{ 6 4 } \n";
+			lst += "  }\n";
+		}
+		else if (st.Right(3) == "6/5") {
+			lst += "  \\concat { \n";
+			lst += "    \\general-align #Y #0.5 {" + st.Left(st.GetLength() - 3) + "}\n";
+			lst += "    \\teeny\n";
+			lst += "    \\override #'(baseline-skip . 1.5) \n";
+			lst += "    \\override #'(line-width . 100)  \n";
+			lst += "    \\center-column{ 6 5 } \n";
+			lst += "  }\n";
+		}
+		else if (st.Right(3) == "4/3") {
+			lst += "  \\concat { \n";
+			lst += "    \\general-align #Y #0.5 {" + st.Left(st.GetLength() - 3) + "}\n";
+			lst += "    \\teeny\n";
+			lst += "    \\override #'(baseline-skip . 1.5) \n";
+			lst += "    \\override #'(line-width . 100)  \n";
+			lst += "    \\center-column{ 4 3 } \n";
+			lst += "  }\n";
+		}
+		else if (st.Right(3) == "4/2") {
+			lst += "  \\concat { \n";
+			lst += "    \\general-align #Y #0.5 {" + st.Left(st.GetLength() - 3) + "}\n";
+			lst += "    \\teeny\n";
+			lst += "    \\override #'(baseline-skip . 1.5) \n";
+			lst += "    \\override #'(line-width . 100)  \n";
+			lst += "    \\center-column{ 4 2 } \n";
 			lst += "  }\n";
 		}
 		else {
