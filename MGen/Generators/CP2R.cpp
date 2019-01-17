@@ -4673,8 +4673,15 @@ void CP2R::GetMinimumMsh() {
 		s2 = fli2[v][ls];
 		if (sus[v][ls]) {
 			// Mark sus start
-			msh[v][sus[v][ls]] = pAux;
 			msh[v][s] = pSusStart;
+			// If sus has space for resolution, mark it non-chord
+			if (fli2[v][ls] < mea_end) {
+				msh[v][sus[v][ls]] = pAux;
+			}
+			// If sus does not have space for resolution, mark it as chord tone
+			else {
+				msh[v][sus[v][ls]] = pSusHarm;
+			}
 		}
 		// First note
 		else if (s == fin[v]) msh[v][s] = pFirst;
