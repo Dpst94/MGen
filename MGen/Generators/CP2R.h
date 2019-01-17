@@ -71,6 +71,7 @@
 #define sCam 5
 
 // Melody shape note position types
+#define pHarmonicInit 1
 #define pLeapTo 2
 #define pLeapFrom 3
 #define pSusStart 4
@@ -87,6 +88,7 @@
 #define pHarmonicDNT2 24
 #define pHarmonicCam1 41
 #define pHarmonicCam2 44
+#define pHarmonicCleared 50
 #define pAux -1
 #define pPass -2
 #define pSusNonHarm -3
@@ -258,6 +260,7 @@ protected:
 	inline int FailRetrInside();
 	inline void GetHarm(int & lchm, int & rating);
 	inline void GetChordTonePresent();
+	inline void RemoveMinimumMsh();
 	inline int FailHarm();
 	inline int EvalHarm();
 	inline int FailTonicCP();

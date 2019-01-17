@@ -3655,6 +3655,23 @@ void CP2R::GetChordTonePresent() {
 	}
 }
 
+void CP2R::RemoveMinimumMsh() {
+	for (hs = 0; hs < hli.size(); ++hs) {
+		if (chm[hs] != -1) continue;
+		for (v = 0; v < av_cnt; ++v) {
+			ls2 = bli[v][hli2[hs]];
+			for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
+				s = fli[v][ls];
+				// Skip pauses
+				if (!cc[v][s]) continue;
+				s5 = max(hli[hs], s);
+				if (msh[v][s5] > 0) continue;
+				msh[v][s5] = pHarmonicCleared;
+			}
+		}
+	}
+}
+
 int CP2R::FailHarm() {
 	CHECK_READY(DR_fli, DR_pc);
 	CHECK_READY(DR_msh);
@@ -3676,6 +3693,7 @@ int CP2R::FailHarm() {
 				if (msh[v][s5] > 0) {
 					chns[hs][pc[v][s]] = 2;
 					cchns[hs][pcc[v][s]] = 2;
+					// Delete chord if non-chord tone is in wrong place
 					if (!nih[v][s5]) chm[hs] = -1;
 				}
 				else {
@@ -3697,6 +3715,9 @@ int CP2R::FailHarm() {
 			}
 		}
 	}
+#if defined(_DEBUG)
+	RemoveMinimumMsh();
+#endif
 	GetBhli();
 	GetHarmBass();
 	GetChordTones();
