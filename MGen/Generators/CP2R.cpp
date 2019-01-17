@@ -180,12 +180,12 @@ int CP2R::EvaluateCP() {
 		if (FailLocalMacc(notes_arange[sp][av_cnt][0], min_arange[sp][av_cnt][0] / 10.0, 15)) return 1;
 		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
 	}
-	GetMsh();
 	FlagFullParallel();
 	FlagParallelIco();
 	FlagMultiSlur();
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
+	GetMsh();
 	if (FailHarm()) return 1;
 	FlagFullMeasureNote();
 	FlagFCR();
@@ -3673,9 +3673,10 @@ int CP2R::FailHarm() {
 				// Skip pauses
 				if (!cc[v][s]) continue;
 				s5 = max(hli[hs], s);
-				if (msh[v][s5]) {
+				if (msh[v][s5] > 0) {
 					chns[hs][pc[v][s]] = 2;
 					cchns[hs][pcc[v][s]] = 2;
+					if (!nih[v][s5]) chm[hs] = -1;
 				}
 				else {
 					chns[hs][pc[v][s]] = max(1, chn[hs][pc[v][s]]);
