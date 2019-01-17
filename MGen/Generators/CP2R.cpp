@@ -3599,6 +3599,30 @@ int CP2R::FailRetrInside() {
 	return 0;
 }
 
+// Detect all possible chords
+void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
+	poss_vars = 0;
+	for (hv = 0; hv < 7; ++hv) {
+		// At least one note exists
+		if (!chn[hs][hv] && !chn[hs][(hv + 2) % 7] && !chn[hs][(hv + 4) % 7] &&
+			(!chn[hs][(hv + 6) % 7] || severity[sp][vc][vp][194] > 60)) continue;
+		// No other notes should exist
+		if (chn[hs][(hv + 1) % 7] || chn[hs][(hv + 3) % 7] || chn[hs][(hv + 5) % 7]) continue;
+		// Prohibit 7th only if its severity is red
+		if (severity[sp][vc][vp][194] > 60) {
+			if (chn[hs][(hv + 6) % 7]) continue;
+		}
+		cpos[hv] = 1;
+		++poss_vars;
+#if defined(_DEBUG)
+		CString est;
+		est.Format("Possible chord %s in measure %d:%d harmony %d",
+			degree_name[hv], cp_id + 1, ms + 1, hs + 1);
+		WriteLog(3, est);
+#endif
+	}
+}
+
 // Take vector of diatonic notes and detect most possible chord
 void CP2R::GetHarm(int &lchm, int &rating) {
 	rating = -10000;
@@ -3966,7 +3990,7 @@ void CP2R::EvalMshHarm(int hvar) {
 	if (!found_de1) hpenalty += 1000;
 	// Flag 7th chord
 	if (found_de4) 
-		FlagA(0, 194, hstart, hstart, 0, 100);
+		FlagA(0, 194, hstart, hstart, 0, 80);
 	// Prohibit DTIII#5 augmented chord
 	if (cchnv[shp[hstart % npm]][11] && cchnv[shp[hstart % npm]][3]) {
 		FlagA(0, 375, hstart, hstart, 0, 3);
@@ -4744,29 +4768,6 @@ void CP2R::GetMinimumMsh() {
 	}
 }
 
-// Detect all possible chords
-void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
-	poss_vars = 0;
-	for (hv = 0; hv < 7; ++hv) {
-		// At least one note exists
-		if (!chn[hs][hv] && !chn[hs][(hv + 2) % 7] && !chn[hs][(hv + 4) % 7]) continue;
-		// No other notes should exist
-		if (chn[hs][(hv + 1) % 7] || chn[hs][(hv + 3) % 7] || chn[hs][(hv + 5) % 7]) continue;
-		// Prohibit 7th only if its severity is red
-		if (severity[sp][vc][vp][194] > 60) {
-			if (chn[hs][(hv + 6) % 7]) continue;
-		}
-		cpos[hv] = 1;
-		++poss_vars;
-#if defined(_DEBUG)
-		CString est;
-		est.Format("Possible chord %s in measure %d:%d",
-			degree_name[hv], cp_id + 1, ms + 1);
-		WriteLog(3, est);
-#endif
-	}
-}
-
 void CP2R::GetMsh() {
 	SET_READY(DR_msh, DR_nih, DR_resol);
 	CHECK_READY(DR_fli, DR_vca, DR_pc);
@@ -4798,10 +4799,6 @@ void CP2R::GetMsh() {
 		int hnotes = 0;
 		for (v = 0; v < av_cnt; ++v) {
 			GetMinimumMsh();
-			// Clear note-in-harmony
-			for (s = s0; s < s0 + npm; ++s) {
-				nih[v][s] = 0;
-			}
 			for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 				s = fli[v][ls];
 				if (!cc[v][s]) continue;
@@ -5032,6 +5029,9 @@ void CP2R::GetMsh2(int sec_hp) {
 	cchn.resize(hs);
 	cchn.resize(hs + 2, empty_cchn);
 	int hs0 = hs;
+	for (v = 0; v < av_cnt; ++v) {
+		GetMinimumMsh();
+	}
 	for (hs = hs0; hs < hs0 + 2; ++hs) {
 		if (hs == hs0) {
 			hstart = s0;
@@ -5278,6 +5278,9 @@ void CP2R::GetMsh2(int sec_hp) {
 
 void CP2R::GetNotesInHarm() {
 	CHECK_READY(DR_fli, DR_nih, DR_pc);
+	for (s = hstart; s <= hend; ++s) {
+		nih[v][s] = 0;
+	}
 	for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
 		s = fli[v][ls];
 		// Skip pauses
@@ -5285,9 +5288,6 @@ void CP2R::GetNotesInHarm() {
 		if (s < hstart) s = hstart;
 		if (cchnv[shp[s % npm]][pcc[v][s]]) {
 			nih[v][s] = 1;
-		}
-		else {
-			nih[v][s] = 0;
 		}
 	}
 }
