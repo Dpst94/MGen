@@ -5058,6 +5058,7 @@ void CP2R::GetMsh2(int sec_hp) {
 				++cchn[hs][pcc[v][s]];
 			}
 		}
+		fill(cpos[hs - hs0].begin(), cpos[hs - hs0].end(), 0);
 		GetHarmVars(lchm[hs - hs0], rat, cpos[hs - hs0], poss_vars);
 		if (poss_vars == 0) return;
 	}
