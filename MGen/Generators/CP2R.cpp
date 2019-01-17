@@ -4068,49 +4068,50 @@ void CP2R::GetHarmBass() {
 		// Init habcc - lowest harmonic note, including audible or suggested
 		int habcc = 1000;
 		// Loop inside harmony
-		for (v = 0; v < min(av_cnt, 2); ++v) {
-			for (ls = bli[v][hli[hs]]; ls <= bli[v][hli2[hs]]; ++ls) {
-				s = fli[v][ls];
-				// Skip pauses
-				if (!cc[v][s]) continue;
-				nt = c[v][s] % 7;
-				// Do not process notes that are not harmonic
-				if (nt != de1 && nt != de2 && nt != de3 && nt != de4) continue;
-				// Process only lower notes
-				if (hbcc[hs] <= cc[v][s]) continue;
-				if (nt == de3) {
-					if (beat[v][ls] <= 1) {
-						hbcc[hs] = cc[0][s];
-						hbc[hs] = c[0][s];
-						// Clear audible 64, because we have real 64 now
-						ha64[hs] = 0;
-					}
-					else {
-						int found = 0;
-						// Search for note repeat
-						for (int ls2 = bli[v][hli[hs]]; ls2 <= bli[v][hli2[hs]]; ++ls2) if (ls2 != ls) {
-							if (cc[0][s] == cc[0][fli[v][ls2]]) found = 1;
-						}
-						// Set audible 6/4 for repeating 5th on upbeat
-						if (found) {
-							// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
-							ha64[hs] = 2;
-							habcc = cc[0][s];
-						}
-						// Set suggestive 6/4 for non-repeating 5th on upbeat
-						else {
-							// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
-							ha64[hs] = 1;
-							habcc = cc[0][s];
-						}
-					}
+		for (s = hli[hs]; s <= hli2[hs]; ++s) {
+			v = lva[s];
+			ls = bli[v][s];
+			// Skip no note start
+			if (s > hli[hs] && s != fli[v][ls]) continue;
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			nt = c[v][s] % 7;
+			// Do not process notes that are not harmonic
+			if (nt != de1 && nt != de2 && nt != de3 && nt != de4) continue;
+			// Process only lower notes
+			if (hbcc[hs] <= cc[v][s]) continue;
+			if (nt == de3) {
+				if (beat[v][ls] <= 1) {
+					hbcc[hs] = cc[0][s];
+					hbc[hs] = c[0][s];
+					// Clear audible 64, because we have real 64 now
+					ha64[hs] = 0;
 				}
 				else {
-					hbcc[hs] = cc[v][s];
-					hbc[hs] = c[v][s];
-					// Clear audible 64 if current note is lower than it
-					if (ha64[hs] && cc[v][s] < habcc) ha64[hs] = 0;
+					int found = 0;
+					// Search for note repeat
+					for (int ls2 = bli[v][hli[hs]]; ls2 <= bli[v][hli2[hs]]; ++ls2) if (ls2 != ls) {
+						if (cc[0][s] == cc[0][fli[v][ls2]]) found = 1;
+					}
+					// Set audible 6/4 for repeating 5th on upbeat
+					if (found) {
+						// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
+						ha64[hs] = 2;
+						habcc = cc[0][s];
+					}
+					// Set suggestive 6/4 for non-repeating 5th on upbeat
+					else {
+						// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
+						ha64[hs] = 1;
+						habcc = cc[0][s];
+					}
 				}
+			}
+			else {
+				hbcc[hs] = cc[v][s];
+				hbc[hs] = c[v][s];
+				// Clear audible 64 if current note is lower than it
+				if (ha64[hs] && cc[v][s] < habcc) ha64[hs] = 0;
 			}
 		}
 	}
