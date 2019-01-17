@@ -3715,7 +3715,7 @@ int CP2R::FailHarm() {
 			}
 		}
 	}
-#if defined(_DEBUG)
+#if !defined(_DEBUG)
 	RemoveMinimumMsh();
 #endif
 	GetBhli();
@@ -3757,10 +3757,6 @@ int CP2R::EvalHarm() {
 		if (chm[i] == -1) {
 			FlagV(v, 555, s);
 			continue;
-		}
-		// Prohibit 7th chord
-		if (cctp[i][3]) {
-			FlagV(v, 194, s);
 		}
 		// Prohibit 64 chord
 		if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
@@ -3944,38 +3940,33 @@ void CP2R::EvalMshHarm(int hvar) {
 		}
 	}
 	// Detect 4/2 chord
-	if (lhbc % 7 == (hvar + 6) % 7) hpenalty += 10;
+	if (lhbc % 7 == de4) hpenalty += 10;
 	// Detect 6/4 and 4/3 chord
-	if (lhbc % 7 == (hvar + 4) % 7) hpenalty += 10;
+	if (lhbc % 7 == de3) hpenalty += 10;
 	// Detect 6th and 6/5 chord
-	if (lhbc % 7 == (hvar + 2) % 7) hpenalty += 1;
+	if (lhbc % 7 == de2) hpenalty += 1;
 	// Find root in harmonic notes
 	int found_de1 = 0;
+	// Find 7th in harmonic notes
+	int found_de4 = 0;
 	for (v = 0; v < av_cnt; ++v) {
 		for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
 			s = fli[v][ls];
 			if (!cc[v][s]) continue;
 			int nt = c[v][s] % 7;
-			if (nt != de1) continue;
 			// For left sus and isus check hstart
-			if (s < hstart) {
-				if (msh[v][hstart] > 0) {
-					found_de1 = 1;
-					break;
-				}
-			}
-			// For other notes check note start
-			else {
-				if (msh[v][s] > 0) {
-					found_de1 = 1;
-					break;
-				}
-			}
+			if (s < hstart) s5 = hstart;
+			else s5 = s;
+			if (msh[v][s5] <= 0) continue;
+			if (nt == de1) found_de1 = 1;
+			else if (nt == de4) found_de4 = 1;
 		}
-		if (found_de1) break;
 	}
 	// Increase penalty for chord without root (probably wrong chord detected)
 	if (!found_de1) hpenalty += 1000;
+	// Flag 7th chord
+	if (found_de4) 
+		FlagA(0, 194, hstart, hstart, 0, 100);
 	// Prohibit DTIII#5 augmented chord
 	if (cchnv[shp[hstart % npm]][11] && cchnv[shp[hstart % npm]][3]) {
 		FlagA(0, 375, hstart, hstart, 0, 3);
@@ -4921,7 +4912,7 @@ void CP2R::GetMsh() {
 					if (v < av_cnt - 1) est += " /";
 				}
 				for (int fl = 0; fl < flaga.size(); ++fl) {
-					st.Format(" [%d] %d %s (%s)", flaga[fl].id, flaga[fl].s,
+					st.Format(" \n[%d] %d:%d %s (%s)", flaga[fl].id, flaga[fl].s, flaga[fl].voice,
 						ruleinfo[flaga[fl].id].RuleName,
 						ruleinfo[flaga[fl].id].SubRuleName);
 					est += st;
@@ -5231,7 +5222,7 @@ void CP2R::GetMsh2(int sec_hp) {
 						if (v < av_cnt - 1) est += " /";
 					}
 					for (int fl = 0; fl < flaga.size(); ++fl) {
-						st.Format(" [%d] %d %s (%s)", flaga[fl].id, flaga[fl].s,
+						st.Format(" \n[%d] %d:%d %s (%s)", flaga[fl].id, flaga[fl].s, flaga[fl].voice,
 							ruleinfo[flaga[fl].id].RuleName,
 							ruleinfo[flaga[fl].id].SubRuleName);
 						est += st;
