@@ -784,7 +784,7 @@ void CP2Ly::SendLyHarm() {
 		}
 		lst += "  \\pad-markup #0.4 \n";
 		st = GetHarmName(chm[hs], chm_alter[hs]);;
-		if (show_harmony_bass) {
+		if (chm[hs] != -1 && show_harmony_bass) {
 			if (show_harmony_bass == 1) {
 				if (hbc[hs] % 7 != chm[hs]) {
 					st += "/" +

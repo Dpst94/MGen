@@ -3638,7 +3638,7 @@ void CP2R::GetChordTonePresent() {
 				// Skip pauses
 				if (!cc[v][s]) continue;
 				s5 = max(hli[hs], s);
-				if (msh[v][s5]) {
+				if (msh[v][s5] > 0) {
 					for (int ct = 0; ct < 4; ++ct) {
 						if (cct[hs][ct] == pcc[v][s])
 							cctp[hs][ct] = 2;
@@ -4561,7 +4561,8 @@ void CP2R::EvaluateMsh() {
 			else if (msh[v][s] == pDownbeat) FlagA(v, 83, s, s, v, 100);
 			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v, 100);
 			else if (msh[v][s] == pLeapFrom) FlagA(v, 187, s, s, v, 100);
-			else if (msh[v][s] == pSusStart) FlagA(v, 458, s, s, v, 100);
+			else if (msh[v][s] == pSusStart) 
+				FlagA(v, 458, s, s, v, 100);
 			// pSusRes does not have separate flag, because it is marked as not resolved
 			// This is protection against wrong melodic shape value
 			else if (msh[v][s] > 0) FlagA(v, 83, s, s, v, 100);
@@ -4808,6 +4809,10 @@ void CP2R::GetMsh() {
 				cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
 				cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 1;
 				cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 1;
+				// Prohibit 7th only if its severity is red
+				if (severity[sp][vc][vp][194] <= 60) {
+					cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 1;
+				}
 				if (mminor) {
 					if (hv_alt) {
 						if (cchnv[0][8]) {
@@ -5038,6 +5043,10 @@ void CP2R::GetMsh2(int sec_hp) {
 			cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
 			cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 1;
 			cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 1;
+			// Prohibit 7th only if its severity is red
+			if (severity[sp][vc][vp][194] <= 60) {
+				cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 1;
+			}
 			if (mminor) {
 				if (hv_alt) {
 					if (cchnv[0][8]) {
@@ -5077,6 +5086,10 @@ void CP2R::GetMsh2(int sec_hp) {
 					cchnv[1][(c_cc[hv3 + 14] + 24 - bn) % 12] = 1;
 					cchnv[1][(c_cc[hv3 + 16] + 24 - bn) % 12] = 1;
 					cchnv[1][(c_cc[hv3 + 18] + 24 - bn) % 12] = 1;
+					// Prohibit 7th only if its severity is red
+					if (severity[sp][vc][vp][194] <= 60) {
+						cchnv[1][(c_cc[hv + 20] + 24 - bn) % 12] = 1;
+					}
 					if (mminor) {
 						if (hv_alt2) {
 							if (cchnv[1][8]) {
