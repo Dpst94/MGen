@@ -4777,9 +4777,10 @@ void CP2R::GetMsh() {
 			for (ls = bli[v][s0]; ls <= bli[v][mea_end]; ++ls) {
 				s = fli[v][ls];
 				if (!cc[v][s]) continue;
-				// Skip first suspension
-				if (s < s0) continue;
+				// Skip interbar or intrabar sus end, which has space to resolve (in this case msh is always negative due to MinimumMsh)
+				if (s < s0 && fli2[v][ls] < hend) continue;
 				// Skip non-harmonic and ambiguous notes
+				// Check note start always (because unresolved sus will also be considered chord tone)
 				if (msh[v][s] <= 0) continue;
 				// Record note
 				++chn[hs][pc[v][s]];
@@ -5018,13 +5019,13 @@ void CP2R::GetMsh2(int sec_hp) {
 				s = fli[v][ls];
 				// Skip pauses
 				if (!cc[v][s]) continue;
-				// Skip sus end, which has space to resolve
+				// Skip interbar or intrabar sus end, which has space to resolve (in this case msh is always negative due to MinimumMsh)
 				if (s < hstart && fli2[v][ls] < hend) continue;
+				// Skip non-harmonic and ambiguous notes
 				// Check note start always (because unresolved sus will also be considered chord tone)
-				if (msh[v][s]) {
-					++chn[hs][pc[v][s]];
-					++cchn[hs][pcc[v][s]];
-				}
+				if (msh[v][s] <= 0) continue;
+				++chn[hs][pc[v][s]];
+				++cchn[hs][pcc[v][s]];
 			}
 		}
 		GetHarmVars(lchm[hs - hs0], rat, cpos[hs - hs0], poss_vars);
