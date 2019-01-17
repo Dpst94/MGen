@@ -3914,14 +3914,20 @@ void CP2R::EvalMshHarm(int hvar) {
 	int de1 = hvar;
 	int de2 = (de1 + 2) % 7;
 	int de3 = (de1 + 4) % 7;
+	int de4 = (de1 + 6) % 7;
 	// Init lhbcc - lowest harmonic note in bass
 	int lhbc = 1000;
-	for (ls = bli[0][hstart]; ls <= bli[0][hend]; ++ls) {
-		s = fli[0][ls];
+	for (s = hstart; s <= hend; ++s) {
+		v = lva[s];
+		ls = bli[v][ls];
+		// Skip no note start
+		if (s > hstart && s != fli[v][ls]) continue;
+		// Skip pause
 		if (!cc[0][s]) continue;
 		int nt = c[0][s] % 7;
 		// Do not process notes that are not harmonic
-		if (nt != de1 && nt != de2 && nt != de3) continue;
+		if (nt != de1 && nt != de2 && nt != de3 && 
+			(nt != de4 || severity[sp][vc][vp][194] > 60)) continue;
 		// Process only lower notes
 		if (c[0][s] > lhbc) continue;
 		// For left sus and isus check hstart
@@ -3937,9 +3943,11 @@ void CP2R::EvalMshHarm(int hvar) {
 			}
 		}
 	}
-	// Detect 6/4 chord
+	// Detect 4/2 chord
+	if (lhbc % 7 == (hvar + 6) % 7) hpenalty += 10;
+	// Detect 6/4 and 4/3 chord
 	if (lhbc % 7 == (hvar + 4) % 7) hpenalty += 10;
-	// Detect 6th chord
+	// Detect 6th and 6/5 chord
 	if (lhbc % 7 == (hvar + 2) % 7) hpenalty += 1;
 	// Find root in harmonic notes
 	int found_de1 = 0;
@@ -4588,8 +4596,7 @@ void CP2R::EvaluateMsh() {
 			else if (msh[v][s] == pDownbeat) FlagA(v, 83, s, s, v, 100);
 			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v, 100);
 			else if (msh[v][s] == pLeapFrom) FlagA(v, 187, s, s, v, 100);
-			else if (msh[v][s] == pSusStart) 
-				FlagA(v, 458, s, s, v, 100);
+			else if (msh[v][s] == pSusStart) FlagA(v, 458, s, s, v, 100);
 			// pSusRes does not have separate flag, because it is marked as not resolved
 			// This is protection against wrong melodic shape value
 			else if (msh[v][s] > 0) FlagA(v, 83, s, s, v, 100);
