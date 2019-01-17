@@ -3736,6 +3736,10 @@ int CP2R::EvalHarm() {
 			FlagV(v, 555, s);
 			continue;
 		}
+		// Prohibit 7th chord
+		if (cctp[i][3]) {
+			FlagV(v, 194, s);
+		}
 		// Prohibit 64 chord
 		if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
 			FlagV(v, 433, s);
