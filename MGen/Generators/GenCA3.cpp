@@ -695,7 +695,6 @@ void CGenCA3::GetCPKey() {
 				++cchn[0][pcc[v][s]];
 			}
 			int lchm;
-			int lchm_alter;
 			int rat;
 			GetHarm(lchm, rat);
 			bn = c_cc[lchm + 14] % 12;

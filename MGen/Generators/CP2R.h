@@ -284,7 +284,7 @@ protected:
 	inline int GetTriRes(int cc1, int cc2);
 	inline void FlagLTDouble();
 	inline void GetChordTones();
-	inline void GetHarmNotes(int lchm, int lchm_alter, vector<int>& lcct);
+	inline void GetHarmNotes(int lchm, int fis, int gis, vector<int>& lcct);
 	inline void FlagTriDouble();
 	inline void FlagPcoApart();
 	inline void FlagFCR();

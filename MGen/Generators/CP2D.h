@@ -159,7 +159,7 @@ protected:
 	inline void GetVp();
 	void LoadHarmNotation();
 	void LoadIntNames();
-	CString GetHarmName(int pitch, int alter);
+	CString GetHarmName(int pitch, int fis, int gis);
 	static CString GetPrintKey(int lbn, int lmode, int mminor = -1);
 	void TestCC_C2();
 	void BuildPitchConvert();
@@ -333,7 +333,9 @@ protected:
 	// Harmony notation
 	vector <CString> HarmName;
 	vector <CString> HarmName_m;
-	vector <CString> HarmName_ma;
+	vector <CString> HarmName_mf; // fis
+	vector <CString> HarmName_mg; // gis
+	vector <CString> HarmName_mfg; // gis fis
 	vector <CString> harm_notation_name;
 
 	// Interval names
@@ -436,7 +438,8 @@ protected:
 	vector <vector<int>> cctp; // [hs][4] Chord tones present for each harmony (1 - any msh, 2 - msh required)
 	vector <int> chm; // [hs] Current harmonic meaning (diatonic)
 	vector <int> chm_alter; // [hs] Type of harmonic meaning
-	vector <int> chm_alter2; // [hs] Type of harmonic meaning (detected in GetMsh)
+	vector <int> chm_fis; // [hs] F# in chm in melodic Am
+	vector <int> chm_gis; // [hs] G# in chm in melodic Am
 	int hv; // Current harmony variant being analysed
 	int hv_alt; // Current harmony alteration variant being analysed
 	vector<int> empty_chn;

@@ -639,7 +639,7 @@ void CP2R::SendHarmMarks() {
 			vi = vid[v];
 			if (cc[v][s]) break;
 		}
-		mark[step0 + s][vi] = GetHarmName(chm[hs], chm_alter[hs]);
+		mark[step0 + s][vi] = GetHarmName(chm[hs], chm_fis[hs], chm_gis[hs]);
 		if (show_harmony_bass && chm[hs] > -1) {
 			if (cctp[hs][3] == 2) {
 				if ((hbc[hs] % 7 - chm[hs] + 7) % 7 == 2) {
@@ -3700,8 +3700,10 @@ int CP2R::FailHarm() {
 	CHECK_READY(DR_fli, DR_pc);
 	CHECK_READY(DR_msh);
 	SET_READY(DR_hli, DR_hbc);
-	chm_alter.clear();
-	chm_alter.resize(hli.size(), 0);
+	chm_fis.clear();
+	chm_fis.resize(hli.size(), 0);
+	chm_gis.clear();
+	chm_gis.resize(hli.size(), 0);
 	chns.clear();
 	cchns.clear();
 	chns.resize(hli.size(), empty_chn);
@@ -3729,13 +3731,13 @@ int CP2R::FailHarm() {
 		if (mminor) {
 			// For all chords that include G/G# note in Am
 			if (chm[hs] == 6 || chm[hs] == 4 || chm[hs] == 2) {
-				if (cchns[hs][11] > cchns[hs][10]) chm_alter[hs] = 1;
-				else if (cchns[hs][10] > cchns[hs][11]) chm_alter[hs] = -1;
+				if (cchns[hs][11] > cchns[hs][10]) chm_gis[hs] = 1;
+				else if (cchns[hs][10] > cchns[hs][11]) chm_gis[hs] = -1;
 			}
 			// For all chords that include F/F# note in Am
 			if (chm[hs] == 5 || chm[hs] == 3 || chm[hs] == 1) {
-				if (cchns[hs][9] > cchns[hs][8]) chm_alter[hs] = 1;
-				else if (cchns[hs][9] > cchns[hs][8]) chm_alter[hs] = -1;
+				if (cchns[hs][9] > cchns[hs][8]) chm_fis[hs] = 1;
+				else if (cchns[hs][9] > cchns[hs][8]) chm_fis[hs] = -1;
 			}
 		}
 	}
@@ -3798,17 +3800,17 @@ int CP2R::EvalHarm() {
 				s > 0 && pc[0][s - 1] == 4) FlagV(v, 48, s);
 			if (mminor) {
 				// Prohibit dVII (GBD) in root position after S (DF#A) in root position
-				if (chm[i] == 6 && chm[i - 1] == 3 && chm_alter[i] < 1 && chm_alter[i - 1] == 1) {
+				if (chm[i] == 6 && chm[i - 1] == 3 && chm_gis[i] < 1 && chm_fis[i - 1] == 1) {
 					if (ls > 0 && pc[0][s] == 6 && pc[0][fli[v][ls - 1]] == 3) FlagV(v, 308, s);
 				}
 				// Prohibit DTIII (CEG) in root position after dVII (GBD) in root position
-				if (chm[i] == 2 && chm[i - 1] == 6 && chm_alter[i] < 1 && chm_alter[i - 1] < 1) {
+				if (chm[i] == 2 && chm[i - 1] == 6 && chm_gis[i] < 1 && chm_gis[i - 1] < 1) {
 					if (ls > 0 && pc[0][s] == 2 && pc[0][fli[v][ls - 1]] == 6) FlagV(v, 309, s);
 				}
 			}
 			if (mode == 9) {
 				// Prohibit DTIII (CEG) in root position after SII (BDF)
-				if (chm[i] == 2 && chm[i - 1] == 1 && chm_alter[i] < 1 && chm_alter[i - 1] < 1) {
+				if (chm[i] == 2 && chm[i - 1] == 1 && chm_gis[i] < 1 && chm_fis[i - 1] < 1) {
 					if (ls > 0 && pc[0][s] == 2) FlagV(v, 139, s);
 				}
 			}
@@ -4607,9 +4609,6 @@ void CP2R::EvaluateMsh() {
 			else continue;
 		}
 		if (!nih[v][s]) {
-			if (cp_id == 3 && ms == 9) {
-				WriteLog(1, "WOW");
-			}
 			if (msh[v][s] == pFirst) FlagA(v, 551, s, s, v, 100);
 			else if (msh[v][s] == pDownbeat) FlagA(v, 83, s, s, v, 100);
 			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v, 100);
@@ -4776,7 +4775,7 @@ void CP2R::GetMsh() {
 	CHECK_READY(DR_fli, DR_vca, DR_pc);
 	flaga.clear();
 	chm.clear();
-	chm_alter2.clear();
+	chm_alter.clear();
 	hli.clear();
 	hli2.clear();
 	chn.clear();
@@ -4818,7 +4817,6 @@ void CP2R::GetMsh() {
 		}
 		// Main chord
 		int lchm;
-		int lchm_alter;
 		int rat;
 		// Possible chords
 		vector <int> cpos;
@@ -5001,12 +4999,12 @@ void CP2R::GetMsh() {
 			if (best_shp) {
 				// Add first harmony
 				chm.push_back(best_hv);
-				chm_alter2.push_back(best_hv_alt);
+				chm_alter.push_back(best_hv_alt);
 				hli.push_back(s0);
 				hli2.push_back(s0 + best_shp - 1);
 				// Add second harmony
 				chm.push_back(best_hv2);
-				chm_alter2.push_back(best_hv_alt2);
+				chm_alter.push_back(best_hv_alt2);
 				hli.push_back(s0 + best_shp);
 				hli2.push_back(s0 + npm - 1);
 				hs += 2;
@@ -5014,7 +5012,7 @@ void CP2R::GetMsh() {
 			else {
 				// Add one harmony
 				chm.push_back(best_hv);
-				chm_alter2.push_back(best_hv_alt);
+				chm_alter.push_back(best_hv_alt);
 				hli.push_back(s0);
 				hli2.push_back(s0 + npm - 1);
 				++hs;
@@ -5023,7 +5021,7 @@ void CP2R::GetMsh() {
 		// Add one empty harmony
 		else {
 			chm.push_back(-1);
-			chm_alter2.push_back(0);
+			chm_alter.push_back(0);
 			hli.push_back(s0);
 			hli2.push_back(s0 + npm - 1);
 			++hs;
@@ -5956,24 +5954,26 @@ void CP2R::FlagLTDouble() {
 void CP2R::GetChordTones() {
 	CHECK_READY(DR_hli);
 	for (hs = 0; hs < hli.size(); ++hs) {
-		GetHarmNotes(chm[hs], chm_alter[hs], cct[hs]);
+		GetHarmNotes(chm[hs], chm_fis[hs], chm_gis[hs], cct[hs]);
 	}
 }
 
-void CP2R::GetHarmNotes(int lchm, int lchm_alter, vector<int> &lcct) {
+void CP2R::GetHarmNotes(int lchm, int fis, int gis, vector<int> &lcct) {
 	lcct[0] = (c_cc[lchm + 7] - bn + 12) % 12;
 	lcct[1] = (c_cc[lchm + 9] - bn + 12) % 12;
 	lcct[2] = (c_cc[lchm + 11] - bn + 12) % 12;
 	lcct[3] = (c_cc[lchm + 13] - bn + 12) % 12;
-	if (lchm_alter) {
+	if (fis) {
 		if (lcct[0] == 8) lcct[0] = 9;
-		else if (lcct[0] == 10) lcct[0] = 11;
 		if (lcct[1] == 8) lcct[1] = 9;
-		else if (lcct[1] == 10) lcct[1] = 11;
 		if (lcct[2] == 8) lcct[2] = 9;
-		else if (lcct[2] == 10) lcct[2] = 11;
 		if (lcct[3] == 8) lcct[3] = 9;
-		else if (lcct[3] == 10) lcct[3] = 11;
+	}
+	if (gis) {
+		if (lcct[0] == 10) lcct[0] = 11;
+		if (lcct[1] == 10) lcct[1] = 11;
+		if (lcct[2] == 10) lcct[2] = 11;
+		if (lcct[3] == 10) lcct[3] = 11;
 	}
 }
 
@@ -6139,10 +6139,10 @@ void CP2R::FlagFCR() {
 		int fcr = 0;
 		// Prohibit VI<->VI# containing progression
 		if (chm[hs] % 2 && chm[hs - 1] % 2) {
-			if (chm_alter[hs] == 1 && chm_alter[hs - 1] == -1) {
+			if (chm_fis[hs] == 1 && chm_fis[hs - 1] == -1) {
 				fcr = FindFCRNotes(8, 9);
 			}
-			else if (chm_alter[hs] == -1 && chm_alter[hs - 1] == 1) {
+			else if (chm_fis[hs] == -1 && chm_fis[hs - 1] == 1) {
 				fcr = FindFCRNotes(9, 8);
 			}
 			// If both notes exist in external voices, flag red
@@ -6157,10 +6157,10 @@ void CP2R::FlagFCR() {
 		fcr = 0;
 		// Prohibit VII<->VII# containing progression
 		if (chm[hs] && chm[hs] % 2 == 0 && chm[hs - 1] && chm[hs - 1] % 2 == 0) {
-			if (chm_alter[hs] == 1 && chm_alter[hs - 1] == -1) {
+			if (chm_gis[hs] == 1 && chm_gis[hs - 1] == -1) {
 				fcr = FindFCRNotes(10, 11);
 			}
-			else if (chm_alter[hs] == -1 && chm_alter[hs - 1] == 1) {
+			else if (chm_gis[hs] == -1 && chm_gis[hs - 1] == 1) {
 				fcr = FindFCRNotes(11, 10);
 			}
 			// If both notes exist in external voices, flag red

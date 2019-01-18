@@ -22,7 +22,9 @@ CP2D::CP2D() {
 	// Harmony notation
 	HarmName.resize(7);
 	HarmName_m.resize(7);
-	HarmName_ma.resize(7);
+	HarmName_mf.resize(7);
+	HarmName_mg.resize(7);
+	HarmName_mfg.resize(7);
 	// Test
 #ifdef _DEBUG
 	//TestCC_C2();
@@ -926,13 +928,18 @@ void CP2D::LoadHarmNotation() {
 					for (int i = 1; i < 8; ++i) HarmName[i - 1] = sv[i];
 				if (sv[0] == "Minor natural")
 					for (int i = 1; i < 8; ++i) HarmName_m[i - 1] = sv[i];
-				if (sv[0] == "Minor altered")
-					for (int i = 1; i < 8; ++i) HarmName_ma[i - 1] = sv[i];
+				if (sv[0] == "Minor VI#")
+					for (int i = 1; i < 8; ++i) HarmName_mf[i - 1] = sv[i];
+				if (sv[0] == "Minor VII#")
+					for (int i = 1; i < 8; ++i) HarmName_mg[i - 1] = sv[i];
+				if (sv[0] == "Minor VI# VII#")
+					for (int i = 1; i < 8; ++i) HarmName_mfg[i - 1] = sv[i];
 			}
 		}
 	}
 	fs.close();
-	if (HarmName[6].IsEmpty() || HarmName_m[6].IsEmpty() || HarmName_ma[6].IsEmpty()) {
+	if (HarmName[6].IsEmpty() || HarmName_m[6].IsEmpty() || HarmName_mf[6].IsEmpty()
+		|| HarmName_mg[6].IsEmpty() || HarmName_mfg[6].IsEmpty()) {
 		CString est;
 		est.Format("Error loading harmonic notation");
 		WriteLog(5, est);
@@ -992,10 +999,12 @@ void CP2D::LoadIntNames() {
 	}
 }
 
-CString CP2D::GetHarmName(int pitch, int alter) {
+CString CP2D::GetHarmName(int pitch, int fis, int gis) {
 	if (pitch == -1) return "?";
 	if (mode == 9) {
-		if (alter == 1) return HarmName_ma[pitch];
+		if (fis == 1 && gis == 1) return HarmName_mfg[pitch];
+		else if (fis == 1) return HarmName_mf[pitch];
+		else if (gis == 1) return HarmName_mg[pitch];
 		else return HarmName_m[pitch];
 	}
 	else return HarmName[pitch];
