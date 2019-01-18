@@ -4607,6 +4607,9 @@ void CP2R::EvaluateMsh() {
 			else continue;
 		}
 		if (!nih[v][s]) {
+			if (cp_id == 3 && ms == 9) {
+				WriteLog(1, "WOW");
+			}
 			if (msh[v][s] == pFirst) FlagA(v, 551, s, s, v, 100);
 			else if (msh[v][s] == pDownbeat) FlagA(v, 83, s, s, v, 100);
 			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v, 100);
@@ -4832,34 +4835,48 @@ void CP2R::GetMsh() {
 		for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
 			hv = hv2 % 7;
 			if (!cpos[hv]) continue;
-			for (hv_alt = 0; hv_alt <= 1; ++hv_alt) {
+			for (hv_alt = 0; hv_alt <= 4; ++hv_alt) {
 				// Only for melodic minor
 				if (hv_alt && !mminor) continue;
 				fill(cchnv[0].begin(), cchnv[0].end(), 0);
 				cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
 				cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 1;
 				cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 1;
-				// Prohibit 7th only if its severity is red
+				// Prohibit 7th if its severity is red
 				if (severity[sp][vc][vp][194] <= 60) {
 					cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 1;
 				}
 				if (mminor) {
-					if (hv_alt) {
-						if (cchnv[0][8]) {
-							// Skip if this variant conflicts with detected notes
-							if (cchn[hs][8]) continue;
-							// Convert to altered
-							cchnv[0][8] = 0;
-							cchnv[0][9] = 1;
-						}
-						else if (cchnv[0][10]) {
-							// Skip if this variant conflicts with detected notes
-							if (cchn[hs][10]) continue;
-							// Convert to altered
-							cchnv[0][10] = 0;
-							cchnv[0][11] = 1;
-						}
-						else continue;
+					if (hv_alt == 3) {
+						// Skip if no notes to alter
+						if (!cchnv[0][8] || !cchnv[0][10]) continue;
+						// Skip if this variant conflicts with detected notes
+						if (cchn[hs][8]) continue;
+						if (cchn[hs][10]) continue;
+						// Convert to altered
+						cchnv[0][8] = 0;
+						cchnv[0][9] = 1;
+						// Convert to altered
+						cchnv[0][10] = 0;
+						cchnv[0][11] = 1;
+					}
+					if (hv_alt == 2) {
+						// Skip if no notes to alter
+						if (!cchnv[0][10]) continue;
+						// Skip if this variant conflicts with detected notes
+						if (cchn[hs][10]) continue;
+						// Convert to altered
+						cchnv[0][10] = 0;
+						cchnv[0][11] = 1;
+					}
+					if (hv_alt == 1) {
+						// Skip if no notes to alter
+						if (!cchnv[0][8]) continue;
+						// Skip if this variant conflicts with detected notes
+						if (cchn[hs][8]) continue;
+						// Convert to altered
+						cchnv[0][8] = 0;
+						cchnv[0][9] = 1;
 					}
 					else {
 						if (cchnv[0][8]) {
@@ -4897,8 +4914,8 @@ void CP2R::GetMsh() {
 				EvalHarmIncomplete(hv);
 #if defined(_DEBUG)
 				CString st, est;
-				est.Format("Checked chord %s%s in measure %d:%d, hpenalty %d, flags %d:",
-					degree_name[hv], hv_alt ? "*" : "", cp_id + 1, ms + 1,
+				est.Format("Checked chord %s%d in measure %d:%d, hpenalty %d, flags %d:",
+					degree_name[hv], hv_alt, cp_id + 1, ms + 1,
 					hpenalty, flaga.size());
 				est += " msh:";
 				for (v = 0; v < av_cnt; ++v) {
