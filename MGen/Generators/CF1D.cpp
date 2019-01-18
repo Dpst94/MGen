@@ -527,7 +527,7 @@ void CF1D::CheckConfig() {
 }
 
 void CF1D::LoadHarmNotation() {
-	CString fname = "configs\\harm\\harm-notation.csv";
+	CString fname = "configs\\harm\\ca2-harm-notation.csv";
 	if (!CGLib::fileExists(fname)) {
 		CString est;
 		est.Format("Cannot find file: %s", fname);
