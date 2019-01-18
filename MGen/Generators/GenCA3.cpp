@@ -168,7 +168,9 @@ int CGenCA3::XML_to_CP() {
 		// Position of note inside xml measure
 		float xpos2 = 0;
 		vname[v] = xfi.voice[vi].name;
-		vname[v].Replace("MusicXML ", "");
+		vname[v].Replace("MusicXML", "");
+		vname[v].Trim();
+		if (vname[v].IsEmpty()) vname[v] = "Part";
 		unique_part_id.insert(xfi.voice[vi].id);
 		track_id[v] = unique_part_id.size();
 		track_name[v].Format("%s (%s), staff %d, voice %d, chord %d", vname[v], xfi.voice[vi].id, xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord);
