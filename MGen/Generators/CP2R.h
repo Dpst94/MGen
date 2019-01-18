@@ -30,6 +30,10 @@
 #define DR_nlen					17
 #define DR_nih					18
 #define DR_resol				19
+#define DR_chm_fis			20
+#define DR_chns   			21
+#define DR_cct    			22
+#define DR_cctp    			23
 
 #ifdef CF_DEBUG
 

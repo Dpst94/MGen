@@ -631,7 +631,8 @@ void CP2R::MakeBellDyn(int v, int step1, int step2, int dyn1, int dyn2, int dyn_
 }
 
 void CP2R::SendHarmMarks() {
-	CHECK_READY(DR_hli, DR_hbc);
+	CHECK_READY(DR_hli, DR_hbc, DR_chm_fis);
+	CHECK_READY(DR_cctp);
 	for (hs = 0; hs < hli.size(); ++hs) {
 		s = hli[hs];
 		// Find lowest voice with note
@@ -1882,7 +1883,7 @@ int CP2R::FailStagnation(int steps, int notes, int stag_fl) {
 
 // Prohibit multiple culminations
 int CP2R::FailMultiCulm() {
-	CHECK_READY(DR_fli, DR_nmin);
+	CHECK_READY(DR_fli, DR_nmin, DR_vca);
 	int culm_count = 0;
 	int culm_ls = -1;
 	int multi_culm_fired = 0;
@@ -1930,6 +1931,7 @@ int CP2R::FailMultiCulm() {
 
 int CP2R::FailFirstNotes() {
 	CHECK_READY(DR_fli, DR_pc, DR_sus);
+	CHECK_READY(DR_vca);
 	// Prohibit first note not tonic
 	s = fin[v];
 	if (v == hva[s]) vp = vpExt;
@@ -1952,6 +1954,7 @@ int CP2R::FailFirstNotes() {
 
 int CP2R::FailLastNotes() {
 	CHECK_READY(DR_fli, DR_pc, DR_nih);
+	CHECK_READY(DR_vca);
 	// Do not check if melody is short yet
 	if (fli_size[v] < 3) return 0;
 	// Prohibit last note not tonic
@@ -3474,7 +3477,7 @@ void CP2R::GetNoteLen() {
 
 // Detect repeating notes. Step2 excluding
 int CP2R::FailNoteLen() {
-	CHECK_READY(DR_nlen, DR_fli);
+	CHECK_READY(DR_nlen, DR_fli, DR_beat);
 	// Get min sus length
 	min_sus = 6;
 	//if (npm == 8) min_sus = 6;
@@ -3652,6 +3655,9 @@ void CP2R::GetHarm(int &lchm, int &rating) {
 }
 
 void CP2R::GetChordTonePresent() {
+	CHECK_READY(DR_fli, DR_msh, DR_hli);
+	CHECK_READY(DR_cct, DR_pc);
+	SET_READY(DR_cctp);
 	cctp.clear();
 	cctp.resize(hli.size(), vector<int>(4));
 	for (hs = 0; hs < hli.size(); ++hs) {
@@ -3680,6 +3686,7 @@ void CP2R::GetChordTonePresent() {
 }
 
 void CP2R::RemoveMinimumMsh() {
+	CHECK_READY(DR_fli, DR_msh, DR_hli);
 	for (hs = 0; hs < hli.size(); ++hs) {
 		if (chm[hs] != -1) continue;
 		for (v = 0; v < av_cnt; ++v) {
@@ -3698,8 +3705,8 @@ void CP2R::RemoveMinimumMsh() {
 
 int CP2R::FailHarm() {
 	CHECK_READY(DR_fli, DR_pc);
-	CHECK_READY(DR_msh);
-	SET_READY(DR_hli, DR_hbc);
+	CHECK_READY(DR_msh, DR_hli);
+	SET_READY(DR_chm_fis, DR_chns, DR_hbc);
 	chm_fis.clear();
 	chm_fis.resize(hli.size(), 0);
 	chm_gis.clear();
@@ -3744,7 +3751,6 @@ int CP2R::FailHarm() {
 #if !defined(_DEBUG)
 	RemoveMinimumMsh();
 #endif
-	GetBhli();
 	GetHarmBass();
 	GetChordTones();
 	GetChordTonePresent();
@@ -3764,7 +3770,7 @@ int CP2R::FailHarm() {
 
 int CP2R::EvalHarm() {
 	CHECK_READY(DR_fli, DR_pc, DR_hli);
-	CHECK_READY(DR_hbc);
+	CHECK_READY(DR_hbc, DR_chm_fis);
 	int pen1;
 	int p2c = 0; // Count of consecutive penalty 2
 	int p3c = 0; // Count of consecutive penalty 3
@@ -3932,6 +3938,7 @@ void CP2R::GetBhli() {
 
 void CP2R::EvalMshHarm(int hvar) {
 	CHECK_READY(DR_fli, DR_c, DR_msh);
+	CHECK_READY(DR_vca);
 	// Get harmonic notes
 	int de1 = hvar;
 	int de2 = (de1 + 2) % 7;
@@ -4068,7 +4075,7 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 
 void CP2R::GetHarmBass() {
 	SET_READY(DR_hbc);
-	CHECK_READY(DR_fli, DR_c);
+	CHECK_READY(DR_fli, DR_c, DR_vca);
 	SET_READY(DR_beat, DR_hli);
 	ha64.clear();
 	hbcc.clear();
@@ -4773,6 +4780,7 @@ void CP2R::GetMinimumMsh() {
 
 void CP2R::GetMsh() {
 	SET_READY(DR_msh, DR_nih, DR_resol);
+	SET_READY(DR_hli);
 	CHECK_READY(DR_fli, DR_vca, DR_pc);
 	flaga.clear();
 	chm.clear();
@@ -5030,11 +5038,12 @@ void CP2R::GetMsh() {
 			++hs;
 		}
 	}
+	GetBhli();
 }
 
 void CP2R::GetMsh2(int sec_hp) {
 	CHECK_READY(DR_msh, DR_nih, DR_resol);
-	CHECK_READY(DR_fli, DR_sus, DR_pc);
+	CHECK_READY(DR_fli, DR_pc);
 	// Detect second chord position
 	// Main chord
 	vector<int> lchm;
@@ -5984,7 +5993,8 @@ void CP2R::FlagLTDouble() {
 }
 
 void CP2R::GetChordTones() {
-	CHECK_READY(DR_hli);
+	SET_READY(DR_cct);
+	CHECK_READY(DR_hli, DR_chm_fis);
 	for (hs = 0; hs < hli.size(); ++hs) {
 		GetHarmNotes(chm[hs], chm_fis[hs], chm_gis[hs], cct[hs]);
 	}
@@ -6011,7 +6021,7 @@ void CP2R::GetHarmNotes(int lchm, int fis, int gis, vector<int> &lcct) {
 
 void CP2R::FlagTriDouble() {
 	CHECK_READY(DR_fli, DR_vca, DR_hli);
-	CHECK_READY(DR_pc);
+	CHECK_READY(DR_pc, DR_cct);
 	for (hs = 0; hs < hli.size(); ++hs) {
 		// Skip chords without tritone
 		if ((cct[hs][2] - cct[hs][0] + 12) % 12 != 6) continue;
@@ -6059,7 +6069,7 @@ void CP2R::FlagTriDouble() {
 
 void CP2R::FlagPcoApart() {
 	CHECK_READY(DR_fli, DR_vca, DR_sus);
-	CHECK_READY(DR_msh);
+	CHECK_READY(DR_msh, DR_hli);
 	int av, av2;
 	for (v = 0; v < av_cnt; ++v) {
 		for (v2 = v + 1; v2 < av_cnt; ++v2) {
@@ -6164,7 +6174,7 @@ void CP2R::FlagPcoApart() {
 }
 
 void CP2R::FlagFCR() {
-	CHECK_READY(DR_hli);
+	CHECK_READY(DR_hli, DR_chm_fis);
 	if (!mminor) return;
 	// Find pair of neighboring chords, which contain FCR notes as chord tones
 	for (hs = 1; hs < hli.size(); ++hs) {
@@ -6211,6 +6221,7 @@ void CP2R::FlagFCR() {
 // step1 is set to last step of rightmost FCR note in first harmony
 // step2 is set to first step of leftmost FCR note in second harmony
 int CP2R::FindFCRNotes(int pcc1, int pcc2) {
+	CHECK_READY(DR_vca);
 	// FCR voices array
 	vector<int> fva, fva2;
 	// FCR steps array
