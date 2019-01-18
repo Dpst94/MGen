@@ -212,6 +212,7 @@ protected:
 	vector<FlagInfo> flaga; // Flags of current variant
 	FlagInfo temp_flaginfo;
 	int hpenalty; // Harmonic penalty
+	int nct_count; // Non-chord tones count in current harmonic variant evaluation
 	int hstart; // (s) Start of current harmony
 	int hend; // (s) End of current harmony
 

@@ -3720,7 +3720,7 @@ int CP2R::FailHarm() {
 					chns[hs][pc[v][s]] = 2;
 					cchns[hs][pcc[v][s]] = 2;
 					// Delete chord if non-chord tone is in wrong place
-					if (!nih[v][s5]) chm[hs] = -1;
+					//if (!nih[v][s5]) chm[hs] = -1;
 				}
 				else {
 					chns[hs][pc[v][s]] = max(1, chn[hs][pc[v][s]]);
@@ -4609,6 +4609,7 @@ void CP2R::EvaluateMsh() {
 			else continue;
 		}
 		if (!nih[v][s]) {
+			++nct_count;
 			if (msh[v][s] == pFirst) FlagA(v, 551, s, s, v, 100);
 			else if (msh[v][s] == pDownbeat) FlagA(v, 83, s, s, v, 100);
 			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v, 100);
@@ -4787,6 +4788,7 @@ void CP2R::GetMsh() {
 		chn.resize(hs + 1, empty_chn);
 		cchn.resize(hs + 1, empty_cchn);
 		hpenalty = 0;
+		nct_count = 0;
 		s0 = mli[ms];
 		hstart = s0;
 		hend = s0 + npm - 1;
@@ -4889,6 +4891,7 @@ void CP2R::GetMsh() {
 				}
 				flaga.clear();
 				hpenalty = 0;
+				nct_count = 0;
 				for (v = 0; v < av_cnt; ++v) {
 					sp = vsp[v];
 					GetMeasureMsh(-1);
@@ -4912,9 +4915,9 @@ void CP2R::GetMsh() {
 				EvalHarmIncomplete(hv);
 #if defined(_DEBUG)
 				CString st, est;
-				est.Format("Checked chord %s%d in measure %d:%d, hpenalty %d, flags %d:",
+				est.Format("Checked chord %s%d in measure %d:%d, hpenalty %d, nct %d, flags %d:",
 					degree_name[hv], hv_alt, cp_id + 1, ms + 1,
-					hpenalty, flaga.size());
+					hpenalty, nct_count, flaga.size());
 				est += " msh:";
 				for (v = 0; v < av_cnt; ++v) {
 					for (int i = 0; i < npm; ++i) {
@@ -4938,7 +4941,7 @@ void CP2R::GetMsh() {
 				WriteLog(3, est);
 #endif
 				// Save best variant
-				if (hpenalty < min_hpenalty) {
+				if (hpenalty < min_hpenalty && !nct_count) {
 #if defined(_DEBUG)
 					WriteLog(3, "Selected best hpenalty");
 #endif
@@ -5170,6 +5173,7 @@ void CP2R::GetMsh2(int sec_hp) {
 					}
 					flaga.clear();
 					hpenalty = 0;
+					nct_count = 0;
 					for (v = 0; v < av_cnt; ++v) {
 						sp = vsp[v];
 						GetMeasureMsh(s0 + sec_hp);
@@ -5224,10 +5228,10 @@ void CP2R::GetMsh2(int sec_hp) {
 					EvalHarmIncomplete(hv3);
 #if defined(_DEBUG)
 					CString st, est;
-					est.Format("Checked chords %s%s %s%s in measure %d:%d, hpenalty %d, flags %d:",
+					est.Format("Checked chords %s%s %s%s in measure %d:%d, hpenalty %d, nct %d, flags %d:",
 						degree_name[hv], hv_alt ? "*" : "",
 						degree_name[hv3], hv_alt2 ? "*" : "",
-						cp_id + 1, ms + 1, hpenalty, flaga.size());
+						cp_id + 1, ms + 1, hpenalty, nct_count, flaga.size());
 					est += " msh:";
 					for (v = 0; v < av_cnt; ++v) {
 						for (int i = 0; i < npm; ++i) {
@@ -5257,7 +5261,7 @@ void CP2R::GetMsh2(int sec_hp) {
 					WriteLog(3, est);
 #endif
 					// Save best variant
-					if (hpenalty < min_hpenalty) {
+					if (hpenalty < min_hpenalty && !nct_count) {
 #if defined(_DEBUG)
 						WriteLog(3, "Selected best hpenalty");
 #endif
