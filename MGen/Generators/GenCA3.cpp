@@ -618,7 +618,7 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 	title = m_algo_name + ": " + my_config + " (" +
 		CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M") + ")";
 	ly_fs.open(dir + "\\" + fname + ".ly");
-	read_file_sv("configs\\ly\\header.ly", sv);
+	read_file_sv("configs\\ly2\\header.ly", sv);
 	for (int i = 0; i < sv.size(); ++i) {
 		sv[i].Replace("$SUBTITLE$", title);
 		sv[i].Replace("$TITLE$", "");
@@ -652,7 +652,7 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 	if (ctools_task_id) ly_fs << " \\with-url #\"http://artportal.su/ctools/job.php?j_id=" << ctools_task_id << "\" \\with-color #(rgb-color 0 0 1) \\underline \"Composer Tools task #" << ctools_task_id << "\" ";
 	ly_fs << "#(string-append \"Engraved by LilyPond \" (lilypond-version))";
 	ly_fs << "}}\n";
-	read_file_sv("configs\\ly\\footer.ly", sv);
+	read_file_sv("configs\\ly2\\footer.ly", sv);
 	write_file_sv(ly_fs, sv);
 	ly_fs << "\\markup \\tiny { \\vspace #1.5\n Harmonic notation: " + harm_notation_name[harm_notation] + " }\n";
 	ly_fs.close();

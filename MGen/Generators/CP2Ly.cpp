@@ -652,7 +652,7 @@ void CP2Ly::SaveLyCP() {
 		ly_ly_st += "  \\major\n";
 		st.Format("  \\time %d/%d\n", npm * btype / 8, btype);
 		ly_ly_st += st;
-		read_file_sv("configs\\ly\\staff.ly", sv);
+		read_file_sv("configs\\ly2\\staff.ly", sv);
 		for (int i = 0; i < sv.size(); ++i) {
 			ly_ly_st += sv[i] + "\n";
 		}
@@ -701,7 +701,7 @@ void CP2Ly::SendLySeparate() {
 	ly_ly_st += "\\new Staff = \"staffs\" \\with {\n";
 	st.Format("  \\time %d/4\n", npm / 2);
 	ly_ly_st += st;
-	read_file_sv("configs\\ly\\separate-staff.ly", sv);
+	read_file_sv("configs\\ly2\\separate-staff.ly", sv);
 	for (int i = 0; i < sv.size(); ++i) {
 		ly_ly_st += sv[i] + "\n";
 	}
