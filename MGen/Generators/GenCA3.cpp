@@ -230,10 +230,6 @@ int CGenCA3::XML_to_CP() {
 	im.resize(c_len);
 	ep2 = c_len;
 	ResizeVectors(t_allocated, av_cnt);
-	// Send track information
-	for (v = 0; v < av_cnt; ++v) {
-
-	}
 	// Explode music into separate exercises
 	// State: 0 - find note, 1 - find pause
 	int state = 0;
@@ -378,6 +374,12 @@ int CGenCA3::CheckXML() {
 int CGenCA3::GetCP() {
 	CString est;
 	av_cnt = cp[cp_id].size();
+	if (av_cnt > 9) {
+		est.Format("%d voices detected in exercise. Maximum 9 voices is supported. Ignoring exercise.",
+			av_cnt);
+		WriteLogLy(5, est, 0);
+		return 1;
+	}
 	cc.resize(av_cnt);
 	src_alter.resize(av_cnt);
 	retr.resize(av_cnt);
