@@ -4835,7 +4835,7 @@ void CP2R::GetMsh() {
 		for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
 			hv = hv2 % 7;
 			if (!cpos[hv]) continue;
-			for (hv_alt = 0; hv_alt <= 4; ++hv_alt) {
+			for (hv_alt = 0; hv_alt < 4; ++hv_alt) {
 				// Only for melodic minor
 				if (hv_alt && !mminor) continue;
 				fill(cchnv[0].begin(), cchnv[0].end(), 0);
@@ -5088,7 +5088,7 @@ void CP2R::GetMsh2(int sec_hp) {
 	for (int hv2 = lchm[0] + 7; hv2 > lchm[0]; --hv2) {
 		hv = hv2 % 7;
 		if (!cpos[0][hv]) continue;
-		for (hv_alt = 0; hv_alt <= 1; ++hv_alt) {
+		for (hv_alt = 0; hv_alt < 4; ++hv_alt) {
 			// Only for melodic minor
 			if (hv_alt && !mminor) continue;
 			fill(cchnv[0].begin(), cchnv[0].end(), 0);
@@ -5100,22 +5100,36 @@ void CP2R::GetMsh2(int sec_hp) {
 				cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 1;
 			}
 			if (mminor) {
-				if (hv_alt) {
-					if (cchnv[0][8]) {
-						// Skip if this variant conflicts with detected notes
-						if (cchn[hs][8]) continue;
-						// Convert to altered
-						cchnv[0][8] = 0;
-						cchnv[0][9] = 1;
-					}
-					else if (cchnv[0][10]) {
-						// Skip if this variant conflicts with detected notes
-						if (cchn[hs][10]) continue;
-						// Convert to altered
-						cchnv[0][10] = 0;
-						cchnv[0][11] = 1;
-					}
-					else continue;
+				if (hv_alt == 3) {
+					// Skip if no notes to alter
+					if (!cchnv[0][8] || !cchnv[0][10]) continue;
+					// Skip if this variant conflicts with detected notes
+					if (cchn[hs][8]) continue;
+					if (cchn[hs][10]) continue;
+					// Convert to altered
+					cchnv[0][8] = 0;
+					cchnv[0][9] = 1;
+					// Convert to altered
+					cchnv[0][10] = 0;
+					cchnv[0][11] = 1;
+				}
+				if (hv_alt == 2) {
+					// Skip if no notes to alter
+					if (!cchnv[0][10]) continue;
+					// Skip if this variant conflicts with detected notes
+					if (cchn[hs][10]) continue;
+					// Convert to altered
+					cchnv[0][10] = 0;
+					cchnv[0][11] = 1;
+				}
+				if (hv_alt == 1) {
+					// Skip if no notes to alter
+					if (!cchnv[0][8]) continue;
+					// Skip if this variant conflicts with detected notes
+					if (cchn[hs][8]) continue;
+					// Convert to altered
+					cchnv[0][8] = 0;
+					cchnv[0][9] = 1;
 				}
 				else {
 					if (cchnv[0][8]) {
@@ -5131,7 +5145,7 @@ void CP2R::GetMsh2(int sec_hp) {
 			for (int hv4 = lchm[1] + 7; hv4 > lchm[1]; --hv4) {
 				int hv3 = hv4 % 7;
 				if (!cpos[1][hv3]) continue;
-				for (int hv_alt2 = 0; hv_alt2 <= 1; ++hv_alt2) {
+				for (int hv_alt2 = 0; hv_alt2 < 4; ++hv_alt2) {
 					// Only for melodic minor
 					if (hv_alt2 && !mminor) continue;
 					fill(cchnv[1].begin(), cchnv[1].end(), 0);
@@ -5143,22 +5157,36 @@ void CP2R::GetMsh2(int sec_hp) {
 						cchnv[1][(c_cc[hv + 20] + 24 - bn) % 12] = 1;
 					}
 					if (mminor) {
-						if (hv_alt2) {
-							if (cchnv[1][8]) {
-								// Skip if this variant conflicts with detected notes
-								if (cchn[hs + 1][8]) continue;
-								// Convert to altered
-								cchnv[1][8] = 0;
-								cchnv[1][9] = 1;
-							}
-							else if (cchnv[1][10]) {
-								// Skip if this variant conflicts with detected notes
-								if (cchn[hs + 1][10]) continue;
-								// Convert to altered
-								cchnv[1][10] = 0;
-								cchnv[1][11] = 1;
-							}
-							else continue;
+						if (hv_alt2 == 3) {
+							// Skip if no notes to alter
+							if (!cchnv[1][8] || !cchnv[1][10]) continue;
+							// Skip if this variant conflicts with detected notes
+							if (cchn[hs + 1][8]) continue;
+							if (cchn[hs + 1][10]) continue;
+							// Convert to altered
+							cchnv[1][8] = 0;
+							cchnv[1][9] = 1;
+							// Convert to altered
+							cchnv[1][10] = 0;
+							cchnv[1][11] = 1;
+						}
+						if (hv_alt2 == 2) {
+							// Skip if no notes to alter
+							if (!cchnv[1][10]) continue;
+							// Skip if this variant conflicts with detected notes
+							if (cchn[hs + 1][10]) continue;
+							// Convert to altered
+							cchnv[1][10] = 0;
+							cchnv[1][11] = 1;
+						}
+						if (hv_alt2 == 1) {
+							// Skip if no notes to alter
+							if (!cchnv[1][8]) continue;
+							// Skip if this variant conflicts with detected notes
+							if (cchn[hs + 1][8]) continue;
+							// Convert to altered
+							cchnv[1][8] = 0;
+							cchnv[1][9] = 1;
 						}
 						else {
 							if (cchnv[1][8]) {
