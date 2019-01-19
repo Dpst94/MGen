@@ -505,7 +505,7 @@ int CGenCA3::GetCPSpecies() {
 		if (my_sp <= 1) {
 			// For species 1 search voice with minimum notes (because counterpoint can contain slurs)
 			best_fli = 1000000;
-			for (v = 0; v < av_cnt; ++v) {
+			for (v = av_cnt-1; v >= 0; --v) {
 				if (fli_size[v] < best_fli) {
 					best_fli = fli_size[v];
 					best_v = v;
