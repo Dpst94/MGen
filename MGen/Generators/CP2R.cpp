@@ -601,14 +601,14 @@ void CP2R::SendCP() {
 			}
 		}
 		MergeNotes(step0, step0 + full_len - 1);
-		MakeBellDyn(vi, step0, step0 + full_len - 1, 50, 110, 0);
+		MakeBellDyn(vi, step0, step0 + c_len - 1, 50, 110, 0);
 		st.Format("#%d (from %s)",
 			cp_id + 1, bname_from_path(musicxml_file));
 		AddMelody(step0, step0 + full_len - 1, vi, st);
 	}
 	SendHarmMarks();
 	for (int s = step0 + real_len; s < step0 + full_len; ++s) tempo[s] = tempo[s - 1];
-	if (tempo_bell) MakeBellTempo(step0, step0 + full_len - 1, tempo[step0], tempo_bell * tempo[step0]);
+	if (tempo_bell) MakeBellTempo(step0, step0 + c_len - 1, tempo[step0], tempo_bell * tempo[step0]);
 	CountOff(step0, step0 + full_len - 1);
 	CountTime(step0, step0 + full_len - 1);
 	UpdateNoteMinMax(step0, step0 + full_len - 1);
