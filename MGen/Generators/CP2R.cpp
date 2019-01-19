@@ -984,16 +984,16 @@ void CP2R::GetNoteTypes() {
 
 			if (sm == 0) beat[v][ls] = 0;
 			else if (sm == 1) beat[v][ls] = 10;
-			else if (sm == 2) beat[v][ls] = 3;
+			else if (sm == 2) beat[v][ls] = 4;
 			else if (sm == 3) beat[v][ls] = 11;
 			else if (sm == 4) {
-				if (nlen[v] == 6) beat[v][ls] = 4;
+				if (nlen[v] == 6) beat[v][ls] = 5;
 				else beat[v][ls] = 1;
 			}
 			else if (sm == 5) beat[v][ls] = 12;
 			else if (sm == 6) {
 				if (nlen[v] == 6) beat[v][ls] = 1;
-				else beat[v][ls] = 4;
+				else beat[v][ls] = 5;
 			}
 			else if (sm == 7) beat[v][ls] = 13;
 			else if (sm == 8) beat[v][ls] = 2;
@@ -2751,11 +2751,13 @@ int CP2R::FailRhythm() {
 // Fail rhythm for species 2
 int CP2R::FailRhythm2() {
 	CHECK_READY(DR_fli, DR_sus, DR_nlen);
-	// Last measure not whole
+	// Last note not full measure length
 	if (c_len - fli[v][fli_size[v] - 1] < npm || 
 		(c_len == ep2 && llen[v][fli_size[v] - 1] != npm)) {
 		FlagV(v, 267, fli[v][fli_size[v] - 1]);
 	}
+	// Do not check for 5/4 because already checked
+	if (npm == 10) return 0;
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		// Slurred note inside measure
 		if (llen[v][ls] > nlen[v] && !sus[v][ls] && cc[v][fli[v][ls]]) FlagV(v, 160, fli[v][ls]);
@@ -2771,6 +2773,8 @@ int CP2R::FailRhythm4() {
 		(c_len == ep2 && llen[v][fli_size[v] - 1] != npm)) {
 		FlagV(v, 267, fli[v][fli_size[v] - 1]);
 	}
+	// Do not check for 5/4 because already checked
+	if (npm == 10) return 0;
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		// Slurred note inside measure
 		if (llen[v][ls] > nlen[v] && !sus[v][ls] && cc[v][fli[v][ls]]) FlagV(v, 160, fli[v][ls]);
@@ -3477,6 +3481,9 @@ void CP2R::GetNoteLen() {
 			nlen[v] = npm;
 		}
 		else if (sp == 2 || sp == 4) {
+			if (npm == 10) {
+				nlen[v] = 2;
+			}
 			if (npm == 6 || (npm == 12 && btype == 2)) {
 				nlen[v] = npm / 3;
 			}
@@ -3528,9 +3535,16 @@ int CP2R::FailNoteLen() {
 			if (!cc[v][s]) continue;
 			// Last note - do not check length, it is checked in FailRhythm
 			if (ls == fli_size[v] - 1) continue;
-			if (llen[v][ls] == nlen[v]) continue;
-			if (llen[v][ls] == nlen[v] * 2 && 
-				fli[v][ls] % npm == npm - nlen[v]) continue;
+			if (npm == 10) {
+				if (s % npm == 0 && llen[v][ls] == 4) continue;
+				if (s % npm == 4 && llen[v][ls] == 2) continue;
+				if (s % npm == 6 && (llen[v][ls] == 4 || llen[v][ls] == 8)) continue;
+			}
+			else {
+				if (llen[v][ls] == nlen[v]) continue;
+				if (llen[v][ls] == nlen[v] * 2 &&
+					fli[v][ls] % npm == npm - nlen[v]) continue;
+			}
 			FlagV(v, 514, s);
 		}
 	}
@@ -3593,14 +3607,22 @@ int CP2R::FailBeat() {
 	else if (sp == 2 || sp == 4) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
-			if (beat[v][ls] < 4) continue;
+			if (npm == 10) {
+				if (ls == fli_size[v] - 1 && llen[v][ls] == npm) continue;
+				if (s % npm == 0 && llen[v][ls] == 4) continue;
+				if (s % npm == 4 && llen[v][ls] == 2) continue;
+				if (s % npm == 6 && (llen[v][ls] == 4 || llen[v][ls] == 8)) continue;
+			}
+			else {
+				if (s % nlen[v] == 0) continue;
+			}
 			FlagV(v, 515, s);
 		}
 	}
 	else if (sp == 3) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
-			if (beat[v][ls] < 10) continue;
 			s = fli[v][ls];
+			if (s % nlen[v] == 0) continue;
 			FlagV(v, 515, s);
 		}
 	}
@@ -4265,6 +4287,7 @@ int CP2R::FailMeasureLen() {
 		}
 		if (sp == 4) {
 			if (npm == 8) continue;
+			if (npm == 10) continue;
 			if (npm == 4 || npm == 6 || npm == 12) continue;
 		}
 		if (sp == 5) {
@@ -5515,7 +5538,7 @@ void CP2R::DetectSus() {
 			s4 = fli2[v][ls + 2];
 			// Is there a dissonance between two consonances, forming stepwise descending movement?
 			if (!nih[v][fli[v][ls + 1]] && nih[v][fli[v][ls + 2]] && c[v][s2] - c[v][s4] == 1 &&
-				llen[v][ls + 2] >= 2 && beat[v][ls + 2] < 10) {
+				llen[v][ls + 2] >= 2 && fli[v][ls + 2] % 2 == 0) {
 				// Detect stepwise+leap or leap+stepwise
 				if ((c[v][s3] - c[v][s2] == 1 && c[v][s3] - c[v][s4] == 2) ||
 					(c[v][s2] - c[v][s3] == 2 && c[v][s4] - c[v][s3] == 1)) {
@@ -5792,8 +5815,14 @@ int CP2R::FailStartPause() {
 				sp2345_nopause = 0;
 				continue;
 			}
-			// Only halfnote pause is allowed
-			if (fin[v] % npm != nlen[v]) FlagV(v, 138, fin[v]);
+			if (npm == 10) {
+				// Only halfnote pause is allowed
+				if (fin[v] % npm != 4) FlagV(v, 138, fin[v]);
+			}
+			else {
+				// Only halfnote pause is allowed
+				if (fin[v] % npm != nlen[v]) FlagV(v, 138, fin[v]);
+			}
 		}
 		else if (sp == 3) {
 			if (fin[v] == 0 && sp2345_nopause) {
