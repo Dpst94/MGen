@@ -511,11 +511,12 @@ int CGenCA3::GetCPSpecies() {
 			}
 		}
 		else {
-			// For species 2-5 search for voice with maximum notes or pauses
+			// For species 2-5 search for voice containing at least one note starting not on measure start or with length not whole measure or multiple whole measures
 			for (v = 0; v < av_cnt; ++v) {
-				if (fli_size[v] > best_fli) {
-					best_fli = fli_size[v];
-					best_v = v;
+				for (ls = 0; ls < fli_size[v]; ++ls) {
+					if (fli[v][ls] % npm || llen[v][ls] % npm) {
+						best_v = v;
+					}
 				}
 			}
 		}
