@@ -474,7 +474,7 @@ int CGenCA3::GetCPSpecies() {
 		Tokenize(st, sa, " ");
 		for (int i = 0; i < sa.size(); ++i) {
 			sa[i].Trim();
-			if (sa[i].Left(2) == "sp") {
+			if (sa[i].Left(2) == "sp" && isdigit(sa[i][2])) {
 				LoadSpecies(sa[i].Mid(2));
 				found = 1;
 				break;
@@ -488,7 +488,7 @@ int CGenCA3::GetCPSpecies() {
 		Tokenize(st, sa, " ");
 		for (int i = 0; i < sa.size(); ++i) {
 			sa[i].Trim();
-			if (sa[i].Left(2) == "sp") {
+			if (sa[i].Left(2) == "sp" && isdigit(sa[i][2])) {
 				LoadSpecies(sa[i].Mid(2));
 				found = 1;
 				break;
