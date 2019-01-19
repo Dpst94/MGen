@@ -3250,6 +3250,21 @@ void CP2R::FlagSus() {
 	CHECK_READY(DR_hli, DR_resol, DR_pc);
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
+		// Check intermeasure sus preparation length
+		if (sp == 5) {
+			for (ls = 0; ls < fli_size[v]; ++ls) {
+				if (!sus[v][ls]) continue;
+				s = fli[v][ls];
+				s2 = fli2[v][ls];
+				// Preparation is shorter then suspension
+				if ((sus[v][ls] - s) * 2 < llen[v][ls])
+					FlagV(v, 427, s);
+				// Preparation has wrong length
+				if (sus[v][ls] - s != 4 && sus[v][ls] - s != 8) {
+					FlagV(v, 274, s);
+				}
+			}
+		}
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
 			s2 = fli2[v][ls];
@@ -3261,22 +3276,25 @@ void CP2R::FlagSus() {
 			if (hstart <= s) continue;
 			hend = hli2[hs];
 			if (sp == 5) {
-				// Preparation is shorter then suspension
-				if ((hstart - s) * 2 < llen[v][ls])
-					FlagV(v, 427, s);
-				// Preparation has wrong length
-				if (hstart - s != 4 && hstart - s != 8) {
-  				FlagV(v, 274, s);
+				// Check preparation if this is not an interbar sus
+				if (!sus[v][ls]) {
+					// Preparation is shorter then suspension
+					if ((hstart - s) * 2 < llen[v][ls])
+						FlagV(v, 427, s);
+					// Preparation has wrong length
+					if (hstart - s != 4 && hstart - s != 8) {
+						FlagV(v, 274, s);
+					}
 				}
 				// Suspension has wrong length
 				if (btype == 4) {
-					if (s2 - hstart != 1 && s2 - hstart != 3 && 
-						s2 - hstart != 7) {
+					if (s2 - hstart  + 1 != 2 && s2 - hstart + 1 != 4 && 
+						s2 - hstart + 1 != 6) {
 						FlagV(v, 244, s);
 					}
 				}
 				else {
-					if (s2 - hstart != 3 && s2 - hstart != 7) {
+					if (s2 - hstart + 1 != 4 && s2 - hstart + 1 != 6) {
 						FlagV(v, 244, s);
 					}
 				}
