@@ -500,6 +500,8 @@ int CGenCA3::GetCPSpecies() {
 		int my_sp = vsp[0];
 		int best_fli = 0;
 		int best_v = 0;
+		vector<int> cf_v;
+		cf_v.resize(av_cnt, 1);
 		if (my_sp <= 1) {
 			// For species 1 search voice with minimum notes (because counterpoint can contain slurs)
 			best_fli = 1000000;
@@ -508,28 +510,38 @@ int CGenCA3::GetCPSpecies() {
 					best_fli = fli_size[v];
 					best_v = v;
 				}
+				if (fli[v][ls] % npm || llen[v][ls] != npm) {
+					cf_v[v] = 0;
+				}
 			}
 		}
 		else {
-			// For species 2-5 search for voice containing at least one note starting not on measure start or with length not whole measure or multiple whole measures
+			// For species 2-5 search for highest voice containing at least one note starting not on measure start or with length not whole measure or multiple whole measures
 			for (v = 0; v < av_cnt; ++v) {
 				for (ls = 0; ls < fli_size[v]; ++ls) {
 					if (fli[v][ls] % npm || llen[v][ls] % npm) {
 						best_v = v;
 					}
+					if (fli[v][ls] % npm || llen[v][ls] != npm) {
+						cf_v[v] = 0;
+					}
 				}
+			}
+		}
+		int best_cf_v = 0;
+		for (v = 0; v < av_cnt; ++v) {
+			if (cf_v[v] && v != best_v) {
+				best_cf_v = v;
+				break;
 			}
 		}
 		vsp.clear();
 		vsp.resize(av_cnt, -1);
 		vsp[best_v] = my_sp;
-		int lowest_v;
-		if (best_v) lowest_v = 0;
-		else lowest_v = 1;
 		for (v = 0; v < av_cnt; ++v) {
 			if (vsp[v] == -1) {
 				// Set species 1 for all voices except lowest
-				if (v == lowest_v) vsp[v] = 0;
+				if (v == best_cf_v) vsp[v] = 0;
 				// Set CF for lowest voice
 				else vsp[v] = 1;
 			}
