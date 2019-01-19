@@ -510,8 +510,10 @@ int CGenCA3::GetCPSpecies() {
 					best_fli = fli_size[v];
 					best_v = v;
 				}
-				if (fli[v][ls] % npm || llen[v][ls] != npm) {
-					cf_v[v] = 0;
+				for (ls = 0; ls < fli_size[v]; ++ls) {
+					if (fli[v][ls] % npm || llen[v][ls] != npm) {
+						cf_v[v] = 0;
+					}
 				}
 			}
 		}
