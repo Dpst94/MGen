@@ -281,6 +281,7 @@ protected:
 	inline int FailSyncVIntervals();
 	inline void FlagDirectDis();
 	inline int FailMsh();
+	inline void DetectAux();
 	inline int FailPco();
 	inline int FailVRLimit();
 	inline int FailMeasureLen();

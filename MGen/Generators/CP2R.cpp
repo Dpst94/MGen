@@ -4621,6 +4621,115 @@ int CP2R::FailMsh() {
 	return 0;
 }
 
+void CP2R::DetectAux() {
+	CHECK_READY(DR_fli, DR_nih, DR_msh);
+	CHECK_READY(DR_c);
+	// Get last measure step
+	int mea_end = mli[ms] + npm - 1;
+	for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
+		s = fli[v][ls];
+		// Skip pauses
+		if (!cc[v][s]) continue;
+		// Only if current note is non-harmonic tone
+		if (msh[v][s] > 0) continue;
+		// Only if current note is longer than a croche
+		if (llen[v][ls] < 2) continue;
+		// Do not work with last note
+		if (ls == fli_size[v] - 1) continue;
+		// Do not work with sus, because it is already processed in DetectSus
+		if (s < hstart) continue;
+		s3 = fli[v][ls - 1];
+		s4 = fli[v][ls + 1];
+		// Work only with aux tone
+		if (cc[v][s3] != cc[v][s4]) continue;
+		if (abs(c[v][s3] - c[v][s]) != 1) continue;
+		// Bit mask: first bit is previous note, second is current note, third is next note
+		int apply = 0;
+		if (ls < bli[v][mea_end]) {
+			// Previous and next notes both have msh>0. In this case nothing needs to be checked. 
+			// Positive msh already requires that previous and next note are chord tones, so we do not need to also require that current note is a chord tone. 
+			// Even if previous or next note is not a chord tone, we would get hpenalty and flag.
+			if (msh[v][s3] > 0 && msh[v][s4] > 0) continue;
+			// If current note has nih = 1..3, make it msh>0. This ensures that we do not create a 7th chord
+			if (nih[v][s] > 0 && nih[v][s] < 4) apply = 2;
+			// If previous note has msh>0 and next has msh<=0
+			// Current or next note should be a chord tone, but requireing either note to be a chord tone may make chord a 7th chord.
+			if (msh[v][s3] > 0) {
+				// If next note has nih = 1..3, make it msh>0. This ensures that we do not create a 7th chord
+				if (nih[v][s4] > 0 && nih[v][s4] < 4) apply = 4;
+				// If current note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
+				else if (nih[v][s] > 0 ) apply = 2;
+				// If next note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
+				else if (nih[v][s4] > 0) apply = 4;
+				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted.
+				else apply = 2;
+			}
+			// If next note has msh>0 and previous has msh<=0
+			// Current or previous note should be a chord tone, but requireing either note to be a chord tone may make chord a 7th chord.
+			else if (msh[v][s4] > 0) {
+				// If previous note has nih = 1..3, make it msh>0. This ensures that we do not create a 7th chord
+				if (nih[v][s3] > 0 && nih[v][s3] < 4) apply = 1;
+				// If current note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
+				else if (nih[v][s] > 0) apply = 2;
+				// If previous note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
+				else if (nih[v][s3] > 0) apply = 1;
+				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted.
+				else apply = 2;
+			}
+			// Both surrounding notes have msh<=0. We still have two variants: make both surrounding notes msh>0 or current note msh>0. 
+			// What changed here is that making both surrounding notes msh>0 can make one of them a 7th, while another one can be in a different chord.
+			else {
+				// If previous and next notes have nih = 1..3, make them both msh>0. This ensures that we do not create a 7th chord
+				if (nih[v][s3] > 0 && nih[v][s3] < 4 && nih[v][s4] > 0 && nih[v][s4] < 4) apply = 5;
+				// If current note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
+				else if (nih[v][s] > 0) apply = 2;
+				// If previous and next notes both have nih = 1..4, make them both msh>0. This creates a 7th chord, but does not make chord convoluted.
+				else if (nih[v][s3] > 0 && nih[v][s4] > 0) apply = 5;
+				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted.
+				else apply = 2;
+			}
+		}
+		else {
+			// Previous note has msh>0. In this case nothing needs to be checked. 
+			// Positive msh already requires that previous note is a chord tone, so we do not need to also require that current note is a chord tone. 
+			// Even if previous note is not a chord tone, we would get hpenalty and flag.
+			if (msh[v][s3] > 0) continue;
+			// Previous note has msh<=0. One of notes should be a chord tone, but requireing either note to be a chord tone may make chord a 7th chord. 
+			// In this case always a non-7th note should be selected (between previous and current) and made msh>0
+			// If current note has nih = 1..3, make it msh>0. This ensures that we do not create a 7th chord
+			if (nih[v][s] > 0 && nih[v][s] < 4) apply = 2;
+			// At this step we consider next note msh to be >0, because it was not evaluated yet and will be evaluated only in next harmony.
+			// This leads to conditions, when we will note fire flags and make notes msh>0 because we did not know that next note will be non-chord tone (PDD).
+			// If previous note has nih = 1..3, make it msh>0. This ensures that we do not create a 7th chord
+			if (nih[v][s3] > 0 && nih[v][s3] < 4) apply = 1;
+			// If current note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
+			else if (nih[v][s] > 0) apply = 2;
+			// If previous note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
+			else if (nih[v][s3] > 0) apply = 1;
+			// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted.
+			else apply = 2;
+		}
+		// Make previous note msh>0. If it creates conflict, flag it and increase hpenalty
+		if (apply & 1) {
+			msh[v][s3] = pAuxWrong;
+			if (!nih[v][s3])
+				FlagA(v, 170, s3, s3, v, 50);
+		}
+		// Make current note msh>0. If it creates conflict, flag it and increase hpenalty
+		if (apply & 2) {
+			msh[v][s] = pAuxWrong;
+			if (!nih[v][s])
+				FlagA(v, 170, s, s, v, 50);
+		}
+		// Make next note msh>0. If it creates conflict, flag it and increase hpenalty
+		if (apply & 4) {
+			msh[v][s4] = pAuxWrong;
+			if (!nih[v][s4])
+				FlagA(v, 170, s4, s4, v, 50);
+		}
+	}
+}
+
 // This function evaluates whole measure, not harmony
 void CP2R::EvaluateMsh() {
 	CHECK_READY(DR_fli, DR_nih, DR_msh);
@@ -4637,6 +4746,14 @@ void CP2R::EvaluateMsh() {
 			if (ls < bli[v][mea_end] && llen[v][ls] > 1 && 
 				cc[v][fli[v][ls - 1]] == cc[v][fli[v][ls + 1]] && abs(c[v][fli[v][ls - 1]] - c[v][s]) == 1 && 
 				(!nih[v][fli[v][ls - 1]] || !nih[v][fli[v][ls + 1]])) {
+				msh[v][s] = pAuxWrong;
+				if (!nih[v][s])
+					FlagA(v, 170, s, s, v, 50);
+			}
+			// Detect auxiliary tone at measure end, not preceded by chord tone
+			else if (ls == bli[v][mea_end] && llen[v][ls] > 1 && ls < fli_size[v] - 1 &&
+				cc[v][fli[v][ls - 1]] == cc[v][fli[v][ls + 1]] && abs(c[v][fli[v][ls - 1]] - c[v][s]) == 1 &&
+				!nih[v][fli[v][ls - 1]]) {
 				msh[v][s] = pAuxWrong;
 				if (!nih[v][s])
 					FlagA(v, 170, s, s, v, 50);
@@ -4671,6 +4788,8 @@ void CP2R::EvaluateMsh() {
 			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v, 100);
 			else if (msh[v][s] == pLeapFrom) FlagA(v, 187, s, s, v, 100);
 			else if (msh[v][s] == pSusStart) FlagA(v, 458, s, s, v, 100);
+			// Do not flag pAuxWrong, because it was already flagged
+			else if (msh[v][s] == pAuxWrong) {}
 			// pSusRes does not have separate flag, because it is marked as not resolved
 			// This is protection against wrong melodic shape value
 			else if (msh[v][s] > 0) FlagA(v, 83, s, s, v, 100);
@@ -4897,11 +5016,11 @@ void CP2R::GetMsh() {
 				if (hv_alt && !mminor) continue;
 				fill(cchnv[0].begin(), cchnv[0].end(), 0);
 				cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
-				cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 1;
-				cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 1;
+				cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 2;
+				cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 3;
 				// Prohibit 7th if its severity is red
 				if (severity[sp][vc][vp][194] <= 60) {
-					cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 1;
+					cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
 				}
 				if (mminor) {
 					if (hv_alt == 3) {
@@ -4911,11 +5030,11 @@ void CP2R::GetMsh() {
 						if (cchn[hs][8]) continue;
 						if (cchn[hs][10]) continue;
 						// Convert to altered
+						cchnv[0][9] = cchnv[0][8];
 						cchnv[0][8] = 0;
-						cchnv[0][9] = 1;
 						// Convert to altered
+						cchnv[0][11] = cchnv[0][10];
 						cchnv[0][10] = 0;
-						cchnv[0][11] = 1;
 					}
 					if (hv_alt == 2) {
 						// Skip if no notes to alter
@@ -4923,8 +5042,8 @@ void CP2R::GetMsh() {
 						// Skip if this variant conflicts with detected notes
 						if (cchn[hs][10]) continue;
 						// Convert to altered
+						cchnv[0][11] = cchnv[0][10];
 						cchnv[0][10] = 0;
-						cchnv[0][11] = 1;
 					}
 					if (hv_alt == 1) {
 						// Skip if no notes to alter
@@ -4932,8 +5051,8 @@ void CP2R::GetMsh() {
 						// Skip if this variant conflicts with detected notes
 						if (cchn[hs][8]) continue;
 						// Convert to altered
+						cchnv[0][9] = cchnv[0][8];
 						cchnv[0][8] = 0;
-						cchnv[0][9] = 1;
 					}
 					else {
 						if (cchnv[0][8]) {
@@ -4964,6 +5083,7 @@ void CP2R::GetMsh() {
 					DetectPDD();
 					DetectDNT();
 					DetectCambiata();
+					DetectAux();
 					EvaluateMsh();
 					EvaluateMshSteps();
 				}
@@ -5151,11 +5271,11 @@ void CP2R::GetMsh2(int sec_hp) {
 			if (hv_alt && !mminor) continue;
 			fill(cchnv[0].begin(), cchnv[0].end(), 0);
 			cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
-			cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 1;
-			cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 1;
+			cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 2;
+			cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 3;
 			// Prohibit 7th only if its severity is red
 			if (severity[sp][vc][vp][194] <= 60) {
-				cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 1;
+				cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
 			}
 			if (mminor) {
 				if (hv_alt == 3) {
@@ -5165,11 +5285,11 @@ void CP2R::GetMsh2(int sec_hp) {
 					if (cchn[hs][8]) continue;
 					if (cchn[hs][10]) continue;
 					// Convert to altered
+					cchnv[0][9] = cchnv[0][8];
 					cchnv[0][8] = 0;
-					cchnv[0][9] = 1;
 					// Convert to altered
+					cchnv[0][11] = cchnv[0][10];
 					cchnv[0][10] = 0;
-					cchnv[0][11] = 1;
 				}
 				if (hv_alt == 2) {
 					// Skip if no notes to alter
@@ -5177,8 +5297,8 @@ void CP2R::GetMsh2(int sec_hp) {
 					// Skip if this variant conflicts with detected notes
 					if (cchn[hs][10]) continue;
 					// Convert to altered
+					cchnv[0][11] = cchnv[0][10];
 					cchnv[0][10] = 0;
-					cchnv[0][11] = 1;
 				}
 				if (hv_alt == 1) {
 					// Skip if no notes to alter
@@ -5186,8 +5306,8 @@ void CP2R::GetMsh2(int sec_hp) {
 					// Skip if this variant conflicts with detected notes
 					if (cchn[hs][8]) continue;
 					// Convert to altered
+					cchnv[0][9] = cchnv[0][8];
 					cchnv[0][8] = 0;
-					cchnv[0][9] = 1;
 				}
 				else {
 					if (cchnv[0][8]) {
@@ -5208,11 +5328,11 @@ void CP2R::GetMsh2(int sec_hp) {
 					if (hv_alt2 && !mminor) continue;
 					fill(cchnv[1].begin(), cchnv[1].end(), 0);
 					cchnv[1][(c_cc[hv3 + 14] + 24 - bn) % 12] = 1;
-					cchnv[1][(c_cc[hv3 + 16] + 24 - bn) % 12] = 1;
-					cchnv[1][(c_cc[hv3 + 18] + 24 - bn) % 12] = 1;
+					cchnv[1][(c_cc[hv3 + 16] + 24 - bn) % 12] = 2;
+					cchnv[1][(c_cc[hv3 + 18] + 24 - bn) % 12] = 3;
 					// Prohibit 7th only if its severity is red
 					if (severity[sp][vc][vp][194] <= 60) {
-						cchnv[1][(c_cc[hv + 20] + 24 - bn) % 12] = 1;
+						cchnv[1][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
 					}
 					if (mminor) {
 						if (hv_alt2 == 3) {
@@ -5222,11 +5342,11 @@ void CP2R::GetMsh2(int sec_hp) {
 							if (cchn[hs + 1][8]) continue;
 							if (cchn[hs + 1][10]) continue;
 							// Convert to altered
+							cchnv[1][9] = cchnv[1][8];
 							cchnv[1][8] = 0;
-							cchnv[1][9] = 1;
 							// Convert to altered
+							cchnv[1][11] = cchnv[1][10];
 							cchnv[1][10] = 0;
-							cchnv[1][11] = 1;
 						}
 						if (hv_alt2 == 2) {
 							// Skip if no notes to alter
@@ -5234,8 +5354,8 @@ void CP2R::GetMsh2(int sec_hp) {
 							// Skip if this variant conflicts with detected notes
 							if (cchn[hs + 1][10]) continue;
 							// Convert to altered
+							cchnv[1][11] = cchnv[1][10];
 							cchnv[1][10] = 0;
-							cchnv[1][11] = 1;
 						}
 						if (hv_alt2 == 1) {
 							// Skip if no notes to alter
@@ -5243,8 +5363,8 @@ void CP2R::GetMsh2(int sec_hp) {
 							// Skip if this variant conflicts with detected notes
 							if (cchn[hs + 1][8]) continue;
 							// Convert to altered
+							cchnv[1][9] = cchnv[1][8];
 							cchnv[1][8] = 0;
-							cchnv[1][9] = 1;
 						}
 						else {
 							if (cchnv[1][8]) {
@@ -5292,11 +5412,13 @@ void CP2R::GetMsh2(int sec_hp) {
 						// First harmony
 						hstart = s0;
 						hend = s0 + sec_hp - 1;
+						DetectAux();
 						EvaluateMsh();
 						EvaluateMshSteps();
 						// Second harmony
 						hstart = s0 + sec_hp;
 						hend = s0 + npm - 1;
+						DetectAux();
 						EvaluateMsh();
 						EvaluateMshSteps();
 					}
@@ -5391,9 +5513,7 @@ void CP2R::GetNotesInHarm() {
 		// Skip pauses
 		if (!cc[v][s]) continue;
 		if (s < hstart) s = hstart;
-		if (cchnv[shp[s % npm]][pcc[v][s]]) {
-			nih[v][s] = 1;
-		}
+		nih[v][s] = cchnv[shp[s % npm]][pcc[v][s]];
 	}
 }
 
