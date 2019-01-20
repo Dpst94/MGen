@@ -3777,14 +3777,14 @@ int CP2R::FailHarm() {
 		}
 		if (mminor) {
 			// For all chords that include G/G# note in Am
-			if (chm[hs] == 6 || chm[hs] == 4 || chm[hs] == 2) {
-				if (cchns[hs][11] > cchns[hs][10]) chm_gis[hs] = 1;
-				else if (cchns[hs][10] > cchns[hs][11]) chm_gis[hs] = -1;
+			if (chm[hs] == 6 || chm[hs] == 4 || chm[hs] == 2 || chm[hs] == 0) {
+				if (cchns[hs][11] > cchns[hs][10]) chm_gis[hs] = cchns[hs][11];
+				else if (cchns[hs][10] > cchns[hs][11]) chm_gis[hs] = -cchns[hs][10];
 			}
 			// For all chords that include F/F# note in Am
-			if (chm[hs] == 5 || chm[hs] == 3 || chm[hs] == 1) {
-				if (cchns[hs][9] > cchns[hs][8]) chm_fis[hs] = 1;
-				else if (cchns[hs][9] > cchns[hs][8]) chm_fis[hs] = -1;
+			if (chm[hs] == 5 || chm[hs] == 3 || chm[hs] == 1 || chm[hs] == 6) {
+				if (cchns[hs][9] > cchns[hs][8]) chm_fis[hs] = cchns[hs][9];
+				else if (cchns[hs][8] > cchns[hs][9]) chm_fis[hs] = -cchns[hs][8];
 			}
 		}
 	}
@@ -3846,7 +3846,7 @@ int CP2R::EvalHarm() {
 				s > 0 && pc[0][s - 1] == 4) FlagV(v, 48, s);
 			if (mminor) {
 				// Prohibit dVII (GBD) in root position after S (DF#A) in root position
-				if (chm[i] == 6 && chm[i - 1] == 3 && chm_gis[i] < 1 && chm_fis[i - 1] == 1) {
+				if (chm[i] == 6 && chm[i - 1] == 3 && chm_gis[i] < 1 && chm_fis[i - 1] > 0) {
 					if (ls > 0 && pc[0][s] == 6 && pc[0][fli[v][ls - 1]] == 3) FlagV(v, 308, s);
 				}
 				// Prohibit DTIII (CEG) in root position after dVII (GBD) in root position
@@ -6057,13 +6057,13 @@ void CP2R::GetHarmNotes(int lchm, int fis, int gis, vector<int> &lcct) {
 	lcct[1] = (c_cc[lchm + 9] - bn + 12) % 12;
 	lcct[2] = (c_cc[lchm + 11] - bn + 12) % 12;
 	lcct[3] = (c_cc[lchm + 13] - bn + 12) % 12;
-	if (fis) {
+	if (fis > 0) {
 		if (lcct[0] == 8) lcct[0] = 9;
 		if (lcct[1] == 8) lcct[1] = 9;
 		if (lcct[2] == 8) lcct[2] = 9;
 		if (lcct[3] == 8) lcct[3] = 9;
 	}
-	if (gis) {
+	if (gis > 0) {
 		if (lcct[0] == 10) lcct[0] = 11;
 		if (lcct[1] == 10) lcct[1] = 11;
 		if (lcct[2] == 10) lcct[2] = 11;
@@ -6233,10 +6233,10 @@ void CP2R::FlagFCR() {
 		int fcr = 0;
 		// Prohibit VI<->VI# containing progression
 		if (chm[hs] % 2 && chm[hs - 1] % 2) {
-			if (chm_fis[hs] == 1 && chm_fis[hs - 1] == -1) {
+			if (chm_fis[hs] > 0 && chm_fis[hs - 1] < 0) {
 				fcr = FindFCRNotes(8, 9);
 			}
-			else if (chm_fis[hs] == -1 && chm_fis[hs - 1] == 1) {
+			else if (chm_fis[hs] < 0 && chm_fis[hs - 1] > 0) {
 				fcr = FindFCRNotes(9, 8);
 			}
 			// If both notes exist in external voices, flag red
@@ -6251,10 +6251,10 @@ void CP2R::FlagFCR() {
 		fcr = 0;
 		// Prohibit VII<->VII# containing progression
 		if (chm[hs] && chm[hs] % 2 == 0 && chm[hs - 1] && chm[hs - 1] % 2 == 0) {
-			if (chm_gis[hs] == 1 && chm_gis[hs - 1] == -1) {
+			if (chm_gis[hs] > 0 && chm_gis[hs - 1] < 0) {
 				fcr = FindFCRNotes(10, 11);
 			}
-			else if (chm_gis[hs] == -1 && chm_gis[hs - 1] == 1) {
+			else if (chm_gis[hs] < 0 && chm_gis[hs - 1] > 0) {
 				fcr = FindFCRNotes(11, 10);
 			}
 			// If both notes exist in external voices, flag red

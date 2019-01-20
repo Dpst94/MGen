@@ -1002,9 +1002,9 @@ void CP2D::LoadIntNames() {
 CString CP2D::GetHarmName(int pitch, int fis, int gis) {
 	if (pitch == -1) return "?";
 	if (mode == 9) {
-		if (fis == 1 && gis == 1) return HarmName_mfg[pitch];
-		else if (fis == 1) return HarmName_mf[pitch];
-		else if (gis == 1) return HarmName_mg[pitch];
+		if (fis > 0 && gis > 0) return HarmName_mfg[pitch];
+		else if (fis > 0) return HarmName_mf[pitch];
+		else if (gis > 0) return HarmName_mg[pitch];
 		else return HarmName_m[pitch];
 	}
 	else return HarmName[pitch];
