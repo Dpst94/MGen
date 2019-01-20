@@ -3648,11 +3648,11 @@ void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 	for (hv = 0; hv < 7; ++hv) {
 		// At least one note exists
 		if (!chn[hs][hv] && !chn[hs][(hv + 2) % 7] && !chn[hs][(hv + 4) % 7] &&
-			(!chn[hs][(hv + 6) % 7] || severity[sp][vc][vp][194] > 60)) continue;
+			(!chn[hs][(hv + 6) % 7] || severity[sp][av_cnt][0][194] > 60)) continue;
 		// No other notes should exist
 		if (chn[hs][(hv + 1) % 7] || chn[hs][(hv + 3) % 7] || chn[hs][(hv + 5) % 7]) continue;
 		// Prohibit 7th only if its severity is red
-		if (severity[sp][vc][vp][194] > 60) {
+		if (severity[sp][av_cnt][0][194] > 60) {
 			if (chn[hs][(hv + 6) % 7]) continue;
 		}
 		cpos[hv] = 1;
@@ -3678,7 +3678,7 @@ void CP2R::GetHarm(int &lchm, int &rating) {
 			chn[hs][(x + 4) % 7] ? 1 : 0;
 		// VII note means 7th chord
 		// Prohibit 7th only if its severity is red
-		if (severity[sp][vc][vp][194] > 60) {
+		if (severity[sp][av_cnt][0][194] > 60) {
 			if (chn[hs][(x + 6) % 7]) rat -= 10;
 		}
 		// VI note means other chord
@@ -3999,7 +3999,7 @@ void CP2R::EvalMshHarm(int hvar) {
 		int nt = c[0][s] % 7;
 		// Do not process notes that are not harmonic
 		if (nt != de1 && nt != de2 && nt != de3 && 
-			(nt != de4 || severity[sp][vc][vp][194] > 60)) continue;
+			(nt != de4 || severity[sp][av_cnt][0][194] > 60)) continue;
 		// Process only lower notes
 		if (c[0][s] > lhbc) continue;
 		// For left sus and isus check hstart
@@ -5003,7 +5003,7 @@ void CP2R::GetMsh() {
 				cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 2;
 				cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 3;
 				// Prohibit 7th if its severity is red
-				if (severity[sp][vc][vp][194] <= 60) {
+				if (severity[sp][av_cnt][0][194] <= 60) {
 					cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
 				}
 				if (mminor) {
@@ -5258,7 +5258,7 @@ void CP2R::GetMsh2(int sec_hp) {
 			cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 2;
 			cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 3;
 			// Prohibit 7th only if its severity is red
-			if (severity[sp][vc][vp][194] <= 60) {
+			if (severity[sp][av_cnt][0][194] <= 60) {
 				cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
 			}
 			if (mminor) {
@@ -5315,7 +5315,7 @@ void CP2R::GetMsh2(int sec_hp) {
 					cchnv[1][(c_cc[hv3 + 16] + 24 - bn) % 12] = 2;
 					cchnv[1][(c_cc[hv3 + 18] + 24 - bn) % 12] = 3;
 					// Prohibit 7th only if its severity is red
-					if (severity[sp][vc][vp][194] <= 60) {
+					if (severity[sp][av_cnt][0][194] <= 60) {
 						cchnv[1][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
 					}
 					if (mminor) {
