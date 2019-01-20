@@ -3791,9 +3791,9 @@ int CP2R::FailHarm() {
 #if !defined(_DEBUG)
 	RemoveMinimumMsh();
 #endif
-	GetHarmBass();
 	GetChordTones();
 	GetChordTonePresent();
+	GetHarmBass();
 	// Check first harmony not T
 	if (chm.size() && chm[0] > -1 && (chm[0] || hbc[0] % 7)) {
 		FlagV(0, 137, hli[0]);
@@ -4149,10 +4149,15 @@ void CP2R::GetHarmBass() {
 			if (!cc[v][s]) continue;
 			nt = c[v][s] % 7;
 			// Do not process notes that are not harmonic
-			if (nt != de1 && nt != de2 && nt != de3 && nt != de4) continue;
+			// Do not process 7th notes if it is not a 7th chord
+			if (nt != de1 && nt != de2 && nt != de3 && 
+				(nt != de4 || cctp[hs][3] < 2)) continue;
+			// Do not process short notes
+			if (llen[v][ls] < 2) continue;
 			// Process only lower notes
 			if (hbcc[hs] <= cc[v][s]) continue;
-			if (nt == de3) {
+			// Special process for 6/4 chord
+			if (nt == de3 && cctp[hs][3] < 2) {
 				if (beat[v][ls] <= 1) {
 					hbcc[hs] = cc[0][s];
 					hbc[hs] = c[0][s];
