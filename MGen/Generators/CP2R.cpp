@@ -4742,24 +4742,8 @@ void CP2R::EvaluateMsh() {
 		if (!cc[v][s]) continue;
 		// If non-harmonic tone
 		if (msh[v][s] <= 0) {
-			// Detect auxiliary tone, not surrounded by chord tones
-			if (ls < bli[v][mea_end] && llen[v][ls] > 1 && 
-				cc[v][fli[v][ls - 1]] == cc[v][fli[v][ls + 1]] && abs(c[v][fli[v][ls - 1]] - c[v][s]) == 1 && 
-				(!nih[v][fli[v][ls - 1]] || !nih[v][fli[v][ls + 1]])) {
-				msh[v][s] = pAuxWrong;
-				if (!nih[v][s])
-					FlagA(v, 170, s, s, v, 50);
-			}
-			// Detect auxiliary tone at measure end, not preceded by chord tone
-			else if (ls == bli[v][mea_end] && llen[v][ls] > 1 && ls < fli_size[v] - 1 &&
-				cc[v][fli[v][ls - 1]] == cc[v][fli[v][ls + 1]] && abs(c[v][fli[v][ls - 1]] - c[v][s]) == 1 &&
-				!nih[v][fli[v][ls - 1]]) {
-				msh[v][s] = pAuxWrong;
-				if (!nih[v][s])
-					FlagA(v, 170, s, s, v, 50);
-			}
 			// Detect non-harmonic tone, which is longer than previous non-harmonic tone
-			else if (llen[v][ls] > llen[v][ls - 1] &&
+			if (llen[v][ls] > llen[v][ls - 1] &&
 				!nih[v][fli[v][ls - 1]]) {
 				msh[v][s] = pLong;
 				if (!nih[v][s])
