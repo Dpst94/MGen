@@ -3830,14 +3830,17 @@ int CP2R::EvalHarm() {
 			FlagV(v, 555, s);
 			continue;
 		}
-		// Prohibit 64 chord
-		if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
-			FlagV(v, 433, s);
+		// Do not show 64 chord for 7th chord
+		if (cctp[i][3] < 2) {
+			// Prohibit 64 chord
+			if ((hbc[i] % 7 - chm[i] + 7) % 7 == 4) {
+				FlagV(v, 433, s);
+			}
+			// Prohibit audible 64 chord
+			else if (ha64[i] == 1) FlagV(v, 196, s);
+			// Prohibit audible 64 chord
+			else if (ha64[i] == 2) FlagV(v, 383, s);
 		}
-		// Prohibit audible 64 chord
-		else if (ha64[i] == 1) FlagV(v, 196, s);
-		// Prohibit audible 64 chord
-		else if (ha64[i] == 2) FlagV(v, 383, s);
 		if (i > 0 && chm[i - 1] > -1) {
 			// Check GC for low voice and not last note (last note in any window is ignored)
 			if (ls < fli_size[v] - 1 && av_cnt == 2 &&
