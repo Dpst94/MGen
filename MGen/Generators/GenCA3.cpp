@@ -170,7 +170,7 @@ int CGenCA3::XML_to_CP() {
 		vname[v] = xfi.voice[vi].name;
 		vname[v].Replace("MusicXML", "");
 		vname[v].Trim();
-		if (vname[v].IsEmpty()) vname[v] = "Part";
+		if (vname[v].IsEmpty()) vname[v].Format("Part%d", vi + 1);
 		unique_part_id.insert(xfi.voice[vi].id);
 		track_id[v] = unique_part_id.size();
 		track_name[v].Format("%s (%s), staff %d, voice %d, chord %d", vname[v], xfi.voice[vi].id, xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord);
