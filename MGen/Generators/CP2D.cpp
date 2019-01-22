@@ -749,7 +749,6 @@ void CP2D::SetRuleParam(vector<vector<vector<float>>> &par, int rid, int type, i
 
 void CP2D::SetRuleParams() {
 	long long time_start = CGLib::time();
-	SetRuleParam(pco_apart, 248, rsName, 1);
 	SetRuleParam(cse_leaps_r, 502, rsSubName, 0);
 	SetRuleParam(lclimax_mea5, 325, rsComment, 0);
 	SetRuleParam(gis_trail_max, 200, rsSubName, 0);

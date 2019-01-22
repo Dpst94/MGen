@@ -252,7 +252,6 @@ protected:
 	float tempo_bell = 0; // Increase tempo in the middle of cantus / counterpoint. 0 - preserve source tempo
 
 	// Rule parameters [sp][vc][vp]
-	vector<vector<vector<int>>> pco_apart; // Minimum allowed distance between pco in quarters
 	vector<vector<vector<int>>> sus_last_measures; // Last measures in which sus is allowed in species 2 and 3
 	vector<vector<vector<int>>> lclimax_mea5; // Last measures in which sus is allowed in species 2 and 3
 	vector<vector<vector<int>>> gis_trail_max; // Minimum notes between G# and next G note in Am

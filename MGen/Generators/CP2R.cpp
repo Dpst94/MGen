@@ -4043,8 +4043,8 @@ void CP2R::EvalMshHarm(int hvar) {
 	// Flag 7th chord
 	if (found_de4) 
 		FlagA(0, 194, hstart, hstart, 0, 80);
-	// Prohibit DTIII#5 augmented chord
-	if (cchnv[shp[hstart % npm]][11] && cchnv[shp[hstart % npm]][3]) {
+	// Prohibit DTIII#5 augmented chord (if not 7th chord)
+	if (cchnv[shp[hstart % npm]][11] && cchnv[shp[hstart % npm]][3] && hvar == 2 && !found_de4) {
 		FlagA(0, 375, hstart, hstart, 0, 3);
 	}
 }
