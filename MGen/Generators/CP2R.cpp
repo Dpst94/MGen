@@ -4162,8 +4162,8 @@ void CP2R::GetHarmBass() {
 			// Special process for 6/4 chord
 			if (nt == de3 && cctp[hs][3] < 2) {
 				if (beat[v][ls] <= 1) {
-					hbcc[hs] = cc[0][s];
-					hbc[hs] = c[0][s];
+					hbcc[hs] = cc[v][s];
+					hbc[hs] = c[v][s];
 					// Clear audible 64, because we have real 64 now
 					ha64[hs] = 0;
 				}
@@ -4171,19 +4171,19 @@ void CP2R::GetHarmBass() {
 					int found = 0;
 					// Search for note repeat
 					for (int ls2 = bli[v][hli[hs]]; ls2 <= bli[v][hli2[hs]]; ++ls2) if (ls2 != ls) {
-						if (cc[0][s] == cc[0][fli[v][ls2]]) found = 1;
+						if (cc[v][s] == cc[v][fli[v][ls2]]) found = 1;
 					}
 					// Set audible 6/4 for repeating 5th on upbeat
 					if (found) {
 						// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
 						ha64[hs] = 2;
-						habcc = cc[0][s];
+						habcc = cc[v][s];
 					}
 					// Set suggestive 6/4 for non-repeating 5th on upbeat
 					else {
 						// Do not change harmony bass, because real harmony bass was already set. We set only audible 64
 						ha64[hs] = 1;
-						habcc = cc[0][s];
+						habcc = cc[v][s];
 					}
 				}
 			}
