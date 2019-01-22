@@ -669,7 +669,7 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 	ly_fs << "\\header {tagline = \\markup \\tiny \\center-column {\"This file was created by MGen CA3 ";
 	ly_fs << APP_VERSION << " at " << CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S") << ".\"";
 	if (ctools_task_id) ly_fs << " \\with-url #\"http://artportal.su/ctools/job.php?j_id=" << ctools_task_id << "\" \\with-color #(rgb-color 0 0 1) \\underline \"Composer Tools task #" << ctools_task_id << "\" ";
-	ly_fs << "#(string-append \"Engraved by LilyPond \" (lilypond-version) \". File: " << my_config << "\")";
+	ly_fs << " #(string-append \"Engraved by LilyPond \" (lilypond-version) \". File: " << my_config << "\")  \" \"";
 	ly_fs << "}}\n";
 	read_file_sv("configs\\ly2\\footer.ly", sv);
 	write_file_sv(ly_fs, sv);
