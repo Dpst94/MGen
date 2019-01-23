@@ -4742,8 +4742,8 @@ void CP2R::EvaluateMsh() {
 		if (!cc[v][s]) continue;
 		// If non-harmonic tone
 		if (msh[v][s] <= 0) {
-			// Detect non-harmonic tone, which is longer than previous non-harmonic tone
-			if (llen[v][ls] > llen[v][ls - 1] &&
+			// Detect non-harmonic tone, which is longer than previous non-harmonic tone and is not first harmony note
+			if (s != hstart && llen[v][ls] > llen[v][ls - 1] &&
 				!nih[v][fli[v][ls - 1]]) {
 				msh[v][s] = pLong;
 				if (!nih[v][s])
