@@ -3994,7 +3994,7 @@ void CP2R::EvalMshHarm(int hvar) {
 	int lhbc = 1000;
 	for (s = hstart; s <= hend; ++s) {
 		v = lva[s];
-		ls = bli[v][ls];
+		ls = bli[v][s];
 		// Skip no note start
 		if (s > hstart && s != fli[v][ls]) continue;
 		// Skip pause
