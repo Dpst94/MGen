@@ -3983,6 +3983,9 @@ void CP2R::EvalMshHarm(int hvar) {
 	CHECK_READY(DR_fli, DR_c, DR_msh);
 	CHECK_READY(DR_vca);
 	// Get harmonic notes
+	if (cp_id == 1 && ms == 1) {
+		WriteLog(1, "WOW");
+	}
 	int de1 = hvar;
 	int de2 = (de1 + 2) % 7;
 	int de3 = (de1 + 4) % 7;
@@ -3995,23 +3998,23 @@ void CP2R::EvalMshHarm(int hvar) {
 		// Skip no note start
 		if (s > hstart && s != fli[v][ls]) continue;
 		// Skip pause
-		if (!cc[0][s]) continue;
-		int nt = c[0][s] % 7;
+		if (!cc[v][s]) continue;
+		int nt = c[v][s] % 7;
 		// Do not process notes that are not harmonic
 		if (nt != de1 && nt != de2 && nt != de3 && 
-			(nt != de4 || severity[sp][av_cnt][0][194] > 60)) continue;
+			(nt != de4 || severity[sp][av_cnt][v][194] > 60)) continue;
 		// Process only lower notes
-		if (c[0][s] > lhbc) continue;
+		if (c[v][s] > lhbc) continue;
 		// For left sus and isus check hstart
 		if (s < hstart) {
-			if (msh[0][hstart] > 0) {
-				lhbc = c[0][s];
+			if (msh[v][hstart] > 0) {
+				lhbc = c[v][s];
 			}
 		}
 		// For other notes check note start
 		else {
-			if (msh[0][s] > 0) {
-				lhbc = c[0][s];
+			if (msh[v][s] > 0) {
+				lhbc = c[v][s];
 			}
 		}
 	}
@@ -4805,12 +4808,12 @@ void CP2R::EvaluateMshSteps() {
 		// Prepare data
 		civl = abs(cc[v][s] - cc[v2][s]);
 		// Flag 4th or tritone with bass 
-		if (civl % 12 == 5) AutoFlagA(v, 171, s, s, 0, 100);
+		if (civl % 12 == 5) AutoFlagA(v, 171, s, s, v2, 100);
 		if (civl % 12 == 6) {
 			// Flag if not suspension resolution to lt in bass
 			if (pcc[v2][s] != 11 || fli2[v2][ls2] != mli[bmli[s]] + npm - 1 || 
 				!nih[v2][fli[v2][ls2]] || resol[v2][hstart] != fli[v2][ls2])
-				AutoFlagA(v, 331, s, s, 0, 100);
+				AutoFlagA(v, 331, s, s, v2, 100);
 		}
 	}
 }
