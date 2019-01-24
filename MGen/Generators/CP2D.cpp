@@ -113,8 +113,11 @@ void CP2D::LoadConfigLine(CString* sN, CString* sV, int idata, float fdata) {
 	if (*sN == "rules_file") {
 		++parameter_found;
 		LoadRules("configs\\" + *sV);
-		ParseRules();
-		SetRuleParams();
+	}
+	// Overwrite rules
+	if (sN->Left(15) == "rule_overwrite_") {
+		++parameter_found;
+		RuleOverwrite(*sN, *sV);
 	}
 	// Load harmonic notation
 	if (*sN == "harm_notation") {
@@ -180,6 +183,57 @@ void CP2D::LoadHSP(CString fname) {
 	fs.close();
 	est.Format("LoadHSP loaded %d lines from %s", i, fname);
 	WriteLog(0, est);
+}
+
+// Overwrite rule parameter from config
+void CP2D::RuleOverwrite(CString pname, CString pval) {
+	if (pval.IsEmpty()) return;
+	vector<CString> ast;
+	int rid = atoi(pname.Mid(15));
+	if (!rid) {
+		WriteLog(5, "Cannot parse rule id from parameter " + pname);
+		error = 1;
+		return;
+	}
+	if (rid >= ruleinfo.size()) {
+		WriteLog(5, "Rule id is above maximum loaded in " + pname);
+		error = 1;
+		return;
+	}
+	Tokenize(pval, ast, ";");
+	if (ast.size() != 6) {
+		WriteLog(5, "Wrong column count in " + pname + " parameter: " + pval);
+		error = 1;
+		return;
+	}
+	if (!ast[2].IsEmpty())
+		ruleinfo[rid].RuleName = ast[2];
+	if (!ast[3].IsEmpty())
+		ruleinfo[rid].SubRuleName = ast[3];
+	if (!ast[4].IsEmpty())
+		ruleinfo[rid].RuleComment = ast[4];
+	if (!ast[5].IsEmpty())
+		ruleinfo[rid].SubRuleComment = ast[5];
+	for (sp = 0; sp <= MAX_SPECIES; ++sp) {
+		for (vc = 0; vc <= MAX_VC; ++vc) {
+			for (vp = 0; vp <= MAX_VP; ++vp) {
+				if (!ast[0].IsEmpty())
+					accept[sp][vc][vp][rid] = atoi(ast[0]);
+				if (!ast[1].IsEmpty())
+					severity[sp][vc][vp][rid] = atoi(ast[1]);
+				if (ruleinfo2[rid].size()) {
+					if (!ast[2].IsEmpty())
+						ruleinfo2[rid][sp][vc][vp].RuleName = ast[2];
+					if (!ast[3].IsEmpty())
+						ruleinfo2[rid][sp][vc][vp].SubRuleName = ast[3];
+					if (!ast[4].IsEmpty())
+						ruleinfo2[rid][sp][vc][vp].RuleComment = ast[4];
+					if (!ast[5].IsEmpty())
+						ruleinfo2[rid][sp][vc][vp].SubRuleComment = ast[5];
+				}
+			}
+		}
+	}
 }
 
 // Load rules

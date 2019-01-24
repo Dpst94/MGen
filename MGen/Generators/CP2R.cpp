@@ -3983,9 +3983,6 @@ void CP2R::EvalMshHarm(int hvar) {
 	CHECK_READY(DR_fli, DR_c, DR_msh);
 	CHECK_READY(DR_vca);
 	// Get harmonic notes
-	if (cp_id == 1 && ms == 1) {
-		WriteLog(1, "WOW");
-	}
 	int de1 = hvar;
 	int de2 = (de1 + 2) % 7;
 	int de3 = (de1 + 4) % 7;

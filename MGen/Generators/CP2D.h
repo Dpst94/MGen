@@ -129,6 +129,7 @@ protected:
 	void LoadSpecies(CString st);
 	void LoadConfigLine(CString * sN, CString * sV, int idata, float fdata);
 	void LoadHSP(CString fname);
+	void RuleOverwrite(CString pname, CString pval);
 	void LoadRules(CString fname);
 	void ResizeRuleVariantVector(vector<vector<vector<vector<int>>>>& ve);
 	void ResizeRuleVariantVectorNegative(vector<vector<vector<vector<int>>>>& ve);
