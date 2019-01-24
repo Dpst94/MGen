@@ -3996,24 +3996,15 @@ void CP2R::EvalMshHarm(int hvar) {
 		if (s > hstart && s != fli[v][ls]) continue;
 		// Skip pause
 		if (!cc[v][s]) continue;
+		// Do not process short notes
+		if (llen[v][ls] < 2) continue;
 		int nt = c[v][s] % 7;
 		// Do not process notes that are not harmonic
 		if (nt != de1 && nt != de2 && nt != de3 && 
 			(nt != de4 || severity[sp][av_cnt][v][194] > 60)) continue;
 		// Process only lower notes
 		if (c[v][s] > lhbc) continue;
-		// For left sus and isus check hstart
-		if (s < hstart) {
-			if (msh[v][hstart] > 0) {
-				lhbc = c[v][s];
-			}
-		}
-		// For other notes check note start
-		else {
-			if (msh[v][s] > 0) {
-				lhbc = c[v][s];
-			}
-		}
+		lhbc = c[v][s];
 	}
 	// Detect 4/2 chord
 	if (lhbc % 7 == de4) hpenalty += 10;
@@ -4624,6 +4615,7 @@ int CP2R::FailMsh() {
 void CP2R::DetectAux() {
 	CHECK_READY(DR_fli, DR_nih, DR_msh);
 	CHECK_READY(DR_c);
+	if (!accept[sp][vc][0][170]) return;
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
