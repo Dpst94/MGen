@@ -4615,7 +4615,7 @@ int CP2R::FailMsh() {
 void CP2R::DetectAux() {
 	CHECK_READY(DR_fli, DR_nih, DR_msh);
 	CHECK_READY(DR_c);
-	if (!accept[sp][vc][0][170]) return;
+	if (accept[sp][vc][0][170]) return;
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
