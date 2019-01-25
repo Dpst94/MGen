@@ -1025,10 +1025,14 @@ void CP2Ly::SaveLyComments() {
 		}
 		com = st + ruleinfo[fl].RuleClass + ": " + rule_name;
 		CString subrule_name = GetSubRuleName(fl, sp, vc, vp);
+		// Always hide hidden subrule names starting with /
+		if (subrule_name.Left(1) == "/") subrule_name.Empty();
+		// If minimum verbosity, hide all subrule names except starting with :
 		if (!ly_rule_verbose) {
 			if (subrule_name.Left(1) != ":") subrule_name.Empty();
 		}
 		if (!subrule_name.IsEmpty()) {
+			// Always remove :
 			if (subrule_name.Left(1) == ":") {
 				subrule_name = subrule_name.Mid(1);
 			}
