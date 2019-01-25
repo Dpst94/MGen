@@ -638,21 +638,27 @@ CString CP2D::GetSubRuleName(int rid, int sp, int vc, int vp) {
 }
 
 CString CP2D::GetRuleComment(int rid, int sp, int vc, int vp) {
+	CString st;
 	if (ruleinfo2[rid].size()) {
-		return ruleinfo2[rid][sp][vc][vp].RuleComment;
+		st = ruleinfo2[rid][sp][vc][vp].RuleComment;
 	}
 	else {
-		return ruleinfo[rid].RuleComment;
+		st = ruleinfo[rid].RuleComment;
 	}
+	ReplaceRuleParams2(sp, vc, vp, rid, st);
+	return st;
 }
 
 CString CP2D::GetSubRuleComment(int rid, int sp, int vc, int vp) {
+	CString st;
 	if (ruleinfo2[rid].size()) {
-		return ruleinfo2[rid][sp][vc][vp].SubRuleComment;
+		st = ruleinfo2[rid][sp][vc][vp].SubRuleComment;
 	}
 	else {
-		return ruleinfo[rid].SubRuleComment;
+		st = ruleinfo[rid].SubRuleComment;
 	}
+	ReplaceRuleParams2(sp, vc, vp, rid, st);
+	return st;
 }
 
 // Load rules
@@ -886,6 +892,53 @@ void CP2D::SetRuleParams() {
 	CString st;
 	st.Format("Set rule parameters in %lld ms", time_stop - time_start);
 	WriteLog(0, st);
+}
+
+void CP2D::ReplaceRuleParam(int sp, int vc, int vp, int rid, CString &st, CString pname, int type, int pid) {
+	cmatch cm;
+	if (st.IsEmpty() || st.Find(pname) == -1) return;
+	regex e("\\b" + pname + "\\b");
+	regex_search(st.GetBuffer(), cm, e);
+	if (cm.size()) {
+		CString rst;
+		rst.Format("%d", GetRuleParam(sp, vc, vp, rid, type, pid));
+		st = regex_replace(st.GetBuffer(), e, rst.GetBuffer()).c_str();
+		//WriteLog(1, "Replaced: " + st);
+	}
+}
+
+// Replace AA, BB, XX, YY with rule parameters in string
+void CP2D::ReplaceRuleParams2(int sp, int vc, int vp, int rid, CString &st) {
+	ReplaceRuleParam(sp, vc, vp, rid, st, "AA", rsSubName, 0);
+	ReplaceRuleParam(sp, vc, vp, rid, st, "BB", rsSubName, 1);
+	ReplaceRuleParam(sp, vc, vp, rid, st, "CC", rsSubName, 2);
+	ReplaceRuleParam(sp, vc, vp, rid, st, "XX", rsName, 0);
+	ReplaceRuleParam(sp, vc, vp, rid, st, "YY", rsName, 1);
+	ReplaceRuleParam(sp, vc, vp, rid, st, "ZZ", rsName, 2);
+}
+
+// Replace AA, BB, XX, YY with rule parameters in comments
+// Obsolete. Used only to test if all XX masks are correct
+void CP2D::ReplaceRuleParams() {
+	long long time_start = CGLib::time();
+	for (int rid = 0; rid <= max_rule; ++rid) {
+		ReplaceRuleParams2(0, 0, 0, rid, ruleinfo[rid].RuleComment);
+		ReplaceRuleParams2(0, 0, 0, rid, ruleinfo[rid].SubRuleComment);
+		if (ruleinfo2[rid].size()) {
+			for (sp = 0; sp <= MAX_SPECIES; ++sp) {
+				for (vc = 0; vc <= MAX_VC; ++vc) {
+					for (vp = 0; vp <= MAX_VP; ++vp) {
+						ReplaceRuleParams2(sp, vc, vp, rid, ruleinfo2[rid][sp][vc][vp].RuleComment);
+						ReplaceRuleParams2(sp, vc, vp, rid, ruleinfo2[rid][sp][vc][vp].SubRuleComment);
+					}
+				}
+			}
+		}
+	}
+	long long time_stop = CGLib::time();
+	CString est;
+	est.Format("ReplaceRuleParams run %lld ms", time_stop - time_start);
+	WriteLog(0, est);
 }
 
 // Fill pause from start step to (start+length) step inclusive

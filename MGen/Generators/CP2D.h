@@ -154,6 +154,9 @@ protected:
 	inline void SetRuleParamI2C(vector<vector<vector<int>>>& par, int rid, int type, int id);
 	inline void SetRuleParam(vector<vector<vector<float>>>& par, int rid, int type, int id);
 	void SetRuleParams();
+	inline void ReplaceRuleParam(int sp, int vc, int vp, int rid, CString & st, CString pname, int type, int pid);
+	void ReplaceRuleParams2(int sp, int vc, int vp, int rid, CString & st);
+	void ReplaceRuleParams();
 	void FillPause(int start, int length, int v);
 	void GetFlag(int f);
 	inline void GetSpVcVp();
@@ -233,7 +236,7 @@ protected:
 
 	// Rules
 	vector<RuleInfo> ruleinfo; // [rid]
-	vector<vector<vector<vector<RuleInfo2>>>> ruleinfo2; // [sp][vc][vp][rid]
+	vector<vector<vector<vector<RuleInfo2>>>> ruleinfo2; // [rid][sp][vc][vp]
 	vector<vector<vector<vector<int>>>> accept; // [sp][vc][vp][rid]
 	vector<vector<vector<vector<int>>>> severity; // [sp][vc][vp][rid]
 	//vector<int>* vaccept;

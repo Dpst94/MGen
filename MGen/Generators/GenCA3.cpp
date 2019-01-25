@@ -563,6 +563,8 @@ void CGenCA3::Generate() {
 	if (error) return;
 	ParseRules();
 	SetRuleParams();
+	// Uncomment to test XX masks in rule comments and subrule comments
+	//ReplaceRuleParams();
 	if (error) return;
 	LoadLyShapes("configs\\ly\\shapes.csv");
 	if (HarmName[0].IsEmpty()) {
