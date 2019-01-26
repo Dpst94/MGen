@@ -4020,7 +4020,7 @@ void CP2R::EvalMshHarm(int hvar) {
 	// Flag 7th chord
 	if (found_de4) 
 		FlagA(0, 194, hstart, hstart, 0, 80);
-	// Prohibit DTIII#5 augmented chord (if not 7th chord)
+	// Prohibit DTIII#5 augmented chord (if not 7th chord, because 7th chord is already an error)
 	if (cchnv[shp[hstart % npm]][11] && cchnv[shp[hstart % npm]][3] && hvar == 2 && !found_de4) {
 		FlagA(0, 375, hstart, hstart, 0, 3);
 	}
@@ -6011,7 +6011,7 @@ void CP2R::FlagHarmTriRes() {
 				s5 = hli2[hs];
 				// Always prohibit harmonic tritone in archaic modes
 				if (mode && !mminor) {
-					AutoFlagL(v, 331, s, s, v2);
+					AutoFlagL(v, 195, s, s, v2);
 					continue;
 				}
 				// Last first note
