@@ -2785,8 +2785,6 @@ int CP2R::FailRhythm4() {
 // Fail rhythm for species 3
 int CP2R::FailRhythm3() {
 	CHECK_READY(DR_fli);
-	// Check uneven pause
-	if (fli_size[v] > 2 && !cc[v][0] && llen[v][0] % npm != llen[v][1]) FlagV(v, 237, 0);
 	// Last measure not whole
 	if (c_len - fli[v][fli_size[v] - 1] < npm ||
 		(c_len == ep2 && llen[v][fli_size[v] - 1] != npm)) {
@@ -2947,15 +2945,6 @@ int CP2R::FailRhythm5() {
 				// 1/4 syncope
 				else if (l_len[lp] > 2 && pos == 2 && cc[v][s2]) FlagV(v, 235, s2);
 			}
-			// Uneven starting rhythm
-			if (!ms && !cc[v][0] && lp > 0 && l_len[lp] != l_len[lp - 1] && !uneven_start_fired) {
-				// Check for exception: (pause + 1/4 + 1/2 slurred)
-				if (llen[v][0] == 2 && lp == 2 && l_len[lp] >= 4 && l_len[lp - 1] == 2 && slur2) {}
-				else {
-					uneven_start_fired = 1;
-					FlagVL(v, 254, s2, fin[v]);
-				}
-			}
 			pos += l_len[lp];
 		}
 		// Check rhythm repeat
@@ -2971,11 +2960,6 @@ int CP2R::FailRhythm5() {
 			rh_pid[v][ms] = pid_cur;
 		}
 		// Check rhythm rules
-		// First measure
-		if (!ms) {
-			// Uneven pause
-			if (l_len.size() > 1 && l_len[0] == fin[v] && l_len[0] != l_len[1]) FlagV(v, 237, s);
-		}
 		// Whole inside
 		//if (l_len[0] >= 8 && ms < mli.size() - 1 && ms && cc[v][s]) FlagV(v, 160, s);
 		// 1/2.
@@ -3607,6 +3591,8 @@ int CP2R::FailBeat() {
 	else if (sp == 2 || sp == 4) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
+			// Skip starting rest
+			if (!cc[v][s] && !s) continue;
 			if (npm == 10) {
 				if (ls == fli_size[v] - 1 && llen[v][ls] == npm) continue;
 				if (s % npm == 0 && llen[v][ls] == 4) continue;
@@ -5891,16 +5877,6 @@ int CP2R::FailStartPause() {
 				v = vstarts[ms];
 				FlagV(v, 527, mli[ms]);
 			}
-			if (mstarts[ms] > 2) {
-				// Too many voices start
-				v = vstarts[ms];
-				FlagV(v, 529, mli[ms]);
-			}
-			else if (mstarts[ms] == 1 && last_start > ms) {
-				// Only one voice starts, although there are more voices to start
-				v = vstarts[ms];
-				FlagV(v, 528, mli[ms]);
-			}
 		}
 	}
 	// Allow only one voice of sp2-5 starting without pause if there are no species 0-1
@@ -5919,13 +5895,16 @@ int CP2R::FailStartPause() {
 				sp2345_nopause = 0;
 				continue;
 			}
-			if (npm == 10) {
-				// Only halfnote pause is allowed
-				if (fin[v] % npm != 4) FlagV(v, 138, fin[v]);
-			}
+			// Voice should not start on downbeat
+			if (!fin[v]) FlagV(v, 237, fin[v]);
 			else {
-				// Only halfnote pause is allowed
-				if (fin[v] % npm != nlen[v]) FlagV(v, 138, fin[v]);
+				if (npm == 10) {
+					if (fin[v] % npm != 4 && fin[v] % npm != 6) FlagV(v, 138, fin[v]);
+				}
+				else {
+					// Starting pause must be exactly divisible by note length
+					if (!(fin[v] % npm) || fin[v] % nlen[v]) FlagV(v, 138, fin[v]);
+				}
 			}
 		}
 		else if (sp == 3) {
@@ -5933,16 +5912,20 @@ int CP2R::FailStartPause() {
 				sp2345_nopause = 0;
 				continue;
 			}
-			// Only particular pauses are allowed
-			if (fin[v] % npm != 2) FlagV(v, 138, fin[v]);
+			// Voice should not start on downbeat
+			if (!fin[v]) FlagV(v, 237, fin[v]);
+			// Starting pause must be exactly divisible by note length
+			else if (!(fin[v] % npm) || fin[v] % nlen[v]) FlagV(v, 138, fin[v]);
 		}
 		else if (sp == 5) {
 			if (fin[v] == 0 && sp2345_nopause) {
 				sp2345_nopause = 0;
 				continue;
 			}
-			// Only particular pauses are allowed
-			if (fin[v] % npm != 2 && fin[v] % npm != 4) FlagV(v, 138, fin[v]);
+			// Voice should not start on downbeat
+			if (!fin[v]) FlagV(v, 237, fin[v]);
+			// Starting pause must be exactly divisible by note length
+			else if (!(fin[v] % npm) || fin[v] % 2) FlagV(v, 138, fin[v]);
 		}
 	}
 	return 0;
