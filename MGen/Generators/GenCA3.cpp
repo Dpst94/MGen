@@ -759,7 +759,7 @@ void CGenCA3::GetCPKey() {
 	// Detect mminor
 	if (detected_mminor) {
 		if (mode != 9) {
-			est.Format("Detected melodic minor alterations (major IV# or V#), but specified key was %s. This is impossible. Please check source file",
+			est.Format("Detected melodic minor alterations (major IV# or V#), but specified key was %s. Please check source file",
 				GetPrintKey(bn, mode));
 			WriteLogLy(1, est, 1);
 		}
