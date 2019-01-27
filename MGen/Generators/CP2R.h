@@ -266,6 +266,7 @@ protected:
 	inline void GetChordTonePresent();
 	inline void RemoveMinimumMsh();
 	inline int FailHarm();
+	inline void Remove7thFisGis();
 	inline int EvalHarm();
 	inline int FailTonicCP();
 	inline int FailHarmStep(int i, const int * hv, int & count, int & wcount, int repeat_letters, int miss_letters, int flagr, int flagm);

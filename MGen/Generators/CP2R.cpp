@@ -3779,6 +3779,7 @@ int CP2R::FailHarm() {
 #endif
 	GetChordTones();
 	GetChordTonePresent();
+	Remove7thFisGis();
 	GetHarmBass();
 	// Check first harmony not T
 	if (chm.size() && chm[0] > -1 && (chm[0] || hbc[0] % 7)) {
@@ -3792,6 +3793,21 @@ int CP2R::FailHarm() {
 	if (FailTonicCP()) return 1;
 	GetLT();
 	return 0;
+}
+
+// Clear chm_fis and chm_gis if they were created by non-chord 7th tones
+void CP2R::Remove7thFisGis() {
+	CHECK_READY(DR_fli, DR_msh, DR_hli);
+	CHECK_READY(DR_cct, DR_pc);
+	SET_READY(DR_cctp);
+	for (hs = 0; hs < hli.size(); ++hs) {
+		// Find all chords with 7th notes, that are not required
+		if (cctp[hs][3] == 1) {
+			// If these notes are F, F#, G or G#, remove this flag
+			if (cct[hs][3] == 8 || cct[hs][3] == 9) chm_fis[hs] = 0;
+			if (cct[hs][3] == 10 || cct[hs][3] == 11) chm_fis[hs] = 0;
+		}
+	}
 }
 
 int CP2R::EvalHarm() {
@@ -6314,7 +6330,7 @@ void CP2R::FlagFCR() {
 	for (hs = 1; hs < hli.size(); ++hs) {
 		int fcr = 0;
 		// Prohibit VI<->VI# containing progression
-		if (chm[hs] % 2 && chm[hs - 1] % 2) {
+		if (chm_fis[hs] * chm_fis[hs - 1] < 0) {
 			if (chm_fis[hs] > 0 && chm_fis[hs - 1] < 0) {
 				fcr = FindFCRNotes(8, 9);
 			}
@@ -6332,7 +6348,7 @@ void CP2R::FlagFCR() {
 		}
 		fcr = 0;
 		// Prohibit VII<->VII# containing progression
-		if (chm[hs] && chm[hs] % 2 == 0 && chm[hs - 1] && chm[hs - 1] % 2 == 0) {
+		if (chm_gis[hs] * chm_gis[hs - 1] < 0) {
 			if (chm_gis[hs] > 0 && chm_gis[hs - 1] < 0) {
 				fcr = FindFCRNotes(10, 11);
 			}
@@ -6375,7 +6391,7 @@ int CP2R::FindFCRNotes(int pcc1, int pcc2) {
 			if (fva[x] == fva2[y]) continue;
 			// Check outer voices
 			if ((fva[x] == lva[fsa[x]] || fva[x] == hva[fsa[x]]) && 
-				(fva2[y] == hva[fsa2[x]] || fva2[y] == lva[fsa2[x]])) {
+				(fva2[y] == hva[fsa2[y]] || fva2[y] == lva[fsa2[y]])) {
 				// If outer voices, save and return, because it is best variant
 				v = fva[x];
 				v2 = fva2[y];
