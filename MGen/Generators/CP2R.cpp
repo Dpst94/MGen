@@ -4486,17 +4486,17 @@ int CP2R::FailPco() {
 		}
 		// Prohibit similar movement to pco
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0) {
-			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
-				// Penultimate measure with stepwise motion in higher voice
+			if (!beat[v][ls] && bmli[s] == mli.size() - 1) {
+				// Last measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
 					FlagL(v, 72, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
-				// Penultimate measure
+				// Last measure
 				else {
 					FlagL(v, 73, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
-			// Non-penultimate measure
+			// Not last measure
 			else {
 				if (s % npm) {
 					FlagL(v, 167, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
@@ -4525,17 +4525,17 @@ int CP2R::FailPco() {
 		// Prohibit similar movement in outer voices to pco
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && 
 			v == lva[s] && v2 == hva[s]) {
-			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
-				// Penultimate measure with stepwise motion in higher voice
+			if (!beat[v][ls] && bmli[s] == mli.size() - 1) {
+				// Last measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
 					FlagL(v, 209, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
-				// Penultimate measure
+				// Last measure
 				else {
 					FlagL(v, 213, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
-			// Non-penultimate measure
+			// Not last measure
 			else {
 				if (s % npm) {
 					FlagL(v, 168, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
@@ -4564,17 +4564,17 @@ int CP2R::FailPco() {
 		// Prohibit similar movement in outer voices to pco
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && 
 			v == lva[s] && v2 == hva[s]) {
-			if (!beat[v][ls] && bmli[s] >= mli.size() - 2) {
-				// Penultimate measure with stepwise motion in higher voice
+			if (!beat[v][ls] && bmli[s] == mli.size() - 1) {
+				// Last measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
 					FlagL(v, 208, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
-				// Penultimate measure
+				// Last measure
 				else {
 					FlagL(v, 212, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
-			// Non-penultimate measure
+			// Not last measure
 			else {
 				if (s % npm) {
 					FlagL(v, 166, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
@@ -4774,9 +4774,6 @@ void CP2R::EvaluateMsh() {
 		}
 		if (!nih[v][s]) {
 			++nct_count;
-			if (cp_id == 3 && ms == 2) {
-				WriteLog(1, "WOW");
-			}
 			if (msh[v][s] == pFirst) FlagA(v, 551, s, s, v, 100);
 			else if (msh[v][s] == pDownbeat) FlagA(v, 83, s, s, v, 100);
 			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v, 100);
