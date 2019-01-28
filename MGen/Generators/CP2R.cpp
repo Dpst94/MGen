@@ -3363,26 +3363,28 @@ void CP2R::FlagSus2() {
 
 void CP2R::GetLT() {
 	CHECK_READY(DR_nih, DR_pc, DR_hli);
-	CHECK_READY(DR_fli);
+	CHECK_READY(DR_fli, DR_cct);
 	SET_READY(DR_islt);
 	for (v = 0; v < av_cnt; ++v) {
-		for (ls = 0; ls < fli_size[v]; ++ls) {
-			s = fli[v][ls];
+		for (s = 0; s < ep2; ++s) {
 			islt[v][s] = 0;
 			// Set lt only for major and melodic minor
 			if (mode && !mminor) continue;
+			ls = bli[v][s];
+			hs = bhli[s];
+			// Skip no note start and no harmony start
+			if (s != fli[v][ls] && s != hli[hs]) continue;
 			// Skip pause
 			if (!cc[v][s]) continue;
-			if (pcc[v][s] == 11 && nih[v][s]) {
-				hs = bhli[s];
-				// Last harmony
-				if (hs >= hli.size() - 1) continue;
-				// D or DVII harmony
-				if (chm[hs] == 4 || chm[hs] == 6) islt[v][s] = 1;
-				else {
-					// DTIII followed by T chord
-					if (chm[hs] == 2 && chm[hs + 1] == 0) islt[v][s] = 1;
-				}
+			// Skip non-harmonic tones and not VII#
+			if (pcc[v][s] != 11 || !nih[v][s]) continue;
+			// Last harmony
+			if (hs == hli.size() - 1) continue;
+			// D or DVII harmony
+			if (chm[hs] == 4 || chm[hs] == 6) islt[v][s] = 1;
+			else {
+				// DTIII followed by T chord
+				if (chm[hs] == 2 && chm[hs + 1] == 0) islt[v][s] = 1;
 			}
 		}
 	}
