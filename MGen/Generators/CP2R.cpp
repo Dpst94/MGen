@@ -4711,20 +4711,26 @@ void CP2R::DetectAux() {
 		// Make previous note msh>0. If it creates conflict, flag it and increase hpenalty
 		if (apply & 1) {
 			msh[v][s3] = pAuxWrong;
-			if (!nih[v][s3])
+			if (!nih[v][s3]) {
+				++nct_count;
 				FlagA(v, 170, s3, s3, v, 50);
+			}
 		}
 		// Make current note msh>0. If it creates conflict, flag it and increase hpenalty
 		if (apply & 2) {
 			msh[v][s] = pAuxWrong;
-			if (!nih[v][s])
+			if (!nih[v][s]) {
+				++nct_count;
 				FlagA(v, 170, s, s, v, 50);
+			}
 		}
 		// Make next note msh>0. If it creates conflict, flag it and increase hpenalty
 		if (apply & 4) {
 			msh[v][s4] = pAuxWrong;
-			if (!nih[v][s4])
+			if (!nih[v][s4]) {
+				++nct_count;
 				FlagA(v, 170, s4, s4, v, 50);
+			}
 		}
 	}
 }
@@ -4745,8 +4751,10 @@ void CP2R::EvaluateMsh() {
 			if (s != hstart && llen[v][ls] > llen[v][ls - 1] &&
 				!nih[v][fli[v][ls - 1]]) {
 				msh[v][s] = pLong;
-				if (!nih[v][s])
+				if (!nih[v][s]) {
+					++nct_count;
 					FlagA(v, 223, s, s, v, 50);
+				}
 			}
 			// Skip other non-harmonic tones
 			continue;
@@ -4766,6 +4774,9 @@ void CP2R::EvaluateMsh() {
 		}
 		if (!nih[v][s]) {
 			++nct_count;
+			if (cp_id == 3 && ms == 2) {
+				WriteLog(1, "WOW");
+			}
 			if (msh[v][s] == pFirst) FlagA(v, 551, s, s, v, 100);
 			else if (msh[v][s] == pDownbeat) FlagA(v, 83, s, s, v, 100);
 			else if (msh[v][s] == pLeapTo) FlagA(v, 36, s, s, v, 100);
@@ -5802,7 +5813,7 @@ void CP2R::DetectSus() {
 void CP2R::DetectPDD() {
 	CHECK_READY(DR_fli, DR_c, DR_resol);
 	CHECK_READY(DR_msh, DR_nih);
-	if (!accept[sp][vc][0][282]) return;
+	if (severity[sp][vc][0][282] > 60) return;
 	// First measure
 	if (!ms) return;
 	if (!cc[v][s]) return;
@@ -5836,6 +5847,8 @@ void CP2R::DetectPDD() {
 		msh[v][fli[v][ls]] = pAuxPDD;
 		msh[v][fli[v][ls + 1]] = pHarmonicPDD;
 		resol[v][hstart] = fli[v][ls + 1];
+		// Increase hpenalty so that PDD is selected only as worst case (if PDD is prohibited)
+		FlagA(v, 282, s, s, v, 450);
 	}
 }
 
