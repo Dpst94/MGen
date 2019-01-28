@@ -949,8 +949,16 @@ void CP2R::FlagLtLt() {
 			// Ignore pauses
 			if (!cc[v][s1]) continue;
 			if (!cc[v][s]) continue;
+			// Calculate step for islt
+			hs = bhli[s];
+			if (s0 < hli[hs]) {
+				s5 = hli[hs];
+			}
+			else {
+				s5 = s0;
+			}
 			// Prohibit BB
-			if (islt[v][s1] || islt[v][s0]) {
+			if (islt[v][s1] || islt[v][s5]) {
 				if (pcc[v][s] == pcc[v][s1])
 					FlagVL(v, 348, s0, s1);
 			}
@@ -5971,31 +5979,43 @@ void CP2R::FlagLTUnresolved() {
 		// Up to penultimate note
 		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 			s = fli[v][ls];
-			// Skip not lt
-			if (!islt[v][s]) continue;
+			s2 = fli2[v][ls];
 			// Skip pause
 			if (!cc[v][s]) continue;
-			hs = bhli[s];
-			s5 = hli2[hs];
+			// Harmony of last lt note step
+			hs = bhli[s2];
+			// Skip last harmony
+			if (hs == hli.size() - 1) continue;
+			// Check if this is interbar or intrabar suspension
+			if (s < hli[hs]) {
+				// If lt is resolved, do not check - already checked in sus
+				if (resol[v][hli[hs]]) continue;
+				// If lt is unresolved, islt is harmony step; resolution is next harmony step
+				s4 = hli[hs];
+			}
+			// If there is no suspension, islt step is note start; resolution is next note
+			else {
+				s4 = s;
+			}
+			// Skip not lt
+			if (!islt[v][s4]) continue;
+			s5 = hli2[hs] + 1;
 			// Check if note touches harmony end
-			if (fli2[v][ls] < s5) continue;
-			// Check if this is last harmony
-			if (hli.size() <= hs + 1) continue;
+			if (fli2[v][ls] < s5 - 1) continue;
 			vc = vca[s];
 			sp = vsp[v];
-			s2 = fli[v][ls + 1];
 			// Check if lt has to resolve up (do not check current chord, because we are already working with situations where islt=1)
 			if (chm[hs + 1] == 0 || chm[hs + 1] == 5) {
 				// Check if lt resolves up
-				if (pc[v][s2] != 0) {
-					FlagVL(v, 197, s, s2);
+				if (pc[v][s5] != 0) {
+					FlagVL(v, 197, s, s5);
 				}
 			} 
 			// Check if lt has to resolve up or down
 			else if (chm[hs + 1] == 1 || chm[hs + 1] == 3) {
 				// Check if lt resolves up or down
-				if (pc[v][s2] != 0 && pc[v][s2] != 5) {
-					FlagVL(v, 198, s, s2);
+				if (pc[v][s5] != 0 && pc[v][s5] != 5) {
+					FlagVL(v, 198, s, s5);
 				}
 			}
 		}
