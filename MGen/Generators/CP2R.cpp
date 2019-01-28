@@ -3855,10 +3855,10 @@ int CP2R::EvalHarm() {
 		}
 		if (i > 0 && chm[i - 1] > -1) {
 			// Check GC for low voice and not last note (last note in any window is ignored)
-			if (ls < fli_size[v] - 1 && av_cnt == 2 &&
+			if (ls < fli_size[v] - 1 && 
 				chm[i] == 0 && chm[i - 1] == 4 &&
-				pc[0][s] == 0 && pc[1][s] == 0 &&
-				s > 0 && pc[0][s - 1] == 4) FlagV(v, 48, s);
+				pc[lva[s]][s] == 0 && pc[hva[s]][s] == 0 &&
+				s > 0 && pc[lva[s]][s - 1] == 4) FlagV(v, 48, s);
 			if (mminor) {
 				// Prohibit dVII (GBD) in root position after S (DF#A) in root position
 				if (chm[i] == 6 && chm[i - 1] == 3 && chm_gis[i] < 1 && chm_fis[i - 1] > 0) {
