@@ -3815,7 +3815,7 @@ void CP2R::Remove7thFisGis() {
 		if (cctp[hs][3] == 1) {
 			// If these notes are F, F#, G or G#, remove this flag
 			if (cct[hs][3] == 8 || cct[hs][3] == 9) chm_fis[hs] = 0;
-			if (cct[hs][3] == 10 || cct[hs][3] == 11) chm_fis[hs] = 0;
+			if (cct[hs][3] == 10 || cct[hs][3] == 11) chm_gis[hs] = 0;
 		}
 	}
 }
@@ -6376,11 +6376,11 @@ void CP2R::FlagFCR() {
 			}
 			// If both notes exist in external voices, flag red
 			if (fcr == 2) {
-				FlagV(v2, 377, s2);
+				Flag(v2, 377, s2, v);
 			}
 			// If one of notes exist in internal voice and the other - in any voice, flag yellow
 			else if (fcr == 1) {
-				FlagV(v2, 164, s2);
+				Flag(v2, 164, s2, v);
 			}
 		}
 		fcr = 0;
@@ -6394,11 +6394,11 @@ void CP2R::FlagFCR() {
 			}
 			// If both notes exist in external voices, flag red
 			if (fcr == 2) {
-				FlagV(v2, 378, s2);
+				Flag(v2, 378, s2, v);
 			}
 			// If one of notes exist in internal voice and the other - in any voice, flag yellow
 			else if (fcr == 1) {
-				FlagV(v2, 165, s2);
+				Flag(v2, 165, s2, v);
 			}
 		}
 	}
