@@ -430,7 +430,7 @@ int CGenCA3::GetCP() {
 	}
 	for (v = 0; v < av_cnt; ++v) {
 		if (!cc[v][c_len - 1]) {
-			est.Format("Voice %d ends before the end of exercise %d Ignoring exercise.",
+			est.Format("Voice %d ends before the end of exercise %d. Ignoring exercise.",
 				v + 1, cp_id + 1);
 			WriteLogLy(1, est, 0);
 			return 1;
@@ -825,6 +825,7 @@ int CGenCA3::GetVocalRanges() {
 }
 
 void CGenCA3::ScanVocalRanges() {
+	// Scanned voice
 	int sv = 0;
 	int finished = 0;
 	cycle = 0;
