@@ -1164,6 +1164,9 @@ int CP2R::FailMinor() {
 int CP2R::FailMinorStepwise() {
 	CHECK_READY(DR_pc, DR_fli);
 	CHECK_READY(DR_nih, DR_c);
+	if (cp_id == 9) {
+		WriteLog(1, "WOW");
+	}
 	// For non-border notes only, because border notes have their own rules
 	for (ls = fil[v] + 1; ls < fli_size[v] - 1; ++ls) {
 		s = fli[v][ls];
@@ -3762,7 +3765,7 @@ int CP2R::FailHarm() {
 				if (msh[v][s5] > 0) {
 					chns[hs][pc[v][s]] = 2;
 					cchns[hs][pcc[v][s]] = 2;
-					// Delete chord if non-chord tone is in wrong place
+					// Delete chord if non-chord tone is in wrong place - not needed because this chord is no longer detected in GetMsh
 					//if (!nih[v][s5]) chm[hs] = -1;
 				}
 				else {
@@ -3810,12 +3813,21 @@ void CP2R::Remove7thFisGis() {
 	CHECK_READY(DR_fli, DR_msh, DR_hli);
 	CHECK_READY(DR_cct, DR_pc);
 	SET_READY(DR_cctp);
+	if (cp_id == 9) {
+		WriteLog(1, "WOW");
+	}
 	for (hs = 0; hs < hli.size(); ++hs) {
 		// Find all chords with 7th notes, that are not required
 		if (cctp[hs][3] == 1) {
 			// If these notes are F, F#, G or G#, remove this flag
 			if (cct[hs][3] == 8 || cct[hs][3] == 9) chm_fis[hs] = 0;
 			if (cct[hs][3] == 10 || cct[hs][3] == 11) chm_gis[hs] = 0;
+			// Clear 7th
+			for (v = 0; v < av_cnt; ++v) {
+				for (s = hli[hs]; s <= hli2[hs]; ++s) {
+					if (pcc[v][s] == cct[hs][3]) nih[v][s] = 0;
+				}
+			}
 		}
 	}
 }
