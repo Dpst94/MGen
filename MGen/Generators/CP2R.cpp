@@ -50,17 +50,50 @@ inline void CP2R::FlagL(int voice, int fid, int step, int step2, int voice2) {
 	fvl[voice][step].push_back(voice2);
 }
 
-inline void CP2R::AutoFlagL(int voice, int fid, int step, int step2, int voice2) {
-	CHECK_READY(DR_fli);
-	int avoice, avoice2;
+void CP2R::AutoChooseVoice(int step, int voice, int voice2, int &avoice, int &avoice2) {
 	if (fli[voice][bli[voice][step]] == step) {
-		avoice = voice;
-		avoice2 = voice2;
+		// If both voices are possible, choose best voice
+		if (fli[voice2][bli[voice2][step]] == step) {
+			// If first voice is bass, send to second voice
+			if (!voice) {
+				avoice = voice2;
+				avoice2 = voice;
+			}
+			// If second voice is bass, send to first voice
+			else if (!voice2) {
+				avoice = voice;
+				avoice2 = voice2;
+			}
+			// If neither voice is bass, send to lowest voice
+			else {
+				avoice = min(voice, voice2);
+				avoice2 = max(voice, voice2);
+			}
+		}
+		// If only first voice is possible, use it
+		else {
+			avoice = voice;
+			avoice2 = voice2;
+		}
 	}
+	// If only second voice is possible, use it
 	else {
 		avoice = voice2;
 		avoice2 = voice;
 	}
+}
+
+inline void CP2R::AutoFlag(int voice, int fid, int step, int voice2) {
+	CHECK_READY(DR_fli);
+	int avoice, avoice2;
+	AutoChooseVoice(step, voice, voice2, avoice, avoice2);
+	Flag(avoice, fid, step, avoice2);
+}
+
+inline void CP2R::AutoFlagL(int voice, int fid, int step, int step2, int voice2) {
+	CHECK_READY(DR_fli);
+	int avoice, avoice2;
+	AutoChooseVoice(step, voice, voice2, avoice, avoice2);
 	FlagL(avoice, fid, step, step2, avoice2);
 }
 
@@ -80,14 +113,7 @@ inline void CP2R::FlagA(int voice, int fid, int step, int step2, int voice2, int
 inline void CP2R::AutoFlagA(int voice, int fid, int step, int step2, int voice2, int ihpe) {
 	CHECK_READY(DR_fli);
 	int avoice, avoice2;
-	if (fli[voice][bli[voice][step]] == step) {
-		avoice = voice;
-		avoice2 = voice2;
-	}
-	else {
-		avoice = voice2;
-		avoice2 = voice;
-	}
+	AutoChooseVoice(step, voice, voice2, avoice, avoice2);
 	FlagA(avoice, fid, step, step2, avoice2, ihpe);
 }
 
@@ -281,13 +307,13 @@ int CP2R::FailOverlap() {
 				// Direct movement to 2nd
 				if (abs(cc[v][s3] - cc[v2][s4]) < 3 && abs(cc[v][s3] - cc[v2][s4]) > 0 && 
 					(cc[v][s3] - cc[v][s3 - 1]) * (cc[v2][s4] - cc[v2][s4 - 1]) > 0) {
-					FlagL(v, 136, s3, s, v2);
+					AutoFlagL(v, 136, s3, s, v2);
 				}
 				else if (nonadj) {
-					FlagL(v, 548, s3, s, v2);
+					AutoFlagL(v, 548, s3, s, v2);
 				}
 				else {
-					FlagL(v, 24, s3, s, v2);
+					AutoFlagL(v, 24, s3, s, v2);
 				}
 			}
 		}
