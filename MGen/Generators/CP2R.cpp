@@ -357,24 +357,24 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 	CHECK_READY(DR_sus);
 	// Is any crossing prohibited?
 	if (!accept[sp][vc][0][543]) {
-		FlagL(v, 543, cross_start, cross_end, v2);
+		AutoFlagL(v, 543, cross_start, cross_end, v2);
 	}
 	// Is there crossing in first or last measure?
 	else if (!accept[sp][vc][0][541] && bmli[cross_start] == 0) {
-		FlagL(v, 541, cross_start, cross_end, v2);
+		AutoFlagL(v, 541, cross_start, cross_end, v2);
 	}
 	else if (!accept[sp][vc][0][542] && bmli[cross_end] == mli.size() - 1) {
-		FlagL(v, 542, cross_start, cross_end, v2);
+		AutoFlagL(v, 542, cross_start, cross_end, v2);
 	}
 	else {
 		// Check crossing length
 		int clen = (cross_end - cross_start + 1) * 1.0 / npm;
 		if (clen > cross_max_len[sp][av_cnt][0]) {
 			if (clen > cross_max_len2[sp][av_cnt][0]) {
-				FlagL(v, 519, cross_start, cross_end, v2);
+				AutoFlagL(v, 519, cross_start, cross_end, v2);
 			}
 			else {
-				FlagL(v, 518, cross_start, cross_end, v2);
+				AutoFlagL(v, 518, cross_start, cross_end, v2);
 			}
 		}
 	}
@@ -392,7 +392,7 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 		}
 		// Flag non-adjacent voices crossing
 		if (found) {
-			FlagL(v, 520, cross_start, cross_end, v2);
+			AutoFlagL(v, 520, cross_start, cross_end, v2);
 		}
 	}
 	// Only if not first note and not oblique motion and not pauses
@@ -402,25 +402,25 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 		int int2 = abs(c[v][cross_start - 1] - c[v2][cross_start - 1]);
 		// 2 x 2nd intervals (sequential)
 		if (int1 == 1 && int2 == 1) {
-			FlagL(v, 545, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
+			AutoFlagL(v, 545, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
 		}
 		// Prohibit 2nd interval
 		else if (int1 == 1) {
-			Flag(v, 544, cross_start, v2);
+			AutoFlag(v, 544, cross_start, v2);
 		}
 		// Prohibit 2nd interval
 		else if (int2 == 1) {
-			Flag(v, 544, ssus[v][bli[v][cross_start - 1]], v2);
+			AutoFlag(v, 544, ssus[v][bli[v][cross_start - 1]], v2);
 		}
 		// Prohibit direct motion
 		if ((cc[v][cross_start] - cc[v][cross_start - 1]) * (cc[v2][cross_start] - cc[v2][cross_start - 1]) > 0) {
 			// Both leaps
 			if (leap[v][cross_start - 1] && leap[v2][cross_start - 1]) {
-				FlagL(v, 547, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
+				AutoFlagL(v, 547, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
 			}
 			// One leap
 			else {
-				FlagL(v, 546, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
+				AutoFlagL(v, 546, ssus[v][bli[v][cross_start - 1]], cross_start, v2);
 			}
 			// Zero leaps is impossible, because this will not lead to voice crossing
 		}
@@ -431,24 +431,24 @@ int CP2R::FailOneCross(int cross_start, int cross_end) {
 		int int2 = abs(c[v][cross_end] - c[v2][cross_end]);
 		// 2 x 2nd intervals (sequential)
 		if (int1 == 1 && int2 == 1) {
-			FlagL(v, 545, ssus[v][bli[v][cross_end]], cross_end + 1, v2);
+			AutoFlagL(v, 545, ssus[v][bli[v][cross_end]], cross_end + 1, v2);
 		}
 		// Prohibit 2nd interval
 		else if (int1 == 1) {
-			Flag(v, 544, cross_end + 1, v2);
+			AutoFlag(v, 544, cross_end + 1, v2);
 		}
 		// Prohibit 2nd interval
 		else if (int2 == 1) {
-			Flag(v, 544, ssus[v][bli[v][cross_end]], v2);
+			AutoFlag(v, 544, ssus[v][bli[v][cross_end]], v2);
 		}
 		// Prohibit direct motion
 		if ((cc[v][cross_end + 1] - cc[v][cross_end]) * (cc[v2][cross_end + 1] - cc[v2][cross_end]) > 0) {
 			// Both leaps
 			if (leap[v][cross_end] && leap[v2][cross_end]) {
-				FlagL(v, 547, ssus[v][bli[v][cross_end]], cross_end + 1, v2);
+				AutoFlagL(v, 547, ssus[v][bli[v][cross_end]], cross_end + 1, v2);
 			}
 			else {
-				FlagL(v, 546, ssus[v][bli[v][cross_end]], cross_end + 1, v2);
+				AutoFlagL(v, 546, ssus[v][bli[v][cross_end]], cross_end + 1, v2);
 			}
 		}
 	}
@@ -1975,10 +1975,10 @@ int CP2R::FailFirstNotes() {
 	else if (v == lva[s]) vp = vpBas;
 	else vp = vpNbs;
 	if (pc[v][s] != 0 && !bmli[s]) {
-		if (pc[v][s] == 4) Flag(v, 532, s, v);
+		if (pc[v][s] == 4) FlagV(v, 532, s);
 		else if (pc[v][s] == 2) {
-			if (sus[v][bli[v][s]]) Flag(v, 533, s, v);
-			else Flag(v, 534, s, v);
+			if (sus[v][bli[v][s]]) FlagV(v, 533, s);
+			else FlagV(v, 534, s);
 		}
 		else FlagV(v, 535, s);
 	}
@@ -2003,9 +2003,9 @@ int CP2R::FailLastNotes() {
 	else if (v == lva[s]) vp = vpBas;
 	else vp = vpNbs;
 	if (pc[v][s] != 0) {
-		if (pc[v][s] == 4) Flag(v, 536, s, v);
-		else if (pc[v][s] == 2) Flag(v, 537, s, v);
-		else Flag(v, 538, s, v);
+		if (pc[v][s] == 4) FlagV(v, 536, s);
+		else if (pc[v][s] == 2) FlagV(v, 537, s);
+		else FlagV(v, 538, s);
 	}
 	if (mminor) {
 		// Prohibit major second up before I (far)
@@ -3031,7 +3031,7 @@ int CP2R::FailRhythmRepeat() {
 				// Fire if rhythm and pauses rhythm matches and there is no whole-measure pause
 				if (rh_id[v][ms] == rh_id[v2][ms] && rh_pid[v][ms] == rh_pid[v2][ms] &&
 					(fli2[v][ls] < s + npm - 1 || cc[v][s]))
-					FlagL(v, 549, s, fli[v][bli[v][s + npm - 1]], v2);
+					AutoFlagL(v, 549, s, fli[v][bli[v][s + npm - 1]], v2);
 			}
 		}
 	}
@@ -3085,7 +3085,7 @@ void CP2R::FlagMultiSlur() {
 			}
 		}
 		if (scount > 1) {
-			FlagL(v, 557, s, s, v2);
+			AutoFlagL(v, 557, s, s, v2);
 		}
 	}
 }
@@ -3343,19 +3343,19 @@ void CP2R::FlagSus() {
 					civl = cc[v][s3] - cc[v2][s3];
 					// Interval is 2nd
 					if (abs(civl) == 1 || abs(civl) == 2) {
-						Flag(v2, 218, s3, v);
+						AutoFlag(v2, 218, s3, v);
 						continue;
 					}
 					// Above sus
 					if (civl < 0) {
-						Flag(v2, 216, s3, v);
+						AutoFlag(v2, 216, s3, v);
 						continue;
 					}
 					// Sus resolution is in bass
 					if (v2 == lva[s3]) continue;
 					// Less than 4 voices
 					if (vca[s3] < 4) {
-						Flag(v2, 217, s3, v);
+						AutoFlag(v2, 217, s3, v);
 						continue;
 					}
 					// Find chord tone between sus and susres
@@ -3368,7 +3368,7 @@ void CP2R::FlagSus() {
 						}
 					}
 					if (!found) {
-						Flag(v2, 217, s3, v);
+						AutoFlag(v2, 217, s3, v);
 					}
 				}
 			}
@@ -4274,10 +4274,10 @@ int CP2R::FailVocalRangesConflict() {
 				if (!is_conf) {
 					if (s - conf_start > vocra_disbal_yel[sp][vc][vp] * 2) {
 						if (s - conf_start > vocra_disbal_red[sp][vc][vp] * 2) {
-							FlagL(v, 526, conf_start, s - 1, v2);
+							AutoFlagL(v, 526, conf_start, s - 1, v2);
 						}
 						else {
-							FlagL(v, 524, conf_start, s - 1, v2);
+							AutoFlagL(v, 524, conf_start, s - 1, v2);
 						}
 					}
 					conf_start = -1;
@@ -4288,10 +4288,10 @@ int CP2R::FailVocalRangesConflict() {
 			s = c_len;
 			if (s - conf_start > vocra_disbal_yel[sp][vc][vp] * 2) {
 				if (s - conf_start > vocra_disbal_red[sp][vc][vp] * 2) {
-					FlagL(v, 526, conf_start, s - 1, v2);
+					AutoFlagL(v, 526, conf_start, s - 1, v2);
 				}
 				else {
-					FlagL(v, 524, conf_start, s - 1, v2);
+					AutoFlagL(v, 524, conf_start, s - 1, v2);
 				}
 			}
 		}
@@ -4398,9 +4398,9 @@ void CP2R::FlagParallelIco() {
 				if (pico_count > 3 && s - fli[v][ls - pico_count + 1] > npm && !pico_flagged) {
 					pico_flagged = 1;
 					if (ivlc == 2) 
-						FlagL(v, 89, fli[v][ls - pico_count + 1], s, v2);
+						AutoFlagL(v, 89, fli[v][ls - pico_count + 1], s, v2);
 					else
-						FlagL(v, 90, fli[v][ls - pico_count + 1], s, v2);
+						AutoFlagL(v, 90, fli[v][ls - pico_count + 1], s, v2);
 				}
 			}
 		}
@@ -4441,19 +4441,15 @@ int CP2R::FailUnison() {
 			s3 = fli[v][ls] - 1;
 			// 2nd -> unison
 			civl2 = abs(cc[v2][s3] - cc[v][s3]);
-			if (civl2 == 1) FlagL(v, 275, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
-			else if (civl2 == 2) FlagL(v, 277, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			if (civl2 == 1) AutoFlagL(v, 275, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			else if (civl2 == 2) AutoFlagL(v, 277, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 		else {
 			s3 = fli[v2][ls2] - 1;
 			// 2nd -> unison
 			civl2 = abs(cc[v2][s3] - cc[v][s3]);
-			// Send flag to voice v2 instead of v
-			swap(v, v2);
-			if (civl2 == 1) FlagL(v, 275, s, max(ssus[v2][ls - 1], ssus[v][ls2 - 1]), v2);
-			else if (civl2 == 2) FlagL(v, 277, s, max(ssus[v2][ls - 1], ssus[v][ls2 - 1]), v2);
-			// Return to voice v
-			swap(v, v2);
+			if (civl2 == 1) AutoFlagL(v, 275, s, max(ssus[v2][ls - 1], ssus[v][ls2 - 1]), v2);
+			else if (civl2 == 2) AutoFlagL(v, 277, s, max(ssus[v2][ls - 1], ssus[v][ls2 - 1]), v2);
 		}
 	}
 	return 0;
@@ -4518,7 +4514,7 @@ int CP2R::FailPco() {
 		if (!beat[v][ls] && ls < fli_size[v] - 1 && ls2 < fli_size[v2] - 1 && !sus[v][ls] && !sus[v2][ls2]) {
 			// Ignore more than 4 voices and 2 lowest of 4 voices
 			if (vca[s] < 4 || (vca[s] == 4 && v + v2 != 1) )
-				Flag(v, 91, s, v2);
+				AutoFlag(v, 91, s, v2);
 		}
 	}
 	// Unison
@@ -4529,7 +4525,7 @@ int CP2R::FailPco() {
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				FlagL(v, 481, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				AutoFlagL(v, 481, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit similar movement to pco
@@ -4537,26 +4533,26 @@ int CP2R::FailPco() {
 			if (!beat[v][ls] && bmli[s] == mli.size() - 1) {
 				// Last measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
-					FlagL(v, 72, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 72, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 				// Last measure
 				else {
-					FlagL(v, 73, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 73, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
 			// Not last measure
 			else {
 				if (s % npm) {
-					FlagL(v, 167, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 167, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 				else {
-					FlagL(v, 76, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 76, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
 		}
 		// Prohibit consecutive contrary movement
 		else if (civlc == civlc2) {
-			FlagL(v, 482, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			AutoFlagL(v, 482, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
 	// Octave
@@ -4567,7 +4563,7 @@ int CP2R::FailPco() {
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				FlagL(v, 481, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				AutoFlagL(v, 481, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit similar movement in outer voices to pco
@@ -4576,26 +4572,26 @@ int CP2R::FailPco() {
 			if (!beat[v][ls] && bmli[s] == mli.size() - 1) {
 				// Last measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
-					FlagL(v, 209, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 209, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 				// Last measure
 				else {
-					FlagL(v, 213, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 213, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
 			// Not last measure
 			else {
 				if (s % npm) {
-					FlagL(v, 168, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 168, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 				else {
-					FlagL(v, 211, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 211, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
 		}
 		// Prohibit consecutive contrary movement
 		else if (civlc == civlc2) {
-			FlagL(v, 482, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			AutoFlagL(v, 482, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
 	// 5th
@@ -4606,7 +4602,7 @@ int CP2R::FailPco() {
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				FlagL(v, 84, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				AutoFlagL(v, 84, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit similar movement in outer voices to pco
@@ -4615,26 +4611,26 @@ int CP2R::FailPco() {
 			if (!beat[v][ls] && bmli[s] == mli.size() - 1) {
 				// Last measure with stepwise motion in higher voice
 				if (abs(c[v2][s] - c[v2][s - 1]) == 1) {
-					FlagL(v, 208, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 208, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 				// Last measure
 				else {
-					FlagL(v, 212, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 212, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
 			// Not last measure
 			else {
 				if (s % npm) {
-					FlagL(v, 166, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 166, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 				else {
-					FlagL(v, 210, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+					AutoFlagL(v, 210, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 				}
 			}
 		}
 		// Prohibit consecutive contrary movement
 		else if (civlc == civlc2) {
-			FlagL(v, 85, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			AutoFlagL(v, 85, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
 	// Tritone
@@ -4645,17 +4641,17 @@ int CP2R::FailPco() {
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
-				FlagL(v, 162, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+				AutoFlagL(v, 162, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
 		// Prohibit similar movement in outer voices to tritone
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && 
 			v == lva[s] && v2 == hva[s]) {
-			FlagL(v, 161, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			AutoFlagL(v, 161, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 		// Prohibit consecutive contrary movement
 		else if (civlc == civlc2) {
-			FlagL(v, 163, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
+			AutoFlagL(v, 163, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
 	}
 	return 0;
@@ -5213,7 +5209,7 @@ void CP2R::GetMsh() {
 			// Save flags
 			for (int fl = 0; fl < flagab.size(); ++fl) {
 				v = flagab[fl].voice;
-				FlagL(v, flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
+				AutoFlagL(v, flagab[fl].id, flagab[fl].s, flagab[fl].fsl, flagab[fl].fvl);
 			}
 			if (best_shp) {
 				// Add first harmony
@@ -6107,31 +6103,31 @@ void CP2R::FlagHarmTriRes() {
 				}
 				// Last first note
 				if (ls >= fli_size[v] - 1) {
-					FlagL(v, 379, fli[v][ls], fli[v][ls], v2);
+					AutoFlagL(v, 379, fli[v][ls], fli[v][ls], v2);
 				}
 				// Check if first note touches harmony end
 				else if (fli2[v][ls] >= s5) {
 					if (!GetTriRes(cc[v][s], cc[v][fli[v][ls + 1]]))
-						FlagL(v, 379, fli[v][ls], fli[v][ls + 1], v2);
+						AutoFlagL(v, 379, fli[v][ls], fli[v][ls + 1], v2);
 				}
 				// Check if first note touches anticipation
 				else if (ls < fli_size[v] - 2 && cc[v][fli[v][ls + 1]] == cc[v][fli[v][ls + 2]] && hs < hli.size() - 1 && fli[v][ls + 2] == hli[hs + 1]) {
 					if (!GetTriRes(cc[v][s], cc[v][fli[v][ls + 1]]))
-						FlagL(v, 379, fli[v][ls], fli[v][ls + 1], v2);
+						AutoFlagL(v, 379, fli[v][ls], fli[v][ls + 1], v2);
 				}
 				// Last second note
 				if (ls2 >= fli_size[v2] - 1) {
-					FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2], v);
+					AutoFlagL(v2, 379, fli[v2][ls2], fli[v2][ls2], v);
 				}
 				// Check if second note touches harmony end
 				else if (fli2[v2][ls2] >= s5) {
 					if (!GetTriRes(cc[v2][s], cc[v2][fli[v2][ls2 + 1]]))
-						FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v);
+						AutoFlagL(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v);
 				}
 				// Check if second note touches anticipation
 				else if (ls2 < fli_size[v2] - 2 && cc[v2][fli[v2][ls2 + 1]] == cc[v2][fli[v2][ls2 + 2]] && hs < hli.size() - 1 && fli[v2][ls2 + 2] == hli[hs + 1]) {
 					if (!GetTriRes(cc[v2][s], cc[v2][fli[v2][ls2 + 1]]))
-						FlagL(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v);
+						AutoFlagL(v2, 379, fli[v2][ls2], fli[v2][ls2 + 1], v);
 				}
 			}
 		}
@@ -6207,10 +6203,10 @@ void CP2R::FlagLTDouble() {
 				// Skip if both are not leading tones
 				if (!islt[v][fli[v][ls]] && !islt[v2][fli[v2][ls2]]) continue;
 				if (fli[v][ls] < fli[v2][ls2]) {
-					Flag(v2, 324, fli[v2][ls2], v);
+					AutoFlag(v2, 324, fli[v2][ls2], v);
 				}
 				else {
-					Flag(v, 324, fli[v][ls], v2);
+					AutoFlag(v, 324, fli[v][ls], v2);
 				}
 			}
 		}
@@ -6281,10 +6277,10 @@ void CP2R::FlagTriDouble() {
 					GetVp();
 					vc = vca[s];
 					if (fli[v][ls] < fli[v2][ls2]) {
-						Flag(v2, 222, fli[v2][ls2], v);
+						AutoFlag(v2, 222, fli[v2][ls2], v);
 					}
 					else {
-						Flag(v, 222, fli[v][ls], v2);
+						AutoFlag(v, 222, fli[v][ls], v2);
 					}
 				}
 			}
@@ -6414,11 +6410,11 @@ void CP2R::FlagFCR() {
 			}
 			// If both notes exist in external voices, flag red
 			if (fcr == 2) {
-				Flag(v2, 377, s2, v);
+				AutoFlag(v2, 377, s2, v);
 			}
 			// If one of notes exist in internal voice and the other - in any voice, flag yellow
 			else if (fcr == 1) {
-				Flag(v2, 164, s2, v);
+				AutoFlag(v2, 164, s2, v);
 			}
 		}
 		fcr = 0;
@@ -6432,11 +6428,11 @@ void CP2R::FlagFCR() {
 			}
 			// If both notes exist in external voices, flag red
 			if (fcr == 2) {
-				Flag(v2, 378, s2, v);
+				AutoFlag(v2, 378, s2, v);
 			}
 			// If one of notes exist in internal voice and the other - in any voice, flag yellow
 			else if (fcr == 1) {
-				Flag(v2, 165, s2, v);
+				AutoFlag(v2, 165, s2, v);
 			}
 		}
 	}
