@@ -29,6 +29,7 @@ protected:
 	CP2Ly();
 	~CP2Ly();
 	void InitFSep();
+	void DistributeFlags();
 	void SaveLyCP();
 	void SendLyIntervals();
 	void SendLySeparate();

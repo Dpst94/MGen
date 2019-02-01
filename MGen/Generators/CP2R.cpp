@@ -1190,9 +1190,6 @@ int CP2R::FailMinor() {
 int CP2R::FailMinorStepwise() {
 	CHECK_READY(DR_pc, DR_fli);
 	CHECK_READY(DR_nih, DR_c);
-	if (cp_id == 9) {
-		WriteLog(1, "WOW");
-	}
 	// For non-border notes only, because border notes have their own rules
 	for (ls = fil[v] + 1; ls < fli_size[v] - 1; ++ls) {
 		s = fli[v][ls];
@@ -3839,9 +3836,6 @@ void CP2R::Remove7thFisGis() {
 	CHECK_READY(DR_fli, DR_msh, DR_hli);
 	CHECK_READY(DR_cct, DR_pc);
 	SET_READY(DR_cctp);
-	if (cp_id == 9) {
-		WriteLog(1, "WOW");
-	}
 	for (hs = 0; hs < hli.size(); ++hs) {
 		// Find all chords with 7th notes, that are not required
 		if (cctp[hs][3] == 1) {

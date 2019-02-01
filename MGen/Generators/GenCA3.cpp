@@ -613,6 +613,7 @@ void CGenCA3::Generate() {
 		GetAnalysisVectors();
 		if (GetCPSpecies()) continue;
 		if (AnalyseCP()) continue;
+		DistributeFlags();
 		for (int v = 0; v < v_cnt; ++v) {
 			FillPause(step0, full_len, v);
 		}

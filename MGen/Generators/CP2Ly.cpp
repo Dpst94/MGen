@@ -508,6 +508,40 @@ void CP2Ly::InitFSep() {
 	}
 }
 
+void CP2Ly::DistributeFlags() {
+	for (s = 0; s < c_len; ++s) {
+		int changed = 0;
+		for (v = 0; v < av_cnt; ++v) {
+			// Skip voices with little flags
+			if (flag[v][s].size() < 4) continue;
+			for (int f = 0; f < flag[v][s].size(); ++f) {
+				v2 = fvl[v][s][f];
+				// Do not process single-voice flags
+				if (v2 == v) continue;
+				// Do not process flags that will exceed limit if moved
+				if (flag[v2][s].size() > 2) continue;
+				// Do not move flag if second voice does not start note at the same place
+				if (fli[v2][bli[v2][s]] != s) continue;
+				// Copy flag
+				flag[v2][s].push_back(flag[v][s][f]);
+				fsl[v2][s].push_back(fsl[v][s][f]);
+				fvl[v2][s].push_back(v);
+				// Remove old flag
+				flag[v][s].erase(flag[v][s].begin() + f);
+				fsl[v][s].erase(fsl[v][s].begin() + f);
+				fvl[v][s].erase(fvl[v][s].begin() + f);
+				// Restart scanning step
+				changed = 1;
+				break;
+			}
+			// Restart scanning step
+			if (changed) break;
+		}
+		// Rescan step if flag was moved
+		if (changed) --s;
+	}
+}
+
 void CP2Ly::SaveLyCP() {
 	CString st;
 	InitFSep();
