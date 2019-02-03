@@ -428,8 +428,8 @@ protected:
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants
 	vector<vector<int>> chn; // [pc] Diatonic pitch classes in chord
 	vector<vector<int>> cchn; // [pcc] Chromatic pitch classes in chord
-	vector<vector<int>> chns; // [pc] Diatonic pitch classes in chord (0 = not in harmony, 1 = only non-chord tones, 2 = chord tones)
-	vector<vector<int>> cchns; // [pcc] Chromatic pitch classes in chord (0 = not in harmony, 1 = only non-chord tones, 2 = chord tones)
+	vector<vector<int>> chns; // [hs][pc] Diatonic pitch classes in chord (0 = not in harmony, 1 = only non-chord tones, 2 = chord tones)
+	vector<vector<int>> cchns; // [hs][pcc] Chromatic pitch classes in chord (0 = not in harmony, 1 = only non-chord tones, 2 = chord tones)
 	vector<vector<int>> cpos; // [harm][pc] Possible chords for multiple chords in measure
 	vector<vector<int>> cchnv; // [harm][pcc] Chromatic pitch classes in variant chord
 	vector<int> shp; // [s] Harmony position for each step

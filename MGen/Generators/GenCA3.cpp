@@ -753,14 +753,14 @@ void CGenCA3::GetCPKey() {
 	}
 	// Detect chromatic collisions
 	if (wrong_alt) {
-		est.Format("Specified key was %s, but detected alterations (major I#, II# or VI#) cannot be used in this key. Please check source file",
+		est.Format("Specified key was %s, but detected alterations (major I#, II# or VI#) cannot be used in this key. Please check source file. Exercise analysis may be incorrect.",
 			GetPrintKey(bn, mode));
 		WriteLogLy(1, est, 1);
 	}
 	// Detect mminor
 	if (detected_mminor) {
 		if (mode != 9) {
-			est.Format("Detected melodic minor alterations (major IV# or V#), but specified key was %s. Please check source file",
+			est.Format("Detected melodic minor alterations (major IV# or V#), but specified key was %s. Please check source file. Exercise analysis may be incorrect.",
 				GetPrintKey(bn, mode));
 			WriteLogLy(1, est, 1);
 		}
