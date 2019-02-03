@@ -206,13 +206,14 @@ int CP2R::EvaluateCP() {
 		if (FailLocalMacc(notes_arange[sp][av_cnt][0], min_arange[sp][av_cnt][0] / 10.0, 15)) return 1;
 		if (FailLocalMacc(notes_arange2[sp][av_cnt][0], min_arange2[sp][av_cnt][0] / 10.0, 16)) return 1;
 	}
-	FlagFullParallel();
 	FlagParallelIco();
 	FlagMultiSlur();
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	GetMsh();
 	if (FailHarm()) return 1;
+	FlagFullParallel();
+	FlagFullSimilar();
 	FlagFullMeasureNote();
 	FlagFCR();
 	FlagPcoApart();
@@ -3062,8 +3063,29 @@ void CP2R::FlagFullParallel() {
 		if (ls && fp) ++fps;
 		else fps = 0;
 		if (fps == 2) {
-			FlagVL(0, 550, s, fli[0][ls - 2]);
+			v = av_cnt - 1;
+			AutoFlagL(v, 550, s, fli[0][ls - 2], 0);
 		}
+	}
+}
+
+void CP2R::FlagFullSimilar() {
+	CHECK_READY(DR_fli, DR_c);
+	// Skip if below 3 voices
+	if (av_cnt < 3) return;
+	for (hs = 1; hs < hli.size(); ++hs) {
+		s = hli[hs];
+		// Skip 6th chord
+		if (pcc[lva[s]][s] == cct[hs][1]) continue;
+		int dir = 0;
+		for (v = 0; v < av_cnt; ++v) {
+			if (cc[v][s] > cc[v][s - 1]) ++dir;
+			else if (cc[v][s] < cc[v][s - 1]) --dir;
+		}
+		// Skip if not all voices move in same direction
+		if (abs(dir) < av_cnt) continue;
+		v = av_cnt - 1;
+		AutoFlagL(v, 214, s, fli[v][bli[v][s - 1]], 0);
 	}
 }
 
@@ -3854,7 +3876,7 @@ void CP2R::Remove7thFisGis() {
 
 int CP2R::EvalHarm() {
 	CHECK_READY(DR_fli, DR_pc, DR_hli);
-	CHECK_READY(DR_hbc, DR_chm_fis);
+	CHECK_READY(DR_hbc, DR_chm_fis, DR_cctp);
 	int pen1;
 	int p2c = 0; // Count of consecutive penalty 2
 	int p3c = 0; // Count of consecutive penalty 3
@@ -3886,9 +3908,9 @@ int CP2R::EvalHarm() {
 			else if (ha64[i] == 2) FlagV(v, 383, s);
 		}
 		if (i > 0 && chm[i - 1] > -1) {
-			// Check GC for low voice and not last note (last note in any window is ignored)
+			// Check GC for low voice and not last note in V-I progression and not I7 (last note in any window is ignored)
 			if (ls < fli_size[v] - 1 && 
-				chm[i] == 0 && chm[i - 1] == 4 &&
+				chm[i] == 0 && chm[i - 1] == 4 && cctp[i][3] != 2 &&
 				pc[lva[s]][s] == 0 && pc[hva[s]][s] == 0 &&
 				s > 0 && pc[lva[s]][s - 1] == 4) FlagV(v, 48, s);
 			if (mminor) {

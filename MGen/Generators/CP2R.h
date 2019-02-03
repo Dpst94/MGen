@@ -236,6 +236,7 @@ protected:
 	inline int FailTritones2();
 	inline int FailRhythmRepeat();
 	inline void FlagFullParallel();
+	inline void FlagFullSimilar();
 	inline void FlagMultiSlur();
 	inline int FailAnapaest();
 	inline void FlagFullMeasureNote();
