@@ -4861,9 +4861,14 @@ void CP2R::EvalHarm4thTritone() {
 		if (v == v2) continue;
 		// Skip no note start if it is not first note of harmony
 		if (s != fli[v][ls] && s != fli[v2][ls2] && s > hstart) continue;
+		s4 = max(hstart, fli[v][ls]);
+		s5 = max(hstart, fli[v2][ls2]);
 		// Skip non-chord tones
-		if (msh[v][max(hstart, fli[v][ls])] < 0) continue;
-		if (msh[v2][max(hstart, fli[v2][ls2])] < 0) continue;
+		if (!nih[v][s4]) continue;
+		if (!nih[v2][s5]) continue;
+		// Skip 7th  notes without msh
+		if (nih[v][s4] == 4 && msh[v][s4] < 0) continue;
+		if (nih[v2][s5] == 4 && msh[v2][s5] < 0) continue;
 		// Skip pauses
 		if (!cc[v][s]) continue;
 		if (!cc[v2][s]) continue;
@@ -4899,7 +4904,8 @@ void CP2R::EvalTriDouble() {
 			if (!cc[v][s]) continue;
 			// Skip non-chord tones
 			s5 = max(hstart, fli[v][ls]);
-			if (msh[v][s5] < 0) continue;
+			if (!nih[v][s5]) continue;
+			if (nih[v][s5] == 4 && msh[v][s5] < 0) continue;
 			int cc1 = pcc[v][s];
 			int cc2 = (cc1 + 6) % 12;
 			// Add note
@@ -6123,9 +6129,14 @@ void CP2R::FlagHarmTriRes() {
 				hstart = hli[hs];
 				// Skip no note start
 				if (s != fli[v][ls] && s != fli[v2][ls2] && s > hstart) continue;
+				s4 = max(hstart, fli[v][ls]);
+				s5 = max(hstart, fli[v2][ls2]);
 				// Skip non-chord tones
-				if (msh[v][max(hstart, fli[v][ls])] < 0) continue;
-				if (msh[v2][max(hstart, fli[v2][ls2])] < 0) continue;
+				if (!nih[v][s4]) continue;
+				if (!nih[v2][s5]) continue;
+				// Skip 7th  notes without msh
+				if (nih[v][s4] == 4 && msh[v][s4] < 0) continue;
+				if (nih[v2][s5] == 4 && msh[v2][s5] < 0) continue;
 				// Skip pauses
 				if (!cc[v][s]) continue;
 				if (!cc[v2][s]) continue;
