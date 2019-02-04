@@ -218,7 +218,6 @@ int CP2R::EvaluateCP() {
 	FlagFCR();
 	FlagPcoApart();
 	FlagHarmTriRes();
-	//FlagTriDouble();
 	FlagLTDouble();
 	FlagLTUnresolved();
 	FlagLtLt();
@@ -6292,54 +6291,6 @@ void CP2R::GetHarmNotes(int lchm, int fis, int gis, vector<int> &lcct) {
 		if (lcct[1] == 10) lcct[1] = 11;
 		if (lcct[2] == 10) lcct[2] = 11;
 		if (lcct[3] == 10) lcct[3] = 11;
-	}
-}
-
-void CP2R::FlagTriDouble() {
-	CHECK_READY(DR_fli, DR_vca, DR_hli);
-	CHECK_READY(DR_pc, DR_cct);
-	for (hs = 0; hs < hli.size(); ++hs) {
-		// Skip chords without tritone
-		if ((cct[hs][2] - cct[hs][0] + 12) % 12 != 6) continue;
-		// Check if both notes of this tritone exist in voices
-		int found0 = -1;
-		int found2 = -1;
-		for (v = 0; v < av_cnt; ++v) {
-			ls2 = bli[v][hli2[hs]];
-			for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
-				s = fli[v][ls];
-				if (pcc[v][s] == cct[hs][0]) found0 = v;
-				else if (pcc[v][s] == cct[hs][2]) found2 = v;
-			}
-		}
-		if (found0 == -1 || found2 == -1) continue;
-		// Find duplication of one of tritone notes
-		for (v = 0; v < av_cnt; ++v) {
-			sp = vsp[v];
-			for (v2 = v + 1; v2 < av_cnt; ++v2) {
-				for (s = hli[hs]; s <= hli2[hs]; ++s) {
-					// Skip not octave / unison
-					if (pcc[v][s] != pcc[v2][s]) continue;
-					ls = bli[v][s];
-					ls2 = bli[v2][s];
-					// Skip no note start
-					if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
-					// Skip if note is not tritone note
-					if (pcc[v][s] != cct[hs][0] && pcc[v][s] != cct[hs][2]) continue;
-					// Skip pauses
-					if (!cc[v][s]) continue;
-					if (!cc[v2][s]) continue;
-					GetVp();
-					vc = vca[s];
-					if (fli[v][ls] < fli[v2][ls2]) {
-						AutoFlag(v2, 222, fli[v2][ls2], v);
-					}
-					else {
-						AutoFlag(v, 222, fli[v][ls], v2);
-					}
-				}
-			}
-		}
 	}
 }
 

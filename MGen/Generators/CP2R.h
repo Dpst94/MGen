@@ -295,7 +295,6 @@ protected:
 	inline void FlagLTDouble();
 	inline void GetChordTones();
 	inline void GetHarmNotes(int lchm, int fis, int gis, vector<int>& lcct);
-	inline void FlagTriDouble();
 	inline void FlagPcoApart();
 	inline void FlagFCR();
 	inline int FindFCRNotes(int pcc1, int pcc2);
