@@ -218,7 +218,7 @@ int CP2R::EvaluateCP() {
 	FlagFCR();
 	FlagPcoApart();
 	FlagHarmTriRes();
-	FlagTriDouble();
+	//FlagTriDouble();
 	FlagLTDouble();
 	FlagLTUnresolved();
 	FlagLtLt();
@@ -4848,7 +4848,7 @@ void CP2R::EvaluateMsh() {
 	}
 }
 
-void CP2R::EvaluateMshSteps() {
+void CP2R::EvalHarm4thTritone() {
 	CHECK_READY(DR_fli, DR_vca, DR_msh);
 	CHECK_READY(DR_nih, DR_resol, DR_pc);
 	// Get last measure step
@@ -4860,8 +4860,8 @@ void CP2R::EvaluateMshSteps() {
 		ls2 = bli[v2][s];
 		// Skip same voice at this step
 		if (v == v2) continue;
-		// Skip no note start
-		if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
+		// Skip no note start if it is not first note of harmony
+		if (s != fli[v][ls] && s != fli[v2][ls2] && s > hstart) continue;
 		// Skip non-chord tones
 		if (msh[v][max(hstart, fli[v][ls])] < 0) continue;
 		if (msh[v2][max(hstart, fli[v2][ls2])] < 0) continue;
@@ -4877,7 +4877,43 @@ void CP2R::EvaluateMshSteps() {
 			// Flag if not suspension resolution to lt in bass
 			if (pcc[v2][s] != 11 || fli2[v2][ls2] != mli[bmli[s]] + npm - 1 || 
 				!nih[v2][fli[v2][ls2]] || resol[v2][hstart] != fli[v2][ls2])
-				AutoFlagA(v, 331, s, s, v2, 100);
+				AutoFlagA(v, 331, max(hstart, fli[v][ls]), max(hstart, fli[v2][ls2]), v2, 100);
+		}
+	}
+}
+
+void CP2R::EvalTriDouble() {
+	CHECK_READY(DR_fli, DR_vca, DR_msh);
+	CHECK_READY(DR_nih, DR_resol, DR_pc);
+	// Get last measure step
+	int mea_end = mli[ms] + npm - 1;
+	for (s = hstart; s <= hend; ++s) {
+		// Count of each note cc
+		vector<int> tccc;
+		tccc.resize(12);
+		// Count of each note start at step
+		vector<int> tccs;
+		tccs.resize(12);
+		for (v = 0; v < av_cnt; ++v) {
+			ls = bli[v][s];
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			// Skip non-chord tones
+			s5 = max(hstart, fli[v][ls]);
+			if (msh[v][s5] < 0) continue;
+			int cc1 = pcc[v][s];
+			int cc2 = (cc1 + 6) % 12;
+			// Add note
+			++tccc[cc1];
+			// Add note start
+			if (s == fli[v][ls] || s == hstart) ++tccs[pcc[v][s]];
+			// Skip if not a single note started so far (if note starts on fourth note only, this means that these three notes could already trigger flag)
+			if (!tccs[cc1] && !tccs[cc2]) continue;
+			// Skip if not first duplicate
+			if ((tccc[cc1] != 2 || tccc[cc2] != 1) &&
+				(tccc[cc1] != 1 || tccc[cc2] != 2)) continue;
+			vc = vca[s5];
+			AutoFlagA(v, 222, s5, s5, v, 100);
 		}
 	}
 }
@@ -5136,8 +5172,9 @@ void CP2R::GetMsh() {
 					DetectCambiata();
 					DetectAux();
 					EvaluateMsh();
-					EvaluateMshSteps();
+					EvalHarm4thTritone();
 				}
+				EvalTriDouble();
 				EvalMshHarm(hv);
 				EvalHarmAmbig(hv);
 				EvalHarmIncomplete(hv);
@@ -5465,23 +5502,25 @@ void CP2R::GetMsh2(int sec_hp) {
 						hend = s0 + sec_hp - 1;
 						DetectAux();
 						EvaluateMsh();
-						EvaluateMshSteps();
+						EvalHarm4thTritone();
 						// Second harmony
 						hstart = s0 + sec_hp;
 						hend = s0 + npm - 1;
 						DetectAux();
 						EvaluateMsh();
-						EvaluateMshSteps();
+						EvalHarm4thTritone();
 					}
 					// First harmony
 					hstart = s0;
 					hend = s0 + sec_hp - 1;
+					EvalTriDouble();
 					EvalMshHarm(hv);
 					EvalHarmAmbig(hv);
 					EvalHarmIncomplete(hv);
 					// Second harmony
 					hstart = s0 + sec_hp;
 					hend = s0 + npm - 1;
+					EvalTriDouble();
 					EvalMshHarm(hv3);
 					EvalHarmAmbig(hv3);
 					EvalHarmIncomplete(hv3);
@@ -6081,10 +6120,10 @@ void CP2R::FlagHarmTriRes() {
 			for (s = 0; s < ep2; ++s) {
 				ls = bli[v][s];
 				ls2 = bli[v2][s];
-				// Skip no note start
-				if (s != fli[v][ls] && s != fli[v2][ls2]) continue;
 				hs = bhli[s];
 				hstart = hli[hs];
+				// Skip no note start
+				if (s != fli[v][ls] && s != fli[v2][ls2] && s > hstart) continue;
 				// Skip non-chord tones
 				if (msh[v][max(hstart, fli[v][ls])] < 0) continue;
 				if (msh[v2][max(hstart, fli[v2][ls2])] < 0) continue;

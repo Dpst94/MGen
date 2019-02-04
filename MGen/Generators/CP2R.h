@@ -193,7 +193,8 @@ protected:
 	inline void GetHarmVars(int & lchm, int & rat, vector<int>& cpos, int & poss_vars);
 	inline void GetMsh2(int sec_hp);
 	inline void EvaluateMsh();
-	inline void EvaluateMshSteps();
+	inline void EvalHarm4thTritone();
+	inline void EvalTriDouble();
 	inline void GetMeasureMsh(int sec_hp);
 	inline void DetectSus();
 	inline void DetectPDD();
