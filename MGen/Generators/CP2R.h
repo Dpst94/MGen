@@ -235,7 +235,7 @@ protected:
 	inline int FailAdjacentTritone2(int ta, int t1, int t2, int tb);
 	inline int FailAdjacentTritones();
 	inline int FailTritones2();
-	inline int FailRhythmRepeat();
+	inline void FlagRhythmRepeatFull();
 	inline void FlagFullParallel();
 	inline void FlagFullSimilar();
 	inline void FlagMultiSlur();
@@ -246,7 +246,9 @@ protected:
 	inline int FailRhythm2();
 	inline int FailRhythm4();
 	inline int FailRhythm3();
+	inline void GetRhythmId();
 	inline int FailRhythm5();
+	inline int FailRhythmRepeat();
 	inline int FailMissSlurs();
 	inline int FailSlurs();
 	inline int FailStartPause();

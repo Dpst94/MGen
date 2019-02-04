@@ -142,6 +142,7 @@ int CP2R::EvaluateCP() {
 	if (FailMeasureLen()) return 1;
 	FailStartPause();
 	FlagRhythmStagnation();
+	GetRhythmId();
 
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
@@ -208,6 +209,7 @@ int CP2R::EvaluateCP() {
 	}
 	FlagParallelIco();
 	FlagMultiSlur();
+	FlagRhythmRepeatFull();
 	if (FailRhythmRepeat()) return 1;
 	if (FailAnapaest()) return 1;
 	GetMsh();
@@ -2828,15 +2830,43 @@ int CP2R::FailRhythm3() {
 	return 0;
 }
 
+void CP2R::GetRhythmId() {
+	for (v = 0; v < av_cnt; ++v) {
+		rh_id[v].resize(mli.size());
+		rh_pid[v].resize(mli.size());
+		for (ms = 0; ms < mli.size(); ++ms) {
+			s0 = mli[ms];
+			ls3 = bli[v][s0];
+			ls4 = bli[v][s0 + npm - 1];
+			if (fli[v][ls3] < s0) {
+				rh_id[v][ms] = 0;
+				rh_pid[v][ms] = 0;
+			}
+			else {
+				rh_id[v][ms] = 1;
+				if (!cc[v][s0]) {
+					rh_pid[v][ms] = 1;
+				}
+				else {
+					rh_pid[v][ms] = 0;
+				}
+			}
+			for (ls = ls3; ls <= ls4; ++ls) {
+				s2 = fli2[v][ls];
+				if (s2 < s0 + npm) {
+					rh_id[v][ms] += 1 << (s2 - s0 + 1);
+					if (!cc[v][s2]) {
+						rh_pid[v][ms] += 1 << (s2 - s0 + 1);
+					}
+				}
+			}
+		}
+	}
+}
+
 // Fail rhythm for species 5
 int CP2R::FailRhythm5() {
 	CHECK_READY(DR_fli, DR_sus, DR_leap);
-	// Rhythm id
-	rh_id[v].resize(mli.size());
-	int rid_cur = 0;
-	// Pause rhythm id
-	rh_pid[v].resize(mli.size());
-	int pid_cur = 0;
 	int count8;
 	// Note lengths inside measure
 	vector<int> l_len;
@@ -2919,9 +2949,6 @@ int CP2R::FailRhythm5() {
 					FlagV(v, 267, fli[v][fli_size[v] - 1]);
 			}
 		}
-		// Set first rhythm id bit
-		rid_cur = slur1 ? 0 : 1;
-		pid_cur = 0;
 		// Iterative rhythm checks
 		count8 = 0;
 		pos = 0;
@@ -2933,12 +2960,6 @@ int CP2R::FailRhythm5() {
 				// Check length
 				if (l_len[lp] == 1) FlagV(v, 253, fli[v][fli_size[v] - 1]);
 				else if (l_len[lp] == 2) FlagV(v, 252, fli[v][fli_size[v] - 1]);
-			}
-			// Calculate rhythm id
-			if (lp < l_len.size() - 1 || !slur2)
-				rid_cur += 1 << (pos + l_len[lp]);
-			if (!cc[v][s2]) {
-				pid_cur += 1 << (pos + l_len[lp]);
 			}
 			// Check 1/8
 			if (l_len[lp] == 1) {
@@ -2986,12 +3007,10 @@ int CP2R::FailRhythm5() {
 			// Check only if no croches or less than 4 notes
 			if (ms > 0 && (!has_croche || l_len.size() <4)) {
 				// Fire if rhythm and pauses rhythm matches and there is no full measure pause
-				if (rh_id[v][ms - 1] == rid_cur && rh_pid[v][ms - 1] == pid_cur &&
+				if (rh_id[v][ms - 1] == rh_id[v][ms] && rh_pid[v][ms - 1] == rh_pid[v][ms] &&
 					(l_len[0] < 8 || cc[v][s]))
 					FlagVL(v, 247, s, fli[v][bli[v][s + npm - 1]]);
 			}
-			rh_id[v][ms] = rid_cur;
-			rh_pid[v][ms] = pid_cur;
 		}
 		// Check rhythm rules
 		// Whole inside
@@ -3014,6 +3033,7 @@ int CP2R::FailRhythm5() {
 
 int CP2R::FailRhythmRepeat() {
 	CHECK_READY(DR_fli);
+	if (accept[0][av_cnt][0][549]) return 0;
 	for (v = 0; v < av_cnt; ++v) {
 		// Only for sp5
 		if (vsp[v] != 5) continue;
@@ -3033,6 +3053,31 @@ int CP2R::FailRhythmRepeat() {
 		}
 	}
 	return 0;
+}
+
+void CP2R::FlagRhythmRepeatFull() {
+	CHECK_READY(DR_fli);
+	for (v = 0; v < av_cnt; ++v) {
+		// Do not check if at least one c.f. or species 1 is present
+		if (vsp[v] < 2) return;
+	}
+	for (ms = 1; ms < mli.size() - 1; ++ms) {
+		int blocked = 0;
+		for (v = 1; v < av_cnt; ++v) {
+			s = mli[ms];
+			ls = bli[v][s];
+			// Whole measure pause skips voice, thus making same rhythm flag move probable
+			if (!cc[v][s] && fli2[v][ls] >= s + npm - 1) continue;
+			// Different rhythm blocks flag
+			if (rh_id[v][ms] != rh_id[0][ms] || rh_pid[v][ms] != rh_pid[0][ms]) {
+				blocked = 1;
+				break;
+			}
+		}
+		if (!blocked) {
+			AutoFlagL(av_cnt - 1, 215, s, s, 0);
+		}
+	}
 }
 
 void CP2R::FlagFullParallel() {
