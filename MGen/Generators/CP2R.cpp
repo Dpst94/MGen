@@ -4428,7 +4428,7 @@ void CP2R::FlagParallelIco() {
 			for (ls = 0; ls < fli_size[v]; ++ls) {
 				s = fli[v][ls];
 				ls2 = bli[v2][s];
-				// Skip different notes, pauses
+				// Skip different note starts, pauses
 				if (!cc[v][s] || !cc[v2][s] || s != fli[v2][ls2] ||
 					llen[v2][ls2] != llen[v][ls]) {
 					pico_count = 0;
@@ -4439,8 +4439,8 @@ void CP2R::FlagParallelIco() {
 				ivlc = abs(ivl) % 7;
 				civl = cc[v][s] - cc[v2][s];
 				civlc = abs(civl) % 12;
-				// Skip non-ico
-				if (civlc != 3 && civlc != 4 && civlc != 8 && civlc != 9) {
+				// Skip wrong intervals, other than 3rd, 4th, 6th
+				if (civlc != 3 && civlc != 4 && civlc != 5 && civlc != 8 && civlc != 9) {
 					pico_count = 0;
 					pico_flagged = 0;
 					continue;
@@ -4459,8 +4459,10 @@ void CP2R::FlagParallelIco() {
 					pico_flagged = 1;
 					if (ivlc == 2) 
 						AutoFlagL(v, 89, fli[v][ls - pico_count + 1], s, v2);
-					else
+					else if (ivlc == 5)
 						AutoFlagL(v, 90, fli[v][ls - pico_count + 1], s, v2);
+					else 
+						AutoFlagL(v, 238, fli[v][ls - pico_count + 1], s, v2);
 				}
 			}
 		}
