@@ -214,6 +214,7 @@ int CP2R::EvaluateCP() {
 	if (FailAnapaest()) return 1;
 	GetMsh();
 	if (FailHarm()) return 1;
+	FlagHarmIncomplete();
 	FlagFullParallel();
 	FlagFullSimilar();
 	FlagFullMeasureNote();
@@ -4218,6 +4219,54 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 	else {
 		if (vc > 2) {
 			if (!dc2 || (!dc1 && !dc3)) FlagA(0, 559, hstart, hstart, 0, 0);
+		}
+	}
+}
+
+void CP2R::FlagHarmIncomplete() {
+	CHECK_READY(DR_vca, DR_pc, DR_msh);
+	CHECK_READY(DR_nih, DR_resol, DR_fli);
+	CHECK_READY(DR_cct);
+	if (av_cnt < 3) return;
+	int prev_complete = 1;
+	for (hs = 0; hs < hli.size(); ++hs) {
+		hstart = hli[hs];
+		hend = hli2[hs];
+		vc = vca[hstart];
+		// Do not check for single voice
+		if (vc < 3) continue;
+		// Count harmonic occurences
+		int dc1 = 0;
+		int dc2 = 0;
+		int dc3 = 0;
+		for (v = 0; v < av_cnt; ++v) {
+			ls = bli[v][hstart];
+			// Skip pauses
+			if (!cc[v][hstart]) continue;
+			// Detect downbeat chord tones
+			if (msh[v][hstart] > 0 && nih[v][hstart]) {
+				if (cct[hs][0] == pcc[v][hstart]) dc1 = 1;
+				else if (cct[hs][1] == pcc[v][hstart]) dc2 = 1;
+				else if (cct[hs][2] == pcc[v][hstart]) dc3 = 1;
+			}
+			// Detect PDD and sus resolutions
+			else {
+				if (resol[v][hstart]) {
+					if (cct[hs][0] == pcc[v][resol[v][hstart]]) dc1 = 1;
+					else if (cct[hs][1] == pcc[v][resol[v][hstart]]) dc2 = 1;
+					else if (cct[hs][2] == pcc[v][resol[v][hstart]]) dc3 = 1;
+				}
+			}
+		}
+		if (dc1 && dc2 && dc3) {
+			prev_complete = 1;
+			continue;
+		}
+		else {
+			if (!prev_complete) {
+				FlagL(0, 251, hstart, hli[hs - 1], 0);
+			}
+			prev_complete = 0;
 		}
 	}
 }

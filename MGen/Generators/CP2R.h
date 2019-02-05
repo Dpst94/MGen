@@ -280,6 +280,7 @@ protected:
 	inline void EvalMshHarm(int hvar);
 	inline void EvalHarmAmbig(int hvar);
 	inline void EvalHarmIncomplete(int hvar);
+	inline void FlagHarmIncomplete();
 	inline void GetHarmBass();
 	inline int FailVocalRanges();
 	inline int FailVocalRangesConflict();
