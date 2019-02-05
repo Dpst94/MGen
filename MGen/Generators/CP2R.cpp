@@ -51,6 +51,7 @@ inline void CP2R::FlagL(int voice, int fid, int step, int step2, int voice2) {
 }
 
 void CP2R::AutoChooseVoice(int step, int voice, int voice2, int &avoice, int &avoice2) {
+	CHECK_READY(DR_fli);
 	if (fli[voice][bli[voice][step]] == step) {
 		// If both voices are possible, choose best voice
 		if (fli[voice2][bli[voice2][step]] == step) {
@@ -84,14 +85,12 @@ void CP2R::AutoChooseVoice(int step, int voice, int voice2, int &avoice, int &av
 }
 
 inline void CP2R::AutoFlag(int voice, int fid, int step, int voice2) {
-	CHECK_READY(DR_fli);
 	int avoice, avoice2;
 	AutoChooseVoice(step, voice, voice2, avoice, avoice2);
 	Flag(avoice, fid, step, avoice2);
 }
 
 inline void CP2R::AutoFlagL(int voice, int fid, int step, int step2, int voice2) {
-	CHECK_READY(DR_fli);
 	int avoice, avoice2;
 	AutoChooseVoice(step, voice, voice2, avoice, avoice2);
 	FlagL(avoice, fid, step, step2, avoice2);
@@ -111,7 +110,6 @@ inline void CP2R::FlagA(int voice, int fid, int step, int step2, int voice2, int
 
 // Accumulate flag
 inline void CP2R::AutoFlagA(int voice, int fid, int step, int step2, int voice2, int ihpe) {
-	CHECK_READY(DR_fli);
 	int avoice, avoice2;
 	AutoChooseVoice(step, voice, voice2, avoice, avoice2);
 	FlagA(avoice, fid, step, step2, avoice2, ihpe);
@@ -965,7 +963,7 @@ int CP2R::FailIntervals() {
 }
 
 void CP2R::FlagLtLt() {
-	CHECK_READY(DR_pc, DR_fli);
+	CHECK_READY(DR_pc, DR_fli, DR_hli);
 	CHECK_READY(DR_islt, DR_nih);
 	// Process only for major and melodic minor
 	if (!mminor && mode) return;
@@ -2830,6 +2828,7 @@ int CP2R::FailRhythm3() {
 }
 
 void CP2R::GetRhythmId() {
+	CHECK_READY(DR_fli);
 	for (v = 0; v < av_cnt; ++v) {
 		rh_id[v].resize(mli.size());
 		rh_pid[v].resize(mli.size());
@@ -3108,7 +3107,8 @@ void CP2R::FlagFullParallel() {
 }
 
 void CP2R::FlagFullSimilar() {
-	CHECK_READY(DR_fli, DR_c);
+	CHECK_READY(DR_fli, DR_hli, DR_cct);
+	CHECK_READY(DR_vca, DR_pc);
 	// Skip if below 3 voices
 	if (av_cnt < 3) return;
 	for (hs = 1; hs < hli.size(); ++hs) {
@@ -3319,6 +3319,7 @@ int CP2R::FailSlurs() {
 void CP2R::FlagSus() {
 	CHECK_READY(DR_fli, DR_vca, DR_nih);
 	CHECK_READY(DR_hli, DR_resol, DR_pc);
+	CHECK_READY(DR_sus);
 	for (v = 0; v < av_cnt; ++v) {
 		sp = vsp[v];
 		// Check intermeasure sus preparation length
@@ -3446,7 +3447,7 @@ void CP2R::FlagSus2() {
 
 void CP2R::GetLT() {
 	CHECK_READY(DR_nih, DR_pc, DR_hli);
-	CHECK_READY(DR_fli, DR_cct);
+	CHECK_READY(DR_fli);
 	SET_READY(DR_islt);
 	for (v = 0; v < av_cnt; ++v) {
 		for (s = 0; s < ep2; ++s) {
@@ -3657,7 +3658,7 @@ void CP2R::FlagSusSus() {
 
 // Detect repeating notes. Step2 excluding
 int CP2R::FailBeat() {
-	CHECK_READY(DR_fli, DR_beat);
+	CHECK_READY(DR_fli, DR_beat, DR_nlen);
 	if (sp == 0) {
 		if (av_cnt == 1) return 0;
 		for (ls = 0; ls < fli_size[v]; ++ls) {
@@ -3882,7 +3883,7 @@ int CP2R::FailHarm() {
 
 // Clear chm_fis and chm_gis if they were created by non-chord 7th tones
 void CP2R::Remove7thFisGis() {
-	CHECK_READY(DR_fli, DR_msh, DR_hli);
+	CHECK_READY(DR_nih, DR_chm_fis, DR_hli);
 	CHECK_READY(DR_cct, DR_pc);
 	SET_READY(DR_cctp);
 	for (hs = 0; hs < hli.size(); ++hs) {
@@ -3904,6 +3905,7 @@ void CP2R::Remove7thFisGis() {
 int CP2R::EvalHarm() {
 	CHECK_READY(DR_fli, DR_pc, DR_hli);
 	CHECK_READY(DR_hbc, DR_chm_fis, DR_cctp);
+	CHECK_READY(DR_vca);
 	int pen1;
 	int p2c = 0; // Count of consecutive penalty 2
 	int p3c = 0; // Count of consecutive penalty 3
@@ -4208,7 +4210,7 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 void CP2R::FlagHarmIncomplete() {
 	CHECK_READY(DR_vca, DR_pc, DR_msh);
 	CHECK_READY(DR_nih, DR_resol, DR_fli);
-	CHECK_READY(DR_cct);
+	CHECK_READY(DR_cct, DR_hli);
 	if (av_cnt < 3) return;
 	int prev_complete = 1;
 	for (hs = 0; hs < hli.size(); ++hs) {
@@ -4255,8 +4257,9 @@ void CP2R::FlagHarmIncomplete() {
 
 void CP2R::GetHarmBass() {
 	SET_READY(DR_hbc);
-	CHECK_READY(DR_fli, DR_c, DR_vca);
 	SET_READY(DR_beat, DR_hli);
+	CHECK_READY(DR_fli, DR_c, DR_vca);
+	CHECK_READY(DR_cctp);
 	ha64.clear();
 	hbcc.clear();
 	hbc.clear();
@@ -4875,7 +4878,6 @@ void CP2R::DetectAux() {
 // This function evaluates whole measure, not harmony
 void CP2R::EvaluateMsh() {
 	CHECK_READY(DR_fli, DR_nih, DR_msh);
-	CHECK_READY(DR_c);
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
@@ -4966,7 +4968,7 @@ void CP2R::EvalHarm4thTritone() {
 
 void CP2R::EvalTriDouble() {
 	CHECK_READY(DR_fli, DR_vca, DR_msh);
-	CHECK_READY(DR_nih, DR_resol, DR_pc);
+	CHECK_READY(DR_nih, DR_pc);
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	for (s = hstart; s <= hend; ++s) {
@@ -5821,7 +5823,7 @@ void CP2R::DetectCambiata() {
 
 void CP2R::DetectSus() {
 	CHECK_READY(DR_fli, DR_c, DR_leap);
-	CHECK_READY(DR_beat, DR_msh, DR_nih);
+	CHECK_READY(DR_msh, DR_nih);
 	CHECK_READY(DR_resol, DR_pc);
 	// Skip first measure
 	if (!ms) return;
@@ -6141,7 +6143,7 @@ int CP2R::FailStartPause() {
 
 void CP2R::FlagLTUnresolved() {
 	CHECK_READY(DR_islt, DR_fli, DR_vca);
-	CHECK_READY(DR_pc, DR_hli);
+	CHECK_READY(DR_pc, DR_hli, DR_resol);
 	for (v = 0; v < av_cnt; ++v) {
 		// Up to penultimate note
 		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
