@@ -255,7 +255,6 @@ protected:
 	inline void FlagLTUnresolved();
 	inline void FlagHarmTriRes();
 	inline int FailOverlap();
-	inline int FailMaxNoteLen();
 	inline void FlagSus();
 	inline void FlagSus2();
 	inline void GetLT();

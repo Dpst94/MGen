@@ -266,7 +266,6 @@ int CP2R::FailOverlap() {
 		for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 			s = fli[v][ls];
 			ls2 = bli[v2][s];
-			//s2 = fli[v2][ls2];
 			// Skip last note
 			if (ls2 == fli_size[v2] - 1) break;
 			vc = vca[s];
@@ -2613,7 +2612,6 @@ int CP2R::FailAdjacentTritone2(int ta, int t1, int t2, int tb) {
 			if (note_count > 1) found = 3;
 		}
 	}
-	//if (!found) return 0;
 	GetTritoneResolution(ta, t1, t2, tb, res1, res2);
 	// Flag resolution for normal tritone
 	if (found == 0) {
@@ -2909,8 +2907,6 @@ int CP2R::FailRhythm5() {
 			if (ep2 != c_len && ls2 == fli_size[v] - 1) {
 				// Last measure without whole note
 				if (ms == mli.size() - 1 && l_len.size() && cc[v][fli[v][ls2]]) FlagV(v, 267, fli[v][fli_size[v] - 1]);
-				// Whole inside if it starts not from first measure, from first step and is not a suspension
-				//if (llen[v][ls2] >= 8 && ms && !pos && !sus[v][ls2] && cc[v][fli[v][ls2]]) FlagV(v, 160, s);
 				// 1/8 syncope
 				else if (llen[v][ls2] > 1 && pos % 2) FlagV(v, 232, fli[v][ls2]);
 				// 1/4 syncope (not last, because it is flagged in suspension)
@@ -3014,8 +3010,6 @@ int CP2R::FailRhythm5() {
 			}
 		}
 		// Check rhythm rules
-		// Whole inside
-		//if (l_len[0] >= 8 && ms < mli.size() - 1 && ms && cc[v][s]) FlagV(v, 160, s);
 		// 1/2.
 		else if (l_len[0] == 6 && !slur1 && cc[v][s]) FlagV(v, 233, s);
 		else if (l_len.size() > 1 && l_len[1] == 6 && cc[v][fli[v][l_ls[1]]]) 
@@ -3045,7 +3039,6 @@ int CP2R::FailRhythmRepeat() {
 				s = mli[ms];
 				if (s >= ep2) break;
 				ls = bli[v][s];
-				//if (ms >= rh_id[v].size() || ms >= rh_id[v2].size()) continue;
 				// Fire if rhythm and pauses rhythm matches and there is no whole-measure pause
 				if (rh_id[v][ms] == rh_id[v2][ms] && rh_pid[v][ms] == rh_pid[v2][ms] &&
 					(fli2[v][ls] < s + npm - 1 || cc[v][s]))
@@ -3319,17 +3312,6 @@ int CP2R::FailSlurs() {
 		FlagV(v, 95, fli[v][max_ls]);
 		if (!accept[sp][av_cnt][0][95]) fpenalty += (max_count - 2) * 50;
 	}
-	return 0;
-}
-
-int CP2R::FailMaxNoteLen() {
-	// Never check last note, either end of scan window or end of counterpoint
-	//for (ls = 0; ls < fli_size[v] - 1; ++ls) {
-	//if (rlen[v][ls] > max_note_len[sp][av_cnt][0] * 2)
-	//FlagV(v, 336, fli[v][ls]);
-	// Check notes crossing multiple measures
-	//if (bmli[fli2[v][ls]] - bmli[fli[v][ls]] > 1) FlagV(v, 41, fli[v][ls]);
-	//}
 	return 0;
 }
 
@@ -6028,11 +6010,6 @@ void CP2R::DetectPDD() {
 	if (c[v][s] - c[v][s - 1] != -1) return;
 	// Note 2 is not too long
 	if (llen[v][ls] > 4) return;
-	// Find at least one dissonance
-	//int has_dissonance = 0;
-	//for (v2 = 0; v2 < av_cnt; ++v2) {
-		//if (v2 == v) continue;
-	//}
 	if (ls < fli_size[v] - 1) {
 		// Stepwise descending movement
 		if (c[v][s2 + 1] - c[v][s2] != -1) return;
@@ -6418,9 +6395,6 @@ void CP2R::FlagPcoApart() {
 				civl = abs(cc[v][s] - cc[v2][s]);
 				// Skip not octave / unison / 5th
 				if (civl % 12 != 0 && civl % 12 != 7) continue;
-				// Skip nct
-				//if ((vsp[v] == 3 || vsp[v] == 5) && msh[v][fli[v][ls]] < 0) continue;
-				//if ((vsp[v2] == 3 || vsp[v2] == 5) && msh[v2][fli[v2][ls2]] < 0) continue;
 				GetVp();
 				vc = vca[s];
 				// Get interval end
@@ -6453,9 +6427,6 @@ void CP2R::FlagPcoApart() {
 					// Skip same notes (oblique motion)
 					if (cc[v][s] == cc[v][s3]) continue;
 					if (cc[v2][s] == cc[v2][s3]) continue;
-					// Skip nct
-					//if ((vsp[v] == 3 || vsp[v] == 5) && msh[v][fli[v][ls3]] < 0) continue;
-					//if ((vsp[v2] == 3 || vsp[v2] == 5) && msh[v2][fli[v2][ls4]] < 0) continue;
 					int is_contrary = (cc[v][s3] - cc[v][s]) * (cc[v2][s3] - cc[v2][s]) < 0;
 					// Last contrary
 					if (ls3 == fli_size[v] - 1 && ls4 == fli_size[v2] - 1 &&
