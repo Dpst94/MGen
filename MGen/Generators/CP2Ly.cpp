@@ -554,6 +554,7 @@ void CP2Ly::DistributeFlags() {
 			}
 			// Restart scanning step
 			if (changed) break;
+			v = v3;
 		}
 		// Rescan step if flag was moved
 		if (changed) --s;

@@ -2834,6 +2834,8 @@ void CP2R::GetRhythmId() {
 		rh_pid[v].resize(mli.size());
 		for (ms = 0; ms < mli.size(); ++ms) {
 			s0 = mli[ms];
+			// Do not process non-full measures
+			if (s0 + npm > ep2) continue;
 			ls3 = bli[v][s0];
 			ls4 = bli[v][s0 + npm - 1];
 			if (fli[v][ls3] < s0) {
@@ -4969,6 +4971,8 @@ void CP2R::EvalHarm4thTritone() {
 void CP2R::EvalTriDouble() {
 	CHECK_READY(DR_fli, DR_vca, DR_msh);
 	CHECK_READY(DR_nih, DR_pc);
+	// As duplicated note has to sound with both tritone notes, this is possible only starting from 3 voices
+	if (av_cnt < 3) return;
 	// Get last measure step
 	int mea_end = mli[ms] + npm - 1;
 	for (s = hstart; s <= hend; ++s) {
