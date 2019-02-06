@@ -508,28 +508,46 @@ void CP2Ly::InitFSep() {
 	}
 }
 
+int CP2Ly::GetFCount() {
+	int fcount = 0;
+	for (int f = 0; f < flag[v][s].size(); ++f) {
+		GetFlag(f);
+		// Send comments and color only if rule is not ignored
+		if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) continue;
+		// Send comments and color only if rule is not ignored
+		if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) continue;
+		// Do not send if ignored
+		if (severity[sp][vc][vp][fl] < show_min_severity) continue;
+		++fcount;
+	}
+	return fcount;
+}
+
 void CP2Ly::DistributeFlags() {
 	for (s = 0; s < c_len; ++s) {
 		int changed = 0;
 		for (v = 0; v < av_cnt; ++v) {
 			// Skip voices with little flags
-			if (flag[v][s].size() < 4) continue;
+			int fcount = GetFCount();
+			if (fcount < 4) continue;
+			v3 = v;
 			for (int f = 0; f < flag[v][s].size(); ++f) {
-				v2 = fvl[v][s][f];
+				v = fvl[v3][s][f];
 				// Do not process single-voice flags
-				if (v2 == v) continue;
+				if (v3 == v) continue;
 				// Do not process flags that will exceed limit if moved
-				if (flag[v2][s].size() > 2) continue;
+				int fcount2 = GetFCount();
+				if (fcount2 > 2) continue;
 				// Do not move flag if second voice does not start note at the same place
-				if (fli[v2][bli[v2][s]] != s) continue;
+				if (fli[v][bli[v][s]] != s) continue;
 				// Copy flag
-				flag[v2][s].push_back(flag[v][s][f]);
-				fsl[v2][s].push_back(fsl[v][s][f]);
-				fvl[v2][s].push_back(v);
+				flag[v][s].push_back(flag[v3][s][f]);
+				fsl[v][s].push_back(fsl[v3][s][f]);
+				fvl[v][s].push_back(v3);
 				// Remove old flag
-				flag[v][s].erase(flag[v][s].begin() + f);
-				fsl[v][s].erase(fsl[v][s].begin() + f);
-				fvl[v][s].erase(fvl[v][s].begin() + f);
+				flag[v3][s].erase(flag[v3][s].begin() + f);
+				fsl[v3][s].erase(fsl[v3][s].begin() + f);
+				fvl[v3][s].erase(fvl[v3][s].begin() + f);
 				// Restart scanning step
 				changed = 1;
 				break;
