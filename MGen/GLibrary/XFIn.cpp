@@ -348,113 +348,113 @@ void XFIn::ValidateXML() {
 				if (note[vi][m][ni].tie_start) {
 					if (ni < note[vi][m].size() - 1) {
 						if (note[vi][m][ni + 1].rest) {
-							error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note in this measure is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+							warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note in this measure is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 								m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 								mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-							return;
+							note[vi][m][ni].tie_start = 0;
 						}
 						if (note[vi][m][ni].pitch != note[vi][m][ni + 1].pitch) {
-							error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note in this measure has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+							warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note in this measure has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 								m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 								mea[m].beats, mea[m].beat_type, ni+1, note[vi][m].size());
-							return;
+							note[vi][m][ni].tie_start = 0;
 						}
 						if (!note[vi][m][ni + 1].tie_stop) {
-							error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note in this measure does not stop tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+							warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note in this measure does not stop tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 								m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 								mea[m].beats, mea[m].beat_type, ni+1, note[vi][m].size());
-							return;
+							note[vi][m][ni].tie_start = 0;
 						}
 					}
 					else if (m < mea.size() - 1) {
 						if (!note[vi][m + 1].size()) {
-							error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next measure does not have note in this voice.",
+							warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next measure does not have note in this voice.",
 								m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 								mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-							return;
+							note[vi][m][ni].tie_start = 0;
 						}
 						else {
 							if (note[vi][m + 1][0].rest) {
-								error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+								warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 									m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 									mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-								return;
+								note[vi][m][ni].tie_start = 0;
 							}
 							if (note[vi][m][ni].pitch != note[vi][m + 1][0].pitch) {
-								error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+								warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 									m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 									mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-								return;
+								note[vi][m][ni].tie_start = 0;
 							}
 							if (!note[vi][m + 1][0].tie_stop) {
-								error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note does not stop tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+								warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but next note does not stop tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 									m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 									mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-								return;
+								note[vi][m][ni].tie_start = 0;
 							}
 						}
 					}
 					else {
-						error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but it is last note in this voice.",
+						warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note starts tie, but it is last note in this voice.",
 							m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 							mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-						return;
+						note[vi][m][ni].tie_start = 0;
 					}
 				}
 				if (note[vi][m][ni].tie_stop) {
 					if (ni) {
 						if (note[vi][m][ni - 1].rest) {
-							error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note in this measure is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+							warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note in this measure is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 								m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 								mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-							return;
+							note[vi][m][ni].tie_stop = 0;
 						}
 						if (note[vi][m][ni].pitch != note[vi][m][ni - 1].pitch) {
-							error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note in this measure has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+							warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note in this measure has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 								m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 								mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-							return;
+							note[vi][m][ni].tie_stop = 0;
 						}
 						if (!note[vi][m][ni - 1].tie_start) {
-							error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note in this measure does not stop tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+							warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note in this measure does not stop tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 								m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 								mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-							return;
+							note[vi][m][ni].tie_stop = 0;
 						}
 					}
 					else if (m > 1) {
 						if (!note[vi][m - 1].size()) {
-							error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous measure does not have note in this voice.",
+							warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous measure does not have note in this voice.",
 								m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 								mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-							return;
+							note[vi][m][ni].tie_stop = 0;
 						}
 						else {
 							if (note[vi][m - 1][note[vi][m - 1].size() - 1].rest) {
-								error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+								warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note is a rest. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 									m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 									mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-								return;
+								note[vi][m][ni].tie_stop = 0;
 							}
 							if (note[vi][m][ni].pitch != note[vi][m - 1][note[vi][m - 1].size() - 1].pitch) {
-								error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+								warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note has different pitch. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 									m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 									mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-								return;
+								note[vi][m][ni].tie_stop = 0;
 							}
 							if (!note[vi][m - 1][note[vi][m - 1].size() - 1].tie_start) {
-								error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note does not start tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
+								warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but previous note does not start tie. Probably, you are using tie in a chord, which is not recommended: better use voices or staffs",
 									m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 									mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-								return;
+								note[vi][m][ni].tie_stop = 0;
 							}
 						}
 					}
 					else {
-						error.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but it is the first note in this voice.",
+						warning.Format("Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d. Note stops tie, but it is the first note in this voice.",
 							m, vi, voice[vi].id, voice[vi].name, voice[vi].staff, voice[vi].v, voice[vi].chord,
 							mea[m].beats, mea[m].beat_type, ni + 1, note[vi][m].size());
-						return;
+						note[vi][m][ni].tie_stop = 0;
 					}
 				}
 			}

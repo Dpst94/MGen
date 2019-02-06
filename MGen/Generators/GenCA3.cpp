@@ -597,6 +597,9 @@ void CGenCA3::Generate() {
 		error = 9;
 		return;
 	}
+	if (!xfi.warning.IsEmpty()) {
+		WriteLogLy(1, xfi.warning, 0);
+	}
 	if (CheckXML()) return;
 	if (XML_to_CP()) return;
 	if (conf_species.GetLength() > 1 && conf_species.GetLength() != v_cnt) {

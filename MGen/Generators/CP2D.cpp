@@ -1241,6 +1241,7 @@ void CP2D::LogVector(CString print_st, int print_int, int x1, int x2, vector<int
 	CGLib::AppendLineToFile(fname, st2 + " \n");
 }
 
+// Pos 0 is before counterpoint. Pos 1 is inside counterpoint
 void CP2D::WriteLogLy(int i, CString st, int pos) {
 	LyLogEntry lle;
 	lle.st = st;

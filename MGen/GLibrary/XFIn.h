@@ -52,8 +52,9 @@ public:
 	// Input
 	CString path;
 
-	// Error
+	// Errors
 	CString error;
+	CString warning;
 
 	// Result
 	CString encoder;
