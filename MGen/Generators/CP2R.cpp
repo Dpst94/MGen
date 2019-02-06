@@ -4978,6 +4978,9 @@ void CP2R::EvalTriDouble() {
 		// Count of each note start at step
 		vector<int> tccs;
 		tccs.resize(12);
+		// Voices for each note
+		vector<vector<int>> tccv;
+		tccv.resize(12);
 		for (v = 0; v < av_cnt; ++v) {
 			ls = bli[v][s];
 			// Skip pauses
@@ -4990,15 +4993,23 @@ void CP2R::EvalTriDouble() {
 			int cc2 = (cc1 + 6) % 12;
 			// Add note
 			++tccc[cc1];
+			// Add voice
+			tccv[cc1].push_back(v);
 			// Add note start
 			if (s == fli[v][ls] || s == hstart) ++tccs[pcc[v][s]];
 			// Skip if not a single note started so far (if note starts on fourth note only, this means that these three notes could already trigger flag)
 			if (!tccs[cc1] && !tccs[cc2]) continue;
-			// Skip if not first duplicate
-			if ((tccc[cc1] != 2 || tccc[cc2] != 1) &&
-				(tccc[cc1] != 1 || tccc[cc2] != 2)) continue;
 			vc = vca[s5];
-			AutoFlagA(v, 222, s5, s5, v, 100);
+			if (tccc[cc1] == 2 && tccc[cc2] == 1) {
+				v2 = tccv[cc1][1];
+				s4 = max(hstart, fli[v2][bli[v2][s]]);
+				AutoFlagA(v2, 222, s4, s4, tccv[cc1][0], 100);
+			}
+			else if (tccc[cc1] == 1 && tccc[cc2] == 2) {
+				v2 = tccv[cc2][1];
+				s4 = max(hstart, fli[v2][bli[v2][s]]);
+				AutoFlagA(v2, 222, s4, s4, tccv[cc2][0], 100);
+			}
 		}
 	}
 }
