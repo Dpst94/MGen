@@ -2822,7 +2822,6 @@ int CP2R::FailRhythm3() {
 	if (c_len - fli[v][fli_size[v] - 1] < npm ||
 		(c_len == ep2 && llen[v][fli_size[v] - 1] != npm)) {
 		FlagV(v, 267, fli[v][fli_size[v] - 1]);
-		if (c_len - fli[v][fli_size[v] - 1] == 2) FlagV(v, 252, fli[v][fli_size[v] - 1]);
 	}
 	return 0;
 }
@@ -2953,12 +2952,6 @@ int CP2R::FailRhythm5() {
 		for (int lp = 0; lp < l_len.size(); ++lp) {
 			s2 = s + pos;
 			ls2 = bli[v][s2];
-			// Last note
-			if (ep2 == c_len && ls2 == fli_size[v] - 1 && ms == mli.size() - 1) {
-				// Check length
-				if (l_len[lp] == 1) FlagV(v, 253, fli[v][fli_size[v] - 1]);
-				else if (l_len[lp] == 2) FlagV(v, 252, fli[v][fli_size[v] - 1]);
-			}
 			// Check 1/8
 			if (l_len[lp] == 1) {
 				// Last 1/8 syncope
