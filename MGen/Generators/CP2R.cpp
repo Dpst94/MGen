@@ -6055,6 +6055,8 @@ int CP2R::FailStartPause() {
 	vstarts.resize(mli.size());
 	// Prohibit start at the same step
 	for (v = 0; v < av_cnt; ++v) {
+		// Skip for voices that start without pause, because this is already flagged
+		if (!fin[v]) continue;
 		sp = vsp[v];
 		int count3 = 0;
 		if (sp > 1) {
