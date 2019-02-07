@@ -4093,7 +4093,7 @@ void CP2R::EvalMshHarm(int hvar) {
 		int nt = c[v][s] % 7;
 		// Do not process notes that are not harmonic
 		if (nt != de1 && nt != de2 && nt != de3 && 
-			(nt != de4 || severity[sp][av_cnt][v][194] > 60)) continue;
+			(nt != de4 || severity[sp][av_cnt][0][194] > 60)) continue;
 		// Process only lower notes
 		if (c[v][s] > lhbc) continue;
 		lhbc = c[v][s];
