@@ -117,7 +117,7 @@ void SendProgress(CString st) {
 	j_progress = st;
 	CString q;
 	long long timestamp = CGLib::time();
-	q.Format("UPDATE jobs SET j_updated=NOW(), j_progress='%s' WHERE j_id='%ld'",
+	q.Format("UPDATE jobs SET j_updated=NOW(), j_progress='%s' WHERE j_id='%lld'",
 		db.Escape(j_progress), CDb::j_id);
 	if (db.Query(q)) {
 		nRetCode = 8;
@@ -191,8 +191,23 @@ void SaveScreenshot() {
 void SendStatus() {
 	CString q;
 	long long timestamp = CGLib::time();
-	q.Format("REPLACE INTO s_status VALUES('%d',NOW(),'%s','%ld','%lld','%lld','%lld','%lld','%lld','%ld','%d')",
-		CDb::server_id, client_host, GetTickCount() / 1000, (timestamp - server_start_time) / 1000,
+	long long passed = (timestamp - server_start_time) / 1000;
+	q.Format("SELECT session, last_update, TIMESTAMPDIFF(SECOND, last_update, NOW()) as tdiff FROM s_status WHERE s_id='%d'", CDb::server_id);
+	if (db.Fetch(q)) {
+		nRetCode = 8;
+		return;
+	}
+	if (db.result.size()) {
+		long long session2 = db.GetLongLong("session");
+		long long tdiff = db.GetLongLong("tdiff");
+		if (session2 != CDb::session_id && tdiff < passed) {
+			est.Format("Warning! Multiple servers with same server_id '%d' detected. Current server has session '%lld', which started %lld second ago. Another server with session '%lld' updated status at %s (%lld seconds ago)",
+				CDb::server_id, CDb::session_id, passed, session2, db.GetSt("last_update"), tdiff);
+			WriteLog(est);
+		}
+	}
+	q.Format("REPLACE INTO s_status VALUES('%d','%lld',NOW(),'%s','%ld','%lld','%lld','%lld','%lld','%lld','%lld','%d')",
+		CDb::server_id, CDb::session_id, client_host, GetTickCount() / 1000, (timestamp - server_start_time) / 1000,
 		rChild["Reaper.exe"] ? (timestamp - tChild["Reaper.exe"]) / 1000 : -1,
 		rChild["AutoHotkey.exe"] ? (timestamp - tChild["AutoHotkey.exe"]) / 1000 : -1,
 		rChild["MGen.exe"] ? (timestamp - tChild["MGen.exe"]) / 1000 : -1,
@@ -432,7 +447,7 @@ int FinishJob(int res, CString st) {
 	// Queue autorestarting job after finish
 	if (j_autorestart && !res) state = 1;
 	CString q;
-	q.Format("UPDATE jobs SET j_updated=NOW(), j_duration=TIMESTAMPDIFF(SECOND, j_started, NOW()), j_finished=NOW(), j_state='%d', j_result='%d', j_progress='%s', j_cleaned=0, j_size='%llu' WHERE j_id='%ld'",
+	q.Format("UPDATE jobs SET j_updated=NOW(), j_duration=TIMESTAMPDIFF(SECOND, j_started, NOW()), j_finished=NOW(), j_state='%d', j_result='%d', j_progress='%s', j_cleaned=0, j_size='%llu' WHERE j_id='%lld'",
 		state, res, db.Escape(st), CGLib::FolderSize(share + j_folder), CDb::j_id);
 	if (db.Query(q)) {
 		nRetCode = 8;
@@ -948,7 +963,7 @@ void TakeJob() {
 	}
 	if (db.result.size()) {
 		// Load job
-		CDb::j_id = db.GetInt("j_id");
+		CDb::j_id = db.GetLongLong("j_id");
 		j_priority = db.GetInt("j_priority");
 		j_autorestart = db.GetInt("j_autorestart");
 		f_stems = db.GetInt("f_stems");
@@ -968,7 +983,7 @@ void TakeJob() {
 		// Prevent changing database if there is db error (need to restart)
 		if (nRetCode) return;
 		// Take job
-		q.Format("UPDATE jobs SET j_started=NOW(), j_updated=NOW(), s_id='%d', j_state=2, j_progress='Job assigned' WHERE j_id='%ld'",
+		q.Format("UPDATE jobs SET j_started=NOW(), j_updated=NOW(), s_id='%d', j_state=2, j_progress='Job assigned' WHERE j_id='%lld'",
 			CDb::server_id, CDb::j_id);
 		if (db.Query(q)) {
 			nRetCode = 8;
@@ -980,7 +995,7 @@ void TakeJob() {
 			return;
 		}
 		// Log
-		est.Format("Taking job #%ld: %s, %s%s (priority %d)", 
+		est.Format("Taking job #%lld: %s, %s%s (priority %d)", 
 			CDb::j_id, j_type, j_folder, f_name, j_priority);
 		WriteLog(est);
 		// Update status
@@ -1000,8 +1015,15 @@ void TakeJob() {
 
 void Init() {
 	db.log_fname = "server\\server.log";
-	// On start, reset all jobs that did not finish correctly
 	CString q;
+	// Register server session
+	q.Format("INSERT INTO sessions (s_id, s_created) VALUES('%d', NOW())", CDb::server_id);
+	if (db.Query(q)) {
+		nRetCode = 8;
+		return;
+	}
+	CDb::session_id = db.GetInsertId();
+	// On start, reset all jobs that did not finish correctly
 	q.Format("SELECT COUNT(*) as cnt FROM jobs WHERE s_id='%d' AND j_state=2", CDb::server_id);
 	if (db.Fetch(q)) {
 		nRetCode = 8;
