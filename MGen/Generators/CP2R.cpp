@@ -3479,6 +3479,8 @@ void CP2R::GetLT() {
 void CP2R::FlagNoLT() {
 	CHECK_READY(DR_fli, DR_pc, DR_hli);
 	CHECK_READY(DR_islt);
+	// This rule is not for archaic modes, because they do not have a leading tone
+	if (mode && !mminor) return;
 	if (hli.size() < 2) return;
 	if (fli_size[0] < 2) return;
 	hs = hli.size() - 2;
