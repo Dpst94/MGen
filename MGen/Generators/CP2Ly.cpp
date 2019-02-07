@@ -531,7 +531,7 @@ void CP2Ly::DistributeFlags() {
 			int fcount = GetFCount();
 			if (fcount < 4) continue;
 			v3 = v;
-			for (int f = 0; f < flag[v][s].size(); ++f) {
+			for (int f = 0; f < flag[v3][s].size(); ++f) {
 				v = fvl[v3][s][f];
 				// Do not process single-voice flags
 				if (v3 == v) continue;
