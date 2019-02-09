@@ -650,6 +650,12 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 	for (int i = 0; i < sv.size(); ++i) {
 		sv[i].Replace("$SUBTITLE$", title);
 		sv[i].Replace("$TITLE$", "");
+		if (ly_page_breaking.IsEmpty()) {
+			sv[i].Replace("$PAGE_BREAKING$", "minimal-breaking");
+		}
+		else {
+			sv[i].Replace("$PAGE_BREAKING$", ly_page_breaking);
+		}
 		sv[i].Replace("$DEDICATION$", "");
 		ly_fs << sv[i] << "\n";
 	}

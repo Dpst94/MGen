@@ -664,6 +664,7 @@ void CP2Ly::SaveLyCP() {
 			ly_ly_st += "}\n";
 		}
 	}
+	if (av_cnt < 5) ly_ly_st += "\\noPageBreak\n";
 	// Save notes
 	ly_ly_st += "<<\n";
 	for (v = av_cnt - 1; v >= 0; --v) {

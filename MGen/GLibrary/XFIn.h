@@ -66,7 +66,6 @@ public:
 	vector<vector<vector<XMLNote>>> note; // [v][m][]
 
 private:
-	void ReorderChords();
 	int ReorderTwoVoices(float pdif);
 	void GetTextV(CString xpath, vector<CString>& sa);
 	CString GetText(CString xpath);

@@ -480,6 +480,7 @@ protected:
 	int ly_rule_verbose = 0; // How verbose rule display format is
 	int ly_show_xml_text = 0; // show imported text from xml file
 	int ly_show_xml_lyrics = 0; // show imported lyrics from xml file
+	CString ly_page_breaking; // page-turn-breaking is most sparse and removes risk of page compression. minimal-breaking is most dense. optimal-breaking is something in between.
 
 	// Graphs
 	vector <vector <float>> tweight; // [ls] Tonic weight for each note
