@@ -607,8 +607,9 @@ void CP2Ly::SaveLyCP() {
 	// First info
 	CString st3;
 	ly_ly_st += "\\markup \\wordwrap {\n  \\bold {\n";
+	CString bname = CW2A(CA2W(bname_from_path(musicxml_file), CP_ACP), CP_UTF8);
 	st.Format("\"#\"%d (from %s)",
-		cp_id + 1, bname_from_path(musicxml_file));
+		cp_id + 1, bname);
 	ly_ly_st += st + " Key: " + key_visual;
 	if (mode == 9) {
 		if (mminor) ly_ly_st += " minor";

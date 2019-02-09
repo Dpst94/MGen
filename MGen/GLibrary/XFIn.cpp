@@ -112,10 +112,14 @@ void XFIn::LoadXML(CString pth) {
 	error = "";
 	mea.clear();
 	voice.clear();
-	// Load file
+	DWORD ftyp = GetFileAttributesA(path);
+	if (ftyp == INVALID_FILE_ATTRIBUTES || ftyp & FILE_ATTRIBUTE_DIRECTORY) {
+		error = "File does not exist: " + path;
+		return;
+	}
 	xml_parse_result result = d.load_file(path);
 	if (!result) {
-		error = "Cannot open file " + path;
+		error = "Error parsing MusicXML file - check file format: " + path;
 		return;
 	}
 	// General information
