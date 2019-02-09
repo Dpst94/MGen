@@ -157,6 +157,7 @@ int CGenCA3::XML_to_CP() {
 	InitAnalysis();
 	cp_tempo = 0;
 	vname.resize(av_cnt);
+	vname2.resize(av_cnt);
 	it.resize(av_cnt);
 	ilyr.resize(av_cnt);
 	for (vi = 0; vi < xfi.voice.size(); ++vi) {
@@ -167,10 +168,18 @@ int CGenCA3::XML_to_CP() {
 		float xpos = 0;
 		// Position of note inside xml measure
 		float xpos2 = 0;
-		vname[v] = xfi.voice[vi].name;
-		vname[v].Replace("MusicXML", "");
-		vname[v].Trim();
-		if (vname[v].IsEmpty()) vname[v].Format("Part%d", vi + 1);
+		// Convert from UTF8 to UTF16
+		CStringW vname_w = CA2W(xfi.voice[vi].name, CP_UTF8);
+		// Build full name
+		vname_w.Replace(L"MusicXML", L"");
+		vname_w.Trim();
+		if (vname_w.IsEmpty()) vname_w.Format(L"Part%d", vi + 1);
+		// Build short name
+		CStringW vname_w2 = vname_w;
+		if (vname_w2.GetLength() > 10) vname_w2 = vname_w2.Left(10);
+		// Conert back to UTF8
+		vname[v] = CW2A(vname_w, CP_UTF8);
+		vname2[v] = CW2A(vname_w2, CP_UTF8);
 		unique_part_id.insert(xfi.voice[vi].id);
 		track_id[v] = unique_part_id.size();
 		track_name[v].Format("%s (%s), staff %d, voice %d, chord %d", vname[v], xfi.voice[vi].id, xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord);
@@ -335,7 +344,6 @@ int CGenCA3::XML_to_CP() {
 		}
 	}
 	// Make unique voice names
-	vname2 = vname;
 	for (v = av_cnt - 1; v > 0; --v) {
 		int dupl = 1;
 		for (v2 = v - 1; v2 >= 0; --v2) {
@@ -347,6 +355,7 @@ int CGenCA3::XML_to_CP() {
 			}
 		}
 	}
+	xmlfile_loaded = 1;
 	return 0;
 }
 
