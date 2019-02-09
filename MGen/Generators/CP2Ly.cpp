@@ -655,6 +655,7 @@ void CP2Ly::SaveLyCP() {
 	ly_ly_st += "\n}\n";
 	// Show logs
 	for (int i = 0; i < ly_log.size(); ++i) {
+		if (av_cnt < 5 && ly_log.size() < 5) ly_ly_st += "\\noPageBreak\n";
 		if (ly_log[i].pos == 1) {
 			CString st;
 			ly_ly_st += "\\markup \\smaller \\bold \\wordwrap \\with-color #(rgb-color 1.000 0.000 0.000) { \\char ##x26D4 \n";
