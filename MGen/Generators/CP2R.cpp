@@ -6411,12 +6411,15 @@ void CP2R::FlagPcoApart() {
 				if (civl % 12 != 0 && civl % 12 != 7) continue;
 				GetVp();
 				vc = vca[s];
-				// Get interval end
+				// Get interval end (when one of notes finishes)
 				int iend = min(fli2[v][ls], fli2[v2][ls2]);
+				// Get scan start as next note after latest note in the interval or 1 step after first note ending in the interval - because both notes have to finish, but also intervals cannot sound tight close
+				int scan_start = max(iend + 2, max(fli2[v][ls], fli2[v2][ls2]) + 1);
 				// Scan for second interval
 				int scan_end = iend + npm;
 				if (scan_end > ep2) scan_end = ep2;
-				for (s3 = iend + 2; s3 < scan_end; ++s3) {
+				// Start scanning from end + 1
+				for (s3 = scan_start; s3 < scan_end; ++s3) {
 					// Stop scanning as soon as there is a harmony between the intervals
 					if (bhli[s3] - bhli[s] > 1) break;
 					ls3 = bli[v][s3];
@@ -6474,7 +6477,7 @@ void CP2R::FlagPcoApart() {
 							else AutoFlagL(v, 248, s3, s, v2);
 						}
 						// Oblique nct in sp3/5
-						else if ((vsp[v] == 3 || vsp[v] == 5 || vsp[v2] == 3 || vsp[v2] == 5) && 
+						else if ((vsp[v] == 3 || vsp[v] == 5 || vsp[v] == 4 || vsp[v2] == 3 || vsp[v2] == 4 || vsp[v2] == 5) &&
 							is_oblique &&	(msh[v][fli[v][ls]] < 0 || msh[v2][fli[v2][ls2]] < 0 ||
 								msh[v][fli[v][ls3]] < 0 || msh[v2][fli[v2][ls4]] < 0)) {
 							if (civl % 12 == 0) AutoFlagL(v, 488, s3, s, v2);
