@@ -176,7 +176,7 @@ int CGenCA3::XML_to_CP() {
 		if (vname_w.IsEmpty()) vname_w.Format(L"Part%d", vi + 1);
 		// Build short name
 		CStringW vname_w2 = vname_w;
-		if (vname_w2.GetLength() > 10) vname_w2 = vname_w2.Left(10);
+		if (vname_w2.GetLength() > ly_max_partname_len) vname_w2 = vname_w2.Left(ly_max_partname_len);
 		// Conert back to UTF8
 		vname[v] = CW2A(vname_w, CP_UTF8);
 		vname2[v] = CW2A(vname_w2, CP_UTF8);

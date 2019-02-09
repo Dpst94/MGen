@@ -481,6 +481,7 @@ protected:
 	int ly_show_xml_text = 0; // show imported text from xml file
 	int ly_show_xml_lyrics = 0; // show imported lyrics from xml file
 	CString ly_page_breaking; // page-turn-breaking is most sparse and removes risk of page compression. minimal-breaking is most dense. optimal-breaking is something in between.
+	int ly_max_partname_len = 10; // Maximum allowed length of part name in characters
 
 	// Graphs
 	vector <vector <float>> tweight; // [ls] Tonic weight for each note
