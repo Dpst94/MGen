@@ -4228,7 +4228,7 @@ void CP2R::FlagHarmIncomplete() {
 	CHECK_READY(DR_cct, DR_hli);
 	if (av_cnt < 3) return;
 	int prev_complete = 1;
-	for (hs = 0; hs < hli.size(); ++hs) {
+	for (hs = 1; hs < hli.size() - 2; ++hs) {
 		hstart = hli[hs];
 		hend = hli2[hs];
 		vc = vca[hstart];
