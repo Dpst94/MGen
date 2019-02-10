@@ -1922,6 +1922,7 @@ int CP2R::FailStagnation(int steps, int notes, int stag_fl) {
 	nstat[0] = 0;
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
+		if (!cc[v][s]) continue;
 		// Add new note to stagnation array
 		++nstat[cc[v][s]];
 		// Subtract old note
@@ -2332,6 +2333,7 @@ int CP2R::FailLocalPiCount(int notes, int picount, int pic_fl) {
 	int last_flag_ls = -10;
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
+		if (!cc[v][s]) continue;
 		// Add new note to stagnation array
 		++nstat[cc[v][s]];
 		// Subtract old note
@@ -3130,6 +3132,7 @@ void CP2R::FlagFullSimilar() {
 		if (pcc[lva[s]][s] == cct[hs][1]) continue;
 		int dir = 0;
 		for (v = 0; v < av_cnt; ++v) {
+			if (!cc[v][s]) continue;
 			if (cc[v][s] > cc[v][s - 1]) ++dir;
 			else if (cc[v][s] < cc[v][s - 1]) --dir;
 		}
@@ -3177,7 +3180,7 @@ int CP2R::FailAnapaest() {
 		// Detect note start at beat 4
 		int start4 = -1;
 		for (v = 0; v < av_cnt; ++v) {
-			if (fli[v][bli[v][s0 + 6]] == s0 + 6) {
+			if (fli[v][bli[v][s0 + 6]] == s0 + 6 && cc[v][s0 + 6]) {
 				start4 = v;
 				break;
 			}
@@ -3185,9 +3188,9 @@ int CP2R::FailAnapaest() {
 		if (start4 != -1) continue;
 		// Detect note start at beat 2 if there is no beat 4
 		for (v = 0; v < av_cnt; ++v) {
-			if (fli[v][bli[v][s0 + 2]] == s0 + 2) {
+			if (fli[v][bli[v][s0 + 2]] == s0 + 2 && cc[v][s0 + 2]) {
 				// If this is the only sp5 voice, check if it ends with slur
-				if (sp5_count == 1 && sus[v][bli[v][s0 + npm - 1]]) {
+				if (vsp[v] == 5 && sp5_count == 1 && sus[v][bli[v][s0 + npm - 1]]) {
 					FlagV(v, 239, s0 + 2);
 				}
 				else FlagV(v, 240, s0 + 2);
@@ -3213,7 +3216,8 @@ void CP2R::FlagFullMeasureNote() {
 		// Detect note start inside measure
 		int found_notestart = -1;
 		for (v = 0; v < av_cnt; ++v) {
-			if (fli2[v][bli[v][s0]] < s0 + npm - 1) {
+			ls = bli[v][s0];
+			if (ls < fli_size[v] - 1 && fli2[v][ls] < s0 + npm - 1 && cc[v][fli[v][ls + 1]]) {
 				found_notestart = v;
 				break;
 			}
@@ -3240,7 +3244,8 @@ void CP2R::FlagRhythmStagnation() {
 		// Detect note start inside measure
 		int plain_measure = 1;
 		for (v = 0; v < av_cnt; ++v) {
-			if (fli2[v][bli[v][s0]] < s0 + npm - 1) {
+			ls = bli[v][s0];
+			if (ls < fli_size[v] - 1 && fli2[v][ls] < s0 + npm - 1 && cc[v][fli[v][ls + 1]]) {
 				plain_measure = 0;
 				break;
 			}
@@ -3341,6 +3346,8 @@ void CP2R::FlagSus() {
 				if (!sus[v][ls]) continue;
 				s = fli[v][ls];
 				s2 = fli2[v][ls];
+				// Skip pauses
+				if (!cc[v][s]) continue;
 				// Preparation is shorter then suspension
 				if ((sus[v][ls] - s) * 2 < llen[v][ls])
 					FlagV(v, 427, s);
@@ -3526,7 +3533,8 @@ int CP2R::FailSusCount() {
 	int c_sus = 0;
 	int c_anti = 0;
 	for (ls = 0; ls < fli_size[v]; ++ls) {
-		if (sus[v][ls]) {
+		s = fli[v][ls];
+		if (sus[v][ls] && cc[v][s]) {
 			if (retr[v][sus[v][ls]]) ++c_anti;
 			else ++c_sus;
 		}
@@ -3540,11 +3548,12 @@ int CP2R::FailSusCount() {
 	return 0;
 }
 
-// Detect repeating notes. Step2 excluding
+// Detect repeating notes
 int CP2R::FailNoteRepeat() {
 	CHECK_READY(DR_fli);
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
-		if (cc[v][fli[v][ls]] == cc[v][fli[v][ls + 1]]) FlagV(v, 30, fli[v][ls]);
+		s = fli[v][ls];
+		if (cc[v][s] && cc[v][s] == cc[v][fli[v][ls + 1]]) FlagV(v, 30, fli[v][ls]);
 	}
 	return 0;
 }
@@ -3665,13 +3674,13 @@ int CP2R::FailNoteLen() {
 void CP2R::FlagSusSus() {
 	CHECK_READY(DR_sus, DR_fli);
 	for (ls = 0; ls < fli_size[v]; ++ls) {
-		if (sus[v][ls] - fli[v][ls] > npm) {
+		s = fli[v][ls];
+		if (cc[v][s] && sus[v][ls] - s > npm) {
 			FlagV(v, 41, fli[v][ls]);
 		}
 	}
 }
 
-// Detect repeating notes. Step2 excluding
 int CP2R::FailBeat() {
 	CHECK_READY(DR_fli, DR_beat, DR_nlen);
 	if (sp == 0) {
@@ -3679,6 +3688,7 @@ int CP2R::FailBeat() {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			if (!beat[v][ls]) continue;
 			s = fli[v][ls];
+			if (!cc[v][s]) continue;
 			FlagV(v, 515, s);
 		}
 	}
@@ -3686,14 +3696,15 @@ int CP2R::FailBeat() {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			if (!beat[v][ls]) continue;
 			s = fli[v][ls];
+			if (!cc[v][s]) continue;
 			FlagV(v, 515, s);
 		}
 	}
 	else if (sp == 2 || sp == 4) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
-			// Skip starting rest
-			if (!cc[v][s] && !s) continue;
+			// Skip rest
+			if (!cc[v][s]) continue;
 			if (npm == 10) {
 				if (ls == fli_size[v] - 1 && llen[v][ls] == npm) continue;
 				if (s % npm == 0 && llen[v][ls] == 4) continue;
@@ -3709,6 +3720,7 @@ int CP2R::FailBeat() {
 	else if (sp == 3) {
 		for (ls = 0; ls < fli_size[v]; ++ls) {
 			s = fli[v][ls];
+			if (!cc[v][s]) continue;
 			if (s % nlen[v] == 0) continue;
 			FlagV(v, 515, s);
 		}
