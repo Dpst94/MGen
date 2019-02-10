@@ -663,14 +663,14 @@ void CP2R::SendCP() {
 }
 
 // Create bell dynamics curve
-void CP2R::MakeBellDyn(int v, int step1, int step2, int dyn1, int dyn2, int dyn_rand) {
+void CP2R::MakeBellDyn(int vi, int step1, int step2, int dyn1, int dyn2, int dyn_rand) {
 	// Do not process if steps are equal or wrong
 	if (step2 <= step1) return;
 	int mids = (step1 + step2) / 2;
 	int counts = step2 - step1;
 	for (int s = step1; s <= step2; ++s) {
-		if (s < mids)	dyn[s][v] = dyn1 + min(dyn2 - dyn1, (dyn2 - dyn1) * (s - step1) / counts * 2) + dyn_rand * rand2() / RAND_MAX;
-		else dyn[s][v] = dyn1 + min(dyn2 - dyn1, (dyn2 - dyn1) * (step2 - s) / counts * 2) + dyn_rand * rand2() / RAND_MAX;
+		if (s < mids)	dyn[s][vi] = dyn1 + min(dyn2 - dyn1, (dyn2 - dyn1) * (s - step1) / counts * 2) + dyn_rand * rand2() / RAND_MAX;
+		else dyn[s][vi] = dyn1 + min(dyn2 - dyn1, (dyn2 - dyn1) * (step2 - s) / counts * 2) + dyn_rand * rand2() / RAND_MAX;
 	}
 }
 
@@ -1229,27 +1229,27 @@ int CP2R::FailMinorStepwise() {
 void CP2R::MergeNotes(int step1, int step2) {
 	// Start of current note
 	int first_pos = step1;
-	DWORD col = color[step1][v];
+	DWORD col = color[step1][vi];
 	for (int x = step1 + 1; x <= step2; ++x) {
 		// Detect steps that have same pitch and there is no retrigger 
-		if (coff[x][v]) {
+		if (coff[x][vi]) {
 			// select best color: gray is ignored, then most red is selected
-			if (color[x][v] != color_noflag &&
-				(col == color_noflag || GetRed(color[x][v]) > GetRed(col))) {
-				col = color[x][v];
+			if (color[x][vi] != color_noflag &&
+				(col == color_noflag || GetRed(color[x][vi]) > GetRed(col))) {
+				col = color[x][vi];
 				// update color of previous steps
 				for (int z = first_pos; z < x; ++z) {
-					color[z][v] = col;
+					color[z][vi] = col;
 				}
 			}
-			coff[x][v] = coff[x - 1][v] + 1;
+			coff[x][vi] = coff[x - 1][vi] + 1;
 			// Copy color forward
-			color[x][v] = col;
+			color[x][vi] = col;
 		}
 		// New note
 		else {
 			first_pos = x;
-			col = color[x][v];
+			col = color[x][vi];
 		}
 	}
 }
