@@ -115,6 +115,7 @@
 #define FLAGAR(voice, fid, step, step2, voice2, ihpe) do { \
 	if (!s3 && !s4 && !s5) { \
 		FlagA(voice, fid, step, step2, voice2, ihpe); \
+		++nct_count; \
 		return; \
 	} \
 } while (0)

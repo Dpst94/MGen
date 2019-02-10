@@ -6455,8 +6455,16 @@ void CP2R::FlagPcoApart() {
 					else if (s3 % npm == 0) {
 						// Suspension
 						if (sus[v][ls3] == s3) {
-							if (civl % 12 == 0) AutoFlagL(v, 491, s3, s, v2);
-							else AutoFlagL(v, 385, s3, s, v2);
+							// Non-harmonic sus
+							if (msh[v][s3] < 0) {
+								if (civl % 12 == 0) AutoFlagL(v, 488, s3, s, v2);
+								else AutoFlagL(v, 249, s3, s, v2);
+							}
+							// Harmonic sus
+							else {
+								if (civl % 12 == 0) AutoFlagL(v, 491, s3, s, v2);
+								else AutoFlagL(v, 385, s3, s, v2);
+							}
 						}
 						else if (sus[v2][ls4] == s3) {
 							if (civl % 12 == 0) AutoFlagL(v, 491, s3, s, v2);
@@ -6476,10 +6484,10 @@ void CP2R::FlagPcoApart() {
 							if (civl % 12 == 0) AutoFlagL(v, 484, s3, s, v2);
 							else AutoFlagL(v, 248, s3, s, v2);
 						}
-						// Oblique nct in sp3/5
-						else if ((vsp[v] == 3 || vsp[v] == 5 || vsp[v] == 4 || vsp[v2] == 3 || vsp[v2] == 4 || vsp[v2] == 5) &&
-							is_oblique &&	(msh[v][fli[v][ls]] < 0 || msh[v2][fli[v2][ls2]] < 0 ||
-								msh[v][fli[v][ls3]] < 0 || msh[v2][fli[v2][ls4]] < 0)) {
+						// Oblique nct
+						else if ((vsp[v] > 1 || vsp[v2] > 1) &&
+							is_oblique &&	(msh[v][max(hli[bhli[s]], fli[v][ls])] < 0 || msh[v2][max(hli[bhli[s]], fli[v2][ls2])] < 0 ||
+								msh[v][max(hli[bhli[s3]], fli[v][ls3])] < 0 || msh[v2][max(hli[bhli[s3]], fli[v2][ls4])] < 0)) {
 							if (civl % 12 == 0) AutoFlagL(v, 488, s3, s, v2);
 							else AutoFlagL(v, 249, s3, s, v2);
 						}
