@@ -52,7 +52,25 @@ inline void CP2R::FlagL(int voice, int fid, int step, int step2, int voice2) {
 
 void CP2R::AutoChooseVoice(int step, int voice, int voice2, int &avoice, int &avoice2) {
 	CHECK_READY(DR_fli);
-	if (fli[voice][bli[voice][step]] == step) {
+	// If position is measure start, any voice is possible: choose best voice
+	if (step % npm == 0) {
+		// If first voice is bass, send to second voice
+		if (!voice) {
+			avoice = voice2;
+			avoice2 = voice;
+		}
+		// If second voice is bass, send to first voice
+		else if (!voice2) {
+			avoice = voice;
+			avoice2 = voice2;
+		}
+		// If neither voice is bass, send to lowest voice
+		else {
+			avoice = min(voice, voice2);
+			avoice2 = max(voice, voice2);
+		}
+	}
+	else if (fli[voice][bli[voice][step]] == step) {
 		// If both voices are possible, choose best voice
 		if (fli[voice2][bli[voice2][step]] == step) {
 			// If first voice is bass, send to second voice
