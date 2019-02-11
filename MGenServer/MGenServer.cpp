@@ -1118,6 +1118,12 @@ int main() {
 	Init();
 	for (;;) {
 		CheckChildren(1);
+		long long timestamp = CGLib::time();
+		long long passed = (timestamp - server_start_time) / 1000;
+		if (passed > 60 * 60) {
+			close_flag = 2;
+			break;
+		}
 		if (nRetCode) return PauseClose();
 		SaveScreenshot();
 		SendStatus();
