@@ -117,31 +117,6 @@ void CP2Ly::AddNLinkForeign(int f) {
 	lyv[v2].f[s3][f2].vl = fvl[v][s][f];
 }
 
-void CP2Ly::AddNLinkSep(int f) {
-	GetFlag(f);
-	// Send comments and color only if rule is not ignored
-	if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) return;
-	// Send comments and color only if rule is not ignored
-	if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) return;
-	// Do not send if ignored
-	if (severity[sp][vc][vp][fl] < show_min_severity) return;
-	// Correct positions
-	int s3 = s;
-	int s4 = fsl[v][s][f];
-	int f2 = lyv[v2].f[s3].size();
-	lyv[v2].f[s3].resize(f2 + 1);
-	lyv[v2].f[s3][f2].fid = fl;
-	lyv[v2].f[s3][f2].fsev = severity[sp][vc][vp][fl];
-	lyv[v2].f[s3][f2].sl = s4 - s3;
-	lyv[v2].f[s3][f2].s_src = s;
-	lyv[v2].f[s3][f2].sl_src = fsl[v][s][f];
-	lyv[v2].f[s3][f2].v = v;
-	lyv[v2].f[s3][f2].vl = fvl[v][s][f];
-	lyv[v2].f[s3][f2].dfgn = 0;
-	lyv[v2].f[s3][f2].sh = 0;
-	++lyv[v2].flags;
-}
-
 void CP2Ly::ParseNLinks() {
 	ly_ufl.clear();
 	for (int f = 0; f < flag[v][s].size(); ++f) {
@@ -153,17 +128,6 @@ void CP2Ly::ParseNLinks() {
 			if (fvl[v][s][f] != v2) continue;
 			//if (ruleinfo[flag[v][s][f]].viz != vGlis) continue;
 			AddNLinkForeign(f);
-		}
-	}
-	v = v2;
-}
-
-void CP2Ly::ParseNLinksSep() {
-	v2 = v;
-	for (v = 0; v < av_cnt; ++v) {
-		for (int f = 0; f < lyv[v].f[s].size(); ++f) {
-			if (!lyv[v].f[s][f].sep) continue;
-			AddNLinkSep(f);
 		}
 	}
 	v = v2;
@@ -558,7 +522,6 @@ void CP2Ly::ParseLy() {
 	}
 	// Parse separate staff
 	v = av_cnt;
-	//for (s = 0; s < c_len; ++s) ParseNLinksSep();
 	ParseLyISep();
 }
 

@@ -84,9 +84,7 @@ private:
 	inline int GetNoteStart(int voice, int step);
 	inline void AddNLink(int f);
 	inline void AddNLinkForeign(int f);
-	void AddNLinkSep(int f);
 	void ParseNLinks();
-	void ParseNLinksSep();
 	void SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype, int voice);
 	void ClearLyShape(int s1, int s2, int vtype);
 	void SendLyEvent(CString ev, int leng);
