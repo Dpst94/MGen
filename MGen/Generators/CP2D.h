@@ -460,7 +460,6 @@ protected:
 	vector<vector<vector<int>>> flag; // [v][s][] Note flags
 	vector<vector<vector<int>>> fsl; // [v][s][] Note flags links to steps
 	vector<vector<vector<int>>> fvl; // [v][s][] Note flags links to voices
-	vector<vector<vector<int>>> fsep; // [v][s][] If this flag should be sent to separate staff
 	vector<DWORD>  sev_color; // Severity colors
 	int fpenalty; // Additional flags penalty
 	int skip_flags;

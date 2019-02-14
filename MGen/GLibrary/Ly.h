@@ -237,7 +237,7 @@ const CString mode_name2[] = {
 #define MAX_VIZ 20
 
 const CString viz_name[] = {
-	"Default", // 0
+ 	"Default", // 0
 	"Harm", // 1
 	"Interval", // 2
 	"VBracket", // 3

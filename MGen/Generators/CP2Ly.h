@@ -13,13 +13,47 @@ struct LY_IntermediateCP {
 	vector<int> fhide; // [] If flag shape should not be displayed (if sent to separate staff)
 	vector<int> fsev; // [] Severity for each flag
 	vector<int> fsl; // [] Current flag step links
-	vector<int> fs_src; // [] Source flag positions
-	vector<int> fsl_src; // [] Source flag links
 	vector<int> fv; // [] Current flag source voice
 	vector<int> fvl; // [] Current flag voice links
+	vector<int> fs_src; // [] Source flag positions
+	vector<int> fsl_src; // [] Source flag links
 	vector<int> nfn; // [] Note flag number
 	vector<int> nfs; // [] Note flag shape
 	//vector<CString> nfc; // [] Note flag comment
+};
+
+struct LY_Shape {
+	int start; // If current step starts new shape
+	int start_s; // Link to shape start position if current position is shape finish
+	int fin; // If current step finishes new shape
+	int fl = -1; // Flag index in nflags
+	int fs = -1; // Flag step
+	int sev = -1; // Highest severity of starting shape
+	int v = -1;
+	CString txt; // Starting shape text
+};
+
+struct LY_Flag {
+	int fid; // Flag id
+	int hide = 0; // If flag shape should not be displayed (if sent to separate staff)
+	int fsev; // Severity for each flag
+	int sl; // Current flag step link
+	int v; // Current flag source voice
+	int vl; // Current flag voice link
+	int s_src; // Source flag position
+	int sl_src; // Source flag link
+	int dfgn = 0; // Displayed flag global number
+	int sh = 0; // Note flag shape
+	int sep = 0; // If this flag is sent to separate staff
+};
+
+struct LY_Voice {
+	int flags = 0;
+	int shapes = 0;
+	int note_names = 0;
+	int intervals = 0;
+	vector<vector<LY_Flag>> f; // [s][] LY Flag
+	vector<vector<LY_Shape>> s; // [s][shape_type] LY Shape
 };
 
 class CP2Ly :
@@ -28,9 +62,10 @@ class CP2Ly :
 protected:
 	CP2Ly();
 	~CP2Ly();
-	void InitFSep();
+	void InitLy();
 	inline int GetFCount();
 	void DistributeFlags();
+	void ParseLy();
 	void SaveLyCP();
 	void SendLyIntervals();
 	void SendLySeparate();
@@ -52,9 +87,8 @@ private:
 	void AddNLinkSep(int f);
 	void ParseNLinks();
 	void ParseNLinksSep();
-	void SetLyShape(int s1, int s2, int f, int fl, int sev, int vtype);
+	void SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype, int voice);
 	void ClearLyShape(int s1, int s2, int vtype);
-	void InitLyI();
 	void SendLyEvent(CString ev, int leng);
 	void CheckLyCP();
 	void SplitLyNoteMeasure(int pos, vector<int>& la);
@@ -66,16 +100,14 @@ private:
 	CString GetRealIntName(int s, int v1, int v2);
 	void ParseLyI();
 	void ParseLyISep();
-	void ExportLyI();
+	void ExportLy();
 
 	CString ly_com_st; // Comments
 	CString ly_ly_st; // Lyrics
-	vector<LY_IntermediateCP> lyi; // Current voice
-	vector<LY_IntermediateCP> slyi; // Separate staff
+	//vector<LY_IntermediateCP> lyi; // Current voice
+	//vector<LY_IntermediateCP> slyi; // Separate staff
+	vector<LY_Voice> lyv; // [v] LY Voice
 	int ly_flags = 0; // Number of flags sent
-	int ly_vflags = 0; // Number of flags in current voice
-	int ly_notenames = 0; // Number of note names in current melody
-	int ly_intervals = 0; // Number of interval flags in current melody
 	vector<pair<int, int>> fss; // Flag severity sequence 
 	int ly_first_flag; // For fss
 

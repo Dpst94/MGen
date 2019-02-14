@@ -575,7 +575,7 @@ void CGenCA3::Generate() {
 	// Uncomment to test XX masks in rule comments and subrule comments
 	//ReplaceRuleParams();
 	if (error) return;
-	LoadLyShapes("configs\\ly\\shapes.csv");
+	LoadLyShapes("configs\\ly2\\shapes.csv");
 	if (HarmName[0].IsEmpty()) {
 		WriteLog(5, "Harmonic notation not loaded: please check harm_notation parameter in configuration file");
 		error = 11;

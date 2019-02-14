@@ -51,16 +51,17 @@ void CP2Ly::AddNLink(int f) {
 		s3 = GetNoteStart(v, s);
 		s4 = GetNoteStart(v, fsl[v][s][f]);
 	}
-	lyi[s3].fhide.push_back(0);
+	int f2 = lyv[v].f[s3].size();
+	lyv[v].f[s3].resize(f2 + 1);
 	// Check if this shape is not allowed at hidden position
 	if (!viz_anyposition[ruleinfo[fl].viz]) {
 		// Note start is ok
 		// Downbeat is ok
 		if ((s3 != fli[v][bli[v][s3]] && s3 % npm) ||
 			(s4 != fli[v][bli[v][s4]] && s4 % npm)) {
-			lyi[s3].fhide[lyi[s3].fhide.size() - 1] = 1;
+			lyv[v].f[s3][f2].hide = 1;
 			if (viz_can_separate[ruleinfo[fl].viz]) {
-				fsep[v][s][f] = 1;
+				lyv[v].f[s3][f2].sep = 1;
 			}
 			else {
 				CString est;
@@ -72,25 +73,21 @@ void CP2Ly::AddNLink(int f) {
 			}
 		}
 	}
-	lyi[s3].nflags.push_back(fl);
-	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
-	lyi[s3].fsl.push_back(s4 - s3);
-	lyi[s3].fs_src.push_back(s);
-	lyi[s3].fsl_src.push_back(fsl[v][s][f]);
-	lyi[s3].fv.push_back(v);
-	lyi[s3].fvl.push_back(fvl[v][s][f]);
+	lyv[v].f[s3][f2].fid = fl;
+	lyv[v].f[s3][f2].fsev = severity[sp][vc][vp][fl];
+	lyv[v].f[s3][f2].sl = s4 - s3;
+	lyv[v].f[s3][f2].s_src = s;
+	lyv[v].f[s3][f2].sl_src = fsl[v][s][f];
+	lyv[v].f[s3][f2].v = v;
+	lyv[v].f[s3][f2].vl = fvl[v][s][f];
 	// Check that this flag was already sent at this step
 	pair<set<int>::iterator, bool> ufl_p = ly_ufl.insert(fl);
-	// Check if insertion did not take place, which means that it is not unique
-	if (!ufl_p.second) {
-		lyi[s3].nfn.push_back(0);
-	}
-	else {
-		lyi[s3].nfn.push_back(ly_flags + 1);
+	// Check if insertion took place, which means that it is unique
+	if (ufl_p.second) {
+		lyv[v].f[s3][f2].dfgn = ly_flags + 1;
 		++ly_flags;
-		++ly_vflags;
+		++lyv[v].flags;
 	}
-	lyi[s3].nfs.push_back(0);
 }
 
 // Parse foreign flags from other voices: gliss and notecolor
@@ -102,7 +99,8 @@ void CP2Ly::AddNLinkForeign(int f) {
 		s3 = GetNoteStart(v2, s);
 		s4 = GetNoteStart(v2, fsl[v][s][f]);
 	}
-	lyi[s3].fhide.push_back(0);
+	int f2 = lyv[v2].f[s3].size();
+	lyv[v2].f[s3].resize(f2 + 1);
 	// Do not check for hidden positions, because gliss pos is corrected and notecolor pos will be corrected
 	// Send comments and color only if rule is not ignored
 	if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) return;
@@ -110,15 +108,13 @@ void CP2Ly::AddNLinkForeign(int f) {
 	if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) return;
 	// Do not send if ignored
 	if (severity[sp][vc][vp][fl] < show_min_severity) return;
-	lyi[s3].nflags.push_back(fl);
-	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
-	lyi[s3].fsl.push_back(s4 - s3);
-	lyi[s3].fs_src.push_back(s);
-	lyi[s3].fsl_src.push_back(fsl[v][s][f]);
-	lyi[s3].fv.push_back(v);
-	lyi[s3].fvl.push_back(fvl[v][s][f]);
-	lyi[s3].nfn.push_back(0);
-	lyi[s3].nfs.push_back(0);
+	lyv[v2].f[s3][f2].fid = fl;
+	lyv[v2].f[s3][f2].fsev = severity[sp][vc][vp][fl];
+	lyv[v2].f[s3][f2].sl = s4 - s3;
+	lyv[v2].f[s3][f2].s_src = s;
+	lyv[v2].f[s3][f2].sl_src = fsl[v][s][f];
+	lyv[v2].f[s3][f2].v = v;
+	lyv[v2].f[s3][f2].vl = fvl[v][s][f];
 }
 
 void CP2Ly::AddNLinkSep(int f) {
@@ -132,16 +128,18 @@ void CP2Ly::AddNLinkSep(int f) {
 	// Correct positions
 	int s3 = s;
 	int s4 = fsl[v][s][f];
-	lyi[s3].nflags.push_back(fl);
-	lyi[s3].fsev.push_back(severity[sp][vc][vp][fl]);
-	lyi[s3].fsl.push_back(s4 - s3);
-	lyi[s3].fs_src.push_back(s);
-	lyi[s3].fsl_src.push_back(fsl[v][s][f]);
-	lyi[s3].fv.push_back(v);
-	lyi[s3].fvl.push_back(fvl[v][s][f]);
-	lyi[s3].nfn.push_back(0);
-	lyi[s3].nfs.push_back(0);
-	++ly_flags;
+	int f2 = lyv[v2].f[s3].size();
+	lyv[v2].f[s3].resize(f2 + 1);
+	lyv[v2].f[s3][f2].fid = fl;
+	lyv[v2].f[s3][f2].fsev = severity[sp][vc][vp][fl];
+	lyv[v2].f[s3][f2].sl = s4 - s3;
+	lyv[v2].f[s3][f2].s_src = s;
+	lyv[v2].f[s3][f2].sl_src = fsl[v][s][f];
+	lyv[v2].f[s3][f2].v = v;
+	lyv[v2].f[s3][f2].vl = fvl[v][s][f];
+	lyv[v2].f[s3][f2].dfgn = 0;
+	lyv[v2].f[s3][f2].sh = 0;
+	++lyv[v2].flags;
 }
 
 void CP2Ly::ParseNLinks() {
@@ -161,65 +159,52 @@ void CP2Ly::ParseNLinks() {
 }
 
 void CP2Ly::ParseNLinksSep() {
+	v2 = v;
 	for (v = 0; v < av_cnt; ++v) {
-		for (int f = 0; f < flag[v][s].size(); ++f) {
-			if (!fsep[v][s][f]) continue;
+		for (int f = 0; f < lyv[v].f[s].size(); ++f) {
+			if (!lyv[v].f[s][f].sep) continue;
 			AddNLinkSep(f);
 		}
 	}
+	v = v2;
 }
 
-void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype) {
-	if (lyi[st1].shse[vtype] <= sev) {
+void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype, int voice) {
+	if (lyv[v].s[st1][vtype].sev <= sev) {
+		if (lyv[v].s[st1][vtype].sev == -1) ++lyv[v].shapes;
 		// Start
-		lyi[st1].shs[vtype] = 1;
+		lyv[v].s[st1][vtype].start = 1;
 		// Finish
-		lyi[st2].shf[vtype] = 1;
+		lyv[v].s[st2][vtype].fin= 1;
 		// Link to start
-		lyi[st2].shsl[vtype] = s1 - s2;
-		lyi[st1].shse[vtype] = sev;
+		lyv[v].s[st2][vtype].start_s = s1 - s2;
+		lyv[v].s[st1][vtype].sev = sev;
 		if (vtype == vInterval || vtype == vNoteName || vtype == vHarm) {
-			if (lyi[st2].shse[vtype] <= sev) {
-				lyi[st2].shse[vtype] = sev;
+			if (lyv[v].s[st2][vtype].sev <= sev) {
+				lyv[v].s[st2][vtype].sev = sev;
 			}
-			if (vtype == vNoteName) ++ly_notenames;
-			if (vtype == vInterval) ++ly_intervals;
+			if (vtype == vNoteName) ++lyv[v].note_names;
+			if (vtype == vInterval) ++lyv[v].intervals;
 		}
-		lyi[st1].sht[vtype] = ruleinfo[fl].viz_text;
+		lyv[v].s[st1][vtype].txt = ruleinfo[fl].viz_text;
 		// Save flag shape (step depends if link is forward or backward)
-		if (fl) lyi[s].nfs[f] = vtype;
-		lyi[st1].shflag[vtype] = f;
-		lyi[st1].shfp[vtype] = s;
+		if (fl) lyv[voice].f[s][f].sh = vtype;
+		lyv[v].s[st1][vtype].fl = f;
+		lyv[v].s[st1][vtype].fs = s;
+		lyv[v].s[st1][vtype].v = voice;
 	}
 }
 
 void CP2Ly::ClearLyShape(int st1, int st2, int vtype) {
-	lyi[st1].shs[vtype] = 0;
-	lyi[st2].shf[vtype] = 0;
-	// Calculate maximum severity
-	lyi[st1].shse[vtype] = -1;
+	lyv[v].s[st1][vtype].start = 0;
+	lyv[v].s[st2][vtype].fin = 0;
+	// Clear severity
+	lyv[v].s[st1][vtype].sev = -1;
 	// Remove link
-	lyi[lyi[st1].shfp[vtype]].nfs[lyi[st1].shflag[vtype]] = 0;
-	lyi[st1].shflag[vtype] = -1;
-	lyi[st1].shfp[vtype] = -1;
-}
-
-void CP2Ly::InitLyI() {
-	ly_vflags = 0;
-	ly_notenames = 0;
-	ly_intervals = 0;
-	lyi.clear();
-	lyi.resize(c_len + 1);
-	for (int i = 0; i < lyi.size(); ++i) {
-		// Init vectors
-		lyi[i].shs.resize(MAX_VIZ);
-		lyi[i].shsl.resize(MAX_VIZ);
-		lyi[i].shf.resize(MAX_VIZ);
-		lyi[i].shse.resize(MAX_VIZ, -1);
-		lyi[i].shflag.resize(MAX_VIZ, -1);
-		lyi[i].shfp.resize(MAX_VIZ, -1);
-		lyi[i].sht.resize(MAX_VIZ);
-	}
+	lyv[lyv[v].s[st1][vtype].v].f[lyv[v].s[st1][vtype].fs][lyv[v].s[st1][vtype].fl].sh = 0;
+	lyv[v].s[st1][vtype].fl = -1;
+	lyv[v].s[st1][vtype].fs = -1;
+	--lyv[v].shapes;
 }
 
 void CP2Ly::ParseLyI() {
@@ -231,23 +216,23 @@ void CP2Ly::ParseLyI() {
 		// Find previous note position
 		int prev_note_step = fli[v][max(0, ls - 1)];
 		// Mark msh
-		if (cc[v][s] && msh[v][s] < 0) SetLyShape(s, s, 0, 0, 0, vCircle);
+		if (cc[v][s] && msh[v][s] < 0) SetLyShape(s, s, -1, 0, 0, vCircle, v);
 		// Mark nih
-		//if (cc[v][s] && nih[v][s] > 0) SetLyShape(s, s, 0, 0, 0, vStac);
+		//if (cc[v][s] && nih[v][s] > 0) SetLyShape(s, s, -1, 0, 0, vStac, v);
 		// Mark islt
-		if (cc[v][s] && islt[v][s] > 0) SetLyShape(s, s, 0, 0, 0, vStac);
+		if (cc[v][s] && islt[v][s] > 0) SetLyShape(s, s, -1, 0, 0, vStac, v);
 		// Parse flags
-		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
-			fl = lyi[s].nflags[f];
-			int link = lyi[s].fsl[f];
-			int vlink = lyi[s].fvl[f];
+		for (int f = 0; f < lyv[v].f[s].size(); ++f) {
+			fl = lyv[v].f[s][f].fid;
+			int link = lyv[v].f[s][f].sl;
+			int vlink = lyv[v].f[s][f].vl;
 			int vtype = ruleinfo[fl].viz;
-			int sev = lyi[s].fsev[f];
+			int sev = lyv[v].f[s][f].fsev;
 			int skip_shape = 0;
 			int link_note_step = fli[v][bli[v][s + link]];
 			// Previous note before link
 			int prev_link_note = fli[v][max(0, bli[v][s + link] - 1)];
-			if (lyi[s].fhide[f]) vtype = 0;
+			if (lyv[v].f[s][f].hide) vtype = 0;
 			if (ly_debugexpect && sev == 100) vtype = 0;
 			// Get flag start/stop
 			s1 = min(s, s + link);
@@ -255,28 +240,28 @@ void CP2Ly::ParseLyI() {
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
 			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
 			// Highlight notes if flag is multivoice and is not gliss (gliss does not need note color)
-			if (vlink != lyi[s].fv[f]) {
+			if (vlink != lyv[v].f[s][f].v) {
 				if (ruleinfo[fl].viz_notecolor == 1) {
 					for (ls = bli[v][s1]; ls <= bli[v][s2]; ++ls) {
 						// Highlight first part of note
-						SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor);
+						SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor, v);
 						// Highlight second part of note after tie
 						if (sus[v][ls]) {
-							SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor);
+							SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor, v);
 						}
 					}
-					SetLyShape(link_note_step, link_note_step, f, fl, sev, vNoteColor);
+					SetLyShape(link_note_step, link_note_step, f, fl, sev, vNoteColor, v);
 				}
 				else if (ruleinfo[fl].viz_notecolor == 2) {
 					// Highlight left step
 					ls = bli[v][s1];
 					if (sus[v][ls] && s1 >= sus[v][ls]) {
 						// Highlight second part of note after tie
-						SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor);
+						SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor, v);
 					}
 					else {
 						// Highlight first part of note
-						SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor);
+						SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor, v);
 					}
 				}
 				else if (ruleinfo[fl].viz_notecolor == 3) {
@@ -284,45 +269,45 @@ void CP2Ly::ParseLyI() {
 					ls = bli[v][s2];
 					if (s2 >= sus[v][ls]) {
 						// Highlight second part of note after tie
-						SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor);
+						SetLyShape(sus[v][ls], sus[v][ls], f, fl, sev, vNoteColor, v);
 					}
 					else {
 						// Highlight first part of note
-						SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor);
+						SetLyShape(fli[v][ls], fli[v][ls], f, fl, sev, vNoteColor, v);
 					}
 				}
 			}
 			// Set interval if not debugexpect. If debugexpect, do not set for red flags
 			if (!ly_debugexpect || sev != 100) {
 				// Source positions
-				int s3 = min(lyi[s].fs_src[f], lyi[s].fsl_src[f]);
-				int s4 = max(lyi[s].fs_src[f], lyi[s].fsl_src[f]);
+				int s3 = min(lyv[v].f[s][f].s_src, lyv[v].f[s][f].sl_src);
+				int s4 = max(lyv[v].f[s][f].s_src, lyv[v].f[s][f].sl_src);
 				if (ruleinfo[fl].viz_int == 1) {
-					SetLyShape(s3, s4, f, fl, sev, vInterval);
+					SetLyShape(s3, s4, f, fl, sev, vInterval, v);
 				}
 				if (ruleinfo[fl].viz_int == 2) {
-					SetLyShape(s3, s3, f, fl, sev, vInterval);
+					SetLyShape(s3, s3, f, fl, sev, vInterval, v);
 				}
 				if (ruleinfo[fl].viz_int == 3) {
-					SetLyShape(s4, s4, f, fl, sev, vInterval);
+					SetLyShape(s4, s4, f, fl, sev, vInterval, v);
 				}
 				if (ruleinfo[fl].viz_harm == 1) {
-					SetLyShape(s1, s2, f, fl, sev, vHarm);
+					SetLyShape(s1, s2, f, fl, sev, vHarm, v);
 				}
 				if (ruleinfo[fl].viz_harm == 2) {
-					SetLyShape(s1, s1, f, fl, sev, vHarm);
+					SetLyShape(s1, s1, f, fl, sev, vHarm, v);
 				}
 				if (ruleinfo[fl].viz_harm == 3) {
-					SetLyShape(s2, s2, f, fl, sev, vHarm);
+					SetLyShape(s2, s2, f, fl, sev, vHarm, v);
 				}
 				if (ruleinfo[fl].viz_harm == 4) {
 					for (hs = bhli[s1]; hs <= bhli[s2]; ++hs) {
-						SetLyShape(hli[hs], hli[hs], f, fl, sev, vHarm);
+						SetLyShape(hli[hs], hli[hs], f, fl, sev, vHarm, v);
 					}
 				}
 			}
 			// Skip all foreign shapes (show only note color, intervals and harmony)
-			if (v != lyi[s].fv[f] && vtype != vGlis) continue;
+			if (v != lyv[v].f[s][f].v && vtype != vGlis) continue;
 			if (vtype == vPedal) {
 				if (bli[v][s1] == fli_size[v] - 1 && s1 == s2) continue;
 			}
@@ -340,18 +325,18 @@ void CP2Ly::ParseLyI() {
 					overlap_limit = min(prev_note_step, prev_link_note) - 1;
 				// Check if shape can be blocked
 				for (int x = c_len - 1; x > overlap_limit; --x) {
-					if (lyi[x].shf[vtype]) {
+					if (lyv[v].s[x][vtype].fin) {
 						overlap2 = x;
-						overlap1 = x + lyi[x].shsl[vtype];
+						overlap1 = x + lyv[v].s[x][vtype].start_s;
 						if (overlap1 < s2 + overlap_border) {
 							// Choose highest severity
-							if (sev < lyi[overlap1].shse[vtype]) {
+							if (sev < lyv[v].s[overlap1][vtype].sev) {
 								// Skip shape
 								skip_shape = 1;
 								break;
 							}
 							// Choose same severity, but longer shape
-							if (sev == lyi[overlap1].shse[vtype] && abs(link) <= abs(lyi[x].shsl[vtype])) {
+							if (sev == lyv[v].s[overlap1][vtype].sev && abs(link) <= abs(lyv[v].s[x][vtype].start_s)) {
 								// Skip shape
 								skip_shape = 1;
 								break;
@@ -362,28 +347,25 @@ void CP2Ly::ParseLyI() {
 				if (skip_shape) continue;
 				// Check if shape can block other shapes
 				for (int x = c_len - 1; x > overlap_limit; --x) {
-					if (lyi[x].shf[vtype]) {
+					if (lyv[v].s[x][vtype].fin) {
 						overlap2 = x;
-						overlap1 = x + lyi[x].shsl[vtype];
+						overlap1 = x + lyv[v].s[x][vtype].start_s;
 						if (overlap1 < s2 + overlap_border) {
 							// Choose highest severity
-							if (sev > lyi[overlap1].shse[vtype]) {
+							if (sev > lyv[v].s[overlap1][vtype].sev) {
 								ClearLyShape(overlap1, overlap2, vtype);
 							}
 							// Choose same severity, but longer shape
-							if (sev == lyi[overlap1].shse[vtype] && abs(link) > abs(lyi[x].shsl[vtype])) {
+							if (sev == lyv[v].s[overlap1][vtype].sev && abs(link) > abs(lyv[v].s[x][vtype].start_s)) {
 								ClearLyShape(overlap1, overlap2, vtype);
 							}
 						}
 					}
 				}
 			}
-			SetLyShape(s1, s2, f, fl, sev, vtype);
+			SetLyShape(s1, s2, f, fl, sev, vtype, v);
 		}
 	}
-#if defined(_DEBUG)
-	ExportLyI();
-#endif
 }
 
 void CP2Ly::ParseLyISep() {
@@ -392,118 +374,121 @@ void CP2Ly::ParseLyISep() {
 		int next_note_step = min(s + 1, c_len - 1);
 		// Find previous note position
 		int prev_note_step = max(s - 1, 0);
-		// Parse flags
-		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
-			fl = lyi[s].nflags[f];
-			int link = lyi[s].fsl[f];
-			int vlink = lyi[s].fvl[f];
-			int vtype = ruleinfo[fl].viz;
-			int sev = lyi[s].fsev[f];
-			int skip_shape = 0;
-			int link_note_step = s + link;
-			// Previous note before link
-			int prev_link_note = max(0, s + link - 1);
-			// Get flag start/stop
-			s1 = min(s, s + link);
-			s2 = max(s, s + link);
-			// If shape cannot highlight single note, but flag does not contain link, then link to next note
-			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
-			// Set interval if not debugexpect. If debugexpect, do not set for red flags
-			if (!viz_can_overlap[vtype]) {
-				// Check that flag overlaps
-				int overlap1 = -1;
-				int overlap2 = -1;
-				int overlap_border = 0;
-				// For groups check for collision between borders
-				if (viz_type[vtype] == vtGroup || viz_type[vtype] == vtVolta)
-					overlap_border = 1;
-				// For vbrackets check for collision between notes
-				int overlap_limit = s1 - overlap_border;
-				if (viz_type[vtype] == vtVBracket)
-					overlap_limit = min(prev_note_step, prev_link_note) - 1;
-				// Check if shape can be blocked
-				for (int x = c_len - 1; x > overlap_limit; --x) {
-					if (lyi[x].shf[vtype]) {
-						overlap2 = x;
-						overlap1 = x + lyi[x].shsl[vtype];
-						if (overlap1 < s2 + overlap_border) {
-							// Choose highest severity
-							if (sev < lyi[overlap1].shse[vtype]) {
-								// Skip shape
-								skip_shape = 1;
-								break;
+		for (v2 = 0; v2 < av_cnt; ++v2) {
+			// Parse flags
+			for (int f = 0; f < lyv[v2].f[s].size(); ++f) {
+				if (!lyv[v2].f[s][f].sep) continue;
+				fl = lyv[v2].f[s][f].fid;
+				int link = lyv[v2].f[s][f].sl;
+				int vlink = lyv[v2].f[s][f].vl;
+				int vtype = ruleinfo[fl].viz;
+				int sev = lyv[v2].f[s][f].fsev;
+				int skip_shape = 0;
+				int link_note_step = s + link;
+				// Previous note before link
+				int prev_link_note = max(0, s + link - 1);
+				// Get flag start/stop
+				s1 = min(s, s + link);
+				s2 = max(s, s + link);
+				// If shape cannot highlight single note, but flag does not contain link, then link to next note
+				if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
+				// Set interval if not debugexpect. If debugexpect, do not set for red flags
+				if (!viz_can_overlap[vtype]) {
+					// Check that flag overlaps
+					int overlap1 = -1;
+					int overlap2 = -1;
+					int overlap_border = 0;
+					// For groups check for collision between borders
+					if (viz_type[vtype] == vtGroup || viz_type[vtype] == vtVolta)
+						overlap_border = 1;
+					// For vbrackets check for collision between notes
+					int overlap_limit = s1 - overlap_border;
+					if (viz_type[vtype] == vtVBracket)
+						overlap_limit = min(prev_note_step, prev_link_note) - 1;
+					// Check if shape can be blocked
+					for (int x = c_len - 1; x > overlap_limit; --x) {
+						if (lyv[v].s[x][vtype].fin) {
+							overlap2 = x;
+							overlap1 = x + lyv[v].s[x][vtype].start_s;
+							if (overlap1 < s2 + overlap_border) {
+								// Choose highest severity
+								if (sev < lyv[v].s[overlap1][vtype].sev) {
+									// Skip shape
+									skip_shape = 1;
+									break;
+								}
+								// Choose same severity, but longer shape
+								if (sev == lyv[v].s[overlap1][vtype].sev && abs(link) <= abs(lyv[v].s[x][vtype].start_s)) {
+									// Skip shape
+									skip_shape = 1;
+									break;
+								}
 							}
-							// Choose same severity, but longer shape
-							if (sev == lyi[overlap1].shse[vtype] && abs(link) <= abs(lyi[x].shsl[vtype])) {
-								// Skip shape
-								skip_shape = 1;
-								break;
+						}
+					}
+					if (skip_shape) continue;
+					// Check if shape can block other shapes
+					for (int x = c_len - 1; x > overlap_limit; --x) {
+						if (lyv[v].s[x][vtype].fin) {
+							overlap2 = x;
+							overlap1 = x + lyv[v].s[x][vtype].start_s;
+							if (overlap1 < s2 + overlap_border) {
+								// Choose highest severity
+								if (sev > lyv[v].s[overlap1][vtype].sev) {
+									ClearLyShape(overlap1, overlap2, vtype);
+								}
+								// Choose same severity, but longer shape
+								if (sev == lyv[v].s[overlap1][vtype].sev && abs(link) > abs(lyv[v].s[x][vtype].start_s)) {
+									ClearLyShape(overlap1, overlap2, vtype);
+								}
 							}
 						}
 					}
 				}
-				if (skip_shape) continue;
-				// Check if shape can block other shapes
-				for (int x = c_len - 1; x > overlap_limit; --x) {
-					if (lyi[x].shf[vtype]) {
-						overlap2 = x;
-						overlap1 = x + lyi[x].shsl[vtype];
-						if (overlap1 < s2 + overlap_border) {
-							// Choose highest severity
-							if (sev > lyi[overlap1].shse[vtype]) {
-								ClearLyShape(overlap1, overlap2, vtype);
-							}
-							// Choose same severity, but longer shape
-							if (sev == lyi[overlap1].shse[vtype] && abs(link) > abs(lyi[x].shsl[vtype])) {
-								ClearLyShape(overlap1, overlap2, vtype);
-							}
-						}
-					}
-				}
+				SetLyShape(s1, s2, f, fl, sev, vtype, v2);
 			}
-			SetLyShape(s1, s2, f, fl, sev, vtype);
 		}
 	}
-#if defined(_DEBUG)
-	ExportLyI();
-#endif
 }
 
-void CP2Ly::ExportLyI() {
+void CP2Ly::ExportLy() {
 	ofstream fs;
-	fs.open(as_dir + "\\lyi-" + as_fname + ".csv", ios_base::app);
-	fs << "Step[" << cp_id << "];";
-	for (int x = 0; x < MAX_VIZ; ++x) {
-		fs << "shs[" << x << "];";
-		fs << "shf[" << x << "];";
-		fs << "shsl[" << x << "];";
-		fs << "shse[" << x << "];";
-		fs << "sht[" << x << "];";
-	}
-	fs << "\n";
-	for (s = 0; s < c_len; ++s) {
-		fs << s << ";";
+	fs.open(as_dir + "\\lyi-" + as_fname + ".csv");
+	for (v = 0; v < av_cnt + 1; ++v) {
+		fs << "Step[" << cp_id << "];";
 		for (int x = 0; x < MAX_VIZ; ++x) {
-			fs << lyi[s].shs[x] << ";";
-			fs << lyi[s].shf[x] << ";";
-			fs << lyi[s].shsl[x] << ";";
-			fs << lyi[s].shse[x] << ";";
-			fs << lyi[s].sht[x] << ";";
+			fs << "shs[" << x << "];";
+			fs << "shf[" << x << "];";
+			fs << "shsl[" << x << "];";
+			fs << "shse[" << x << "];";
+			fs << "sht[" << x << "];";
+		}
+		fs << "\n";
+		for (s = 0; s < c_len; ++s) {
+			fs << s << ";";
+			for (int x = 0; x < MAX_VIZ; ++x) {
+				fs << lyv[v].s[s][x].start << ";";
+				fs << lyv[v].s[s][x].fin << ";";
+				fs << lyv[v].s[s][x].start_s << ";";
+				fs << lyv[v].s[s][x].sev << ";";
+				fs << lyv[v].s[s][x].txt << ";";
+			}
+			fs << "\n";
 		}
 		fs << "\n";
 	}
-	fs << "\n";
 	fs.close();
 }
 
-// Init flags separate staff
-void CP2Ly::InitFSep() {
-	fsep.clear();
-	fsep.resize(av_cnt);
-	for (v = 0; v < av_cnt; ++v) {
-		fsep[v].resize(c_len);
-		for (s = 0; s < c_len; ++s) {
-			fsep[v][s].resize(flag[v][s].size());
+void CP2Ly::InitLy() {
+	ly_flags = 0;
+	lyv.clear();
+	lyv.resize(av_cnt + 1);
+	for (v = 0; v < av_cnt + 1; ++v) {
+		lyv[v].f.resize(c_len + 1);
+		lyv[v].s.resize(c_len + 1);
+		for (s = 0; s < c_len + 1; ++s) {
+			lyv[v].s[s].resize(MAX_VIZ);
 		}
 	}
 }
@@ -561,10 +546,26 @@ void CP2Ly::DistributeFlags() {
 	}
 }
 
+void CP2Ly::ParseLy() {
+	// Parse main voices
+	for (v = av_cnt - 1; v >= 0; --v) {
+		vi = vid[v];
+		for (s = 0; s < c_len; ++s) {
+			ls = bli[v][s];
+			ParseNLinks();
+		}
+		ParseLyI();
+	}
+	// Parse separate staff
+	v = av_cnt;
+	//for (s = 0; s < c_len; ++s) ParseNLinksSep();
+	ParseLyISep();
+}
+
 void CP2Ly::SaveLyCP() {
 	CString st;
-	InitFSep();
-	ly_flags = 0;
+	InitLy();
+	ParseLy();
 	vector<CString> sv;
 	CString clef, key, key_visual;
 	int pos, pos2, le, le2, pause_accum, pause_pos, pause_i;
@@ -618,19 +619,6 @@ void CP2Ly::SaveLyCP() {
 	else {
 		ly_ly_st += " " + mode_name[mode];
 	}
-	//else if (mode == 0) ly_ly_st += " major";
-	/*
-	ly_ly_st += ", Species: ";
-	for (v = 0; v < av_cnt; ++v) {
-		st.Format("%d", vsp[v]);
-		if (v) ly_ly_st += "-";
-		if (vsp[v]) ly_ly_st += st;
-		else ly_ly_st += "CF";
-	}
-	*/
-	// Init separate staff
-	slyi.clear();
-	slyi.resize(c_len + 1);
 	ly_ly_st += "\n}\n";
 	// Show text
 	if (ly_show_xml_text && !xml_text.IsEmpty()) {
@@ -671,12 +659,6 @@ void CP2Ly::SaveLyCP() {
 	ly_ly_st += "<<\n";
 	for (v = av_cnt - 1; v >= 0; --v) {
 		vi = vid[v];
-		InitLyI();
-		for (s = 0; s < c_len; ++s) {
-			ls = bli[v][s];
-			ParseNLinks();
-		}
-		ParseLyI();
 		// Select best clef
 		clef = DetectLyClef(nmin[v], nmax[v]);
 		st.Format("\\new Staff = \"staff%d\" {\n", v);
@@ -729,6 +711,7 @@ void CP2Ly::SaveLyCP() {
 		SendLyNoteNames();
 		SendLyIntervals();
 	}
+	v = 0;
 	SendLyHarm();
 	SendLySeparate();
 	ly_ly_st += ">>\n";
@@ -745,15 +728,10 @@ void CP2Ly::SaveLyCP() {
 }
 
 void CP2Ly::SendLySeparate() {
-	ly_flags = 0;
 	vector<CString> sv;
 	CString st;
-	InitLyI();
-	for (s = 0; s < c_len; ++s) {
-		ParseNLinksSep();
-	}
-	if (!ly_flags) return;
-	ParseLyISep();
+	v = av_cnt;
+	if (!lyv[v].shapes) return;
 	ly_ly_st += "\\new Staff = \"staffs\" \\with {\n";
 	st.Format("  \\time %d/4\n", npm / 2);
 	ly_ly_st += st;
@@ -785,7 +763,7 @@ CString CP2Ly::GetRealNoteNameCP(int no) {
 
 void CP2Ly::SendLyIntervals() {
 	CString st;
-	if (!ly_intervals) return;
+	if (!lyv[v].intervals) return;
 	if (av_cnt != 2) return;
 	if (v) return;
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", 0);
@@ -798,15 +776,15 @@ void CP2Ly::SendLyIntervals() {
 	ly_ly_st += "      \\override InstrumentName.font-size = #-2\n";
 	ly_ly_st += "      \\set shortVocalName = \"I:\"\n";
 	for (s = 0; s < c_len; ++s) {
-		if (!lyi[s].shs[vInterval] && !lyi[s].shf[vInterval]) {
+		if (!lyv[v].s[s][vInterval].start && !lyv[v].s[s][vInterval].fin) {
 			ly_ly_st += SendLySkips(1);
 			continue;
 		}
 		CString st = GetRealIntName(s, 0, 1);
 		ly_ly_st += "\\markup{ ";
 		ly_ly_st += "\\teeny ";
-		if (lyi[s].shse[vInterval] > -1) {
-			ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor(lyi[s].shse[vInterval]) + ") ";
+		if (lyv[v].s[s][vInterval].sev > -1) {
+			ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor(lyv[v].s[s][vInterval].sev) + ") ";
 		}
 		ly_ly_st += " \\pad-markup #0.4 \\concat { " + st + " ";
 		ly_ly_st += "} }\n";
@@ -835,8 +813,8 @@ void CP2Ly::SendLyHarm() {
 		pos = s;
 		lst += "  \\markup{ ";
 		lst += "  \\teeny \n";
-		if (lyi[s].shs[vHarm] || lyi[s].shf[vHarm]) {
-			lst += "  \\on-color #(rgb-color " + GetLyMarkColor(lyi[s].shse[vHarm]) + ") ";
+		if (lyv[v].s[s][vHarm].start || lyv[v].s[s][vHarm].fin) {
+			lst += "  \\on-color #(rgb-color " + GetLyMarkColor(lyv[v].s[s][vHarm].sev) + ") ";
 		}
 		lst += "  \\pad-markup #0.4 \n";
 		st = GetHarmName(chm[hs], chm_fis[hs], chm_gis[hs]);
@@ -930,7 +908,7 @@ void CP2Ly::SendLyHarm() {
 
 void CP2Ly::SendLyNoteNames() {
 	CString st;
-	if (!ly_notenames) return;
+	if (!lyv[v].note_names) return;
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", v);
 	ly_ly_st += st;
 	ly_ly_st += "    \\lyricmode {\n";
@@ -941,15 +919,15 @@ void CP2Ly::SendLyNoteNames() {
 	ly_ly_st += "      \\override InstrumentName.font-size = #-2\n";
 	ly_ly_st += "      \\set shortVocalName = \"N:\"\n";
 	for (s = 0; s < c_len; ++s) {
-		if (!lyi[s].shs[vNoteName] && !lyi[s].shf[vNoteName]) {
+		if (!lyv[v].s[s][vNoteName].start && !lyv[v].s[s][vNoteName].fin) {
 			ly_ly_st += SendLySkips(1);
 			continue;
 		}
 		CString st = GetLyNoteVisualCP("\\raise #0.3 \\magnify #0.5 ");
 		ly_ly_st += "\\markup{ ";
 		ly_ly_st += "\\teeny ";
-		if (lyi[s].shse[vNoteName] > -1) {
-			ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor(lyi[s].shse[vNoteName]) + ") ";
+		if (lyv[v].s[s][vNoteName].sev > -1) {
+			ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor(lyv[v].s[s][vNoteName].sev) + ") ";
 		}
 		ly_ly_st += " \\pad-markup #0.4 \\concat { " + st + " } ";
 		ly_ly_st += "}\n";
@@ -960,7 +938,7 @@ void CP2Ly::SendLyNoteNames() {
 
 void CP2Ly::SendLyMistakes() {
 	CString st;
-	if (!ly_flags) return;
+	if (!lyv[v].flags) return;
 	st.Format("  \\new Lyrics \\with { alignAboveContext = \"staff%d\" } {\n", v);
 	ly_ly_st += st;
 	ly_ly_st += "    \\lyricmode {\n";
@@ -969,15 +947,15 @@ void CP2Ly::SendLyMistakes() {
 	for (s = 0; s < c_len; ++s) {
 		ls = bli[v][s];
 		fss.clear();
-		for (int f = 0; f < lyi[s].nflags.size(); ++f) {
-			if (!lyi[s].nfn[f]) continue;
-			fss.push_back(make_pair(lyi[s].fsev[f], f));
+		for (int f = 0; f < lyv[v].f[s].size(); ++f) {
+			if (!lyv[v].f[s][f].dfgn) continue;
+			fss.push_back(make_pair(lyv[v].f[s][f].fsev, f));
 		}
 		if (!fss.size()) {
 			ly_ly_st += SendLySkips(1);
 			continue;
 		}
-		ly_first_flag = lyi[s].nfn[0];
+		ly_first_flag = lyv[v].f[s][0].dfgn;
 		sort(fss.rbegin(), fss.rend());
 		SaveLyComments();
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
@@ -988,11 +966,11 @@ void CP2Ly::SendLyMistakes() {
 		}
 		for (int ff = fss.size() - 1; ff >= 0; --ff) {
 			int f = fss[ff].second;
-			int fl = lyi[s].nflags[f];
-			int sev = lyi[s].fsev[f];
+			int fl = lyv[v].f[s][f].fid;
+			int sev = lyv[v].f[s][f].fsev;
 			st.Format("        \\with-color #(rgb-color " +
 				GetLyColor(sev) + ") %s %d\n", // \\circle 
-				lyi[s].nfs[f] || lyi[s].fhide[f] ? "\\underline" : "", ly_first_flag + ff);
+				lyv[v].f[s][f].sh || lyv[v].f[s][f].hide ? "\\underline" : "", ly_first_flag + ff);
 			// \override #'(offset . 5) \override #'(thickness . 2) 
 			ly_ly_st += st;
 		}
@@ -1011,29 +989,45 @@ CString CP2Ly::GetLyNoteVisualCP(CString sz) {
 
 void CP2Ly::SendLyViz(int phase) {
 	int shape, sev;
-	if (!lyi.size()) return;
+	if (!lyv[v].s.size()) return;
 	for (int task = ssFinish; task >= ssStart; --task) {
 		for (auto it : shsc[phase][task]) {
 			shape = it.first;
 			if (task == ssFinish) {
-				if (!lyi[s].shf[shape]) continue;
-				sev = lyi[s + lyi[s].shsl[shape]].shse[shape];
+				if (!lyv[v].s[s][shape].fin) continue;
+				sev = lyv[v].s[s + lyv[v].s[s][shape].start_s][shape].sev;
 			}
 			if (task == ssStart) {
-				if (!lyi[s].shs[shape]) continue;
-				sev = lyi[s].shse[shape];
+				if (!lyv[v].s[s][shape].start) continue;
+				sev = lyv[v].s[s][shape].sev;
 			}
 			CString script = it.second;
+			CString shtext;
+			if (lyv[v].s[s][shape].fl == -1 || lyv[lyv[v].s[s][shape].v].f[lyv[v].s[s][shape].fs][lyv[v].s[s][shape].fl].dfgn == 0) {
+				shtext = lyv[v].s[s][shape].txt;
+				shtext.Replace("!fn!", "");
+			}
+			else {
+				CString fl_st;
+				fl_st.Format("%d", lyv[lyv[v].s[s][shape].v].f[lyv[v].s[s][shape].fs][lyv[v].s[s][shape].fl].dfgn);
+				if (lyv[v].s[s][shape].txt.IsEmpty() || lyv[v].s[s][shape].txt == "!fn!") {
+					shtext = lyv[v].s[s][shape].txt;
+				}
+				else {
+					shtext = fl_st + ". " + lyv[v].s[s][shape].txt;
+				}
+				shtext.Replace("!fn!", fl_st);
+			}
 			CString text2;
-			if (lyi[s].sht[shape].IsEmpty()) {
+			if (lyv[v].s[s][shape].txt.IsEmpty()) {
 				text2 = "#f\n ";
 			}
 			else {
-				text2 = "\\markup{ \\raise #0.6 \\teeny \"" + lyi[s].sht[shape] + "\" }\n ";
+				text2 = "\\markup{ \\raise #0.6 \\teeny \"" + shtext + "\" }\n ";
 			}
 			script.Replace("$n$", "\n");
 			script.Replace("$COLOR$", GetLyColor(sev));
-			script.Replace("$TEXT$", lyi[s].sht[shape]);
+			script.Replace("$TEXT$", shtext); 
 			script.Replace("$TEXT2$", text2);
 			ly_ly_st += script + "\n";
 		}
@@ -1043,7 +1037,7 @@ void CP2Ly::SendLyViz(int phase) {
 void CP2Ly::SaveLyComments() {
 	CString st, com, note_st;
 	int pos1, pos2, found;
-	if (!lyi.size()) return;
+	if (!lyv[v].s.size()) return;
 	if (!fss.size()) return;
 	note_st = "\\markup \\wordwrap \\tiny \\bold {\n  ";
 	// Show voice number if more than 1 voice
@@ -1060,8 +1054,8 @@ void CP2Ly::SaveLyComments() {
 	found = 0;
 	for (int ff = 0; ff < fss.size(); ++ff) {
 		int f = fss[ff].second;
-		int fl = lyi[s].nflags[f];
-		int sev = lyi[s].fsev[f];
+		int fl = lyv[v].f[s][f].fid;
+		int sev = lyv[v].f[s][f].fsev;
 		if (!accept[sp][vc][vp][fl]) st = "- ";
 		else if (accept[sp][vc][vp][fl] == -1) st = "$ ";
 		else st = "+ ";
@@ -1098,11 +1092,11 @@ void CP2Ly::SaveLyComments() {
 			com += ". " + GetRuleComment(fl, sp, vc, vp);
 		if (ly_rule_verbose > 1 && !GetSubRuleComment(fl, sp, vc, vp).IsEmpty())
 			com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
-		//st.Format("%d", lyi[s].fvl[f]);
+		//st.Format("%d", lyv[v].f[s].vl[f]);
 		//com += " " + st;
 		// Print link to other part
-		if (lyi[s].fvl[f] != v && av_cnt > 2) {
-			com += " - with " + vname2[vid[lyi[s].fvl[f]]];
+		if (lyv[v].f[s][f].vl != v && av_cnt > 2) {
+			com += " - with " + vname2[vid[lyv[v].f[s][f].vl]];
 		}
 		// Send note number with first comment
 		if (!found) {
