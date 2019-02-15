@@ -537,17 +537,23 @@ void CP2Ly::HideFlags() {
 			for (int sh = 0; sh < lyv[v].s[s].size(); ++sh) {
 				// Get flag voice
 				int fv = lyv[v].s[s][sh].fv;
-				// Do not hide shapes without flag
+				// Do not hide flag for shape without flag
 				if (lyv[v].s[s][sh].fl == -1) continue;
-				// Do not hide shapes without TEXT output
+				// Do not hide flag without TEXT output
 				CString text = lyv[v].s[s][sh].txt;
 				if (text.IsEmpty()) continue;
 				// Get flag of shape
 				LY_Flag F = lyv[fv].f[lyv[v].s[s][sh].fs][lyv[v].s[s][sh].fl];
-				// Do not hide shape if shape is hidden
+				// Do not hide flag if shape is hidden
 				if (F.shide) continue;
-				// Do not process flags without dfgn
+				// Do not hide flag without dfgn
 				if (!F.dfgn) continue;
+				// Do not hide flag for additional shapes
+				if (sh == vInterval || sh == vNoteName || sh == vHarm) continue;
+				// Keep flag number for parallel pco apart
+				ls3 = bli[fv][F.s_src];
+				ls4 = bli[fv][F.sl_src];
+				if (sh == vGlis && (ls3 - ls4 > 1 || F.s_src < sus[fv][ls3] || (sus[fv][ls4] && F.sl_src >= sus[fv][ls4]))) continue;
 				// Hide flag
 				lyv[fv].f[lyv[v].s[s][sh].fs][lyv[v].s[s][sh].fl].fhide = 1;
 			}
@@ -1042,6 +1048,10 @@ void CP2Ly::SendLyViz(int phase) {
 				else {
 					gn = F.dfgn;
 				}
+				// Remove flag number for parallel pco apart
+				ls3 = bli[fv][F.s_src];
+				ls4 = bli[fv][F.sl_src];
+				if (shape == vGlis && (ls3 - ls4 > 1 || F.s_src < sus[fv][ls3] || (sus[fv][ls4] && F.sl_src >= sus[fv][ls4]))) gn = 0;
 			}
 			if (!gn) {
 				shtext = lyv[v].s[s][shape].txt;
