@@ -1,27 +1,6 @@
 #pragma once
 #include "CP2R.h"
 
-struct LY_IntermediateCP {
-	vector<int> shs; // [shape_type] If current step starts new shape
-	vector<int> shsl; // [shape_type] Link to shape start position if current position is shape finish
-	vector<int> shf; // [shape_type] If current step finishes new shape
-	vector<int> shflag; // [shape_type] Flag index in nflags
-	vector<int> shfp; // [shape_type] Flag position
-	vector<int> shse; // [shape_type] Highest severity of starting shape
-	vector<CString> sht; // [shape_type] Starting shape text
-	vector<int> nflags; // [] Current flags
-	vector<int> fhide; // [] If flag shape should not be displayed (if sent to separate staff)
-	vector<int> fsev; // [] Severity for each flag
-	vector<int> fsl; // [] Current flag step links
-	vector<int> fv; // [] Current flag source voice
-	vector<int> fvl; // [] Current flag voice links
-	vector<int> fs_src; // [] Source flag positions
-	vector<int> fsl_src; // [] Source flag links
-	vector<int> nfn; // [] Note flag number
-	vector<int> nfs; // [] Note flag shape
-	//vector<CString> nfc; // [] Note flag comment
-};
-
 struct LY_Shape {
 	int start; // If current step starts new shape
 	int start_s; // Link to shape start position if current position is shape finish
@@ -29,13 +8,14 @@ struct LY_Shape {
 	int fl = -1; // Flag index in nflags
 	int fs = -1; // Flag step
 	int sev = -1; // Highest severity of starting shape
-	int v = -1;
+	int fv = -1; // Flag voice (differs from shape voice when shape is in separate staff)
 	CString txt; // Starting shape text
 };
 
 struct LY_Flag {
 	int fid; // Flag id
-	int hide = 0; // If flag shape should not be displayed (if sent to separate staff)
+	int shide = 0; // If flag shape should not be displayed (if sent to separate staff)
+	int fhide = 0; // If flag number should not be displayed (if already displayed in shape)
 	int fsev; // Severity for each flag
 	int sl; // Current flag step link
 	int v; // Current flag source voice
@@ -62,6 +42,8 @@ struct LY_Voice {
 	vector<vector<LY_Flag>> f; // [s][] LY Flag
 	vector<vector<LY_Shape>> s; // [s][shape_type] LY Shape
 	vector<LY_Step> st; // [s] LY Step
+	vector<vector<pair<int, int>>> fss; // Flags severity sequence for mistakes list
+	vector<vector<pair<int, int>>> fss2; // Flags severity sequence for displaying flag numbers
 };
 
 class CP2Ly :
@@ -74,7 +56,9 @@ protected:
 	inline int GetFCount();
 	void DistributeFlags();
 	void ParseLy();
+	void HideFlags();
 	void SortFlagsBySev();
+	void SortFlagsBySev2();
 	void SaveLyCP();
 	void SendLyIntervals();
 	void SendLySeparate();

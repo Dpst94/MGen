@@ -59,7 +59,7 @@ void CP2Ly::AddNLink(int f) {
 		// Downbeat is ok
 		if ((s3 != fli[v][bli[v][s3]] && s3 % npm) ||
 			(s4 != fli[v][bli[v][s4]] && s4 % npm)) {
-			lyv[v].f[s3][f2].hide = 1;
+			lyv[v].f[s3][f2].shide = 1;
 			if (viz_can_separate[ruleinfo[fl].viz]) {
 				lyv[v].f[s3][f2].sep = 1;
 			}
@@ -149,7 +149,7 @@ void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype, int 
 		if (fl) lyv[voice].f[s][f].sh = vtype;
 		lyv[v].s[st1][vtype].fl = f;
 		lyv[v].s[st1][vtype].fs = s;
-		lyv[v].s[st1][vtype].v = voice;
+		lyv[v].s[st1][vtype].fv = voice;
 	}
 }
 
@@ -159,7 +159,7 @@ void CP2Ly::ClearLyShape(int st1, int st2, int vtype) {
 	// Clear severity
 	lyv[v].s[st1][vtype].sev = -1;
 	// Remove link
-	lyv[lyv[v].s[st1][vtype].v].f[lyv[v].s[st1][vtype].fs][lyv[v].s[st1][vtype].fl].sh = 0;
+	lyv[lyv[v].s[st1][vtype].fv].f[lyv[v].s[st1][vtype].fs][lyv[v].s[st1][vtype].fl].sh = 0;
 	lyv[v].s[st1][vtype].fl = -1;
 	lyv[v].s[st1][vtype].fs = -1;
 	--lyv[v].shapes;
@@ -190,7 +190,7 @@ void CP2Ly::ParseLyI() {
 			int link_note_step = fli[v][bli[v][s + link]];
 			// Previous note before link
 			int prev_link_note = fli[v][max(0, bli[v][s + link] - 1)];
-			if (lyv[v].f[s][f].hide) vtype = 0;
+			if (lyv[v].f[s][f].shide) vtype = 0;
 			if (ly_debugexpect && sev == 100) vtype = 0;
 			// Get flag start/stop
 			s1 = min(s, s + link);
@@ -446,6 +446,8 @@ void CP2Ly::InitLy() {
 		lyv[v].f.resize(c_len + 1);
 		lyv[v].s.resize(c_len + 1);
 		lyv[v].st.resize(c_len + 1);
+		lyv[v].fss.resize(c_len + 1);
+		lyv[v].fss2.resize(c_len + 1);
 		for (s = 0; s < c_len + 1; ++s) {
 			lyv[v].s[s].resize(MAX_VIZ);
 		}
@@ -521,23 +523,55 @@ void CP2Ly::ParseLy() {
 	// Parse separate staff
 	v = av_cnt;
 	ParseLyISep();
-	// Order flags
+	// Order all displayed
 	SortFlagsBySev();
+	// Hide flags, which have flag number in shape
+	HideFlags();
+	// Order flags that are shown with numbers
+	SortFlagsBySev2();
+}
+
+void CP2Ly::HideFlags() {
+	for (v = av_cnt; v >= 0; --v) {
+		for (s = 0; s < c_len; ++s) {
+			for (int sh = 0; sh < lyv[v].s[s].size(); ++sh) {
+				// Get flag voice
+				int fv = lyv[v].s[s][sh].fv;
+				// Do not hide shapes without flag
+				if (lyv[v].s[s][sh].fl == -1) continue;
+				// Do not hide shapes without TEXT output
+				CString text = lyv[v].s[s][sh].txt;
+				if (text.IsEmpty()) continue;
+				// Get flag of shape
+				LY_Flag F = lyv[fv].f[lyv[v].s[s][sh].fs][lyv[v].s[s][sh].fl];
+				// Do not hide shape if shape is hidden
+				if (F.shide) continue;
+				// Do not process flags without dfgn
+				if (!F.dfgn) continue;
+				// Hide flag
+				lyv[fv].f[lyv[v].s[s][sh].fs][lyv[v].s[s][sh].fl].fhide = 1;
+			}
+		}
+	}
 }
 
 void CP2Ly::SortFlagsBySev() {
 	// Order flags
 	for (v = 0; v < av_cnt + 1; ++v) {
 		for (s = 0; s < c_len; ++s) {
-			sort(lyv[v].f[s].begin(), lyv[v].f[s].end());
+			for (int f = 0; f < lyv[v].f[s].size(); ++f) {
+				if (!lyv[v].f[s][f].dfgn) continue;
+				lyv[v].fss[s].push_back(make_pair(lyv[v].f[s][f].fsev, f));
+			}
+			sort(lyv[v].fss[s].rbegin(), lyv[v].fss[s].rend());
 		}
 	}
 	int lfn = 0;
-	for (v = av_cnt; v >=0; --v) {
+	for (v = av_cnt; v >= 0; --v) {
 		for (s = 0; s < c_len; ++s) {
 			lyv[v].st[s].dfgn_count = 0;
-			for (int f = 0; f < lyv[v].f[s].size(); ++f) {
-				if (!lyv[v].f[s][f].dfgn) continue;
+			for (int ff = 0; ff < lyv[v].fss[s].size(); ++ff) {
+				int f = lyv[v].fss[s][ff].second;
 				++lfn;
 				++lyv[v].st[s].dfgn_count;
 				lyv[v].f[s][f].dfgn = lfn;
@@ -546,6 +580,20 @@ void CP2Ly::SortFlagsBySev() {
 	}
 	if (lfn != ly_flags) {
 		WriteLog(5, "LY flag count mismatch detected");
+	}
+}
+
+void CP2Ly::SortFlagsBySev2() {
+	// Order flags
+	for (v = 0; v < av_cnt + 1; ++v) {
+		for (s = 0; s < c_len; ++s) {
+			for (int f = 0; f < lyv[v].f[s].size(); ++f) {
+				if (!lyv[v].f[s][f].dfgn) continue;
+				if (lyv[v].f[s][f].fhide) continue;
+				lyv[v].fss2[s].push_back(make_pair(lyv[v].f[s][f].fsev, f));
+			}
+			sort(lyv[v].fss2[s].rbegin(), lyv[v].fss2[s].rend());
+		}
 	}
 }
 
@@ -935,24 +983,19 @@ void CP2Ly::SendLyMistakes() {
 		ls = bli[v][s];
 		SaveLyComments();
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
-		// Get flags with global id
-		vector<int> fwg;
-		for (int f = lyv[v].f[s].size() - 1; f >= 0; --f) {
-			if (!lyv[v].f[s][f].dfgn) continue;
-			fwg.push_back(f);
-		}
+		int max_fss = lyv[v].fss2[s].size();
 		// Do not show too many mistakes
 		if (lyv[v].st[s].dfgn_count > 3) {
-			fwg.resize(3);
+			max_fss = 3;
 			ly_ly_st += "...\n";
 		}
-		for (int ff = fwg.size() - 1; ff >= 0; --ff) {
-			int f = fwg[ff];
+		for (int ff = max_fss - 1; ff >= 0; --ff) {
+			int f = lyv[v].fss2[s][ff].second;
 			int fl = lyv[v].f[s][f].fid;
 			int sev = lyv[v].f[s][f].fsev;
 			st.Format("        \\with-color #(rgb-color " +
 				GetLyColor(sev) + ") %s %d\n", // \\circle 
-				lyv[v].f[s][f].sh || lyv[v].f[s][f].hide ? "\\underline" : "", lyv[v].f[s][f].dfgn);
+				lyv[v].f[s][f].sh || lyv[v].f[s][f].shide ? "\\underline" : "", lyv[v].f[s][f].dfgn);
 			// \override #'(offset . 5) \override #'(thickness . 2) 
 			ly_ly_st += st;
 		}
@@ -988,10 +1031,10 @@ void CP2Ly::SendLyViz(int phase) {
 			int gn = 0;
 			if (lyv[v].s[s][shape].fl != -1) {
 				// Get shape voice
-				int sv = lyv[v].s[s][shape].v;
+				int fv = lyv[v].s[s][shape].fv;
 				// Get flag of shape
-				LY_Flag F = lyv[sv].f[lyv[v].s[s][shape].fs][lyv[v].s[s][shape].fl];
-				if (sv != F.v) {
+				LY_Flag F = lyv[fv].f[lyv[v].s[s][shape].fs][lyv[v].s[s][shape].fl];
+				if (fv != F.v) {
 					// Get base flag
 					LY_Flag F2 = lyv[F.v].f[F.s_base][F.f_base];
 					gn = F2.dfgn;
@@ -1048,7 +1091,8 @@ void CP2Ly::SaveLyComments() {
 		st += " (middle)";
 	note_st += st + "\n}\n";
 	found = 0;
-	for (int f = 0; f < lyv[v].f[s].size(); ++f) {
+	for (int ff = 0; ff < lyv[v].fss[s].size(); ++ff) {
+		int f = lyv[v].fss[s][ff].second;
 		if (!lyv[v].f[s][f].dfgn) continue;
 		int fl = lyv[v].f[s][f].fid;
 		int sev = lyv[v].f[s][f].fsev;
