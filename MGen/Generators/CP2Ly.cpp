@@ -79,6 +79,8 @@ void CP2Ly::AddNLink(int f) {
 	lyv[v].f[s3][f2].s_src = s;
 	lyv[v].f[s3][f2].sl_src = fsl[v][s][f];
 	lyv[v].f[s3][f2].v = v;
+	lyv[v].f[s3][f2].f_base = f2;
+	lyv[v].f[s3][f2].s_base = s3;
 	lyv[v].f[s3][f2].vl = fvl[v][s][f];
 	// Check that this flag was already sent at this step
 	pair<set<int>::iterator, bool> ufl_p = ly_ufl.insert(fl);
@@ -88,33 +90,34 @@ void CP2Ly::AddNLink(int f) {
 		++ly_flags;
 		++lyv[v].flags;
 	}
-}
-
-// Parse foreign flags from other voices: gliss and notecolor
-void CP2Ly::AddNLinkForeign(int f) {
-	GetFlag(f);
-	int s3 = s;
-	int s4 = fsl[v][s][f];
-	if (ruleinfo[fl].viz == vGlis) {
-		s3 = GetNoteStart(v2, s);
-		s4 = GetNoteStart(v2, fsl[v][s][f]);
+	// Add foreign flag with link to base flag
+	v2 = fvl[v][s][f];
+	if (v2 != v) {
+		int s5 = s;
+		int s6 = fsl[v][s][f];
+		if (ruleinfo[fl].viz == vGlis) {
+			s5 = GetNoteStart(v2, s);
+			s6 = GetNoteStart(v2, fsl[v][s][f]);
+		}
+		int f3 = lyv[v2].f[s5].size();
+		lyv[v2].f[s5].resize(f3 + 1);
+		// Do not check for hidden positions, because gliss pos is corrected and notecolor pos will be corrected
+		// Send comments and color only if rule is not ignored
+		if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) return;
+		// Send comments and color only if rule is not ignored
+		if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) return;
+		// Do not send if ignored
+		if (severity[sp][vc][vp][fl] < show_min_severity) return;
+		lyv[v2].f[s5][f3].fid = fl;
+		lyv[v2].f[s5][f3].fsev = severity[sp][vc][vp][fl];
+		lyv[v2].f[s5][f3].sl = s6 - s5;
+		lyv[v2].f[s5][f3].s_src = s;
+		lyv[v2].f[s5][f3].sl_src = fsl[v][s][f];
+		lyv[v2].f[s5][f3].v = v;
+		lyv[v2].f[s5][f3].f_base = f2;
+		lyv[v2].f[s5][f3].s_base = s3;
+		lyv[v2].f[s5][f3].vl = fvl[v][s][f];
 	}
-	int f2 = lyv[v2].f[s3].size();
-	lyv[v2].f[s3].resize(f2 + 1);
-	// Do not check for hidden positions, because gliss pos is corrected and notecolor pos will be corrected
-	// Send comments and color only if rule is not ignored
-	if (accept[sp][vc][vp][fl] == -1 && !show_ignored_flags) return;
-	// Send comments and color only if rule is not ignored
-	if (accept[sp][vc][vp][fl] == 1 && !show_allowed_flags) return;
-	// Do not send if ignored
-	if (severity[sp][vc][vp][fl] < show_min_severity) return;
-	lyv[v2].f[s3][f2].fid = fl;
-	lyv[v2].f[s3][f2].fsev = severity[sp][vc][vp][fl];
-	lyv[v2].f[s3][f2].sl = s4 - s3;
-	lyv[v2].f[s3][f2].s_src = s;
-	lyv[v2].f[s3][f2].sl_src = fsl[v][s][f];
-	lyv[v2].f[s3][f2].v = v;
-	lyv[v2].f[s3][f2].vl = fvl[v][s][f];
 }
 
 void CP2Ly::ParseNLinks() {
@@ -122,15 +125,6 @@ void CP2Ly::ParseNLinks() {
 	for (int f = 0; f < flag[v][s].size(); ++f) {
 		AddNLink(f);
 	}
-	v2 = v;
-	for (v = 0; v < av_cnt; ++v) if (v != v2) {
-		for (int f = 0; f < flag[v][s].size(); ++f) {
-			if (fvl[v][s][f] != v2) continue;
-			//if (ruleinfo[flag[v][s][f]].viz != vGlis) continue;
-			AddNLinkForeign(f);
-		}
-	}
-	v = v2;
 }
 
 void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype, int voice) {
@@ -139,7 +133,7 @@ void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype, int 
 		// Start
 		lyv[v].s[st1][vtype].start = 1;
 		// Finish
-		lyv[v].s[st2][vtype].fin= 1;
+		lyv[v].s[st2][vtype].fin = 1;
 		// Link to start
 		lyv[v].s[st2][vtype].start_s = s1 - s2;
 		lyv[v].s[st1][vtype].sev = sev;
@@ -451,6 +445,7 @@ void CP2Ly::InitLy() {
 	for (v = 0; v < av_cnt + 1; ++v) {
 		lyv[v].f.resize(c_len + 1);
 		lyv[v].s.resize(c_len + 1);
+		lyv[v].st.resize(c_len + 1);
 		for (s = 0; s < c_len + 1; ++s) {
 			lyv[v].s[s].resize(MAX_VIZ);
 		}
@@ -518,11 +513,40 @@ void CP2Ly::ParseLy() {
 			ls = bli[v][s];
 			ParseNLinks();
 		}
+	}
+	for (v = av_cnt - 1; v >= 0; --v) {
+		vi = vid[v];
 		ParseLyI();
 	}
 	// Parse separate staff
 	v = av_cnt;
 	ParseLyISep();
+	// Order flags
+	SortFlagsBySev();
+}
+
+void CP2Ly::SortFlagsBySev() {
+	// Order flags
+	for (v = 0; v < av_cnt + 1; ++v) {
+		for (s = 0; s < c_len; ++s) {
+			sort(lyv[v].f[s].begin(), lyv[v].f[s].end());
+		}
+	}
+	int lfn = 0;
+	for (v = av_cnt; v >=0; --v) {
+		for (s = 0; s < c_len; ++s) {
+			lyv[v].st[s].dfgn_count = 0;
+			for (int f = 0; f < lyv[v].f[s].size(); ++f) {
+				if (!lyv[v].f[s][f].dfgn) continue;
+				++lfn;
+				++lyv[v].st[s].dfgn_count;
+				lyv[v].f[s][f].dfgn = lfn;
+			}
+		}
+	}
+	if (lfn != ly_flags) {
+		WriteLog(5, "LY flag count mismatch detected");
+	}
 }
 
 void CP2Ly::SaveLyCP() {
@@ -909,31 +933,26 @@ void CP2Ly::SendLyMistakes() {
 	ly_ly_st += "      \\set stanza = #\" Flags:\"\n";
 	for (s = 0; s < c_len; ++s) {
 		ls = bli[v][s];
-		fss.clear();
-		for (int f = 0; f < lyv[v].f[s].size(); ++f) {
-			if (!lyv[v].f[s][f].dfgn) continue;
-			fss.push_back(make_pair(lyv[v].f[s][f].fsev, f));
-		}
-		if (!fss.size()) {
-			ly_ly_st += SendLySkips(1);
-			continue;
-		}
-		ly_first_flag = lyv[v].f[s][0].dfgn;
-		sort(fss.rbegin(), fss.rend());
 		SaveLyComments();
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
+		// Get flags with global id
+		vector<int> fwg;
+		for (int f = lyv[v].f[s].size() - 1; f >= 0; --f) {
+			if (!lyv[v].f[s][f].dfgn) continue;
+			fwg.push_back(f);
+		}
 		// Do not show too many mistakes
-		if (fss.size() > 3) {
-			fss.resize(2);
+		if (lyv[v].st[s].dfgn_count > 3) {
+			fwg.resize(3);
 			ly_ly_st += "...\n";
 		}
-		for (int ff = fss.size() - 1; ff >= 0; --ff) {
-			int f = fss[ff].second;
+		for (int ff = fwg.size() - 1; ff >= 0; --ff) {
+			int f = fwg[ff];
 			int fl = lyv[v].f[s][f].fid;
 			int sev = lyv[v].f[s][f].fsev;
 			st.Format("        \\with-color #(rgb-color " +
 				GetLyColor(sev) + ") %s %d\n", // \\circle 
-				lyv[v].f[s][f].sh || lyv[v].f[s][f].hide ? "\\underline" : "", ly_first_flag + ff);
+				lyv[v].f[s][f].sh || lyv[v].f[s][f].hide ? "\\underline" : "", lyv[v].f[s][f].dfgn);
 			// \override #'(offset . 5) \override #'(thickness . 2) 
 			ly_ly_st += st;
 		}
@@ -966,13 +985,28 @@ void CP2Ly::SendLyViz(int phase) {
 			}
 			CString script = it.second;
 			CString shtext;
-			if (lyv[v].s[s][shape].fl == -1 || lyv[lyv[v].s[s][shape].v].f[lyv[v].s[s][shape].fs][lyv[v].s[s][shape].fl].dfgn == 0) {
+			int gn = 0;
+			if (lyv[v].s[s][shape].fl != -1) {
+				// Get shape voice
+				int sv = lyv[v].s[s][shape].v;
+				// Get flag of shape
+				LY_Flag F = lyv[sv].f[lyv[v].s[s][shape].fs][lyv[v].s[s][shape].fl];
+				if (sv != F.v) {
+					// Get base flag
+					LY_Flag F2 = lyv[F.v].f[F.s_base][F.f_base];
+					gn = F2.dfgn;
+				}
+				else {
+					gn = F.dfgn;
+				}
+			}
+			if (!gn) {
 				shtext = lyv[v].s[s][shape].txt;
 				shtext.Replace("!fn!", "");
 			}
 			else {
 				CString fl_st;
-				fl_st.Format("%d", lyv[lyv[v].s[s][shape].v].f[lyv[v].s[s][shape].fs][lyv[v].s[s][shape].fl].dfgn);
+				fl_st.Format("%d", gn);
 				if (lyv[v].s[s][shape].txt.IsEmpty() || lyv[v].s[s][shape].txt == "!fn!") {
 					shtext = lyv[v].s[s][shape].txt;
 				}
@@ -1001,7 +1035,6 @@ void CP2Ly::SaveLyComments() {
 	CString st, com, note_st;
 	int pos1, pos2, found;
 	if (!lyv[v].s.size()) return;
-	if (!fss.size()) return;
 	note_st = "\\markup \\wordwrap \\tiny \\bold {\n  ";
 	// Show voice number if more than 1 voice
 	if (av_cnt > 1) {
@@ -1015,8 +1048,8 @@ void CP2Ly::SaveLyComments() {
 		st += " (middle)";
 	note_st += st + "\n}\n";
 	found = 0;
-	for (int ff = 0; ff < fss.size(); ++ff) {
-		int f = fss[ff].second;
+	for (int f = 0; f < lyv[v].f[s].size(); ++f) {
+		if (!lyv[v].f[s][f].dfgn) continue;
 		int fl = lyv[v].f[s][f].fid;
 		int sev = lyv[v].f[s][f].fsev;
 		if (!accept[sp][vc][vp][fl]) st = "- ";
@@ -1070,7 +1103,7 @@ void CP2Ly::SaveLyComments() {
 			GetLyColor(sev) + ") {\n  ";
 		com.Replace("\"", "\\\"");
 		com.Replace(" ", "\" \"");
-		st.Format("%d \"", ly_first_flag + ff); // \\teeny \\raise #0.2 \\circle
+		st.Format("%d \"", lyv[v].f[s][f].dfgn); // \\teeny \\raise #0.2 \\circle
 		ly_com_st += st;
 		ly_com_st += com + "\"\n";
 		ly_com_st += "\n}\n";

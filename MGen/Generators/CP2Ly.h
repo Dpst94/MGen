@@ -40,11 +40,18 @@ struct LY_Flag {
 	int sl; // Current flag step link
 	int v; // Current flag source voice
 	int vl; // Current flag voice link
+	int s_base; // Step in base flag voice, where it is located in lyv
+	int f_base; // Flag index of base flag in lyv
 	int s_src; // Source flag position
 	int sl_src; // Source flag link
 	int dfgn = 0; // Displayed flag global number
 	int sh = 0; // Note flag shape
 	int sep = 0; // If this flag is sent to separate staff
+	bool operator<(const LY_Flag &rhs) const { return fsev < rhs.fsev; }
+};
+
+struct LY_Step {
+	int dfgn_count = 0;
 };
 
 struct LY_Voice {
@@ -54,6 +61,7 @@ struct LY_Voice {
 	int intervals = 0;
 	vector<vector<LY_Flag>> f; // [s][] LY Flag
 	vector<vector<LY_Shape>> s; // [s][shape_type] LY Shape
+	vector<LY_Step> st; // [s] LY Step
 };
 
 class CP2Ly :
@@ -66,6 +74,7 @@ protected:
 	inline int GetFCount();
 	void DistributeFlags();
 	void ParseLy();
+	void SortFlagsBySev();
 	void SaveLyCP();
 	void SendLyIntervals();
 	void SendLySeparate();
@@ -83,7 +92,6 @@ private:
 	CString GetLyNoteCP();
 	inline int GetNoteStart(int voice, int step);
 	inline void AddNLink(int f);
-	inline void AddNLinkForeign(int f);
 	void ParseNLinks();
 	void SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype, int voice);
 	void ClearLyShape(int s1, int s2, int vtype);
@@ -102,12 +110,8 @@ private:
 
 	CString ly_com_st; // Comments
 	CString ly_ly_st; // Lyrics
-	//vector<LY_IntermediateCP> lyi; // Current voice
-	//vector<LY_IntermediateCP> slyi; // Separate staff
 	vector<LY_Voice> lyv; // [v] LY Voice
 	int ly_flags = 0; // Number of flags sent
-	vector<pair<int, int>> fss; // Flag severity sequence 
-	int ly_first_flag; // For fss
 
 	// Unique flags
 	set<int> ly_ufl; // Unique flag checker
