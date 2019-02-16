@@ -489,7 +489,9 @@ void CP2D::LoadRules(CString fname) {
 			ruleinfo[rid].SubRuleComment = ast[11];
 			// Replace scripts in viz text
 			ruleinfo[rid].viz_text.Replace("!rn!", ruleinfo[rid].RuleName);
-			ruleinfo[rid].viz_text.Replace("!srn!", ruleinfo[rid].SubRuleName);
+			CString srn = ruleinfo[rid].SubRuleName;
+			if (srn[0] == ':' || srn[0] == '/') srn = srn.Mid(1);
+			ruleinfo[rid].viz_text.Replace("!srn!", srn);
 			ruleinfo[rid].viz_text.Replace("!src!", ruleinfo[rid].SubRuleComment);
 			ruleinfo[rid].viz_text.Replace("!rc!", ruleinfo[rid].RuleComment);
 			ruleinfo[rid].viz_text.Replace("!rc!", ruleinfo[rid].RuleClass);
