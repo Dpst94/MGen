@@ -138,6 +138,13 @@ void CP2Ly::SetLyShape(int st1, int st2, int f, int fl, int sev, int vtype, int 
 		lyv[v].s[st2][vtype].start_s = s1 - s2;
 		lyv[v].s[st1][vtype].sev = sev;
 		if (vtype == vInterval || vtype == vNoteName || vtype == vHarm) {
+			// Detect trying to send to wrong voice
+			if (vtype == vHarm && v) {
+				CString est;
+				est.Format("Trying to send vHarm shape for flag [%d] %s (%s) to voice %d instead of voice 0",
+					fl, ruleinfo[fl].RuleName, ruleinfo[fl].SubRuleName, v);
+				WriteLog(5, est);
+			}
 			if (lyv[v].s[st2][vtype].sev <= sev) {
 				lyv[v].s[st2][vtype].sev = sev;
 			}
@@ -598,7 +605,7 @@ void CP2Ly::SortFlagsBySev2() {
 				if (lyv[v].f[s][f].fhide) continue;
 				// Separate harmonic and interval shapes to separate Flags line
 				int shape = ruleinfo[lyv[v].f[s][f].fid].viz;
-				if (shape == vInterval || shape == vHarm) {
+				if (shape == vHarm) {
 					lyv[v].fss3[s].push_back(make_pair(lyv[v].f[s][f].fsev, f));
 				}
 				else {
