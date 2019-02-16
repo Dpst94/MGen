@@ -540,17 +540,16 @@ void CP2Ly::HideFlags() {
 				int fv = lyv[v].s[s][sh].fv;
 				// Do not hide flag for shape without flag
 				if (lyv[v].s[s][sh].fl == -1) continue;
+				// Do not hide flag for shapes which cannot output text
+				if (!viz_can_text[sh]) continue;
 				// Do not hide flag without TEXT output
-				CString text = lyv[v].s[s][sh].txt;
-				if (text.IsEmpty()) continue;
+				if (lyv[v].s[s][sh].txt.IsEmpty()) continue;
 				// Get flag of shape
 				LY_Flag F = lyv[fv].f[lyv[v].s[s][sh].fs][lyv[v].s[s][sh].fl];
 				// Do not hide flag if shape is hidden
 				if (F.shide) continue;
 				// Do not hide flag without dfgn
 				if (!F.dfgn) continue;
-				// Do not hide flag for additional shapes
-				if (sh == vInterval || sh == vNoteName || sh == vHarm) continue;
 				// Keep flag number for parallel pco apart
 				ls3 = bli[fv][F.s_src];
 				ls4 = bli[fv][F.sl_src];
@@ -838,7 +837,7 @@ void CP2Ly::SendLyIntervals() {
 			ly_ly_st += " \\on-color #(rgb-color " + GetLyMarkColor(lyv[v].s[s][vInterval].sev) + ") ";
 		}
 		ly_ly_st += " \\pad-markup #0.4 \\concat { " + st + " ";
-		ly_ly_st += "} }\n";
+		ly_ly_st += "} }8\n";
 	}
 	ly_ly_st += "    }\n";
 	ly_ly_st += "  }\n";

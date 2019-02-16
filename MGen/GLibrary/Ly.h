@@ -271,6 +271,9 @@ const int viz_type[MAX_VIZ] = { 1, 1, 1, 2, 3, 4, 4, 4, 5, 5, 4, 5, 5, 3, 1, 1, 
 // For each visualisation, specify if it can overlap
 const int viz_can_overlap[MAX_VIZ] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 };
 
+// For each visualisation, specify if it can output text
+const int viz_can_text[MAX_VIZ] = { 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
+
 // For each visualisation, specify if empty string should be replaced with space
 const int viz_space[MAX_VIZ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
