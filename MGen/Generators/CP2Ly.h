@@ -36,6 +36,8 @@ struct LY_Step {
 
 struct LY_Voice {
 	int flags = 0;
+	int flags_harm = 0;
+	int flags_noharm = 0;
 	int shapes = 0;
 	int note_names = 0;
 	int intervals = 0;
@@ -43,7 +45,8 @@ struct LY_Voice {
 	vector<vector<LY_Shape>> s; // [s][shape_type] LY Shape
 	vector<LY_Step> st; // [s] LY Step
 	vector<vector<pair<int, int>>> fss; // Flags severity sequence for mistakes list
-	vector<vector<pair<int, int>>> fss2; // Flags severity sequence for displaying flag numbers
+	vector<vector<pair<int, int>>> fss2; // Flags severity sequence for displaying flag numbers (without harmonic flags)
+	vector<vector<pair<int, int>>> fss3; // Flags severity sequence for displaying flag numbers (only harmonic flags)
 };
 
 class CP2Ly :
@@ -70,6 +73,7 @@ private:
 	void SendLyHarm();
 	void SendLyNoteNames();
 	void SendLyMistakes();
+	void SendLyHarmMistakes();
 	CString GetLyNoteVisualCP(CString sz);
 	void SendLyViz(int phase);
 	void SaveLyComments();

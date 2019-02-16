@@ -448,6 +448,7 @@ void CP2Ly::InitLy() {
 		lyv[v].st.resize(c_len + 1);
 		lyv[v].fss.resize(c_len + 1);
 		lyv[v].fss2.resize(c_len + 1);
+		lyv[v].fss3.resize(c_len + 1);
 		for (s = 0; s < c_len + 1; ++s) {
 			lyv[v].s[s].resize(MAX_VIZ);
 		}
@@ -590,15 +591,23 @@ void CP2Ly::SortFlagsBySev() {
 }
 
 void CP2Ly::SortFlagsBySev2() {
-	// Order flags
+	// Order flags Flags line output
 	for (v = 0; v < av_cnt + 1; ++v) {
 		for (s = 0; s < c_len; ++s) {
 			for (int f = 0; f < lyv[v].f[s].size(); ++f) {
 				if (!lyv[v].f[s][f].dfgn) continue;
 				if (lyv[v].f[s][f].fhide) continue;
-				lyv[v].fss2[s].push_back(make_pair(lyv[v].f[s][f].fsev, f));
+				// Separate harmonic and interval shapes to separate Flags line
+				int shape = ruleinfo[lyv[v].f[s][f].fid].viz;
+				if (shape == vInterval || shape == vHarm) {
+					lyv[v].fss3[s].push_back(make_pair(lyv[v].f[s][f].fsev, f));
+				}
+				else {
+					lyv[v].fss2[s].push_back(make_pair(lyv[v].f[s][f].fsev, f));
+				}
 			}
 			sort(lyv[v].fss2[s].rbegin(), lyv[v].fss2[s].rend());
+			sort(lyv[v].fss3[s].rbegin(), lyv[v].fss3[s].rend());
 		}
 	}
 }
@@ -751,6 +760,7 @@ void CP2Ly::SaveLyCP() {
 		SendLyMistakes();
 		SendLyNoteNames();
 		SendLyIntervals();
+		SendLyHarmMistakes();
 	}
 	v = 0;
 	SendLyHarm();
@@ -1008,6 +1018,41 @@ void CP2Ly::SendLyMistakes() {
 		ly_ly_st += "      } } }8\n";
 		//ly_ly_st += SendLySkips(ly_mul - 1);
 	}	
+	ly_ly_st += "    }\n";
+	ly_ly_st += "  }\n";
+}
+
+void CP2Ly::SendLyHarmMistakes() {
+	CString st;
+	if (v) return;
+	if (!lyv[v].flags) return;
+	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", v);
+	ly_ly_st += st;
+	ly_ly_st += "    \\lyricmode {\n";
+	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
+	ly_ly_st += "      \\set stanza = #\" Flags:\"\n";
+	for (s = 0; s < c_len; ++s) {
+		ls = bli[v][s];
+		ly_ly_st += "      \\markup{ \\teeny \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
+		int max_fss = lyv[v].fss3[s].size();
+		// Do not show too many mistakes
+		if (lyv[v].st[s].dfgn_count > 3) {
+			max_fss = 3;
+			ly_ly_st += "...\n";
+		}
+		for (int ff = 0; ff < max_fss; ++ff) {
+			int f = lyv[v].fss3[s][ff].second;
+			int fl = lyv[v].f[s][f].fid;
+			int sev = lyv[v].f[s][f].fsev;
+			st.Format("        \\with-color #(rgb-color " +
+				GetLyColor(sev) + ") %s %d\n", // \\circle 
+				lyv[v].f[s][f].sh || lyv[v].f[s][f].shide ? "\\underline" : "", lyv[v].f[s][f].dfgn);
+			// \override #'(offset . 5) \override #'(thickness . 2) 
+			ly_ly_st += st;
+		}
+		ly_ly_st += "      } } }8\n";
+		//ly_ly_st += SendLySkips(ly_mul - 1);
+	}
 	ly_ly_st += "    }\n";
 	ly_ly_st += "  }\n";
 }
