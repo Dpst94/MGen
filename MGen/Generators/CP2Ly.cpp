@@ -1189,9 +1189,22 @@ void CP2Ly::SaveLyComments() {
 			com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
 		//st.Format("%d", lyv[v].f[s].vl[f]);
 		//com += " " + st;
-		// Print link to other part
+		// Print link to other part and step
+		CString sl_st;
+		sl_st.Format("bar %d, beat %d", lyv[v].f[s][f].sl_src / 8 + 1, (lyv[v].f[s][f].sl_src % 8) / 2 + 1);
 		if (lyv[v].f[s][f].vl != v && av_cnt > 2) {
 			com += " - with " + vname2[vid[lyv[v].f[s][f].vl]];
+			if (lyv[v].f[s][f].sl_src != lyv[v].f[s][f].s_src) {
+				com += ", " + sl_st;
+			}
+		}
+		else {
+			if (lyv[v].f[s][f].sl_src < lyv[v].f[s][f].s_src) {
+				com += " - from " + sl_st;
+			}
+			else if (lyv[v].f[s][f].sl_src > lyv[v].f[s][f].s_src) {
+				com += " - to " + sl_st;
+			}
 		}
 		// Send note number with first comment
 		if (!found) {
