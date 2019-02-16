@@ -307,8 +307,8 @@ protected:
 	CString GetIntName(int iv);
 	CString DetectLyClef(int vmin, int vmax);
 
-	// Shape scripts
-	vector <vector<unordered_map<int, CString>>> shsc;
+	vector <vector<unordered_map<int, CString>>> shsc; // Shape scripts
+	vector <int> shape_has_text_macro; // [shape] If this shape has $TEXT in any script
 
 	// General
 	ofstream ly_fs;

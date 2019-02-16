@@ -70,6 +70,8 @@ void CLy::LoadLyShapes(CString fname) {
 		WriteLog(5, est);
 		return;
 	}
+	shape_has_text_macro.clear();
+	shape_has_text_macro.resize(MAX_VIZ);
 	ifstream fs;
 	int i = 0;
 	vector <CString> ast;
@@ -155,6 +157,10 @@ void CLy::LoadLyShapes(CString fname) {
 				WriteLog(5, est);
 			}
 			shsc[phase][task][shape] = ast[3];
+			// Detect TEXT macro
+			if (ast[3].Find("$TEXT") != -1) {
+				shape_has_text_macro[shape] = 1;
+			}
 		}
 	}
 	return;

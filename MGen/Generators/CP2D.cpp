@@ -600,6 +600,27 @@ void CP2D::CheckRuleList() {
 	}
 }
 
+void CP2D::ValidateShapeText() {
+	for (int rid = 0; rid <= max_rule; ++rid) {
+		if (ruleinfo[rid].viz_text.IsEmpty()) {
+			if (shape_has_text_macro[ruleinfo[rid].viz]) {
+				CString est;
+				est.Format("Rule [%d] " + ruleinfo[rid].RuleName + " (" + ruleinfo[rid].SubRuleName + ") has no viz_text, but this shape %d has $TEXT in script",
+					rid, ruleinfo[rid].viz);
+				WriteLog(5, est);
+			}
+		}
+		else {
+			if (!shape_has_text_macro[ruleinfo[rid].viz]) {
+				CString est;
+				est.Format("Rule [%d] " + ruleinfo[rid].RuleName + " (" + ruleinfo[rid].SubRuleName + ") has viz_text '" + ruleinfo[rid].viz_text + "', but this shape %d does not have $TEXT in script",
+					rid, ruleinfo[rid].viz);
+				WriteLog(5, est);
+			}
+		}
+	}
+}
+
 // Return chromatic length of an interval (e.g. return 4 from 3rd)
 int CP2D::Interval2Chromatic(int iv) {
 	if (iv > 0) --iv;
