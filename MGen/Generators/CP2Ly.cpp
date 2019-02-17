@@ -599,6 +599,9 @@ void CP2Ly::SortFlagsBySev() {
 void CP2Ly::SortFlagsBySev2() {
 	// Order flags Flags line output
 	for (v = 0; v < av_cnt + 1; ++v) {
+		lyv[v].flags = 0;
+		lyv[v].flags_harm = 0;
+		lyv[v].flags_noharm = 0;
 		for (s = 0; s < c_len; ++s) {
 			for (int f = 0; f < lyv[v].f[s].size(); ++f) {
 				if (!lyv[v].f[s][f].dfgn) continue;
@@ -620,7 +623,9 @@ void CP2Ly::SortFlagsBySev2() {
 			}
 			sort(lyv[v].fss2[s].rbegin(), lyv[v].fss2[s].rend());
 			sort(lyv[v].fss3[s].rbegin(), lyv[v].fss3[s].rend());
+			lyv[v].flags += lyv[v].fss2[s].size() + lyv[v].fss3[s].size();
 			lyv[v].flags_harm += lyv[v].fss3[s].size();
+			lyv[v].flags_noharm += lyv[v].fss2[s].size();
 		}
 	}
 }
@@ -770,6 +775,7 @@ void CP2Ly::SaveLyCP() {
 		}
 		ly_ly_st += "\n  }\n";
 		ly_ly_st += "}\n";
+		SaveLyComments();
 		SendLyMistakes();
 		SendLyNoteNames();
 		SendLyIntervals();
@@ -1002,7 +1008,7 @@ void CP2Ly::SendLyNoteNames() {
 
 void CP2Ly::SendLyMistakes() {
 	CString st;
-	if (!lyv[v].flags) return;
+	if (!lyv[v].flags_noharm) return;
 	st.Format("  \\new Lyrics \\with { alignAboveContext = \"staff%d\" } {\n", v);
 	ly_ly_st += st;
 	ly_ly_st += "    \\lyricmode {\n";
@@ -1010,7 +1016,6 @@ void CP2Ly::SendLyMistakes() {
 	ly_ly_st += "      \\set stanza = #\" Flags:\"\n";
 	for (s = 0; s < c_len; ++s) {
 		ls = bli[v][s];
-		SaveLyComments();
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
 		int max_fss = lyv[v].fss2[s].size();
 		// Do not show too many mistakes
@@ -1038,7 +1043,7 @@ void CP2Ly::SendLyMistakes() {
 void CP2Ly::SendLyHarmMistakes() {
 	CString st;
 	if (v) return;
-	if (!lyv[v].flags) return;
+	if (!lyv[v].flags_harm) return;
 	st.Format("  \\new Lyrics \\with { alignBelowContext = \"staff%d\" } {\n", v);
 	ly_ly_st += st;
 	ly_ly_st += "    \\lyricmode {\n";
@@ -1148,93 +1153,95 @@ void CP2Ly::SendLyViz(int phase) {
 void CP2Ly::SaveLyComments() {
 	CString st, com, note_st;
 	int pos1, pos2, found;
-	if (!lyv[v].s.size()) return;
-	note_st = "\\markup \\wordwrap \\tiny \\bold {\n  ";
-	// Show voice number if more than 1 voice
-	if (av_cnt > 1) {
-		//st.Format("%d. %s", av_cnt - v, vname[vid[v]]);
-		note_st += vname2[vid[v]];
-	}
-	st.Format(" [bar %d, beat %d] note %s", // ly_nnum
-		s / 8 + 1, (s % 8) / 2 + 1,
-		GetLyNoteVisualCP("\\raise #0.3 \\magnify #0.7 "));
-	if (fli[v][ls] != s)
-		st += " (middle)";
-	note_st += st + "\n}\n";
-	found = 0;
-	for (int ff = 0; ff < lyv[v].fss[s].size(); ++ff) {
-		int f = lyv[v].fss[s][ff].second;
-		if (!lyv[v].f[s][f].dfgn) continue;
-		int fl = lyv[v].f[s][f].fid;
-		int sev = lyv[v].f[s][f].fsev;
-		if (!accept[sp][vc][vp][fl]) st = "- ";
-		else if (accept[sp][vc][vp][fl] == -1) st = "$ ";
-		else st = "+ ";
-		CString rule_name = GetRuleName(fl, sp, vc, vp);
-		//rule_name.SetAt(0, rule_name.Left(1).MakeLower().GetAt(0));
-		if (ly_debugexpect) {
-			CString st2;
-			st2.Format("[%d/%d] ", fl, s + 1);
-			rule_name = st2 + rule_name;
+	if (!lyv[v].f.size()) return;
+	for (s = 0; s < c_len; ++s) {
+		ls = bli[v][s];
+		note_st = "\\markup \\wordwrap \\tiny \\bold {\n  ";
+		// Show voice number if more than 1 voice
+		if (av_cnt > 1) {
+			//st.Format("%d. %s", av_cnt - v, vname[vid[v]]);
+			note_st += vname2[vid[v]];
 		}
-		else {
-			if (!ly_rule_verbose) {
-				if (rule_name.Find(":") != -1) {
-					rule_name = rule_name.Left(rule_name.Find(":"));
+		st.Format(" [bar %d, beat %d] note %s", // ly_nnum
+			s / 8 + 1, (s % 8) / 2 + 1,
+			GetLyNoteVisualCP("\\raise #0.3 \\magnify #0.7 "));
+		if (fli[v][ls] != s)
+			st += " (middle)";
+		note_st += st + "\n}\n";
+		found = 0;
+		for (int ff = 0; ff < lyv[v].fss[s].size(); ++ff) {
+			int f = lyv[v].fss[s][ff].second;
+			int fl = lyv[v].f[s][f].fid;
+			int sev = lyv[v].f[s][f].fsev;
+			if (!accept[sp][vc][vp][fl]) st = "- ";
+			else if (accept[sp][vc][vp][fl] == -1) st = "$ ";
+			else st = "+ ";
+			CString rule_name = GetRuleName(fl, sp, vc, vp);
+			//rule_name.SetAt(0, rule_name.Left(1).MakeLower().GetAt(0));
+			if (ly_debugexpect) {
+				CString st2;
+				st2.Format("[%d/%d] ", fl, s + 1);
+				rule_name = st2 + rule_name;
+			}
+			else {
+				if (!ly_rule_verbose) {
+					if (rule_name.Find(":") != -1) {
+						rule_name = rule_name.Left(rule_name.Find(":"));
+					}
 				}
 			}
-		}
-		com = st + ruleinfo[fl].RuleClass + ": " + rule_name;
-		CString subrule_name = GetSubRuleName(fl, sp, vc, vp);
-		// Always hide hidden subrule names starting with /
-		if (subrule_name.Left(1) == "/") subrule_name.Empty();
-		// If minimum verbosity, hide all subrule names except starting with :
-		if (!ly_rule_verbose) {
-			if (subrule_name.Left(1) != ":") subrule_name.Empty();
-		}
-		if (!subrule_name.IsEmpty()) {
-			// Always remove :
-			if (subrule_name.Left(1) == ":") {
-				subrule_name = subrule_name.Mid(1);
+			com = st + ruleinfo[fl].RuleClass + ": " + rule_name;
+			CString subrule_name = GetSubRuleName(fl, sp, vc, vp);
+			// Always hide hidden subrule names starting with /
+			if (subrule_name.Left(1) == "/") subrule_name.Empty();
+			// If minimum verbosity, hide all subrule names except starting with :
+			if (!ly_rule_verbose) {
+				if (subrule_name.Left(1) != ":") subrule_name.Empty();
 			}
-			com += " (" + subrule_name + ")";
-		}
-		if (ly_rule_verbose > 1 && !GetRuleComment(fl, sp, vc, vp).IsEmpty())
-			com += ". " + GetRuleComment(fl, sp, vc, vp);
-		if (ly_rule_verbose > 1 && !GetSubRuleComment(fl, sp, vc, vp).IsEmpty())
-			com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
-		//st.Format("%d", lyv[v].f[s].vl[f]);
-		//com += " " + st;
-		// Print link to other part and step
-		CString sl_st;
-		sl_st.Format("bar %d, beat %d", lyv[v].f[s][f].sl_src / 8 + 1, (lyv[v].f[s][f].sl_src % 8) / 2 + 1);
-		if (lyv[v].f[s][f].vl != v && av_cnt > 2) {
-			com += " - with " + vname2[vid[lyv[v].f[s][f].vl]];
-			if (lyv[v].f[s][f].sl_src != lyv[v].f[s][f].s_src) {
-				com += ", " + sl_st;
+			if (!subrule_name.IsEmpty()) {
+				// Always remove :
+				if (subrule_name.Left(1) == ":") {
+					subrule_name = subrule_name.Mid(1);
+				}
+				com += " (" + subrule_name + ")";
 			}
-		}
-		else {
-			if (lyv[v].f[s][f].sl_src < lyv[v].f[s][f].s_src) {
-				com += " - from " + sl_st;
+			if (ly_rule_verbose > 1 && !GetRuleComment(fl, sp, vc, vp).IsEmpty())
+				com += ". " + GetRuleComment(fl, sp, vc, vp);
+			if (ly_rule_verbose > 1 && !GetSubRuleComment(fl, sp, vc, vp).IsEmpty())
+				com += " (" + GetSubRuleComment(fl, sp, vc, vp) + ")";
+			//st.Format("%d", lyv[v].f[s].vl[f]);
+			//com += " " + st;
+			// Print link to other part and step
+			CString sl_st;
+			sl_st.Format("bar %d, beat %d", lyv[v].f[s][f].sl_src / 8 + 1, (lyv[v].f[s][f].sl_src % 8) / 2 + 1);
+			if (lyv[v].f[s][f].vl != v && av_cnt > 2) {
+				com += " - with " + vname2[vid[lyv[v].f[s][f].vl]];
+				if (lyv[v].f[s][f].sl_src != lyv[v].f[s][f].s_src) {
+					com += ", " + sl_st;
+				}
 			}
-			else if (lyv[v].f[s][f].sl_src > lyv[v].f[s][f].s_src) {
-				com += " - to " + sl_st;
+			else {
+				if (lyv[v].f[s][f].sl_src < lyv[v].f[s][f].s_src) {
+					com += " - from " + sl_st;
+				}
+				else if (lyv[v].f[s][f].sl_src > lyv[v].f[s][f].s_src) {
+					com += " - to " + sl_st;
+				}
 			}
+			// Send note number with first comment
+			if (!found) {
+				found = 1;
+				ly_com_st += note_st;
+			}
+			ly_com_st += "\\markup \\smaller \\wordwrap \\with-color #(rgb-color " +
+				GetLyColor(sev) + ") {\n  ";
+			com.Replace("\"", "\\\"");
+			com.Replace(" ", "\" \"");
+			st.Format("%d \"", lyv[v].f[s][f].dfgn); // \\teeny \\raise #0.2 \\circle
+			ly_com_st += st;
+			ly_com_st += com + "\"\n";
+			ly_com_st += "\n}\n";
 		}
-		// Send note number with first comment
-		if (!found) {
-			found = 1;
-			ly_com_st += note_st;
-		}
-		ly_com_st += "\\markup \\smaller \\wordwrap \\with-color #(rgb-color " +
-			GetLyColor(sev) + ") {\n  ";
-		com.Replace("\"", "\\\"");
-		com.Replace(" ", "\" \"");
-		st.Format("%d \"", lyv[v].f[s][f].dfgn); // \\teeny \\raise #0.2 \\circle
-		ly_com_st += st;
-		ly_com_st += com + "\"\n";
-		ly_com_st += "\n}\n";
 	}
 }
 
