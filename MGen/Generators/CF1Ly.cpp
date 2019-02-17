@@ -48,8 +48,9 @@ void CF1Ly::SendLyViz(ofstream &fs, int pos, CString &ev, int le, int i, int v, 
 	int shape, sev;
 	if (!lyi.size()) return;
 	for (int task = ssFinish; task >= ssStart; --task) {
-		for (auto it : shsc[phase][task]) {
-			shape = it.first;
+		for (int shape = 0; shape < MAX_VIZ; ++shape) {
+			CString script = shinfo[shape].script[task][phase];
+			if (script.IsEmpty()) continue;
 			if (task == ssFinish) {
 				if (!lyi[ly_s2].shf[shape]) continue;
 				sev = lyi[ly_s2 + lyi[ly_s2].shsl[shape]].shse[shape];
@@ -58,7 +59,6 @@ void CF1Ly::SendLyViz(ofstream &fs, int pos, CString &ev, int le, int i, int v, 
 				if (!lyi[ly_s2].shs[shape]) continue;
 				sev = lyi[ly_s2].shse[shape];
 			}
-			CString script = it.second;
 			CString text2;
 			if (lyi[ly_s2].sht[shape].IsEmpty()) {
 				text2 = "#f\n ";
@@ -242,6 +242,8 @@ void CF1Ly::SetLyShape(int s1, int s2, int f, int fl, int sev, int vtype) {
 			}
 			if (vtype == vNoteName) ++ly_notenames;
 		}
+		// Prevent empty shape text if it is not supported
+		if (shinfo[rule_viz[fl]].empty_space && rule_viz_t[fl].IsEmpty()) rule_viz_t[fl] = " ";
 		lyi[s1].sht[vtype] = rule_viz_t[fl];
 		// Save flag shape (step depends if link is forward or backward)
 		lyi[ly_s2].nfs[f] = vtype;
@@ -310,19 +312,19 @@ void CF1Ly::InitLyITest() {
 	step0 = 4;
 	ly_flags = 0;
 	for (int shape = 0; shape < MAX_VIZ; ++shape) {
-		if (viz_type[shape] == vtPoint) {
+		if (shinfo[shape].type == vtPoint) {
 			step1 = step0;
 			step2 = step0;
 			step3 = step0;
 			step4 = step0;
 		}
-		else if (viz_type[shape] == vtVBracket) {
+		else if (shinfo[shape].type == vtVBracket) {
 			step1 = step0 - 1;
 			step2 = step0;
 			step3 = step0 + 2;
 			step4 = step0 + 3;
 		}
-		else if (viz_type[shape] == vtGroup || viz_type[shape] == vtVolta) {
+		else if (shinfo[shape].type == vtGroup || shinfo[shape].type == vtVolta) {
 			step1 = step0 - 1;
 			step2 = step0;
 			step3 = step0 + 1;
@@ -440,7 +442,7 @@ void CF1Ly::InitLyI() {
 				s2 = max(ly_s2, link_note_step - ly_step1);
 			}
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
-			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step - ly_step1;
+			if (!shinfo[vtype].can_singlenote && s1 == s2) s2 = next_note_step - ly_step1;
 			// Set interval
 			if (!ly_debugexpect || sev != 100) {
 				if (rule_viz_int[fl] == 1) {
@@ -453,17 +455,17 @@ void CF1Ly::InitLyI() {
 					SetLyShape(s2, s2, f, fl, sev, vInterval);
 				}
 			}
-			if (!viz_can_overlap[vtype]) {
+			if (!shinfo[vtype].can_overlap) {
 				// Check that flag overlaps
 				int overlap1 = -1;
 				int overlap2 = -1;
 				int overlap_border = 0;
 				// For groups check for collision between borders
-				if (viz_type[vtype] == vtGroup || viz_type[vtype] == vtVolta)
+				if (shinfo[vtype].type == vtGroup || shinfo[vtype].type == vtVolta)
 					overlap_border = 1;
 				// For vbrackets check for collision between notes
 				int overlap_limit = s1 - overlap_border;
-				if (viz_type[vtype] == vtVBracket)
+				if (shinfo[vtype].type == vtVBracket)
 					overlap_limit = min(prev_note_step, prev_link_note) - ly_step1 - 1;
 				// Check if shape can be blocked
 				for (int x = ly_step2 - ly_step1 - 1; x > overlap_limit; --x) {
@@ -796,6 +798,7 @@ void CF1Ly::SendLyNoteNames() {
 void CF1Ly::SaveLy(CString dir, CString fname) {
 	if (emulate_sas) return;
 	LoadLyShapes("configs\\ly\\shapes.csv");
+	LoadLyShapeScripts("configs\\ly\\shape_scripts.csv");
 	vector<CString> sv;
 	CString title;
 	// Remove server config prefix

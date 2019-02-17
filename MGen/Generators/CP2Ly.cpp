@@ -54,13 +54,13 @@ void CP2Ly::AddNLink(int f) {
 	int f2 = lyv[v].f[s3].size();
 	lyv[v].f[s3].resize(f2 + 1);
 	// Check if this shape is not allowed at hidden position
-	if (!viz_anyposition[ruleinfo[fl].viz]) {
+	if (!shinfo[ruleinfo[fl].viz].can_anyposition) {
 		// Note start is ok
 		// Downbeat is ok
 		if ((s3 != fli[v][bli[v][s3]] && s3 % npm) ||
 			(s4 != fli[v][bli[v][s4]] && s4 % npm)) {
 			lyv[v].f[s3][f2].shide = 1;
-			if (viz_can_separate[ruleinfo[fl].viz]) {
+			if (shinfo[ruleinfo[fl].viz].can_separate) {
 				lyv[v].f[s3][f2].sep = 1;
 			}
 			else {
@@ -203,7 +203,7 @@ void CP2Ly::ParseLyI() {
 			s1 = min(s, s + link);
 			s2 = max(s, s + link);
 			// If shape cannot highlight single note, but flag does not contain link, then link to next note
-			if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
+			if (!shinfo[vtype].can_singlenote && s1 == s2) s2 = next_note_step;
 			// Highlight notes if flag is multivoice and is not gliss (gliss does not need note color)
 			if (vlink != lyv[v].f[s][f].v) {
 				if (ruleinfo[fl].viz_notecolor == 1) {
@@ -276,17 +276,17 @@ void CP2Ly::ParseLyI() {
 			if (vtype == vPedal) {
 				if (bli[v][s1] == fli_size[v] - 1 && s1 == s2) continue;
 			}
-			if (!viz_can_overlap[vtype]) {
+			if (!shinfo[vtype].can_overlap) {
 				// Check that flag overlaps
 				int overlap1 = -1;
 				int overlap2 = -1;
 				int overlap_border = 0;
 				// For groups check for collision between borders
-				if (viz_type[vtype] == vtGroup || viz_type[vtype] == vtVolta)
+				if (shinfo[vtype].type == vtGroup || shinfo[vtype].type == vtVolta)
 					overlap_border = 1;
 				// For vbrackets check for collision between notes
 				int overlap_limit = s1 - overlap_border;
-				if (viz_type[vtype] == vtVBracket)
+				if (shinfo[vtype].type == vtVBracket)
 					overlap_limit = min(prev_note_step, prev_link_note) - 1;
 				// Check if shape can be blocked
 				for (int x = c_len - 1; x > overlap_limit; --x) {
@@ -356,19 +356,19 @@ void CP2Ly::ParseLyISep() {
 				s1 = min(s, s + link);
 				s2 = max(s, s + link);
 				// If shape cannot highlight single note, but flag does not contain link, then link to next note
-				if (!viz_singlenote[vtype] && s1 == s2) s2 = next_note_step;
+				if (!shinfo[vtype].can_singlenote && s1 == s2) s2 = next_note_step;
 				// Set interval if not debugexpect. If debugexpect, do not set for red flags
-				if (!viz_can_overlap[vtype]) {
+				if (!shinfo[vtype].can_overlap) {
 					// Check that flag overlaps
 					int overlap1 = -1;
 					int overlap2 = -1;
 					int overlap_border = 0;
 					// For groups check for collision between borders
-					if (viz_type[vtype] == vtGroup || viz_type[vtype] == vtVolta)
+					if (shinfo[vtype].type == vtGroup || shinfo[vtype].type == vtVolta)
 						overlap_border = 1;
 					// For vbrackets check for collision between notes
 					int overlap_limit = s1 - overlap_border;
-					if (viz_type[vtype] == vtVBracket)
+					if (shinfo[vtype].type == vtVBracket)
 						overlap_limit = min(prev_note_step, prev_link_note) - 1;
 					// Check if shape can be blocked
 					for (int x = c_len - 1; x > overlap_limit; --x) {
@@ -548,7 +548,7 @@ void CP2Ly::HideFlags() {
 				// Do not hide flag for shape without flag
 				if (lyv[v].s[s][sh].fl == -1) continue;
 				// Do not hide flag for shapes which cannot output text
-				if (!viz_can_text[sh]) continue;
+				if (!shinfo[sh].can_text) continue;
 				// Do not hide flag without TEXT output
 				if (lyv[v].s[s][sh].txt.IsEmpty()) continue;
 				// Get flag of shape
@@ -1396,13 +1396,13 @@ CString CP2Ly::GetRealIntName(int s, int v1, int v2) {
 
 void CP2Ly::ValidateShapeText() {
 	for (int sh = 0; sh < MAX_VIZ; ++sh) {
-		if (shinfo[sh].has_text == 1 && viz_can_text[sh] == 0) {
+		if (shinfo[sh].has_text == 1 && shinfo[sh].can_text == 0) {
 			CString est;
 			est.Format("I did not expect shape %d to have $TEXT macro in script",
 				sh);
 			WriteLog(5, est);
 		}
-		if (shinfo[sh].has_text == 1 && viz_can_text[sh] == 0) {
+		if (shinfo[sh].has_text == 1 && shinfo[sh].can_text == 0) {
 			CString est;
 			est.Format("I expected shape %d to have $TEXT macro in script",
 				sh);
@@ -1416,6 +1416,8 @@ void CP2Ly::ValidateShapeText() {
 				est.Format("Rule [%d] " + ruleinfo[rid].RuleName + " (" + ruleinfo[rid].SubRuleName + ") has no viz_text, but this shape %d has $TEXT in script",
 					rid, ruleinfo[rid].viz);
 				WriteLog(5, est);
+				// If this shape cannot work with empty strings, replace with a space
+				if (shinfo[ruleinfo[rid].viz].empty_space) ruleinfo[rid].viz_text = " ";
 			}
 		}
 		else {

@@ -189,7 +189,6 @@ void CF1D::LoadRules(CString fname) {
 					if (fl) flag_replace[fl].push_back(rid);
 				}
 			}
-			if (viz_space[rule_viz[rid]] && rule_viz_t[rid].IsEmpty()) rule_viz_t[rid] = " ";
 			// Disable all species
 			if (RuleName[0][rid].IsEmpty())
 				for (int sp = 0; sp < MAX_SPECIES; ++sp) {

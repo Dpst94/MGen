@@ -89,14 +89,6 @@ void CLy::LoadLyShapes(CString fname) {
 		shinfo[sh].can_anyposition = atoi(cdb.result[i]["Can any position"]);
 		shinfo[sh].can_separate = atoi(cdb.result[i]["Can separate"]);
 		shinfo[sh].empty_space = atoi(cdb.result[i]["Empty space"]);
-		// Debug - remove
-		if (shinfo[sh].type != viz_type[sh]) WriteLog(5, "Error type " + shinfo[sh].name);
-		if (shinfo[sh].can_overlap != viz_can_overlap[sh]) WriteLog(5, "Error ov " + shinfo[sh].name);
-		if (shinfo[sh].can_text != viz_can_text[sh]) WriteLog(5, "Error t " + shinfo[sh].name);
-		if (shinfo[sh].can_singlenote != viz_singlenote[sh]) WriteLog(5, "Error s " + shinfo[sh].name);
-		if (shinfo[sh].can_anyposition != viz_anyposition[sh]) WriteLog(5, "Error a " + shinfo[sh].name);
-		if (shinfo[sh].can_separate != viz_can_separate[sh]) WriteLog(5, "Error se " + shinfo[sh].name);
-		if (shinfo[sh].empty_space != viz_space[sh]) WriteLog(5, "Error sp " + shinfo[sh].name);
 	}
 }
 

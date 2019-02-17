@@ -327,7 +327,6 @@ void CP2D::LoadRules(CString fname) {
 					if (fl) ruleinfo[fl].flag_replace.push_back(rid);
 				}
 			}
-			if (viz_space[ruleinfo[rid].viz] && ruleinfo[rid].viz_text.IsEmpty()) ruleinfo[rid].viz_text = " ";
 			// Find what to replace
 			vector<int> nsp; // species
 			vector<int> nvc; // voice count
