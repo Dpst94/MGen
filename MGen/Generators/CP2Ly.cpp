@@ -607,6 +607,12 @@ void CP2Ly::SortFlagsBySev2() {
 				int shape = ruleinfo[lyv[v].f[s][f].fid].viz;
 				if (shape == vHarm) {
 					lyv[v].fss3[s].push_back(make_pair(lyv[v].f[s][f].fsev, f));
+					if (v) {
+						CString est;
+						est.Format("Detected vHarm flag in non-bass voice: [%d] %s (%s) in counterpoint %d, voice %d, step %d",
+							lyv[v].f[s][f].fid, ruleinfo[lyv[v].f[s][f].fid].RuleName, ruleinfo[lyv[v].f[s][f].fid].SubRuleName, cp_id + 1, v, s);
+						WriteLog(5, est);
+					}
 				}
 				else {
 					lyv[v].fss2[s].push_back(make_pair(lyv[v].f[s][f].fsev, f));
@@ -614,6 +620,7 @@ void CP2Ly::SortFlagsBySev2() {
 			}
 			sort(lyv[v].fss2[s].rbegin(), lyv[v].fss2[s].rend());
 			sort(lyv[v].fss3[s].rbegin(), lyv[v].fss3[s].rend());
+			lyv[v].flags_harm += lyv[v].fss3[s].size();
 		}
 	}
 }
