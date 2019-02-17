@@ -601,6 +601,20 @@ void CP2D::CheckRuleList() {
 }
 
 void CP2D::ValidateShapeText() {
+	for (int sh = 0; sh < MAX_VIZ; ++sh) {
+		if (shape_has_text_macro[sh] == 1 && viz_can_text[sh] == 0) {
+			CString est;
+			est.Format("I did not expect shape %d to have $TEXT macro in script",
+				sh);
+			WriteLog(5, est);
+		}
+		if (shape_has_text_macro[sh] == 1 && viz_can_text[sh] == 0) {
+			CString est;
+			est.Format("I expected shape %d to have $TEXT macro in script",
+				sh);
+			WriteLog(5, est);
+		}
+	}
 	for (int rid = 0; rid <= max_rule; ++rid) {
 		if (ruleinfo[rid].viz_text.IsEmpty()) {
 			if (shape_has_text_macro[ruleinfo[rid].viz]) {
