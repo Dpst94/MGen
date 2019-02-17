@@ -65,6 +65,7 @@ protected:
 	void SaveLyCP();
 	void SendLyIntervals();
 	void SendLySeparate();
+	void ValidateShapeText();
 	vector<CString> ly_st; // Resulting text for each counterpoint
 
 private:

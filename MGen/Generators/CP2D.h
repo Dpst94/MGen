@@ -139,7 +139,6 @@ protected:
 	void ResizeRuleVariantVectors2();
 	inline void SaveRuleVariant(int sp, int vc, int vp, int rid, CString rule, CString subrule, CString rule_com, CString subrule_com);
 	void CheckRuleList();
-	void ValidateShapeText();
 	int Interval2Chromatic(int iv);
 	CString GetRuleName(int rid, int sp, int vc, int vp);
 	CString GetSubRuleName(int rid, int sp, int vc, int vp);

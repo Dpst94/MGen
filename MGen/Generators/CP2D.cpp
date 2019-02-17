@@ -45,9 +45,9 @@ void CP2D::LoadVocalRanges(CString fname) {
 	}
 	CCsvDb cdb;
 	est = cdb.Open(fname);
-	if (est != "") WriteLog(5, est);
+	if (est != "") WriteLog(5, fname + ": " + est);
 	est = cdb.Select();
-	if (est != "") WriteLog(5, est);
+	if (est != "") WriteLog(5, fname + ": " + est);
 	for (int i = 0; i < cdb.result.size(); ++i) {
 		int vr_id = atoi(cdb.result[i]["id"]);
 		vocra_info.resize(max(vocra_info.size(), vr_id + 1));
@@ -596,41 +596,6 @@ void CP2D::CheckRuleList() {
 			est.Format("Detected undefined rule %d in flag_replace list",
 				rid);
 			WriteLog(5, est);
-		}
-	}
-}
-
-void CP2D::ValidateShapeText() {
-	for (int sh = 0; sh < MAX_VIZ; ++sh) {
-		if (shape_has_text_macro[sh] == 1 && viz_can_text[sh] == 0) {
-			CString est;
-			est.Format("I did not expect shape %d to have $TEXT macro in script",
-				sh);
-			WriteLog(5, est);
-		}
-		if (shape_has_text_macro[sh] == 1 && viz_can_text[sh] == 0) {
-			CString est;
-			est.Format("I expected shape %d to have $TEXT macro in script",
-				sh);
-			WriteLog(5, est);
-		}
-	}
-	for (int rid = 0; rid <= max_rule; ++rid) {
-		if (ruleinfo[rid].viz_text.IsEmpty()) {
-			if (shape_has_text_macro[ruleinfo[rid].viz]) {
-				CString est;
-				est.Format("Rule [%d] " + ruleinfo[rid].RuleName + " (" + ruleinfo[rid].SubRuleName + ") has no viz_text, but this shape %d has $TEXT in script",
-					rid, ruleinfo[rid].viz);
-				WriteLog(5, est);
-			}
-		}
-		else {
-			if (!shape_has_text_macro[ruleinfo[rid].viz]) {
-				CString est;
-				est.Format("Rule [%d] " + ruleinfo[rid].RuleName + " (" + ruleinfo[rid].SubRuleName + ") has viz_text '" + ruleinfo[rid].viz_text + "', but this shape %d does not have $TEXT in script",
-					rid, ruleinfo[rid].viz);
-				WriteLog(5, est);
-			}
 		}
 	}
 }

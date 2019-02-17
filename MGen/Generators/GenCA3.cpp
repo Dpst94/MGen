@@ -576,6 +576,7 @@ void CGenCA3::Generate() {
 	//ReplaceRuleParams();
 	if (error) return;
 	LoadLyShapes("configs\\ly2\\shapes.csv");
+	LoadLyShapeScripts("configs\\ly2\\shape_scripts.csv");
 	ValidateShapeText();
 	if (HarmName[0].IsEmpty()) {
 		WriteLog(5, "Harmonic notation not loaded: please check harm_notation parameter in configuration file");

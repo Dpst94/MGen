@@ -66,7 +66,7 @@ void CP2Ly::AddNLink(int f) {
 			else {
 				CString est;
 				est.Format("Detected shape %s at hidden position %d-%d (instead of %d-%d), voice %d counterpoint %d: [%d] %s (%s). Cannot send this type of shapes to separate staff. Shape will be removed",
-					viz_name[ruleinfo[fl].viz],
+					shinfo[ruleinfo[fl].viz].name,
 					s3, s4, ssus[v][bli[v][s3]], ssus[v][bli[v][s4]], v, cp_id + 1, fl,
 					ruleinfo[fl].RuleName, ruleinfo[fl].SubRuleName);
 				WriteLog(5, est);
@@ -1076,8 +1076,9 @@ void CP2Ly::SendLyViz(int phase) {
 	int shape, sev;
 	if (!lyv[v].s.size()) return;
 	for (int task = ssFinish; task >= ssStart; --task) {
-		for (auto it : shsc[phase][task]) {
-			shape = it.first;
+		for (int shape = 0; shape<MAX_VIZ; ++shape) {
+			CString script = shinfo[shape].script[task][phase];
+			if (script.IsEmpty()) continue;
 			if (task == ssFinish) {
 				if (!lyv[v].s[s][shape].fin) continue;
 				sev = lyv[v].s[s + lyv[v].s[s][shape].start_s][shape].sev;
@@ -1086,7 +1087,6 @@ void CP2Ly::SendLyViz(int phase) {
 				if (!lyv[v].s[s][shape].start) continue;
 				sev = lyv[v].s[s][shape].sev;
 			}
-			CString script = it.second;
 			CString shtext;
 			int gn = 0;
 			if (lyv[v].s[s][shape].fl != -1) {
@@ -1392,5 +1392,40 @@ CString CP2Ly::GetRealIntName(int s, int v1, int v2) {
 		}
 	}
 	return iname;
+}
+
+void CP2Ly::ValidateShapeText() {
+	for (int sh = 0; sh < MAX_VIZ; ++sh) {
+		if (shinfo[sh].has_text == 1 && viz_can_text[sh] == 0) {
+			CString est;
+			est.Format("I did not expect shape %d to have $TEXT macro in script",
+				sh);
+			WriteLog(5, est);
+		}
+		if (shinfo[sh].has_text == 1 && viz_can_text[sh] == 0) {
+			CString est;
+			est.Format("I expected shape %d to have $TEXT macro in script",
+				sh);
+			WriteLog(5, est);
+		}
+	}
+	for (int rid = 0; rid <= max_rule; ++rid) {
+		if (ruleinfo[rid].viz_text.IsEmpty()) {
+			if (shinfo[ruleinfo[rid].viz].has_text) {
+				CString est;
+				est.Format("Rule [%d] " + ruleinfo[rid].RuleName + " (" + ruleinfo[rid].SubRuleName + ") has no viz_text, but this shape %d has $TEXT in script",
+					rid, ruleinfo[rid].viz);
+				WriteLog(5, est);
+			}
+		}
+		else {
+			if (!shinfo[ruleinfo[rid].viz].has_text) {
+				CString est;
+				est.Format("Rule [%d] " + ruleinfo[rid].RuleName + " (" + ruleinfo[rid].SubRuleName + ") has viz_text '" + ruleinfo[rid].viz_text + "', but this shape %d does not have $TEXT in script",
+					rid, ruleinfo[rid].viz);
+				WriteLog(5, est);
+			}
+		}
+	}
 }
 

@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../stdafx.h"
 #include "Ly.h"
+#include "CsvDb.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW 
@@ -70,8 +71,43 @@ void CLy::LoadLyShapes(CString fname) {
 		WriteLog(5, est);
 		return;
 	}
-	shape_has_text_macro.clear();
-	shape_has_text_macro.resize(MAX_VIZ);
+	CCsvDb cdb;
+	CString est = cdb.Open(fname);
+	if (est != "") WriteLog(5, fname + ": " + est);
+	est = cdb.Select();
+	if (est != "") WriteLog(5, fname + ": " + est);
+	// Init shapeinfo
+	shinfo.resize(MAX_VIZ);
+	for (int i = 0; i < cdb.result.size(); ++i) {
+		int sh = atoi(cdb.result[i]["Shape id"]);
+		shinfo[sh].name = cdb.result[i]["Name"];
+		shinfo[sh].comment = cdb.result[i]["Comment"];
+		shinfo[sh].type = atoi(cdb.result[i]["Type"]);
+		shinfo[sh].can_overlap = atoi(cdb.result[i]["Can overlap"]);
+		shinfo[sh].can_text = atoi(cdb.result[i]["Can show text"]);
+		shinfo[sh].can_singlenote = atoi(cdb.result[i]["Can single note"]);
+		shinfo[sh].can_anyposition = atoi(cdb.result[i]["Can any position"]);
+		shinfo[sh].can_separate = atoi(cdb.result[i]["Can separate"]);
+		shinfo[sh].empty_space = atoi(cdb.result[i]["Empty space"]);
+		// Debug - remove
+		if (shinfo[sh].type != viz_type[sh]) WriteLog(5, "Error type " + shinfo[sh].name);
+		if (shinfo[sh].can_overlap != viz_can_overlap[sh]) WriteLog(5, "Error ov " + shinfo[sh].name);
+		if (shinfo[sh].can_text != viz_can_text[sh]) WriteLog(5, "Error t " + shinfo[sh].name);
+		if (shinfo[sh].can_singlenote != viz_singlenote[sh]) WriteLog(5, "Error s " + shinfo[sh].name);
+		if (shinfo[sh].can_anyposition != viz_anyposition[sh]) WriteLog(5, "Error a " + shinfo[sh].name);
+		if (shinfo[sh].can_separate != viz_can_separate[sh]) WriteLog(5, "Error se " + shinfo[sh].name);
+		if (shinfo[sh].empty_space != viz_space[sh]) WriteLog(5, "Error sp " + shinfo[sh].name);
+	}
+}
+
+void CLy::LoadLyShapeScripts(CString fname) {
+	// Check file exists
+	if (!fileExists(fname)) {
+		CString est;
+		est.Format("LoadLyShapes cannot find file: %s", fname);
+		WriteLog(5, est);
+		return;
+	}
 	ifstream fs;
 	int i = 0;
 	vector <CString> ast;
@@ -79,12 +115,11 @@ void CLy::LoadLyShapes(CString fname) {
 	fs.open(fname);
 	char pch[2550];
 	// Init
-	shsc.resize(SHAPE_PHASE_CNT);
-	for (int i = 0; i < shsc.size(); ++i) shsc[i].resize(2);
-	//shsc[10][ssStart][vBracket] = "1";
-	//shsc[10][ssStart][vOttava] = "2";
-	//shsc[10][ssStart][vInterval] = "3";
-	//shsc[10][ssStart][vOttava] = "4";
+	for (int sh = 0; sh < MAX_VIZ; ++sh) {
+		shinfo[sh].script.resize(2);
+		shinfo[sh].script[0].resize(SHAPE_PHASE_CNT);
+		shinfo[sh].script[1].resize(SHAPE_PHASE_CNT);
+	}
 	// Load header
 	fs.getline(pch, 2550);
 	while (fs.good()) {
@@ -96,7 +131,7 @@ void CLy::LoadLyShapes(CString fname) {
 		if (st.Find(";") != -1) {
 			Tokenize(st, ast, ";");
 			if (ast.size() != 4) {
-				est.Format("Wrong column count at line %d in shapes file %s: '%s'", i, fname, st);
+				est.Format("Wrong column count at line %d in shape_scripts file %s: '%s'", i, fname, st);
 				WriteLog(5, est);
 				error = 1;
 				return;
@@ -107,7 +142,7 @@ void CLy::LoadLyShapes(CString fname) {
 			ast[3].Trim();
 			int phase = atoi(ast[0]);
 			if (phase >= SHAPE_PHASE_CNT) {
-				est.Format("Wrong phase number at line %d in shapes file %s: '%s'", i, fname, st);
+				est.Format("Wrong phase number at line %d in shape_scripts file %s: '%s'", i, fname, st);
 				WriteLog(5, est);
 				error = 1;
 				return;
@@ -116,34 +151,17 @@ void CLy::LoadLyShapes(CString fname) {
 			if (ast[1] == "Start") task = ssStart;
 			if (ast[1] == "Finish") task = ssFinish;
 			if (task == -1) {
-				est.Format("Wrong task at line %d in shapes file %s: '%s'", i, fname, st);
+				est.Format("Wrong task at line %d in shape_scripts file %s: '%s'", i, fname, st);
 				WriteLog(5, est);
 				error = 1;
 				return;
 			}
 			int shape = -1;
-			ast[2].MakeLower();
-			if (ast[2] == "default") shape = vDefault;
-			if (ast[2] == "harm") shape = vHarm;
-			if (ast[2] == "interval") shape = vInterval;
-			if (ast[2] == "vbracket") shape = vVBracket;
-			if (ast[2] == "volta") shape = vVolta;
-			if (ast[2] == "slur") shape = vSlur;
-			if (ast[2] == "pslur") shape = vPSlur;
-			if (ast[2] == "glis") shape = vGlis;
-			if (ast[2] == "bracket") shape = vBracket;
-			if (ast[2] == "trill") shape = vTrill;
-			if (ast[2] == "ts") shape = vTS;
-			if (ast[2] == "ottava") shape = vOttava;
-			if (ast[2] == "pedal") shape = vPedal;
-			if (ast[2] == "stac") shape = vStac;
-			if (ast[2] == "staco") shape = vStaco;
-			if (ast[2] == "notecolor") shape = vNoteColor;
-			if (ast[2] == "petrucci") shape = vPetrucci;
-			if (ast[2] == "cross") shape = vCross;
-			if (ast[2] == "circle") shape = vCircle;
+			for (int sh = 0; sh < MAX_VIZ; ++sh) {
+				if (shinfo[sh].name == ast[2]) shape = sh;
+			}
 			if (shape == -1) {
-				est.Format("Wrong shape at line %d in shapes file %s: '%s'", i, fname, st);
+				est.Format("Wrong shape at line %d in shape_scripts file %s: '%s'", i, fname, st);
 				WriteLog(5, est);
 				error = 1;
 				return;
@@ -152,18 +170,17 @@ void CLy::LoadLyShapes(CString fname) {
 			if (ast[3][ast[3].GetLength() - 1] == '"') ast[3].Delete(ast[3].GetLength() - 1);
 			ast[3].Replace("\"\"", "\"");
 			// Save
-			if (!(shsc[phase][task][shape].IsEmpty())) {
-				est.Format("Duplicate phase/task/shape at line %d in shapes file %s: '%s'", i, fname, st);
+			if (!shinfo[shape].script[task][phase].IsEmpty()) {
+				est.Format("Duplicate phase/task/shape at line %d in shape_scripts file %s: '%s'", i, fname, st);
 				WriteLog(5, est);
 			}
-			shsc[phase][task][shape] = ast[3];
+			shinfo[shape].script[task][phase] = ast[3];
 			// Detect TEXT macro
 			if (ast[3].Find("$TEXT") != -1) {
-				shape_has_text_macro[shape] = 1;
+				shinfo[shape].has_text = 1;
 			}
 		}
 	}
-	return;
 }
 
 CString CLy::GetLyAlter(int alter) {

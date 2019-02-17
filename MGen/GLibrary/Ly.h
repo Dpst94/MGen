@@ -214,7 +214,7 @@ const CString mode_name2[] = {
 };
 
 // Rule visualization
-#define vDefault 0
+#define vFlag 0
 #define vHarm 1
 #define vInterval 2
 #define vVBracket 3
@@ -236,27 +236,18 @@ const CString mode_name2[] = {
 #define vCircle 19
 #define MAX_VIZ 20
 
-const CString viz_name[] = {
- 	"Default", // 0
-	"Harm", // 1
-	"Interval", // 2
-	"VBracket", // 3
-	"Volta", // 4
-	"Slur", // 5
-	"PSlur", // 6
-	"Glis", // 7
-	"Bracket", // 8
-	"Trill", // 9
-	"TextSpanner", // 10
-	"Ottava", // 11
-	"Pedal", // 12
-	"NoteName", // 13
-	"Stac", // 14
-	"Staco", // 15
-	"NoteColor", // 16
-	"Petrucci", // 17
-	"Cross", // 18
-	"Circle" // 19
+struct LY_ShapeInfo {
+	CString name; // This name is used to map scripts
+	CString comment;
+	int type; // See visualisation types
+	int can_overlap; // If shape can overlap
+	int empty_space; // If empty string should be replaced with space
+	int can_singlenote; // If single note can be marked with this shape
+	int can_anyposition; // If it can go at any position or only at note start / measure start
+	int can_separate; // If shape can be shown in separate staff
+	int can_text; // If this shape can output text
+	int has_text; // If this shape has $TEXT macro in one of its scripts
+	vector<vector<CString>> script; // [task][phase] Lilypond scripts
 };
 
 // Visualisation types
@@ -296,6 +287,7 @@ public:
 
 protected:
 	void TestKeyMatrix();
+	void LoadLyShapeScripts(CString fname);
 	void LoadLyShapes(CString fname);
 	CString GetLyAlter(int alter);
 	CString GetLyAlterVisual(int alter, CString sz);
@@ -309,6 +301,7 @@ protected:
 
 	vector <vector<unordered_map<int, CString>>> shsc; // Shape scripts
 	vector <int> shape_has_text_macro; // [shape] If this shape has $TEXT in any script
+	vector<LY_ShapeInfo> shinfo; // [shape] LY Shape info
 
 	// General
 	ofstream ly_fs;
