@@ -234,7 +234,7 @@ CString CLy::GetLyLen(int length) {
 CString CLy::GetLyColor(int sev) {
 	CString st;
 	DWORD green = MakeColor(0, 0, 180, 0);
-	DWORD yellow = MakeColor(0, 180, 180, 0);
+	DWORD yellow = MakeColor(0, 197, 176, 0);
 	DWORD red = MakeColor(0, 255, 0, 0);
 	if (sev <= 50) {
 		st.Format("%.3f %.3f %.3f",
@@ -256,7 +256,7 @@ CString CLy::GetLyColor(int sev) {
 CString CLy::GetLyMarkColor(int sev) {
 	CString st;
 	DWORD green = MakeColor(0, 130, 255, 130);
-	DWORD yellow = MakeColor(0, 240, 240, 0);
+	DWORD yellow = MakeColor(0, 255, 236, 71);
 	DWORD red = MakeColor(0, 255, 160, 160);
 	if (sev <= 50) {
 		st.Format("%.3f %.3f %.3f",
