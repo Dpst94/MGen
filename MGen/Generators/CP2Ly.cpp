@@ -1007,7 +1007,7 @@ void CP2Ly::SendLyMistakes() {
 		ly_ly_st += "      \\markup{ \\teeny \\override #`(direction . ,UP) \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
 		int max_fss = lyv[v].fss2[s].size();
 		// Do not show too many mistakes
-		if (lyv[v].st[s].dfgn_count > 3) {
+		if (lyv[v].fss2[s].size() > 3) {
 			max_fss = 3;
 			ly_ly_st += "...\n";
 		}
@@ -1042,9 +1042,8 @@ void CP2Ly::SendLyHarmMistakes() {
 		ly_ly_st += "      \\markup{ \\teeny \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
 		int max_fss = lyv[v].fss3[s].size();
 		// Do not show too many mistakes
-		if (lyv[v].st[s].dfgn_count > 3) {
+		if (lyv[v].fss3[s].size() > 3) {
 			max_fss = 3;
-			ly_ly_st += "...\n";
 		}
 		for (int ff = 0; ff < max_fss; ++ff) {
 			int f = lyv[v].fss3[s][ff].second;
@@ -1055,6 +1054,10 @@ void CP2Ly::SendLyHarmMistakes() {
 				lyv[v].f[s][f].sh || lyv[v].f[s][f].shide ? "\\underline" : "", lyv[v].f[s][f].dfgn);
 			// \override #'(offset . 5) \override #'(thickness . 2) 
 			ly_ly_st += st;
+		}
+		// Do not show too many mistakes
+		if (lyv[v].fss3[s].size() > 3) {
+			ly_ly_st += "...\n";
 		}
 		ly_ly_st += "      } } }8\n";
 		//ly_ly_st += SendLySkips(ly_mul - 1);
