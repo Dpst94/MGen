@@ -654,13 +654,15 @@ void CGenCA3::SaveLy(CString dir, CString fname) {
 	if (my_config.Left(3) == "sv_") {
 		my_config = my_config.Mid(3);
 	}
-	title = m_algo_name + ": " + CW2A(CA2W(my_config, CP_ACP), CP_UTF8) + " (" +
+	title = CW2A(CA2W(my_config, CP_ACP), CP_UTF8) + " (" +
 		CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M") + ")";
 	ly_fs.open(dir + "\\" + fname + ".ly");
 	read_file_sv("configs\\ly2\\header.ly", sv);
 	for (int i = 0; i < sv.size(); ++i) {
-		sv[i].Replace("$SUBTITLE$", title);
+		sv[i].Replace("$DEDICATION$", "");
 		sv[i].Replace("$TITLE$", "");
+		sv[i].Replace("$SUBTITLE$", m_algo_name);
+		sv[i].Replace("$SUBSUBTITLE$", title);
 		if (ly_page_breaking.IsEmpty()) {
 			sv[i].Replace("$PAGE_BREAKING$", "minimal-breaking");
 		}
