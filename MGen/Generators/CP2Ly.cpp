@@ -1141,6 +1141,10 @@ void CP2Ly::SendLyViz(int phase) {
 			else {
 				text2 = "\\markup{ \\raise #0.6 \\teeny \"" + shtext + "\" }\n ";
 			}
+			if (shtext.IsEmpty()) {
+				if (shinfo[shape].empty_space == 1) shtext = " ";
+				if (shinfo[shape].empty_space == 2) shtext = "_";
+			}
 			script.Replace("$n$", "\n");
 			script.Replace("$COLOR$", GetLyColor(sev));
 			script.Replace("$TEXT$", shtext); 
@@ -1431,7 +1435,8 @@ void CP2Ly::ValidateShapeText() {
 					rid, ruleinfo[rid].viz);
 				WriteLog(5, est);
 				// If this shape cannot work with empty strings, replace with a space
-				if (shinfo[ruleinfo[rid].viz].empty_space) ruleinfo[rid].viz_text = " ";
+				if (shinfo[ruleinfo[rid].viz].empty_space == 1) ruleinfo[rid].viz_text = " ";
+				if (shinfo[ruleinfo[rid].viz].empty_space == 2) ruleinfo[rid].viz_text = "_";
 			}
 		}
 		else {

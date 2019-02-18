@@ -243,7 +243,7 @@ void CF1Ly::SetLyShape(int s1, int s2, int f, int fl, int sev, int vtype) {
 			if (vtype == vNoteName) ++ly_notenames;
 		}
 		// Prevent empty shape text if it is not supported
-		if (shinfo[rule_viz[fl]].empty_space && rule_viz_t[fl].IsEmpty()) rule_viz_t[fl] = " ";
+		if (rule_viz_t[fl].IsEmpty()) rule_viz_t[fl] = " ";
 		lyi[s1].sht[vtype] = rule_viz_t[fl];
 		// Save flag shape (step depends if link is forward or backward)
 		lyi[ly_s2].nfs[f] = vtype;

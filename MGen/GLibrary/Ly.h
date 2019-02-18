@@ -241,7 +241,7 @@ struct LY_ShapeInfo {
 	CString comment;
 	int type; // See visualisation types
 	int can_overlap; // If shape can overlap
-	int empty_space; // If empty string should be replaced with space
+	int empty_space; // If empty string should be replaced with space (1) or underscore (2)
 	int can_singlenote; // If single note can be marked with this shape
 	int can_anyposition; // If it can go at any position or only at note start / measure start
 	int can_separate; // If shape can be shown in separate staff
