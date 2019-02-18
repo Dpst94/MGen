@@ -4986,9 +4986,11 @@ void CP2R::EvalHarm4thTritone() {
 		if (civl % 12 == 5) AutoFlagA(v, 171, s, s, v2, 100);
 		if (civl % 12 == 6) {
 			// Flag if not suspension resolution to lt in bass
-			if (pcc[v2][s] != 11 || fli2[v2][ls2] != mli[bmli[s]] + npm - 1 || 
-				!nih[v2][fli[v2][ls2]] || resol[v2][hstart] != fli[v2][ls2])
-				AutoFlagA(v, 331, max(hstart, fli[v][ls]), max(hstart, fli[v2][ls2]), v2, 100);
+			if (pcc[v2][s] != 11 || fli2[v2][ls2] != mli[bmli[s]] + npm - 1 ||
+				!nih[v2][fli[v2][ls2]] || resol[v2][hstart] != fli[v2][ls2]) {
+				s4 = max(hstart, max(fli[v][ls], fli[v2][ls2]));
+				AutoFlagA(v, 331, s4, s4, v2, 100);
+			}
 		}
 	}
 }
@@ -5031,13 +5033,15 @@ void CP2R::EvalTriDouble() {
 			vc = vca[s5];
 			if (tccc[cc1] == 2 && tccc[cc2] == 1) {
 				v2 = tccv[cc1][1];
-				s4 = max(hstart, fli[v2][bli[v2][s]]);
-				AutoFlagA(v2, 222, s4, s4, tccv[cc1][0], 100);
+				v3 = tccv[cc1][0];
+				s4 = max(hstart, max(fli[v2][bli[v2][s]], fli[v3][bli[v3][s]]));
+				AutoFlagA(v2, 222, s4, s4, v3, 100);
 			}
 			else if (tccc[cc1] == 1 && tccc[cc2] == 2) {
 				v2 = tccv[cc2][1];
-				s4 = max(hstart, fli[v2][bli[v2][s]]);
-				AutoFlagA(v2, 222, s4, s4, tccv[cc2][0], 100);
+				v3 = tccv[cc2][0];
+				s4 = max(hstart, max(fli[v2][bli[v2][s]], fli[v3][bli[v3][s]]));
+				AutoFlagA(v2, 222, s4, s4, v3, 100);
 			}
 		}
 	}
