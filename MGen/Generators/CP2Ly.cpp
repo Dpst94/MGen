@@ -1057,9 +1057,13 @@ void CP2Ly::SendLyHarmMistakes() {
 	ly_ly_st += "      \\override StanzaNumber.font-size = #-2\n";
 	ly_ly_st += "      \\set stanza = #\" Flags:\"\n";
 	for (s = 0; s < c_len; ++s) {
+		int max_fss = lyv[v].fss3[s].size();
+		if (!max_fss) {
+			ly_ly_st += "      \\skip 8\n";
+			continue;
+		}
 		ls = bli[v][s];
 		ly_ly_st += "      \\markup{ \\teeny \\override #'(baseline-skip . 1.6) { \\dir-column {\n";
-		int max_fss = lyv[v].fss3[s].size();
 		// Do not show too many mistakes
 		if (lyv[v].fss3[s].size() > 3) {
 			max_fss = 3;
