@@ -1120,9 +1120,6 @@ void CP2Ly::SendLyViz(int phase) {
 				// Remove flag number for parallel pco apart
 				ls3 = bli[fv][F.s_src];
 				ls4 = bli[fv][F.sl_src];
-				if (cp_id == 0 && gn == 3) {
-					WriteLog(5, "WOW");
-				}
 				if (shape == vGlis && 
 					(ls3 - ls4 > 1 || F.sl_src < sus[fv][ls4] || 
 					(sus[fv][ls3] && F.s_src >= sus[fv][ls3]))) 
