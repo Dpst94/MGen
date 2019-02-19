@@ -4571,8 +4571,8 @@ int CP2R::FailUnison() {
 			s3 = fli[v2][ls2] - 1;
 			// 2nd -> unison
 			civl2 = abs(cc[v2][s3] - cc[v][s3]);
-			if (civl2 == 1) AutoFlagL(v, 275, s, max(ssus[v2][ls - 1], ssus[v][ls2 - 1]), v2);
-			else if (civl2 == 2) AutoFlagL(v, 277, s, max(ssus[v2][ls - 1], ssus[v][ls2 - 1]), v2);
+			if (civl2 == 1) AutoFlagL(v, 275, s, max(ssus[v2][ls2 - 1], ssus[v][ls - 1]), v2);
+			else if (civl2 == 2) AutoFlagL(v, 277, s, max(ssus[v2][ls2 - 1], ssus[v][ls - 1]), v2);
 		}
 	}
 	return 0;
