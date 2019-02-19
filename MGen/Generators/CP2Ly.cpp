@@ -660,7 +660,7 @@ void CP2Ly::SaveLyCP() {
 		GetMelodyInterval(0, c_len);
 	}
 	// Key
-	key_visual = "\\concat { " + NoteName[bn - bn_alter] + " " + GetLyAlterVisual(bn_alter, "\\raise #0.3 \\magnify #0.5") + " }\n";
+	key_visual = "\\concat { " + NoteName[(bn + 12 - bn_alter) % 12] + " " + GetLyAlterVisual(bn_alter, "\\raise #0.4 \\magnify #0.8 ") + " }\n";
 	// Spacer
 	ly_ly_st += "\\markup {\n  ";
 	ly_ly_st += "    \\vspace #1\n";

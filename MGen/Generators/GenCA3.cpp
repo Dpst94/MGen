@@ -747,8 +747,19 @@ void CGenCA3::GetCPKey() {
 			GetHarm(lchm, rat);
 			bn = c_cc[lchm + 14] % 12;
 			// Get base note alteration
+			bn_alter = -1;
 			for (v = 0; v < av_cnt; ++v) {
-				if ((pcc[v][s] + maj_bn) % 12 == bn) bn_alter = src_alter[v][s];
+				if ((pcc[v][s] + maj_bn) % 12 == bn) {
+					bn_alter = src_alter[v][s];
+				}
+			}
+			// If no root note was found
+			if (bn_alter == -1) {
+				if (bn == 1 || bn == 3 || bn == 6 || bn == 8 || bn == 10) {
+					if (fifths > 0) bn_alter = 1;
+					else bn_alter = -1;
+				}
+				else bn_alter = 0;
 			}
 			break;
 		}
