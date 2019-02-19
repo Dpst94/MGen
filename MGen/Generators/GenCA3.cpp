@@ -720,6 +720,7 @@ void CGenCA3::GetCPKey() {
 	// Temporarily set base note to major base note for last chord detection
 	bn = maj_bn;
 	mode = 0;
+	bn_alter = 0;
 	BuildPitchConvert();
 	// Get diatonic pitch class for chord detection
 	GetDiatonic(0, c_len);
@@ -745,6 +746,10 @@ void CGenCA3::GetCPKey() {
 			int rat;
 			GetHarm(lchm, rat);
 			bn = c_cc[lchm + 14] % 12;
+			// Get base note alteration
+			for (v = 0; v < av_cnt; ++v) {
+				if ((pcc[v][s] + maj_bn) % 12 == bn) bn_alter = src_alter[v][s];
+			}
 			break;
 		}
 	}

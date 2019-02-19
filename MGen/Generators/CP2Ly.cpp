@@ -26,6 +26,20 @@ CString CP2Ly::GetLyNoteCP() {
 	return LyNoteSharp[no2] + GetLyAlter(alter) + LyOctave[oct];
 }
 
+CString CP2Ly::GetLyNoteVisualCP(CString sz) {
+	int no2, oct, alter;
+	if (src_alter[v][s]) {
+		no2 = (cc[v][s] - src_alter[v][s]) % 12;
+		alter = src_alter[v][s];
+		oct = (cc[v][s] - src_alter[v][s]) / 12;
+	}
+	else {
+		GetRealNote(cc[v][s], maj_bn, 0, no2, oct, alter);
+	}
+	//GetRealNote(cc[v][s], bn, mode == 9, no2, oct, alter);
+	return NoteName[no2] + GetLyAlterVisual(alter, sz);
+}
+
 // Get start of real note
 int CP2Ly::GetNoteStart(int voice, int step) {
 	int lstep = bli[voice][step];
@@ -646,16 +660,7 @@ void CP2Ly::SaveLyCP() {
 		GetMelodyInterval(0, c_len);
 	}
 	// Key
-	if (mode == 9) {
-		key = LyMinorKey[bn];
-	}
-	else {
-		key = LyMajorKey[bn];
-	}
-	key_visual = key[0];
-	key_visual.MakeUpper();
-	if (key[1] == 'f') key_visual += "\\flat ";
-	if (key[1] == 's') key_visual = "\"" + key_visual + "#\"";
+	key_visual = "\\concat { " + NoteName[bn - bn_alter] + " " + GetLyAlterVisual(bn_alter, "\\raise #0.3 \\magnify #0.5") + " }\n";
 	// Spacer
 	ly_ly_st += "\\markup {\n  ";
 	ly_ly_st += "    \\vspace #1\n";
@@ -1089,12 +1094,6 @@ void CP2Ly::SendLyHarmMistakes() {
 	ly_ly_st += "  }\n";
 }
 
-CString CP2Ly::GetLyNoteVisualCP(CString sz) {
-	int no2, oct, alter;
-	GetRealNote(cc[v][s], bn, mode == 9, no2, oct, alter);
-	return NoteName[no2] + GetLyAlterVisual(alter, sz);
-}
-
 void CP2Ly::SendLyViz(int phase) {
 	int shape, sev;
 	if (!lyv[v].s.size()) return;
@@ -1180,8 +1179,8 @@ void CP2Ly::SaveLyComments() {
 			//st.Format("%d. %s", av_cnt - v, vname[vid[v]]);
 			note_st += vname2[vid[v]];
 		}
-		st.Format(" [bar %d, beat %d] note %s", // ly_nnum
-			s / 8 + 1, (s % 8) / 2 + 1,
+		st.Format(" [bar %d, beat %d] note \\concat { %s } ", // ly_nnum
+			s / npm + 1, (s % npm) / 2 + 1,
 			GetLyNoteVisualCP("\\raise #0.3 \\magnify #0.7 "));
 		if (fli[v][ls] != s)
 			st += " (middle)";
@@ -1231,7 +1230,7 @@ void CP2Ly::SaveLyComments() {
 			//com += " " + st;
 			// Print link to other part and step
 			CString sl_st;
-			sl_st.Format("bar %d, beat %d", lyv[v].f[s][f].sl_src / 8 + 1, (lyv[v].f[s][f].sl_src % 8) / 2 + 1);
+			sl_st.Format("bar %d, beat %d", lyv[v].f[s][f].sl_src / npm + 1, (lyv[v].f[s][f].sl_src % npm) / 2 + 1);
 			if (lyv[v].f[s][f].vl != v && av_cnt > 2) {
 				com += " - with " + vname2[vid[lyv[v].f[s][f].vl]];
 				if (lyv[v].f[s][f].sl_src != lyv[v].f[s][f].s_src) {

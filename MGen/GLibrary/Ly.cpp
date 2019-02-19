@@ -185,7 +185,7 @@ CString CLy::GetLyAlter(int alter) {
 
 CString CLy::GetLyAlterVisual(int alter, CString sz) {
 	if (alter > 2) alter -= 12;
-	if (alter < -2) alter += 12; 
+	if (alter < -2) alter += 12;
 	if (alter == -1) return sz + "\\flat ";
 	else if (alter == -2) return sz + "\\doubleflat ";
 	else if (alter == 1) return "\"#\"";

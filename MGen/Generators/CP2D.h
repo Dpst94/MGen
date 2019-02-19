@@ -230,6 +230,7 @@ protected:
 	int maj_bn = 0; // Base note if it was major (C - 0, Am - 0)
 	int mminor = 1; // If current cp is in melodic minor
 	int mode = 9; // 0 - major, 2 - dorian, 9 - aeolian
+	int bn_alter = 0; // Alteration to achieve base tonic note
 
 	int cp_tempo = 100;
 	int step0 = 0;
