@@ -5132,9 +5132,9 @@ void CP2R::GetMinimumMsh() {
 		else if (s % npm == 0) {
 			// Long on downbeat
 			if (llen[v][ls] > 4 || leap[v][s2])	msh[v][s] = pDownbeat;
-			// Downbeat note not surrounded by descending stepwise movement
+			// Downbeat note not surrounded by stepwise movement
 			// TODO: Optimize for generation
-			else if (smooth[v][s - 1] != -1 || (s2 < ep2 - 1 && smooth[v][s2] != -1)) {
+			else if (smooth[v][s - 1] == 0 || (s2 < ep2 - 1 && smooth[v][s2] == 0)) {
 				msh[v][s] = pDownbeat;
 			}
 		}
@@ -6052,13 +6052,15 @@ void CP2R::DetectPDD() {
 	if (nih[v][s]) return;
 	// No pauses
 	if (!cc[v][s - 1] || !cc[v][s2 + 1]) return;
-	// Stepwize downward movement
-	if (c[v][s] - c[v][s - 1] != -1) return;
 	// Note 2 is not too long
 	if (llen[v][ls] > 4) return;
+	// Stepwize movement
+	if (abs(c[v][s] - c[v][s - 1]) != 1) return;
 	if (ls < fli_size[v] - 1) {
-		// Stepwise descending movement
-		if (c[v][s2 + 1] - c[v][s2] != -1) return;
+		// Stepwise movement in same direction
+		if (c[v][s2 + 1] - c[v][s2] != c[v][s] - c[v][s - 1]) return;
+		// Prohibit movement up a tone. Allow up a semitone, down a tone or semitone
+		if (cc[v][s2 + 1] - cc[v][s2] == 2) return;
 		// Note 2 is not longer than 3
 		if (llen[v][ls] > llen[v][ls + 1] && (ep2 == c_len || ls < fli_size[v] - 2)) return;
 		// Third note must be chord note
