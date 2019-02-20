@@ -652,7 +652,7 @@ void CP2Ly::SaveLyCP() {
 	InitLy();
 	ParseLy();
 	vector<CString> sv;
-	CString clef, key, key_visual;
+	CString clef, key_visual;
 	int pos, pos2, le, le2, pause_accum, pause_pos, pause_i;
 	ly_com_st.Empty();
 	ly_ly_st.Empty();
