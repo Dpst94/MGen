@@ -4794,10 +4794,12 @@ void CP2R::DetectAux() {
 	int mea_end = mli[ms] + npm - 1;
 	for (ls = bli[v][hstart]; ls <= bli[v][hend]; ++ls) {
 		s = fli[v][ls];
-		// Skip pauses
-		if (!cc[v][s]) continue;
+		// Skip first note
+		if (!ls) continue;
 		// Only if current note is non-harmonic tone
 		if (msh[v][s] > 0) continue;
+		// Skip pauses
+		if (!cc[v][s] || !cc[v][s - 1]) continue;
 		// Only if current note is longer than a croche
 		if (llen[v][ls] < 2) continue;
 		// Do not work with last note
