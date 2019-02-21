@@ -1922,13 +1922,12 @@ int CP2R::FailStagnation(int steps, int notes, int stag_fl) {
 	nstat[0] = 0;
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
-		if (!cc[v][s]) continue;
 		// Add new note to stagnation array
 		++nstat[cc[v][s]];
 		// Subtract old note
 		if (ls >= steps) --nstat[cc[v][fli[v][ls - steps]]];
 		// Check if too many repeating notes
-		if (nstat[cc[v][s]] > notes) 
+		if (nstat[cc[v][s]] > notes && cc[v][s]) 
 			FlagVL(v, stag_fl, s, fli[v][max(0, ls - steps)]);
 	}
 	return 0;
@@ -2333,7 +2332,6 @@ int CP2R::FailLocalPiCount(int notes, int picount, int pic_fl) {
 	int last_flag_ls = -10;
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
-		if (!cc[v][s]) continue;
 		// Add new note to stagnation array
 		++nstat[cc[v][s]];
 		// Subtract old note
@@ -3132,7 +3130,8 @@ void CP2R::FlagFullSimilar() {
 		if (pcc[lva[s]][s] == cct[hs][1]) continue;
 		int dir = 0;
 		for (v = 0; v < av_cnt; ++v) {
-			if (!cc[v][s]) continue;
+			// Stop processing if there are pauses or same notes is repeated - dir will be too low to trigger
+			if (!cc[v][s] || !cc[v][s - 1] || cc[v][s] == cc[v][s - 1]) break;
 			if (cc[v][s] > cc[v][s - 1]) ++dir;
 			else if (cc[v][s] < cc[v][s - 1]) --dir;
 		}
@@ -3187,16 +3186,26 @@ int CP2R::FailAnapaest() {
 		}
 		if (start4 != -1) continue;
 		// Detect note start at beat 2 if there is no beat 4
+		int found = 0;
+		int found_v = 0;
 		for (v = 0; v < av_cnt; ++v) {
 			if (fli[v][bli[v][s0 + 2]] == s0 + 2 && cc[v][s0 + 2]) {
 				// If this is the only sp5 voice, check if it ends with slur
 				if (vsp[v] == 5 && sp5_count == 1 && sus[v][bli[v][s0 + npm - 1]]) {
-					FlagV(v, 239, s0 + 2);
+					if (!found) {
+						found = 1;
+						found_v = v;
+					}
 				}
-				else FlagV(v, 240, s0 + 2);
-				break;
+				else {
+					found = 2;
+					found_v = v;
+					break;
+				}
 			}
 		}
+		if (found == 1) FlagV(found_v, 239, s0 + 2);
+		else if (found == 2) FlagV(found_v, 240, s0 + 2);
 	}
 	return 0;
 }
@@ -3532,13 +3541,16 @@ int CP2R::FailSusCount() {
 	CHECK_READY(DR_sus, DR_fli);
 	int c_sus = 0;
 	int c_anti = 0;
+	// Calculate sus and anticipation count
 	for (ls = 0; ls < fli_size[v]; ++ls) {
 		s = fli[v][ls];
-		if (sus[v][ls] && cc[v][s]) {
+		if (!cc[v][s]) continue;
+		if (sus[v][ls]) {
 			if (retr[v][sus[v][ls]]) ++c_anti;
 			else ++c_sus;
 		}
 	}
+	// Measure count
 	int mcount = bmli[ep2 - 1];
 	// Do not check for first measure
 	if (!mcount) return 0;
