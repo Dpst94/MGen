@@ -4170,6 +4170,10 @@ void CP2R::EvalMshHarm(int hvar) {
 	if (lhbc % 7 == de2) hpenalty += 1;
 	// Find root in harmonic notes
 	int found_de1 = 0;
+	// Find 3rd in harmonic notes
+	int found_de2 = 0;
+	// Find 5th in harmonic notes
+	int found_de3 = 0;
 	// Find 7th in harmonic notes
 	int found_de4 = 0;
 	for (v = 0; v < av_cnt; ++v) {
@@ -4182,11 +4186,17 @@ void CP2R::EvalMshHarm(int hvar) {
 			else s5 = s;
 			if (msh[v][s5] <= 0) continue;
 			if (nt == de1) found_de1 = 1;
+			else if (nt == de2) found_de2 = 1;
+			else if (nt == de3) found_de3 = 1;
 			else if (nt == de4) found_de4 = 1;
 		}
 	}
 	// Increase penalty for chord without root (probably wrong chord detected)
 	if (!found_de1) hpenalty += 1000;
+	// Prohibit 7th chord without 3rd or 5th (in this case 7th note is a non-chord tone)
+	if (!found_de2 && !found_de3 && found_de4) {
+		++nct_count;
+	}
 	// Flag 7th chord
 	if (found_de4) 
 		FlagA(0, 194, hstart, hstart, 0, 80);
