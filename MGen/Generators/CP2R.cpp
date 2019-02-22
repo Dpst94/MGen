@@ -177,6 +177,7 @@ int CP2R::EvaluateCP() {
 			if (FailNoteRepeat()) return 1;
 		}
 		if (FailFirstNotes()) return 1;
+		FlagFirstInterval();
 		if (FailCross()) return 1;
 		if (FailOverlap()) return 1;
 		if (FailLocalPiCount(notes_picount[sp][av_cnt][0], min_picount[sp][av_cnt][0], 344)) return 1;
@@ -2002,6 +2003,27 @@ int CP2R::FailFirstNotes() {
 		if (pcc[v][s] == 10) FlagV(v, 202, s);
 	}
 	return 0;
+}
+
+void CP2R::FlagFirstInterval() {
+	CHECK_READY(DR_fli, DR_pc, DR_sus);
+	CHECK_READY(DR_vca);
+	s = fin[v];
+	vc = vca[s];
+	for (v2 = 0; v2 < av_cnt; ++v2) {
+		// Skip pauses
+		if (!cc[v2][s]) continue;
+		GetVp();
+		int civl = abs(cc[v][s] - cc[v2][s]);
+		int civl2 = civl;
+		if (civl2 > 14) civl2 = civl % 12;
+		if (civl2 == 1) Flag(v, 252, s, v2);
+		else if (civl2 == 2) Flag(v, 241, s, v2);
+		else if (civl2 == 10) Flag(v, 242, s, v2);
+		else if (civl2 == 11) Flag(v, 253, s, v2);
+		else if (civl2 == 13) Flag(v, 254, s, v2);
+		else if (civl2 == 14) Flag(v, 243, s, v2);
+	}
 }
 
 int CP2R::FailLastNotes() {
@@ -4798,6 +4820,7 @@ int CP2R::FailMsh() {
 	return 0;
 }
 
+// Detect wrong aux pattern, apply pAuxWrong and flag/hpenalty/nct_count
 void CP2R::DetectAux() {
 	CHECK_READY(DR_fli, DR_nih, DR_msh);
 	CHECK_READY(DR_c);
@@ -4808,7 +4831,7 @@ void CP2R::DetectAux() {
 		s = fli[v][ls];
 		// Skip first note
 		if (!ls) continue;
-		// Only if current note is non-harmonic tone
+		// Only if current note is non required to be harmonic
 		if (msh[v][s] > 0) continue;
 		// Skip pauses
 		if (!cc[v][s] || !cc[v][s - 1]) continue;

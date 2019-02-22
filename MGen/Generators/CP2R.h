@@ -216,6 +216,7 @@ protected:
 	inline int FailStagnation(int steps, int notes, int fl);
 	inline int FailMultiCulm();
 	inline int FailFirstNotes();
+	void FlagFirstInterval();
 	inline int FailLastNotes();
 	inline int FailAdSymRepeat(int relen);
 	inline int IsRepeat(int ls1, int ls2, int relen);
