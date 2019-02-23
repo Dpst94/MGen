@@ -3872,7 +3872,14 @@ void CP2R::RemoveMinimumMsh() {
 
 // Get chns, cchns, chm_his, chm_fis for current hs
 void CP2R::GetChord(int hstep) {
+	SET_READY(DR_chm_fis, DR_chns);
+	chm_fis.resize(hli.size(), 0);
+	chm_gis.resize(hli.size(), 0);
+	chns.resize(hli.size(), empty_chn);
+	cchns.resize(hli.size(), empty_cchn);
+	cctp.resize(hli.size(), vector<int>(4));
 	hs = hstep;
+	GetBhli();
 	for (v = 0; v < av_cnt; ++v) {
 		ls2 = bli[v][hli2[hs]];
 		for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
@@ -3915,20 +3922,7 @@ void CP2R::GetChord(int hstep) {
 int CP2R::FailHarm() {
 	CHECK_READY(DR_fli, DR_pc);
 	CHECK_READY(DR_msh, DR_hli);
-	SET_READY(DR_chm_fis, DR_chns, DR_hbc);
-	chm_fis.clear();
-	chm_fis.resize(hli.size(), 0);
-	chm_gis.clear();
-	chm_gis.resize(hli.size(), 0);
-	chns.clear();
-	cchns.clear();
-	chns.resize(hli.size(), empty_chn);
-	cchns.resize(hli.size(), empty_cchn);
-	cctp.clear();
-	cctp.resize(hli.size(), vector<int>(4));
-	for (hs = 0; hs < hli.size(); ++hs) {
-		GetChord(hs);
-	}
+	SET_READY(DR_hbc);
 	GetHarmBass();
 	// Check first harmony not T
 	if (chm.size() && chm[0] > -1 && (chm[0] || hbc[0] % 7)) {
@@ -4127,11 +4121,8 @@ int CP2R::FailHarmStep(int i, const int* hv, int &count, int &wcount, int repeat
 
 void CP2R::GetBhli() {
 	CHECK_READY(DR_hli);
-	fill(bhli.begin(), bhli.end(), 0);
-	for (int hs = 0; hs < chm.size(); ++hs) {
-		for (s = hli[hs]; s <= hli2[hs]; ++s) {
-			bhli[s] = hs;
-		}
+	for (s = hli[hs]; s <= hli2[hs]; ++s) {
+		bhli[s] = hs;
 	}
 }
 
@@ -5229,6 +5220,13 @@ void CP2R::GetMsh() {
 	hli2.clear();
 	chn.clear();
 	cchn.clear();
+	// GetHarm
+	fill(bhli.begin(), bhli.end(), 0);
+	chm_fis.clear();
+	chm_gis.clear();
+	chns.clear();
+	cchns.clear();
+	cctp.clear();
 	hs = 0;
 	for (ms = 0; ms < mli.size(); ++ms) {
 		chn.resize(hs);
@@ -5455,12 +5453,15 @@ void CP2R::GetMsh() {
 				chm_alter.push_back(best_hv_alt);
 				hli.push_back(s0);
 				hli2.push_back(s0 + best_shp - 1);
+				GetChord(hs);
+				++hs;
 				// Add second harmony
 				chm.push_back(best_hv2);
 				chm_alter.push_back(best_hv_alt2);
 				hli.push_back(s0 + best_shp);
 				hli2.push_back(s0 + npm - 1);
-				hs += 2;
+				GetChord(hs);
+				++hs;
 			}
 			else {
 				// Add one harmony
@@ -5468,6 +5469,7 @@ void CP2R::GetMsh() {
 				chm_alter.push_back(best_hv_alt);
 				hli.push_back(s0);
 				hli2.push_back(s0 + npm - 1);
+				GetChord(hs);
 				++hs;
 			}
 		}
@@ -5477,10 +5479,10 @@ void CP2R::GetMsh() {
 			chm_alter.push_back(0);
 			hli.push_back(s0);
 			hli2.push_back(s0 + npm - 1);
+			GetChord(hs);
 			++hs;
 		}
 	}
-	GetBhli();
 }
 
 void CP2R::GetMsh2(int sec_hp) {
