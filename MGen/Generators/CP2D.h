@@ -446,8 +446,6 @@ protected:
 	vector <int> chm_alter; // [hs] Type of harmonic meaning
 	vector <int> chm_fis; // [hs] F# in chm in melodic Am
 	vector <int> chm_gis; // [hs] G# in chm in melodic Am
-	int hv; // Current harmony variant being analysed
-	int hv_alt; // Current harmony alteration variant being analysed
 	vector<int> empty_chn;
 	vector<int> empty_cchn;
 

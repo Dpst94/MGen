@@ -3587,7 +3587,7 @@ int CP2R::FailNoteRepeat() {
 	CHECK_READY(DR_fli);
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		s = fli[v][ls];
-		if (cc[v][s] && cc[v][s] == cc[v][fli[v][ls + 1]]) FlagV(v, 30, fli[v][ls]);
+		if (cc[v][s] && cc[v][s] == cc[v][fli[v][ls + 1]]) FlagL(v, 30, fli[v][ls], fli[v][ls + 1], v);
 	}
 	return 0;
 }
@@ -3778,7 +3778,7 @@ int CP2R::FailRetrInside() {
 // Detect all possible chords
 void CP2R::GetHarmVar(vector<int> &cpos, int &poss_vars) {
 	poss_vars = 0;
-	for (hv = 0; hv < 7; ++hv) {
+	for (int hv = 0; hv < 7; ++hv) {
 		// At least one note exists
 		if (!chn[hs][hv] && !chn[hs][(hv + 2) % 7] && !chn[hs][(hv + 4) % 7] &&
 			(!chn[hs][(hv + 6) % 7] || severity[sp][av_cnt][0][194] > 60)) continue;
@@ -4183,7 +4183,9 @@ void CP2R::EvalMshHarm(int hvar) {
 		}
 	}
 	// Increase penalty for chord without root (probably wrong chord detected)
-	if (!found_de1) hpenalty += 1000;
+	if (!found_de1) {
+		++nct_count;
+	}
 	// Prohibit 7th chord without 3rd or 5th (in this case 7th note is a non-chord tone)
 	if (!found_de2 && !found_de3 && found_de4) {
 		++nct_count;
@@ -5295,9 +5297,9 @@ void CP2R::GetMsh() {
 		min_hpenalty = 1000000;
 		// Scan all possible chords
 		for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
-			hv = hv2 % 7;
+			int hv = hv2 % 7;
 			if (!cpos[hv]) continue;
-			for (hv_alt = 0; hv_alt < 4; ++hv_alt) {
+			for (int hv_alt = 0; hv_alt < 4; ++hv_alt) {
 				// Only for melodic minor
 				if (hv_alt && !mminor) continue;
 				fill(cchnv[0].begin(), cchnv[0].end(), 0);
@@ -5366,10 +5368,10 @@ void CP2R::GetMsh() {
 					ls = bli[v][s];
 					s2 = fli2[v][ls];
 					DetectSus();
-					DetectPDD();
+					DetectPDD(hv);
 					DetectDNT();
 					DetectCambiata();
-					if (s0 && hv == chm[bhli[s0 - 1]]) DetectNFBD();
+					if (s0 && hv == chm[bhli[s0 - 1]]) DetectNDD();
 					DetectAux();
 					EvaluateMsh();
 					EvalHarm4thTritone();
@@ -5556,9 +5558,9 @@ void CP2R::GetMsh2(int sec_hp) {
 	}
 	// Scan all possible chords
 	for (int hv2 = lchm[0] + 7; hv2 > lchm[0]; --hv2) {
-		hv = hv2 % 7;
+		int hv = hv2 % 7;
 		if (!cpos[0][hv]) continue;
-		for (hv_alt = 0; hv_alt < 4; ++hv_alt) {
+		for (int hv_alt = 0; hv_alt < 4; ++hv_alt) {
 			// Only for melodic minor
 			if (hv_alt && !mminor) continue;
 			fill(cchnv[0].begin(), cchnv[0].end(), 0);
@@ -5687,7 +5689,7 @@ void CP2R::GetMsh2(int sec_hp) {
 						ls = bli[v][s];
 						s2 = fli2[v][ls];
 						DetectSus();
-						DetectPDD();
+						DetectPDD(hv);
 						// Second harmony
 						hstart = s0 + sec_hp;
 						hend = s0 + npm - 1;
@@ -5696,7 +5698,7 @@ void CP2R::GetMsh2(int sec_hp) {
 						ls = bli[v][s];
 						s2 = fli2[v][ls];
 						DetectSus();
-						DetectPDD();
+						DetectPDD(hv3);
 						// Full measure
 						hstart = s0;
 						DetectDNT();
@@ -5704,7 +5706,7 @@ void CP2R::GetMsh2(int sec_hp) {
 						// First harmony
 						hstart = s0;
 						hend = s0 + sec_hp - 1;
-						if (s0 && hv == chm[bhli[s0 - 1]]) DetectNFBD();
+						if (s0 && hv == chm[bhli[s0 - 1]]) DetectNDD();
 						DetectAux();
 						EvaluateMsh();
 						EvalHarm4thTritone();
@@ -6111,7 +6113,7 @@ void CP2R::DetectSus() {
 	}
 }
 
-void CP2R::DetectPDD() {
+void CP2R::DetectPDD(int hvar) {
 	CHECK_READY(DR_fli, DR_c, DR_resol);
 	CHECK_READY(DR_msh, DR_nih);
 	if (severity[sp][vc][0][282] > 60) return;
@@ -6136,7 +6138,12 @@ void CP2R::DetectPDD() {
 		// Stepwise movement in same direction
 		if (c[v][s2 + 1] - c[v][s2] != c[v][s] - c[v][s - 1]) return;
 		// Prohibit movement up a tone. Allow up a semitone, down a tone or semitone
-		if (cc[v][s2 + 1] - cc[v][s2] == 2) return;
+		if (cc[v][s2 + 1] - cc[v][s2] == 2) {
+			// Prohibit movement up a tone in second harmony, because it cannot be same as previous
+			if (hstart != s0) return;
+			// Prohibit movement up a tone if previous harmony differs
+			if (!s0 || hvar != chm[bhli[s0 - 1]]) DetectNDD();
+		}
 		// Note 2 is not longer than 3
 		if (llen[v][ls] > llen[v][ls + 1] && (ep2 == c_len || ls < fli_size[v] - 2)) return;
 		// Third note must be chord note
@@ -6151,7 +6158,7 @@ void CP2R::DetectPDD() {
 }
 
 // Detect neighbor tone first beat dissonance and make it msh < 0
-void CP2R::DetectNFBD() {
+void CP2R::DetectNDD() {
 	CHECK_READY(DR_fli, DR_c, DR_resol);
 	CHECK_READY(DR_msh, DR_nih);
 	if (!accept[sp][vc][0][257]) return;
@@ -6186,7 +6193,7 @@ void CP2R::DetectNFBD() {
 		msh[v][fli[v][ls]] = pAuxPDD;
 		msh[v][fli[v][ls + 1]] = pHarmonicPDD;
 		resol[v][hstart] = fli[v][ls + 1];
-		// Increase hpenalty so that NFBD is selected only as worst case (if NFBD is prohibited)
+		// Increase hpenalty so that NDD is selected only as worst case (if NDD is prohibited)
 		FlagA(v, 257, s, s, v, 450);
 	}
 }

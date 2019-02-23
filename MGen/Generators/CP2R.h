@@ -198,6 +198,7 @@ protected:
 	inline void EvalTriDouble();
 	inline void GetMeasureMsh(int sec_hp);
 	inline void DetectSus();
+	inline void DetectPDD(int hvar);
 	inline void DetectPDD();
 	inline void DetectDNT();
 	inline void DetectCambiata();
@@ -253,7 +254,7 @@ protected:
 	inline int FailRhythmRepeat();
 	inline int FailMissSlurs();
 	inline int FailSlurs();
-	inline void DetectNFBD();
+	inline void DetectNDD();
 	inline int FailStartPause();
 	inline void FlagLTUnresolved();
 	inline void FlagHarmTriRes();
