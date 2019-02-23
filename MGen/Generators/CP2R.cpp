@@ -5296,139 +5296,143 @@ void CP2R::GetMsh() {
 		}
 		min_hpenalty = 1000000;
 		// Scan all possible chords
-		for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
-			int hv = hv2 % 7;
-			if (!cpos[hv]) continue;
-			for (int hv_alt = 0; hv_alt < 4; ++hv_alt) {
-				// Only for melodic minor
-				if (hv_alt && !mminor) continue;
-				fill(cchnv[0].begin(), cchnv[0].end(), 0);
-				cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
-				cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 2;
-				cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 3;
-				// Prohibit 7th if its severity is red
-				if (severity[sp][av_cnt][0][194] <= 60) {
-					cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
-				}
-				if (mminor) {
-					if (hv_alt == 3) {
-						// Skip if no notes to alter
-						if (!cchnv[0][8] || !cchnv[0][10]) continue;
-						// Skip if this variant conflicts with detected notes
-						if (cchn[hs][8]) continue;
-						if (cchn[hs][10]) continue;
-						// Convert to altered
-						cchnv[0][9] = cchnv[0][8];
-						cchnv[0][8] = 0;
-						// Convert to altered
-						cchnv[0][11] = cchnv[0][10];
-						cchnv[0][10] = 0;
+		for (int hv7 = 0; hv7 < 2; ++hv7) {
+			if (hv7 && severity[sp][av_cnt][0][194] > 60) break;
+			for (int hv2 = lchm + 7; hv2 > lchm; --hv2) {
+				int hv = hv2 % 7;
+				if (!cpos[hv]) continue;
+				for (int hv_alt = 0; hv_alt < 4; ++hv_alt) {
+					// Only for melodic minor
+					if (hv_alt && !mminor) continue;
+					fill(cchnv[0].begin(), cchnv[0].end(), 0);
+					cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
+					cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 2;
+					cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 3;
+					// Prohibit 7th if its severity is red
+					if (hv7 && severity[sp][av_cnt][0][194] <= 60) {
+						cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
 					}
-					if (hv_alt == 2) {
-						// Skip if no notes to alter
-						if (!cchnv[0][10]) continue;
-						// Skip if this variant conflicts with detected notes
-						if (cchn[hs][10]) continue;
-						// Convert to altered
-						cchnv[0][11] = cchnv[0][10];
-						cchnv[0][10] = 0;
-					}
-					if (hv_alt == 1) {
-						// Skip if no notes to alter
-						if (!cchnv[0][8]) continue;
-						// Skip if this variant conflicts with detected notes
-						if (cchn[hs][8]) continue;
-						// Convert to altered
-						cchnv[0][9] = cchnv[0][8];
-						cchnv[0][8] = 0;
-					}
-					else {
-						if (cchnv[0][8]) {
+					if (mminor) {
+						if (hv_alt == 3) {
+							// Skip if no notes to alter
+							if (!cchnv[0][8] || !cchnv[0][10]) continue;
 							// Skip if this variant conflicts with detected notes
-							if (cchn[hs][9]) continue;
+							if (cchn[hs][8]) continue;
+							if (cchn[hs][10]) continue;
+							// Convert to altered
+							cchnv[0][9] = cchnv[0][8];
+							cchnv[0][8] = 0;
+							// Convert to altered
+							cchnv[0][11] = cchnv[0][10];
+							cchnv[0][10] = 0;
 						}
-						if (cchnv[0][10]) {
+						if (hv_alt == 2) {
+							// Skip if no notes to alter
+							if (!cchnv[0][10]) continue;
 							// Skip if this variant conflicts with detected notes
-							if (cchn[hs][11]) continue;
+							if (cchn[hs][10]) continue;
+							// Convert to altered
+							cchnv[0][11] = cchnv[0][10];
+							cchnv[0][10] = 0;
+						}
+						if (hv_alt == 1) {
+							// Skip if no notes to alter
+							if (!cchnv[0][8]) continue;
+							// Skip if this variant conflicts with detected notes
+							if (cchn[hs][8]) continue;
+							// Convert to altered
+							cchnv[0][9] = cchnv[0][8];
+							cchnv[0][8] = 0;
+						}
+						else {
+							if (cchnv[0][8]) {
+								// Skip if this variant conflicts with detected notes
+								if (cchn[hs][9]) continue;
+							}
+							if (cchnv[0][10]) {
+								// Skip if this variant conflicts with detected notes
+								if (cchn[hs][11]) continue;
+							}
 						}
 					}
-				}
-				flaga.clear();
-				hpenalty = 0;
-				nct_count = 0;
-				for (v = 0; v < av_cnt; ++v) {
-					sp = vsp[v];
-					GetMeasureMsh(-1);
-					// Clear resolutions
-					for (s = s0; s < s0 + npm; ++s) {
-						resol[v][s] = 0;
+					flaga.clear();
+					hpenalty = 0;
+					nct_count = 0;
+					for (v = 0; v < av_cnt; ++v) {
+						sp = vsp[v];
+						GetMeasureMsh(-1);
+						// Clear resolutions
+						for (s = s0; s < s0 + npm; ++s) {
+							resol[v][s] = 0;
+						}
+						GetNotesInHarm();
+						s = hstart;
+						ls = bli[v][s];
+						s2 = fli2[v][ls];
+						DetectSus();
+						DetectPDD(hv);
+						DetectDNT();
+						DetectCambiata();
+						if (s0 && hv == chm[bhli[s0 - 1]]) DetectNDD();
+						DetectAux();
+						EvaluateMsh();
+						EvalHarm4thTritone();
 					}
-					GetNotesInHarm();
-					s = hstart;
-					ls = bli[v][s];
-					s2 = fli2[v][ls];
-					DetectSus();
-					DetectPDD(hv);
-					DetectDNT();
-					DetectCambiata();
-					if (s0 && hv == chm[bhli[s0 - 1]]) DetectNDD();
-					DetectAux();
-					EvaluateMsh();
-					EvalHarm4thTritone();
-				}
-				EvalTriDouble();
-				EvalMshHarm(hv);
-				EvalHarmAmbig(hv);
-				EvalHarmIncomplete(hv);
+					EvalTriDouble();
+					EvalMshHarm(hv);
+					EvalHarmAmbig(hv);
+					EvalHarmIncomplete(hv);
 #if defined(_DEBUG)
-				CString st, est;
-				est.Format("Checked chord %s%d in measure %d:%d, hpenalty %d, nct %d, flags %d:",
-					degree_name[hv], hv_alt, cp_id + 1, ms + 1,
-					hpenalty, nct_count, flaga.size());
-				est += " msh:";
-				for (v = 0; v < av_cnt; ++v) {
-					for (int i = 0; i < npm; ++i) {
-						st.Format(" %d", msh[v][s0 + i]);
+					CString st, est;
+					est.Format("Checked chord %s%d%s in measure %d:%d, hpenalty %d, nct %d, flags %d:",
+						degree_name[hv], hv_alt, hv7 ? "7":"", 
+						cp_id + 1, ms + 1,
+						hpenalty, nct_count, flaga.size());
+					est += " msh:";
+					for (v = 0; v < av_cnt; ++v) {
+						for (int i = 0; i < npm; ++i) {
+							st.Format(" %d", msh[v][s0 + i]);
+							est += st;
+						}
+						if (v < av_cnt - 1) est += " /";
+					}
+					for (int fl = 0; fl < flaga.size(); ++fl) {
+						st.Format(" \n[%d] %d:%d %s (%s)", flaga[fl].id, flaga[fl].s, flaga[fl].voice,
+							ruleinfo[flaga[fl].id].RuleName,
+							ruleinfo[flaga[fl].id].SubRuleName);
 						est += st;
 					}
-					if (v < av_cnt - 1) est += " /";
-				}
-				for (int fl = 0; fl < flaga.size(); ++fl) {
-					st.Format(" \n[%d] %d:%d %s (%s)", flaga[fl].id, flaga[fl].s, flaga[fl].voice,
-						ruleinfo[flaga[fl].id].RuleName,
-						ruleinfo[flaga[fl].id].SubRuleName);
-					est += st;
-				}
-				est += " ch:";
-				for (int i = 0; i < 12; ++i) {
-					st.Format(" %d", cchn[hs][i]);
-					est += st;
-					if (i == 5) est += " -";
-				}
-				WriteLog(3, est);
+					est += " ch:";
+					for (int i = 0; i < 12; ++i) {
+						st.Format(" %d", cchn[hs][i]);
+						est += st;
+						if (i == 5) est += " -";
+					}
+					WriteLog(3, est);
 #endif
-				// Save best variant
-				if (hpenalty < min_hpenalty && !nct_count) {
+					// Save best variant
+					if (hpenalty < min_hpenalty && !nct_count) {
 #if defined(_DEBUG)
-					WriteLog(3, "Selected best hpenalty");
+						WriteLog(3, "Selected best hpenalty");
 #endif
-					min_hpenalty = hpenalty;
-					best_hv = hv;
-					best_hv_alt = hv_alt;
-					best_shp = 0;
-					flagab = flaga;
-					for (s = s0; s < s0 + npm; ++s) {
-						for (v = 0; v < av_cnt; ++v) {
-							mshb[v][s] = msh[v][s];
-							nihb[v][s] = nih[v][s];
+						min_hpenalty = hpenalty;
+						best_hv = hv;
+						best_hv_alt = hv_alt;
+						best_shp = 0;
+						flagab = flaga;
+						for (s = s0; s < s0 + npm; ++s) {
+							for (v = 0; v < av_cnt; ++v) {
+								mshb[v][s] = msh[v][s];
+								nihb[v][s] = nih[v][s];
+							}
 						}
 					}
+					// Stop evaluating variants if all is ok
+					if (!hpenalty) break;
 				}
 				// Stop evaluating variants if all is ok
 				if (!hpenalty) break;
 			}
-			// Stop evaluating variants if all is ok
-			if (!hpenalty) break;
 		}
 		if (min_hpenalty > 0 && ms == mli.size() - 2) {
 			if (npm == 8) {
@@ -5557,235 +5561,243 @@ void CP2R::GetMsh2(int sec_hp) {
 		else shp[i] = 1;
 	}
 	// Scan all possible chords
-	for (int hv2 = lchm[0] + 7; hv2 > lchm[0]; --hv2) {
-		int hv = hv2 % 7;
-		if (!cpos[0][hv]) continue;
-		for (int hv_alt = 0; hv_alt < 4; ++hv_alt) {
-			// Only for melodic minor
-			if (hv_alt && !mminor) continue;
-			fill(cchnv[0].begin(), cchnv[0].end(), 0);
-			cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
-			cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 2;
-			cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 3;
-			// Prohibit 7th only if its severity is red
-			if (severity[sp][av_cnt][0][194] <= 60) {
-				cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
-			}
-			if (mminor) {
-				if (hv_alt == 3) {
-					// Skip if no notes to alter
-					if (!cchnv[0][8] || !cchnv[0][10]) continue;
-					// Skip if this variant conflicts with detected notes
-					if (cchn[hs][8]) continue;
-					if (cchn[hs][10]) continue;
-					// Convert to altered
-					cchnv[0][9] = cchnv[0][8];
-					cchnv[0][8] = 0;
-					// Convert to altered
-					cchnv[0][11] = cchnv[0][10];
-					cchnv[0][10] = 0;
+	for (int hv7 = 0; hv7 < 2; ++hv7) {
+		if (hv7 && severity[sp][av_cnt][0][194] > 60) break;
+		for (int hv2 = lchm[0] + 7; hv2 > lchm[0]; --hv2) {
+			int hv = hv2 % 7;
+			if (!cpos[0][hv]) continue;
+			for (int hv_alt = 0; hv_alt < 4; ++hv_alt) {
+				// Only for melodic minor
+				if (hv_alt && !mminor) continue;
+				fill(cchnv[0].begin(), cchnv[0].end(), 0);
+				cchnv[0][(c_cc[hv + 14] + 24 - bn) % 12] = 1;
+				cchnv[0][(c_cc[hv + 16] + 24 - bn) % 12] = 2;
+				cchnv[0][(c_cc[hv + 18] + 24 - bn) % 12] = 3;
+				// Prohibit 7th only if its severity is red
+				if (hv7 && severity[sp][av_cnt][0][194] <= 60) {
+					cchnv[0][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
 				}
-				if (hv_alt == 2) {
-					// Skip if no notes to alter
-					if (!cchnv[0][10]) continue;
-					// Skip if this variant conflicts with detected notes
-					if (cchn[hs][10]) continue;
-					// Convert to altered
-					cchnv[0][11] = cchnv[0][10];
-					cchnv[0][10] = 0;
-				}
-				if (hv_alt == 1) {
-					// Skip if no notes to alter
-					if (!cchnv[0][8]) continue;
-					// Skip if this variant conflicts with detected notes
-					if (cchn[hs][8]) continue;
-					// Convert to altered
-					cchnv[0][9] = cchnv[0][8];
-					cchnv[0][8] = 0;
-				}
-				else {
-					if (cchnv[0][8]) {
+				if (mminor) {
+					if (hv_alt == 3) {
+						// Skip if no notes to alter
+						if (!cchnv[0][8] || !cchnv[0][10]) continue;
 						// Skip if this variant conflicts with detected notes
-						if (cchn[hs][9]) continue;
+						if (cchn[hs][8]) continue;
+						if (cchn[hs][10]) continue;
+						// Convert to altered
+						cchnv[0][9] = cchnv[0][8];
+						cchnv[0][8] = 0;
+						// Convert to altered
+						cchnv[0][11] = cchnv[0][10];
+						cchnv[0][10] = 0;
 					}
-					if (cchnv[0][10]) {
+					if (hv_alt == 2) {
+						// Skip if no notes to alter
+						if (!cchnv[0][10]) continue;
 						// Skip if this variant conflicts with detected notes
-						if (cchn[hs][11]) continue;
+						if (cchn[hs][10]) continue;
+						// Convert to altered
+						cchnv[0][11] = cchnv[0][10];
+						cchnv[0][10] = 0;
+					}
+					if (hv_alt == 1) {
+						// Skip if no notes to alter
+						if (!cchnv[0][8]) continue;
+						// Skip if this variant conflicts with detected notes
+						if (cchn[hs][8]) continue;
+						// Convert to altered
+						cchnv[0][9] = cchnv[0][8];
+						cchnv[0][8] = 0;
+					}
+					else {
+						if (cchnv[0][8]) {
+							// Skip if this variant conflicts with detected notes
+							if (cchn[hs][9]) continue;
+						}
+						if (cchnv[0][10]) {
+							// Skip if this variant conflicts with detected notes
+							if (cchn[hs][11]) continue;
+						}
 					}
 				}
-			}
-			for (int hv4 = lchm[1] + 7; hv4 > lchm[1]; --hv4) {
-				int hv3 = hv4 % 7;
-				if (!cpos[1][hv3]) continue;
-				for (int hv_alt2 = 0; hv_alt2 < 4; ++hv_alt2) {
-					// Only for melodic minor
-					if (hv_alt2 && !mminor) continue;
-					fill(cchnv[1].begin(), cchnv[1].end(), 0);
-					cchnv[1][(c_cc[hv3 + 14] + 24 - bn) % 12] = 1;
-					cchnv[1][(c_cc[hv3 + 16] + 24 - bn) % 12] = 2;
-					cchnv[1][(c_cc[hv3 + 18] + 24 - bn) % 12] = 3;
-					// Prohibit 7th only if its severity is red
-					if (severity[sp][av_cnt][0][194] <= 60) {
-						cchnv[1][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
-					}
-					if (mminor) {
-						if (hv_alt2 == 3) {
-							// Skip if no notes to alter
-							if (!cchnv[1][8] || !cchnv[1][10]) continue;
-							// Skip if this variant conflicts with detected notes
-							if (cchn[hs + 1][8]) continue;
-							if (cchn[hs + 1][10]) continue;
-							// Convert to altered
-							cchnv[1][9] = cchnv[1][8];
-							cchnv[1][8] = 0;
-							// Convert to altered
-							cchnv[1][11] = cchnv[1][10];
-							cchnv[1][10] = 0;
-						}
-						if (hv_alt2 == 2) {
-							// Skip if no notes to alter
-							if (!cchnv[1][10]) continue;
-							// Skip if this variant conflicts with detected notes
-							if (cchn[hs + 1][10]) continue;
-							// Convert to altered
-							cchnv[1][11] = cchnv[1][10];
-							cchnv[1][10] = 0;
-						}
-						if (hv_alt2 == 1) {
-							// Skip if no notes to alter
-							if (!cchnv[1][8]) continue;
-							// Skip if this variant conflicts with detected notes
-							if (cchn[hs + 1][8]) continue;
-							// Convert to altered
-							cchnv[1][9] = cchnv[1][8];
-							cchnv[1][8] = 0;
-						}
-						else {
-							if (cchnv[1][8]) {
-								// Skip if this variant conflicts with detected notes
-								if (cchn[hs + 1][9]) continue;
+				for (int hv72 = 0; hv72 < 2; ++hv72) {
+					if (hv72 && severity[sp][av_cnt][0][194] > 60) break;
+					for (int hv4 = lchm[1] + 7; hv4 > lchm[1]; --hv4) {
+						int hv3 = hv4 % 7;
+						if (!cpos[1][hv3]) continue;
+						for (int hv_alt2 = 0; hv_alt2 < 4; ++hv_alt2) {
+							// Only for melodic minor
+							if (hv_alt2 && !mminor) continue;
+							fill(cchnv[1].begin(), cchnv[1].end(), 0);
+							cchnv[1][(c_cc[hv3 + 14] + 24 - bn) % 12] = 1;
+							cchnv[1][(c_cc[hv3 + 16] + 24 - bn) % 12] = 2;
+							cchnv[1][(c_cc[hv3 + 18] + 24 - bn) % 12] = 3;
+							// Prohibit 7th only if its severity is red
+							if (hv72 && severity[sp][av_cnt][0][194] <= 60) {
+								cchnv[1][(c_cc[hv + 20] + 24 - bn) % 12] = 4;
 							}
-							if (cchnv[1][10]) {
-								// Skip if this variant conflicts with detected notes
-								if (cchn[hs + 1][11]) continue;
+							if (mminor) {
+								if (hv_alt2 == 3) {
+									// Skip if no notes to alter
+									if (!cchnv[1][8] || !cchnv[1][10]) continue;
+									// Skip if this variant conflicts with detected notes
+									if (cchn[hs + 1][8]) continue;
+									if (cchn[hs + 1][10]) continue;
+									// Convert to altered
+									cchnv[1][9] = cchnv[1][8];
+									cchnv[1][8] = 0;
+									// Convert to altered
+									cchnv[1][11] = cchnv[1][10];
+									cchnv[1][10] = 0;
+								}
+								if (hv_alt2 == 2) {
+									// Skip if no notes to alter
+									if (!cchnv[1][10]) continue;
+									// Skip if this variant conflicts with detected notes
+									if (cchn[hs + 1][10]) continue;
+									// Convert to altered
+									cchnv[1][11] = cchnv[1][10];
+									cchnv[1][10] = 0;
+								}
+								if (hv_alt2 == 1) {
+									// Skip if no notes to alter
+									if (!cchnv[1][8]) continue;
+									// Skip if this variant conflicts with detected notes
+									if (cchn[hs + 1][8]) continue;
+									// Convert to altered
+									cchnv[1][9] = cchnv[1][8];
+									cchnv[1][8] = 0;
+								}
+								else {
+									if (cchnv[1][8]) {
+										// Skip if this variant conflicts with detected notes
+										if (cchn[hs + 1][9]) continue;
+									}
+									if (cchnv[1][10]) {
+										// Skip if this variant conflicts with detected notes
+										if (cchn[hs + 1][11]) continue;
+									}
+								}
 							}
-						}
-					}
-					flaga.clear();
-					hpenalty = 0;
-					nct_count = 0;
-					for (v = 0; v < av_cnt; ++v) {
-						sp = vsp[v];
-						GetMeasureMsh(s0 + sec_hp);
-						// Clear resolutions
-						for (s = s0; s < s0 + npm; ++s) {
-							resol[v][s] = 0;
-						}
-						// First harmony
-						hstart = s0;
-						hend = s0 + sec_hp - 1;
-						GetNotesInHarm();
-						s = hstart;
-						ls = bli[v][s];
-						s2 = fli2[v][ls];
-						DetectSus();
-						DetectPDD(hv);
-						// Second harmony
-						hstart = s0 + sec_hp;
-						hend = s0 + npm - 1;
-						GetNotesInHarm();
-						s = hstart;
-						ls = bli[v][s];
-						s2 = fli2[v][ls];
-						DetectSus();
-						DetectPDD(hv3);
-						// Full measure
-						hstart = s0;
-						DetectDNT();
-						DetectCambiata();
-						// First harmony
-						hstart = s0;
-						hend = s0 + sec_hp - 1;
-						if (s0 && hv == chm[bhli[s0 - 1]]) DetectNDD();
-						DetectAux();
-						EvaluateMsh();
-						EvalHarm4thTritone();
-						// Second harmony
-						hstart = s0 + sec_hp;
-						hend = s0 + npm - 1;
-						DetectAux();
-						EvaluateMsh();
-						EvalHarm4thTritone();
-					}
-					// First harmony
-					hstart = s0;
-					hend = s0 + sec_hp - 1;
-					EvalTriDouble();
-					EvalMshHarm(hv);
-					EvalHarmAmbig(hv);
-					EvalHarmIncomplete(hv);
-					// Second harmony
-					hstart = s0 + sec_hp;
-					hend = s0 + npm - 1;
-					EvalTriDouble();
-					EvalMshHarm(hv3);
-					EvalHarmAmbig(hv3);
-					EvalHarmIncomplete(hv3);
-#if defined(_DEBUG)
-					CString st, est;
-					est.Format("Checked chords %s%s %s%s in measure %d:%d, hpenalty %d, nct %d, flags %d:",
-						degree_name[hv], hv_alt ? "*" : "",
-						degree_name[hv3], hv_alt2 ? "*" : "",
-						cp_id + 1, ms + 1, hpenalty, nct_count, flaga.size());
-					est += " msh:";
-					for (v = 0; v < av_cnt; ++v) {
-						for (int i = 0; i < npm; ++i) {
-							st.Format(" %d", msh[v][s0 + i]);
-							est += st;
-						}
-						if (v < av_cnt - 1) est += " /";
-					}
-					for (int fl = 0; fl < flaga.size(); ++fl) {
-						st.Format(" \n[%d] %d:%d %s (%s)", flaga[fl].id, flaga[fl].s, flaga[fl].voice,
-							ruleinfo[flaga[fl].id].RuleName,
-							ruleinfo[flaga[fl].id].SubRuleName);
-						est += st;
-					}
-					est += " ch:";
-					for (int i = 0; i < 12; ++i) {
-						st.Format(" %d", cchn[hs][i]);
-						est += st;
-						if (i == 5) est += " -";
-						if (i == 11) est += " /";
-					}
-					for (int i = 0; i < 12; ++i) {
-						st.Format(" %d", cchn[hs + 1][i]);
-						est += st;
-						if (i == 5) est += " -";
-					}
-					WriteLog(3, est);
-#endif
-					// Save best variant
-					if (hpenalty < min_hpenalty && !nct_count) {
-#if defined(_DEBUG)
-						WriteLog(3, "Selected best hpenalty");
-#endif
-						min_hpenalty = hpenalty;
-						best_hv = hv;
-						best_hv_alt = hv_alt;
-						best_hv2 = hv3;
-						best_hv_alt2 = hv_alt2;
-						best_shp = sec_hp;
-						flagab = flaga;
-						for (s = s0; s < s0 + npm; ++s) {
+							flaga.clear();
+							hpenalty = 0;
+							nct_count = 0;
 							for (v = 0; v < av_cnt; ++v) {
-								mshb[v][s] = msh[v][s];
-								nihb[v][s] = nih[v][s];
+								sp = vsp[v];
+								GetMeasureMsh(s0 + sec_hp);
+								// Clear resolutions
+								for (s = s0; s < s0 + npm; ++s) {
+									resol[v][s] = 0;
+								}
+								// First harmony
+								hstart = s0;
+								hend = s0 + sec_hp - 1;
+								GetNotesInHarm();
+								s = hstart;
+								ls = bli[v][s];
+								s2 = fli2[v][ls];
+								DetectSus();
+								DetectPDD(hv);
+								// Second harmony
+								hstart = s0 + sec_hp;
+								hend = s0 + npm - 1;
+								GetNotesInHarm();
+								s = hstart;
+								ls = bli[v][s];
+								s2 = fli2[v][ls];
+								DetectSus();
+								DetectPDD(hv3);
+								// Full measure
+								hstart = s0;
+								DetectDNT();
+								DetectCambiata();
+								// First harmony
+								hstart = s0;
+								hend = s0 + sec_hp - 1;
+								if (s0 && hv == chm[bhli[s0 - 1]]) DetectNDD();
+								DetectAux();
+								EvaluateMsh();
+								EvalHarm4thTritone();
+								// Second harmony
+								hstart = s0 + sec_hp;
+								hend = s0 + npm - 1;
+								DetectAux();
+								EvaluateMsh();
+								EvalHarm4thTritone();
 							}
+							// First harmony
+							hstart = s0;
+							hend = s0 + sec_hp - 1;
+							EvalTriDouble();
+							EvalMshHarm(hv);
+							EvalHarmAmbig(hv);
+							EvalHarmIncomplete(hv);
+							// Second harmony
+							hstart = s0 + sec_hp;
+							hend = s0 + npm - 1;
+							EvalTriDouble();
+							EvalMshHarm(hv3);
+							EvalHarmAmbig(hv3);
+							EvalHarmIncomplete(hv3);
+#if defined(_DEBUG)
+							CString st, est;
+							est.Format("Checked chords %s%s%s %s%s%s in measure %d:%d, hpenalty %d, nct %d, flags %d:",
+								degree_name[hv], hv_alt ? "*" : "", hv7 ? "7":"",
+								degree_name[hv3], hv_alt2 ? "*" : "", hv72 ? "7" : "",
+								cp_id + 1, ms + 1, hpenalty, nct_count, flaga.size());
+							est += " msh:";
+							for (v = 0; v < av_cnt; ++v) {
+								for (int i = 0; i < npm; ++i) {
+									st.Format(" %d", msh[v][s0 + i]);
+									est += st;
+								}
+								if (v < av_cnt - 1) est += " /";
+							}
+							for (int fl = 0; fl < flaga.size(); ++fl) {
+								st.Format(" \n[%d] %d:%d %s (%s)", flaga[fl].id, flaga[fl].s, flaga[fl].voice,
+									ruleinfo[flaga[fl].id].RuleName,
+									ruleinfo[flaga[fl].id].SubRuleName);
+								est += st;
+							}
+							est += " ch:";
+							for (int i = 0; i < 12; ++i) {
+								st.Format(" %d", cchn[hs][i]);
+								est += st;
+								if (i == 5) est += " -";
+								if (i == 11) est += " /";
+							}
+							for (int i = 0; i < 12; ++i) {
+								st.Format(" %d", cchn[hs + 1][i]);
+								est += st;
+								if (i == 5) est += " -";
+							}
+							WriteLog(3, est);
+#endif
+							// Save best variant
+							if (hpenalty < min_hpenalty && !nct_count) {
+#if defined(_DEBUG)
+								WriteLog(3, "Selected best hpenalty");
+#endif
+								min_hpenalty = hpenalty;
+								best_hv = hv;
+								best_hv_alt = hv_alt;
+								best_hv2 = hv3;
+								best_hv_alt2 = hv_alt2;
+								best_shp = sec_hp;
+								flagab = flaga;
+								for (s = s0; s < s0 + npm; ++s) {
+									for (v = 0; v < av_cnt; ++v) {
+										mshb[v][s] = msh[v][s];
+										nihb[v][s] = nih[v][s];
+									}
+								}
+							}
+							// Stop evaluating variants if all is ok
+							if (!hpenalty) break;
 						}
+						// Stop evaluating variants if all is ok
+						if (!hpenalty) break;
 					}
-					// Stop evaluating variants if all is ok
-					if (!hpenalty) break;
 				}
 				// Stop evaluating variants if all is ok
 				if (!hpenalty) break;
@@ -5793,8 +5805,6 @@ void CP2R::GetMsh2(int sec_hp) {
 			// Stop evaluating variants if all is ok
 			if (!hpenalty) break;
 		}
-		// Stop evaluating variants if all is ok
-		if (!hpenalty) break;
 	}
 	// Reset step harmony positions
 	fill(shp.begin(), shp.end(), 0);
