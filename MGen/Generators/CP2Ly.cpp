@@ -1042,8 +1042,8 @@ void CP2Ly::SendLyMistakes() {
 			CString arr_st, arr_st2;
 			if (lyv[v].f[s][f].sl_src > lyv[v].f[s][f].s_src) arr_st2 = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81e";
 			else if (lyv[v].f[s][f].sl_src < lyv[v].f[s][f].s_src) arr_st = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81c";
-			else if (lyv[v].f[s][f].vl < v) arr_st = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81f";
-			else if (lyv[v].f[s][f].vl > v) arr_st = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81d";
+			else if (lyv[v].f[s][f].vl < v) arr_st2 = "\\magnify #0.6 \\raise #0.0 \\char ##x1f81f";
+			else if (lyv[v].f[s][f].vl > v) arr_st2 = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81d";
 			st.Format("        \\with-color #(rgb-color " +
 				GetLyColor(sev) + ") \\concat { %s %s %d %s } \n", // \\circle 
 				arr_st,
@@ -1087,8 +1087,8 @@ void CP2Ly::SendLyHarmMistakes() {
 			CString arr_st, arr_st2;
 			if (lyv[v].f[s][f].sl_src > lyv[v].f[s][f].s_src) arr_st2 = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81e";
 			else if (lyv[v].f[s][f].sl_src < lyv[v].f[s][f].s_src) arr_st = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81c";
-			else if (lyv[v].f[s][f].vl < v) arr_st = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81f";
-			else if (lyv[v].f[s][f].vl > v) arr_st = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81d";
+			else if (lyv[v].f[s][f].vl < v) arr_st2 = "\\magnify #0.6 \\raise #0.0 \\char ##x1f81f";
+			else if (lyv[v].f[s][f].vl > v) arr_st2 = "\\magnify #0.6 \\raise #0.1 \\char ##x1f81d";
 			st.Format("        \\with-color #(rgb-color " +
 				GetLyColor(sev) + ") \\concat { %s %s %d %s } \n", // \\circle 
 				arr_st,

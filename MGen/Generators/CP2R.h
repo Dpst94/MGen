@@ -253,6 +253,7 @@ protected:
 	inline int FailRhythmRepeat();
 	inline int FailMissSlurs();
 	inline int FailSlurs();
+	inline void DetectNFBD();
 	inline int FailStartPause();
 	inline void FlagLTUnresolved();
 	inline void FlagHarmTriRes();

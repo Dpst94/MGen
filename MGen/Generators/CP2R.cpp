@@ -4857,6 +4857,20 @@ void CP2R::DetectAux() {
 			if (nih[v][s3] > 0 && msh[v][s4] > 0) continue;
 			// If current note has nih = 1..3, make it msh>0. This ensures that we do not create a 7th chord
 			if (nih[v][s] > 0 && nih[v][s] < 4) apply = 2;
+			// If previous note is not harmonic, we cannot require it to be harmonic even if current note is 7th note
+			else if (!nih[v][s3]) apply = 2;
+			// If previous note is harmonic, but current and next notes are msh < 0, we need to choose
+			// Current or next note should be a chord tone, but requireing either note to be a chord tone may make chord a 7th chord.
+			else {
+				// If next note has nih = 1..3, make it msh>0. This ensures that we do not create a 7th chord
+				if (nih[v][s4] > 0 && nih[v][s4] < 4) apply = 4;
+				// If current note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
+				else if (nih[v][s] > 0) apply = 2;
+				// If next note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
+				else if (nih[v][s4] > 0) apply = 4;
+				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted (worse case).
+				else apply = 2;
+			}
 		}
 		else if (ls < bli[v][mea_end]) {
 			// Previous and next notes both have msh>0. In this case nothing needs to be checked. 
@@ -4874,7 +4888,7 @@ void CP2R::DetectAux() {
 				else if (nih[v][s] > 0 ) apply = 2;
 				// If next note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
 				else if (nih[v][s4] > 0) apply = 4;
-				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted.
+				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted (worse case).
 				else apply = 2;
 			}
 			// If next note has msh>0 and previous has msh<=0
@@ -4886,7 +4900,7 @@ void CP2R::DetectAux() {
 				else if (nih[v][s] > 0) apply = 2;
 				// If previous note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
 				else if (nih[v][s3] > 0) apply = 1;
-				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted.
+				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted (worse case).
 				else apply = 2;
 			}
 			// Both surrounding notes have msh<=0. We still have two variants: make both surrounding notes msh>0 or current note msh>0. 
@@ -4898,7 +4912,7 @@ void CP2R::DetectAux() {
 				else if (nih[v][s] > 0) apply = 2;
 				// If previous and next notes both have nih = 1..4, make them both msh>0. This creates a 7th chord, but does not make chord convoluted.
 				else if (nih[v][s3] > 0 && nih[v][s4] > 0) apply = 5;
-				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted.
+				// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted (worse case).
 				else apply = 2;
 			}
 		}
@@ -4919,7 +4933,7 @@ void CP2R::DetectAux() {
 			else if (nih[v][s] > 0) apply = 2;
 			// If previous note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
 			else if (nih[v][s3] > 0) apply = 1;
-			// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted.
+			// If neither of notes has nih > 0, make any of notes msh>0. This makes chord convoluted (worse case).
 			else apply = 2;
 		}
 		// Make previous note msh>0. If it creates conflict, flag it and increase hpenalty
@@ -5121,7 +5135,9 @@ void CP2R::GetMeasureMsh(int sec_hp) {
 			msh[v][sus[v][ls]] = pSusHarm;
 		}
 		// Downbeat
-		else if (s % npm == 0) msh[v][s] = pDownbeat;
+		else if (s % npm == 0) {
+			msh[v][s] = pDownbeat;
+		}
 		// First note in harmony
 		else if (s == sec_hp) msh[v][s] = pDownbeat;
 		// Anticipation
@@ -5353,6 +5369,7 @@ void CP2R::GetMsh() {
 					DetectPDD();
 					DetectDNT();
 					DetectCambiata();
+					if (s0 && hv == chm[bhli[s0 - 1]]) DetectNFBD();
 					DetectAux();
 					EvaluateMsh();
 					EvalHarm4thTritone();
@@ -5687,6 +5704,7 @@ void CP2R::GetMsh2(int sec_hp) {
 						// First harmony
 						hstart = s0;
 						hend = s0 + sec_hp - 1;
+						if (s0 && hv == chm[bhli[s0 - 1]]) DetectNFBD();
 						DetectAux();
 						EvaluateMsh();
 						EvalHarm4thTritone();
@@ -6129,6 +6147,47 @@ void CP2R::DetectPDD() {
 		resol[v][hstart] = fli[v][ls + 1];
 		// Increase hpenalty so that PDD is selected only as worst case (if PDD is prohibited)
 		FlagA(v, 282, s, s, v, 450);
+	}
+}
+
+// Detect neighbor tone first beat dissonance and make it msh < 0
+void CP2R::DetectNFBD() {
+	CHECK_READY(DR_fli, DR_c, DR_resol);
+	CHECK_READY(DR_msh, DR_nih);
+	if (!accept[sp][vc][0][257]) return;
+	// First measure
+	if (!ms) return;
+	// Pause
+	if (!cc[v][s]) return;
+	// Last note
+	if (s2 == ep2 - 1) return;
+	// Both notes should be inside harmony
+	if (s2 >= hend) return;
+	// Note must not start before harmony start
+	if (fli[v][ls] != hstart) return;
+	// Second note must be non-chord tone
+	if (nih[v][s]) return;
+	// No pauses
+	if (!cc[v][s - 1] || !cc[v][s2 + 1]) return;
+	// Note 2 is not too long
+	if (llen[v][ls] > 4) return;
+	// Stepwize movement
+	if (abs(c[v][s] - c[v][s - 1]) != 1) return;
+	if (ls < fli_size[v] - 1) {
+		// Stepwise movement back
+		if (cc[v][s2 + 1] != cc[v][s - 1]) return;
+		// Note 2 is not longer than 3
+		if (llen[v][ls] > llen[v][ls + 1] && (ep2 == c_len || ls < fli_size[v] - 2)) return;
+		// First note must be a chord tone
+		if (!nih[v][fli[v][ls - 1]]) return;
+		// Third note must be a chord tone
+		if (!nih[v][s2 + 1]) return;
+		// Apply pattern
+		msh[v][fli[v][ls]] = pAuxPDD;
+		msh[v][fli[v][ls + 1]] = pHarmonicPDD;
+		resol[v][hstart] = fli[v][ls + 1];
+		// Increase hpenalty so that NFBD is selected only as worst case (if NFBD is prohibited)
+		FlagA(v, 257, s, s, v, 450);
 	}
 }
 
