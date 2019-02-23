@@ -3831,27 +3831,23 @@ void CP2R::GetChordTonePresent() {
 	CHECK_READY(DR_fli, DR_msh, DR_hli);
 	CHECK_READY(DR_cct, DR_pc);
 	SET_READY(DR_cctp);
-	cctp.clear();
-	cctp.resize(hli.size(), vector<int>(4));
-	for (hs = 0; hs < hli.size(); ++hs) {
-		for (v = 0; v < av_cnt; ++v) {
-			ls2 = bli[v][hli2[hs]];
-			for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
-				s = fli[v][ls];
-				// Skip pauses
-				if (!cc[v][s]) continue;
-				s5 = max(hli[hs], s);
-				if (msh[v][s5] > 0) {
-					for (int ct = 0; ct < 4; ++ct) {
-						if (cct[hs][ct] == pcc[v][s])
-							cctp[hs][ct] = 2;
-					}
+	for (v = 0; v < av_cnt; ++v) {
+		ls2 = bli[v][hli2[hs]];
+		for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
+			s = fli[v][ls];
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			s5 = max(hli[hs], s);
+			if (msh[v][s5] > 0) {
+				for (int ct = 0; ct < 4; ++ct) {
+					if (cct[hs][ct] == pcc[v][s])
+						cctp[hs][ct] = 2;
 				}
-				else {
-					for (int ct = 0; ct < 4; ++ct) {
-						if (cct[hs][ct] == pcc[v][s])
-							cctp[hs][ct] = max(1, cctp[hs][ct]);
-					}
+			}
+			else {
+				for (int ct = 0; ct < 4; ++ct) {
+					if (cct[hs][ct] == pcc[v][s])
+						cctp[hs][ct] = max(1, cctp[hs][ct]);
 				}
 			}
 		}
@@ -3860,20 +3856,60 @@ void CP2R::GetChordTonePresent() {
 
 void CP2R::RemoveMinimumMsh() {
 	CHECK_READY(DR_fli, DR_msh, DR_hli);
-	for (hs = 0; hs < hli.size(); ++hs) {
-		if (chm[hs] != -1) continue;
-		for (v = 0; v < av_cnt; ++v) {
-			ls2 = bli[v][hli2[hs]];
-			for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
-				s = fli[v][ls];
-				// Skip pauses
-				if (!cc[v][s]) continue;
-				s5 = max(hli[hs], s);
-				if (msh[v][s5] > 0) continue;
-				msh[v][s5] = pHarmonicCleared;
+	if (chm[hs] != -1) return;
+	for (v = 0; v < av_cnt; ++v) {
+		ls2 = bli[v][hli2[hs]];
+		for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
+			s = fli[v][ls];
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			s5 = max(hli[hs], s);
+			if (msh[v][s5] > 0) continue;
+			msh[v][s5] = pHarmonicCleared;
+		}
+	}
+}
+
+// Get chns, cchns, chm_his, chm_fis for current hs
+void CP2R::GetChord(int hstep) {
+	hs = hstep;
+	for (v = 0; v < av_cnt; ++v) {
+		ls2 = bli[v][hli2[hs]];
+		for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
+			s = fli[v][ls];
+			// Skip pauses
+			if (!cc[v][s]) continue;
+			s5 = max(hli[hs], s);
+			if (msh[v][s5] > 0) {
+				chns[hs][pc[v][s]] = 2;
+				cchns[hs][pcc[v][s]] = 2;
+				// Delete chord if non-chord tone is in wrong place - not needed because this chord is no longer detected in GetMsh
+				//if (!nih[v][s5]) chm[hs] = -1;
+			}
+			else {
+				chns[hs][pc[v][s]] = max(1, chn[hs][pc[v][s]]);
+				cchns[hs][pcc[v][s]] = max(1, cchns[hs][pcc[v][s]]);
 			}
 		}
 	}
+	if (mminor) {
+		// For all chords that include G/G# note in Am
+		if (chm[hs] == 6 || chm[hs] == 4 || chm[hs] == 2 || chm[hs] == 0) {
+			if (cchns[hs][11] > cchns[hs][10]) chm_gis[hs] = cchns[hs][11];
+			else if (cchns[hs][10] > cchns[hs][11]) chm_gis[hs] = -cchns[hs][10];
+		}
+		// For all chords that include F/F# note in Am
+		if (chm[hs] == 5 || chm[hs] == 3 || chm[hs] == 1 || chm[hs] == 6) {
+			if (cchns[hs][9] > cchns[hs][8]) chm_fis[hs] = cchns[hs][9];
+			else if (cchns[hs][8] > cchns[hs][9]) chm_fis[hs] = -cchns[hs][8];
+		}
+	}
+#if !defined(_DEBUG)
+	RemoveMinimumMsh();
+#endif
+	GetChordTones();
+	GetChordTonePresent();
+	Remove7thFisGis();
 }
 
 int CP2R::FailHarm() {
@@ -3888,45 +3924,11 @@ int CP2R::FailHarm() {
 	cchns.clear();
 	chns.resize(hli.size(), empty_chn);
 	cchns.resize(hli.size(), empty_cchn);
+	cctp.clear();
+	cctp.resize(hli.size(), vector<int>(4));
 	for (hs = 0; hs < hli.size(); ++hs) {
-		for (v = 0; v < av_cnt; ++v) {
-			ls2 = bli[v][hli2[hs]];
-			for (ls = bli[v][hli[hs]]; ls <= ls2; ++ls) {
-				s = fli[v][ls];
-				// Skip pauses
-				if (!cc[v][s]) continue;
-				s5 = max(hli[hs], s);
-				if (msh[v][s5] > 0) {
-					chns[hs][pc[v][s]] = 2;
-					cchns[hs][pcc[v][s]] = 2;
-					// Delete chord if non-chord tone is in wrong place - not needed because this chord is no longer detected in GetMsh
-					//if (!nih[v][s5]) chm[hs] = -1;
-				}
-				else {
-					chns[hs][pc[v][s]] = max(1, chn[hs][pc[v][s]]);
-					cchns[hs][pcc[v][s]] = max(1, cchns[hs][pcc[v][s]]);
-				}
-			}
-		}
-		if (mminor) {
-			// For all chords that include G/G# note in Am
-			if (chm[hs] == 6 || chm[hs] == 4 || chm[hs] == 2 || chm[hs] == 0) {
-				if (cchns[hs][11] > cchns[hs][10]) chm_gis[hs] = cchns[hs][11];
-				else if (cchns[hs][10] > cchns[hs][11]) chm_gis[hs] = -cchns[hs][10];
-			}
-			// For all chords that include F/F# note in Am
-			if (chm[hs] == 5 || chm[hs] == 3 || chm[hs] == 1 || chm[hs] == 6) {
-				if (cchns[hs][9] > cchns[hs][8]) chm_fis[hs] = cchns[hs][9];
-				else if (cchns[hs][8] > cchns[hs][9]) chm_fis[hs] = -cchns[hs][8];
-			}
-		}
+		GetChord(hs);
 	}
-#if !defined(_DEBUG)
-	RemoveMinimumMsh();
-#endif
-	GetChordTones();
-	GetChordTonePresent();
-	Remove7thFisGis();
 	GetHarmBass();
 	// Check first harmony not T
 	if (chm.size() && chm[0] > -1 && (chm[0] || hbc[0] % 7)) {
@@ -3947,17 +3949,15 @@ void CP2R::Remove7thFisGis() {
 	CHECK_READY(DR_nih, DR_chm_fis, DR_hli);
 	CHECK_READY(DR_cct, DR_pc);
 	SET_READY(DR_cctp);
-	for (hs = 0; hs < hli.size(); ++hs) {
-		// Find all chords with 7th notes, that are not required
-		if (cctp[hs][3] == 1) {
-			// If these notes are F, F#, G or G#, remove this flag
-			if (cct[hs][3] == 8 || cct[hs][3] == 9) chm_fis[hs] = 0;
-			if (cct[hs][3] == 10 || cct[hs][3] == 11) chm_gis[hs] = 0;
-			// Clear 7th
-			for (v = 0; v < av_cnt; ++v) {
-				for (s = hli[hs]; s <= hli2[hs]; ++s) {
-					if (pcc[v][s] == cct[hs][3]) nih[v][s] = 0;
-				}
+	// Find all chords with 7th notes, that are not required
+	if (cctp[hs][3] == 1) {
+		// If these notes are F, F#, G or G#, remove this flag
+		if (cct[hs][3] == 8 || cct[hs][3] == 9) chm_fis[hs] = 0;
+		if (cct[hs][3] == 10 || cct[hs][3] == 11) chm_gis[hs] = 0;
+		// Clear 7th
+		for (v = 0; v < av_cnt; ++v) {
+			for (s = hli[hs]; s <= hli2[hs]; ++s) {
+				if (pcc[v][s] == cct[hs][3]) nih[v][s] = 0;
 			}
 		}
 	}
@@ -4858,7 +4858,16 @@ void CP2R::DetectAux() {
 		if (abs(c[v][s3] - c[v][s]) != 1) continue;
 		// Bit mask: first bit is previous note, second is current note, third is next note
 		int apply = 0;
-		if (ls < bli[v][mea_end]) {
+		if (ls == bli[v][hstart]) {
+			// For previous note, msh should not be evaluated, because harmony is already fixed and nih is fixed
+			// Previous note is harmonic and next note has to be harmonic. In this case nothing needs to be checked. 
+			// Positive msh already requires that next note is a chord tone, so we do not need to also require that current note is a chord tone. 
+			// Even if next note is not a chord tone, we would get hpenalty and flag.
+			if (nih[v][s3] > 0 && msh[v][s4] > 0) continue;
+			// If current note has nih = 1..3, make it msh>0. This ensures that we do not create a 7th chord
+			if (nih[v][s] > 0 && nih[v][s] < 4) apply = 2;
+		}
+		else if (ls < bli[v][mea_end]) {
 			// Previous and next notes both have msh>0. In this case nothing needs to be checked. 
 			// Positive msh already requires that previous and next note are chord tones, so we do not need to also require that current note is a chord tone. 
 			// Even if previous or next note is not a chord tone, we would get hpenalty and flag.
@@ -6451,9 +6460,7 @@ void CP2R::FlagLTDouble() {
 void CP2R::GetChordTones() {
 	SET_READY(DR_cct);
 	CHECK_READY(DR_hli, DR_chm_fis);
-	for (hs = 0; hs < hli.size(); ++hs) {
-		GetHarmNotes(chm[hs], chm_fis[hs], chm_gis[hs], cct[hs]);
-	}
+	GetHarmNotes(chm[hs], chm_fis[hs], chm_gis[hs], cct[hs]);
 }
 
 void CP2R::GetHarmNotes(int lchm, int fis, int gis, vector<int> &lcct) {

@@ -272,6 +272,7 @@ protected:
 	inline void GetHarm(int & lchm, int & rating);
 	inline void GetChordTonePresent();
 	inline void RemoveMinimumMsh();
+	inline void GetChord(int hstep);
 	inline int FailHarm();
 	inline void Remove7thFisGis();
 	inline int EvalHarm();
