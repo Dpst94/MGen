@@ -4867,7 +4867,7 @@ void CP2R::DetectAux() {
 			if (nih[v][s] > 0 && nih[v][s] < 4) apply = 2;
 			// If previous note has msh>0 and next has msh<=0
 			// Current or next note should be a chord tone, but requireing either note to be a chord tone may make chord a 7th chord.
-			if (msh[v][s3] > 0) {
+			else if (msh[v][s3] > 0) {
 				// If next note has nih = 1..3, make it msh>0. This ensures that we do not create a 7th chord
 				if (nih[v][s4] > 0 && nih[v][s4] < 4) apply = 4;
 				// If current note has nih = 4, make it msh>0. This creates a 7th chord, but does not make chord convoluted.
