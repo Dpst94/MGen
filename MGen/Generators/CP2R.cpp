@@ -2006,7 +2006,7 @@ int CP2R::FailFirstNotes() {
 }
 
 void CP2R::FlagFirstInterval() {
-	CHECK_READY(DR_fli, DR_pc, DR_sus);
+	CHECK_READY(DR_fli);
 	CHECK_READY(DR_vca);
 	s = fin[v];
 	vc = vca[s];
@@ -3872,6 +3872,8 @@ void CP2R::RemoveMinimumMsh() {
 
 // Get chns, cchns, chm_his, chm_fis for current hs
 void CP2R::GetChord(int hstep) {
+	CHECK_READY(DR_fli, DR_pc, DR_msh);
+	CHECK_READY(DR_hli, DR_cctp);
 	SET_READY(DR_chm_fis, DR_chns);
 	chm_fis.resize(hli.size(), 0);
 	chm_gis.resize(hli.size(), 0);
@@ -3920,8 +3922,7 @@ void CP2R::GetChord(int hstep) {
 }
 
 int CP2R::FailHarm() {
-	CHECK_READY(DR_fli, DR_pc);
-	CHECK_READY(DR_msh, DR_hli);
+	CHECK_READY(DR_hli);
 	SET_READY(DR_hbc);
 	GetHarmBass();
 	// Check first harmony not T
@@ -5230,6 +5231,7 @@ void CP2R::GetMinimumMsh() {
 void CP2R::GetMsh() {
 	SET_READY(DR_msh, DR_nih, DR_resol);
 	SET_READY(DR_hli);
+	SET_READY(DR_chm_fis, DR_chns, DR_cctp);
 	CHECK_READY(DR_fli, DR_vca, DR_pc);
 	flaga.clear();
 	chm.clear();
@@ -5510,7 +5512,7 @@ void CP2R::GetMsh() {
 
 void CP2R::GetMsh2(int sec_hp) {
 	CHECK_READY(DR_msh, DR_nih, DR_resol);
-	CHECK_READY(DR_fli, DR_pc);
+	CHECK_READY(DR_fli, DR_pc, DR_hli);
 	// Detect second chord position
 	// Main chord
 	vector<int> lchm;
@@ -6125,7 +6127,7 @@ void CP2R::DetectSus() {
 
 void CP2R::DetectPDD(int hvar) {
 	CHECK_READY(DR_fli, DR_c, DR_resol);
-	CHECK_READY(DR_msh, DR_nih);
+	CHECK_READY(DR_msh, DR_nih, DR_hli);
 	if (severity[sp][vc][0][282] > 60) return;
 	// First measure
 	if (!ms) return;
