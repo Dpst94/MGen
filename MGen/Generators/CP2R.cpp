@@ -5554,7 +5554,10 @@ void CP2R::GetMsh2(int sec_hp) {
 		}
 		fill(cpos[hs - hs0].begin(), cpos[hs - hs0].end(), 0);
 		GetHarmVars(lchm[hs - hs0], rat, cpos[hs - hs0], poss_vars);
-		if (poss_vars == 0) return;
+		if (poss_vars == 0) {
+			hs = hs0;
+			return;
+		}
 	}
 	hs = hs0;
 	// Init step harmony position
