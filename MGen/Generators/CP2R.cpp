@@ -6137,7 +6137,7 @@ void CP2R::DetectPDD(int hvar) {
 	if (!cc[v][s]) return;
 	// Last note
 	if (s2 == ep2 - 1) return;
-	// Both notes should be inside measure
+	// Both notes should be inside harmony
 	if (s2 >= hend) return;
 	// Note must not start before harmony start
 	if (fli[v][ls] != hstart) return;
@@ -6145,8 +6145,6 @@ void CP2R::DetectPDD(int hvar) {
 	if (nih[v][s]) return;
 	// No pauses
 	if (!cc[v][s - 1] || !cc[v][s2 + 1]) return;
-	// Note 2 is not too long
-	if (llen[v][ls] > 4) return;
 	// Stepwize movement
 	if (abs(c[v][s] - c[v][s - 1]) != 1) return;
 	if (ls < fli_size[v] - 1) {
