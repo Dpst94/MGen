@@ -323,7 +323,7 @@ int CP2R::FailOverlap() {
 						if (nonadj) break;
 					}
 				}
-				// Direct movement to 2nd
+				// Direct motion to 2nd
 				if (abs(cc[v][s3] - cc[v2][s4]) < 3 && abs(cc[v][s3] - cc[v2][s4]) > 0 && 
 					(cc[v][s3] - cc[v][s3 - 1]) * (cc[v2][s4] - cc[v2][s4 - 1]) > 0) {
 					AutoFlagL(v, 136, s3, s, v2);
@@ -1008,7 +1008,7 @@ void CP2R::FlagLtLt() {
 					FlagVL(v, 348, s0, s1);
 			}
 			// Prohibit major second up to tonic
-			// This rule additionally limits movement from non-harmonic suspension bVII to next harmonic note I - which is ok, because it is always prohibited
+			// This rule additionally limits motion from non-harmonic suspension bVII to next harmonic note I - which is ok, because it is always prohibited
 			if (pcc[v][s1] == 0 && pcc[v][s0] == 10 && nih[v][s1] && nih[v][s0]) 
 				FlagVL(v, 74, s0, s1);
 		}
@@ -1832,7 +1832,7 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 			if (accept[sp][av_cnt][0][leaps_flag3] > 0) ++fpenalty;
 		}
 		if (leap_sum_corrected > csel2 && accept[sp][av_cnt][0][leaps_flag4] > 0) ++fpenalty;
-		// Prohibit long smooth movement
+		// Prohibit long smooth motion
 		if (smooth[v][s] != 0) {
 			++smooth_sum;
 			if (smooth_sum >= l_max_smooth) {
@@ -1847,7 +1847,7 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 		}
 		else if (leap[v][s]) smooth_sum = 0;
 		if (ls < fli_size[v] - 2) {
-			// Prohibit long smooth movement in one direction
+			// Prohibit long smooth motion in one direction
 			if (smooth[v][s] != 0 && smooth[v][s] == smooth[v][fli2[v][ls + 1]]) {
 				++smooth_sum2;
 				if (smooth_sum2 >= l_max_smooth_direct) {
@@ -2617,7 +2617,7 @@ int CP2R::FailAdjacentTritone2(int ta, int t1, int t2, int tb) {
 	fleap_end = ls + 1;
 	// Do not check tritone if it is at the end of not-last window
 	if (ls >= fli_size[v] - 2 && ep2 != c_len) return 0;
-	// Check framed by ending, pause, leap or opposite movement
+	// Check framed by ending, pause, leap or opposite motion
 	if ((ls >= fli_size[v] - 2 || !cc[v][fli2[v][ls + 2]] ||
 		leap[v][s] * (cc[v][fli2[v][ls + 2]] - cc[v][fli2[v][ls + 1]]) < 0 ||
 		leap[v][fli2[v][ls + 1]]) &&
@@ -4682,14 +4682,14 @@ int CP2R::FailPco() {
 	if (civl == 0) {
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
-		// Prohibit consecutive last - first parallel movement
+		// Prohibit consecutive last - first parallel motion
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
 				AutoFlagL(v, 481, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
-		// Prohibit similar movement to pco
+		// Prohibit similar motion to pco
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0) {
 			if (!beat[v][ls] && bmli[s] == mli.size() - 1) {
 				// Last measure with stepwise motion in higher voice
@@ -4711,7 +4711,7 @@ int CP2R::FailPco() {
 				}
 			}
 		}
-		// Prohibit consecutive contrary movement
+		// Prohibit consecutive contrary motion
 		else if (civlc == civlc2) {
 			AutoFlagL(v, 482, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
@@ -4720,14 +4720,14 @@ int CP2R::FailPco() {
 	else if (civlc == 0) {
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
-		// Prohibit consecutive last - first parallel movement
+		// Prohibit consecutive last - first parallel motion
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
 				AutoFlagL(v, 481, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
-		// Prohibit similar movement in outer voices to pco
+		// Prohibit similar motion in outer voices to pco
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && 
 			v == lva[s] && v2 == hva[s]) {
 			if (!beat[v][ls] && bmli[s] == mli.size() - 1) {
@@ -4750,7 +4750,7 @@ int CP2R::FailPco() {
 				}
 			}
 		}
-		// Prohibit consecutive contrary movement
+		// Prohibit consecutive contrary motion
 		else if (civlc == civlc2) {
 			AutoFlagL(v, 482, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
@@ -4759,14 +4759,14 @@ int CP2R::FailPco() {
 	else if (civlc == 7) {
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
-		// Prohibit consecutive last - first parallel movement
+		// Prohibit consecutive last - first parallel motion
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
 				AutoFlagL(v, 84, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
-		// Prohibit similar movement in outer voices to pco
+		// Prohibit similar motion in outer voices to pco
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && 
 			v == lva[s] && v2 == hva[s]) {
 			if (!beat[v][ls] && bmli[s] == mli.size() - 1) {
@@ -4789,7 +4789,7 @@ int CP2R::FailPco() {
 				}
 			}
 		}
-		// Prohibit consecutive contrary movement
+		// Prohibit consecutive contrary motion
 		else if (civlc == civlc2) {
 			AutoFlagL(v, 85, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
@@ -4798,19 +4798,19 @@ int CP2R::FailPco() {
 	else if (civlc == 6) {
 		// Do not prohibit consecutive first - first (this is for sus notes, which starts are parallel)
 		// because they are detected as pco apart now
-		// Prohibit consecutive last - first parallel movement
+		// Prohibit consecutive last - first parallel motion
 		if (civl == civl2) {
 			// Only if notes are different (ignore interval repeat)
 			if (cc[v2][s - 1] != cc[v2][s] || cc[v][s - 1] != cc[v][s]) {
 				AutoFlagL(v, 162, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 			}
 		}
-		// Prohibit similar movement in outer voices to tritone
+		// Prohibit similar motion in outer voices to tritone
 		else if ((cc[v][s] - cc[v][s - 1]) * (cc[v2][s] - cc[v2][s - 1]) > 0 && 
 			v == lva[s] && v2 == hva[s]) {
 			AutoFlagL(v, 161, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
-		// Prohibit consecutive contrary movement
+		// Prohibit consecutive contrary motion
 		else if (civlc == civlc2) {
 			AutoFlagL(v, 163, s, max(ssus[v][ls - 1], ssus[v2][ls2 - 1]), v2);
 		}
@@ -5198,7 +5198,7 @@ void CP2R::GetMinimumMsh() {
 		else if (s % npm == 0) {
 			// Long on downbeat
 			if (llen[v][ls] > 4 || leap[v][s2])	msh[v][s] = pDownbeat;
-			// Downbeat note not surrounded by stepwise movement
+			// Downbeat note not surrounded by stepwise motion
 			// TODO: Optimize for generation
 			else if (smooth[v][s - 1] == 0 || (s2 < ep2 - 1 && smooth[v][s2] == 0)) {
 				msh[v][s] = pDownbeat;
@@ -5852,7 +5852,7 @@ void CP2R::DetectDNT() {
 		if (!cc[v][s] || !cc[v][s2 + 1] || !cc[v][fli[v][ls + 2]] || !cc[v][fli[v][ls + 3]]) continue;
 		// First note must be chord tone
 		if (!nih[v][s]) continue;
-		// Movement is stepwize
+		// motion is stepwize
 		if (!smooth[v][s2]) continue;
 		// Note 1 is short
 		if (llen[v][ls] < 2) continue;
@@ -5922,7 +5922,7 @@ void CP2R::DetectCambiata() {
 		if (llen[v][ls] < 2) continue;
 		// Note 2 is long
 		if (llen[v][ls + 1] > 2) continue;
-		// Movement is stepwize
+		// motion is stepwize
 		if (!smooth[v][s2]) continue;
 		if (ls < fli_size[v] - 2) {
 			// Note 2 is longer than 1
@@ -5976,7 +5976,7 @@ void CP2R::DetectSus() {
 		if (ls < fli_size[v] - 2 && fli2[v][ls + 1] < hend) {
 			s3 = fli2[v][ls + 1];
 			s4 = fli2[v][ls + 2];
-			// Is there a dissonance between two consonances, forming stepwise descending movement?
+			// Is there a dissonance between two consonances, forming stepwise descending motion?
 			if (!nih[v][fli[v][ls + 1]] && nih[v][fli[v][ls + 2]] && c[v][s2] - c[v][s4] == 1 &&
 				llen[v][ls + 2] >= 2 && fli[v][ls + 2] % 2 == 0) {
 				// Detect stepwise+leap or leap+stepwise
@@ -6086,7 +6086,7 @@ void CP2R::DetectSus() {
 	if (abs(cc[v][fli[v][ls + 1]] - cc[v][s2]) > sus_insert_max_leap[sp][vc][0]) {
 		FlagA(v, 295, fli[v][ls + 1], hstart, v, 100);
 	}
-	// Single insertion, second movement is leap
+	// Single insertion, second motion is leap
 	if (!accept[sp][vc][0][296]) {
 		if (s3 && ls3 == ls + 2 && leap[v][fli2[v][ls + 1]] > sus_insert_max_leap2[sp][vc][0]) s3 = 0;
 		if (s4 && ls4 == ls + 2 && leap[v][fli2[v][ls + 1]] > sus_insert_max_leap2[sp][vc][0]) s4 = 0;
@@ -6145,16 +6145,16 @@ void CP2R::DetectPDD(int hvar) {
 	if (nih[v][s]) return;
 	// No pauses
 	if (!cc[v][s - 1] || !cc[v][s2 + 1]) return;
-	// Stepwize movement
+	// Stepwize motion
 	if (abs(c[v][s] - c[v][s - 1]) != 1) return;
 	if (ls < fli_size[v] - 1) {
-		// Stepwise movement in same direction
+		// Stepwise motion in same direction
 		if (c[v][s2 + 1] - c[v][s2] != c[v][s] - c[v][s - 1]) return;
-		// Prohibit movement up a tone. Allow up a semitone, down a tone or semitone
+		// Prohibit motion up a tone. Allow up a semitone, down a tone or semitone
 		if (cc[v][s2 + 1] - cc[v][s2] == 2) {
-			// Prohibit movement up a tone in second harmony, because it cannot be same as previous
+			// Prohibit motion up a tone in second harmony, because it cannot be same as previous
 			if (hstart != s0) return;
-			// Prohibit movement up a tone if previous harmony differs
+			// Prohibit motion up a tone if previous harmony differs
 			if (!s0 || hvar != chm[bhli[s0 - 1]]) DetectNDD();
 		}
 		// Note 2 is not longer than 3
@@ -6191,10 +6191,10 @@ void CP2R::DetectNDD() {
 	if (!cc[v][s - 1] || !cc[v][s2 + 1]) return;
 	// Note 2 is not too long
 	if (llen[v][ls] > 4) return;
-	// Stepwize movement
+	// Stepwize motion
 	if (abs(c[v][s] - c[v][s - 1]) != 1) return;
 	if (ls < fli_size[v] - 1) {
-		// Stepwise movement back
+		// Stepwise motion back
 		if (cc[v][s2 + 1] != cc[v][s - 1]) return;
 		// Note 2 is not longer than 3
 		if (llen[v][ls] > llen[v][ls + 1] && (ep2 == c_len || ls < fli_size[v] - 2)) return;
