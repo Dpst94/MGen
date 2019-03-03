@@ -519,7 +519,7 @@ void AnalyseWaveform(int sta, CString fname2) {
 
 	// Create waveform graphic
 	CString par;
-	par.Format("-y -i \"%s\" -filter_complex showwavespic=s=1050x120 -frames:v 1 \"%s_.png\"",
+	par.Format("-y -i \"%s\" -filter_complex showwavespic=s=1350x120 -frames:v 1 \"%s_.png\"",
 		share + j_folder + fname2,
 		share + j_folder + fname3);
 	int ret = RunTimeout(fChild["ffmpeg.exe"] + "ffmpeg.exe",
