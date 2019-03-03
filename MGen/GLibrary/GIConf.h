@@ -42,7 +42,9 @@ struct IConf {
 	int pan = 50; // 50 is center
 	int vol = 100; // 0-100% of real cc value
 	int vol_default = 127; // Real CC value
-	CString lib = 0;
+	float db_max = 0; // Maximum controlled loudness in db when volume CC is 127
+	float db_coef = 2; // Slope of CC to db function(2 for Kontakt, 1 for SWAM)
+  CString lib = 0;
 	int poly = 0; // Maximum number of simultaneous voices
 	int splitpo_freq = 0; // Frequency of split portamento in percent
 	int splitpo_mindur = 0; // Minimum legato duration to use split portamento
