@@ -281,6 +281,8 @@ public:
 	static int GetBit(unsigned char ch, int bit);
 	static int NumDigits(int number);
 	static int RunBackground(CString fname, CString par, int delay, int nShow);
+	float vol2db(int vol, int vol_default, float db_max, float db_coef);
+	int db2cc(float db, int vol_default, float db_max, float db_coef);
 	static float Lighten(float col, float coef) { return 255.0 - (255.0 - col) / coef; }
 	static DWORD GetRed(DWORD col) { return (col >> 16) & 0xff; }
 	static DWORD GetGreen(DWORD col) { return (col >> 8) & 0xff; }

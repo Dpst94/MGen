@@ -1229,3 +1229,32 @@ int CGLib::RunBackground(CString fname, CString par, int delay, int nShow) {
 	}
 	return 0;
 }
+
+// Convert virtual volume to db (through cc)
+float CGLib::vol2db(int vol, int vol_default, float db_max, float db_coef) {
+	// Zero volume is -infinite db
+	if (!vol) return -INFINITY;
+	if (vol > 100) {
+		return (vol - 100) / 5.0;
+	}
+	// Get vol to CC coef
+	float vol_to_cc = vol_default / 100.0;
+	// Get CC
+	float cc = vol * vol_to_cc;
+	// Get default db
+	float db_default = (pow(vol_default / 127.0, 0.007) - 1) * 1250 * db_coef + db_max;
+	// Get db
+	float db = (pow(cc / 127.0, 0.007) - 1) * 1250 * db_coef + db_max;
+	// Round
+	return db - db_default;
+}
+
+// Convert db to cc value
+int CGLib::db2cc(float db, int vol_default, float db_max, float db_coef) {
+	// Zero volume is -infinite db
+	if (db == -INFINITY) return 0;
+	// Get default db
+	float db_default = (pow(vol_default / 127.0, 0.007) - 1) * 1250 * db_coef + db_max;
+	float cc = pow((db + db_default - db_max) / 1250.0 / db_coef + 1, 1 / 0.007) * 127.0;
+	return round(cc);
+}

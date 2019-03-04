@@ -41,9 +41,11 @@ struct IConf {
 	int import_max = 127; // Do not import notes above this one
 	int pan = 50; // 50 is center
 	int vol = 100; // 0-100% of real cc value
+	float db = 0; // db level
+	float db_compressed = 0; // db level after compression due to volumes above 100
 	int vol_default = 127; // Real CC value
 	float db_max = 0; // Maximum controlled loudness in db when volume CC is 127
-	float db_coef = 2; // Slope of CC to db function(2 for Kontakt, 1 for SWAM)
+	float db_coef = 3; // Slope of CC to db function(2 for Kontakt, 1 for SWAM)
   CString lib = 0;
 	int poly = 0; // Maximum number of simultaneous voices
 	int splitpo_freq = 0; // Frequency of split portamento in percent

@@ -271,14 +271,26 @@ void CConf::LoadConfig(CString fname, int load_includes) {
 
 void CConf::ProcessConfig() {
 	int max_vol = 100;
-	int test = 0;
 	for (int ii = 0; ii < icf.size(); ++ii) if (icf[ii].used) {
 		if (icf[ii].vol > max_vol) max_vol = icf[ii].vol;
-		test++;
 	}
+	float max_db = (max_vol - 100) / 5.0;
+	CString est;
+	est.Format("Detected maximum dB overshoot: %f", max_db);
+	WriteLog(0, est);
+	est = "";
 	for (int ii = 0; ii < icf.size(); ++ii) {
-		icf[ii].vol = icf[ii].vol * 100.0 / max_vol;
+		icf[ii].db = vol2db(icf[ii].vol, icf[ii].vol_default, icf[ii].db_max, icf[ii].db_coef);
+		icf[ii].db_compressed = icf[ii].db - max_db;
+		if (icf[ii].used) {
+			CString st;
+			st.Format("%d. %s: %.1f (vol %d, cc %d)\n", ii, icf[ii].group, icf[ii].db_compressed,
+				icf[ii].vol,
+				db2cc(icf[ii].db_compressed, icf[ii].vol_default, icf[ii].db_max, icf[ii].db_coef));
+			est += st;
+		}
 	}
+	WriteLog(0, "Instruments db: " + est);
 }
 
 void CConf::LoadConfigFiles(CString fname, int load_includes) {

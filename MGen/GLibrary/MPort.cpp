@@ -325,7 +325,7 @@ void MPort::SendMIDI(int step1, int step2)
 				(icf[ii].pan * 127) / 100);
 			// Send vol
 			AddCC(midi_sent_t - midi_start_time - midi_prepause, 7,
-				(icf[ii].vol * icf[ii].vol_default * master_vol) / 10000);
+				(db2cc(icf[ii].db_compressed, icf[ii].vol_default, icf[ii].db_max, icf[ii].db_coef) * master_vol) / 100);
 			if (icf[ii].trem_chan > -1) {
 				// These CC can seem to be already sent, so clear them
 				last_cc.clear();
@@ -336,7 +336,7 @@ void MPort::SendMIDI(int step1, int step2)
 					(icf[ii].pan * 127) / 100);
 				// Send vol
 				AddCC(midi_sent_t - midi_start_time - midi_prepause, 7,
-					(icf[ii].vol * icf[ii].vol_default * master_vol) / 10000);
+					(db2cc(icf[ii].db_compressed, icf[ii].vol_default, icf[ii].db_max, icf[ii].db_coef) * master_vol) / 100);
 				midi_channel = midi_channel_saved;
 				// These CC can seem to be already sent, so clear them
 				last_cc.clear();
