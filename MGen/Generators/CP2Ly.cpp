@@ -745,12 +745,12 @@ void CP2Ly::SaveLyCP() {
 		}
 		else st3 = "";
 		CString vocra_st;
-		vocra_st = " \"[" + vname_vocra_unique[v] + "]\"";
+		vocra_st = " \"[" + vname2[vi] + "]\"";
 		if (vocra_detected[v]) {
 			clef = vocra_info[vocra[v]].clef;
 		}
 		ly_ly_st += "     \n";
-		st.Format("  \\set Staff.instrumentName = \\markup { \\teeny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" %s%s } }\n", vname2[vi], st3, vocra_st);
+		st.Format("  \\set Staff.instrumentName = \\markup { \\teeny \\override #'(baseline-skip . 2.0) \\center-column{ \"%s\" %s%s } }\n", vname_vocra_unique[v], st3, vocra_st);
 		//ly_ly_st += "    \\override #'(line-width . 100)  \n";
 		ly_ly_st += st;
 		ly_ly_st += "  \\clef \"" + clef + "\"\n  \\key ";
