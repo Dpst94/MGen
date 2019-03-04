@@ -823,7 +823,7 @@ void CGenCA3::GetUniqueVocra() {
 		}
 		++vocra_cnt[vr];
 	}
-	for (v = 0; v < av_cnt; ++v) {
+	for (v = av_cnt - 1; v >= 0; --v) {
 		vname_vocra_unique[v] = "";
 		int vr = vocra[v];
 		if (!vocra_detected[v] || !vr) {

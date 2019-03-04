@@ -4282,7 +4282,12 @@ void CP2R::FlagHarmIncomplete() {
 		hstart = hli[hs];
 		hend = hli2[hs];
 		vc = vca[hstart];
-		// Do not check for single voice
+		// Do not check for convoluted harmony
+		if (chm[hs] == -1) {
+			prev_complete = 1;
+			continue;
+		}
+		// Do not check for 1-2 voices
 		if (vc < 3) continue;
 		// Count harmonic occurences
 		int dc1 = 0;
