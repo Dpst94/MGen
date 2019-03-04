@@ -158,6 +158,7 @@ int CGenCA3::XML_to_CP() {
 	cp_tempo = 0;
 	vname.resize(av_cnt);
 	vname2.resize(av_cnt);
+	vname_vocra_unique.resize(av_cnt);
 	it.resize(av_cnt);
 	ilyr.resize(av_cnt);
 	for (vi = 0; vi < xfi.voice.size(); ++vi) {
@@ -809,6 +810,35 @@ void CGenCA3::GetCPKey() {
 	// TODO: Select better key if alterations do not fit, while preserving bn
 }
 
+// Get unique vocal range names
+void CGenCA3::GetUniqueVocra() {
+	vector<int> vocra_cnt;
+	vocra_cnt.resize(5);
+	vector<int> vocra_num;
+	vocra_num.resize(5);
+	for (v = 0; v < av_cnt; ++v) {
+		int vr = vocra[v];
+		if (!vocra_detected[v] || !vr) {
+			continue;
+		}
+		++vocra_cnt[vr];
+	}
+	for (v = 0; v < av_cnt; ++v) {
+		vname_vocra_unique[v] = "";
+		int vr = vocra[v];
+		if (!vocra_detected[v] || !vr) {
+			continue;
+		}
+		++vocra_num[vr];
+		if (vocra_cnt[vr] > 1) {
+			vname_vocra_unique[v].Format("%s-%d", vocra_info[vr].name, vocra_num[vr]);
+		}
+		else {
+			vname_vocra_unique[v] = vocra_info[vr].name;
+		}
+	}
+}
+
 int CGenCA3::GetVocalRanges() {
 	CString est;
 	// Get vocal ranges from part names
@@ -822,22 +852,22 @@ int CGenCA3::GetVocalRanges() {
 		CString st;
 		st = vname[vi];
 		st.MakeLower();
-		if (st == "soprano") {
+		if (st.Left(7) == "soprano") {
 			vocra[v] = vrSop;
 			++vocra_used[vrSop];
 			vocra_detected[v] = 1;
 		}
-		if (st == "alto") {
+		if (st.Left(4) == "alto") {
 			vocra[v] = vrAlt;
 			++vocra_used[vrAlt];
 			vocra_detected[v] = 1;
 		}
-		if (st == "tenor") {
+		if (st.Left(5) == "tenor") {
 			vocra[v] = vrTen;
 			++vocra_used[vrTen];
 			vocra_detected[v] = 1;
 		}
-		if (st == "bass") {
+		if (st.Left(4) == "bass") {
 			vocra[v] = vrBas;
 			++vocra_used[vrBas];
 			vocra_detected[v] = 1;
@@ -974,6 +1004,7 @@ int CGenCA3::AnalyseCP() {
 	skip_flags = 0;
 	GetCPKey();
 	if (GetVocalRanges()) return 1;
+	GetUniqueVocra();
 	if (!instr_config.size()) {
 		// Save loaded instr
 		instr_config = instr;

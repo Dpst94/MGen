@@ -745,9 +745,7 @@ void CP2Ly::SaveLyCP() {
 		}
 		else st3 = "";
 		CString vocra_st;
-		if (vocra_detected[v] == 2) {
-			vocra_st = " \"[" + vocra_info[vocra[v]].name + "]\"";
-		}
+		vocra_st = " \"[" + vname_vocra_unique[v] + "]\"";
 		if (vocra_detected[v]) {
 			clef = vocra_info[vocra[v]].clef;
 		}
@@ -1191,7 +1189,7 @@ void CP2Ly::SaveLyComments() {
 		// Show voice number if more than 1 voice
 		if (av_cnt > 1) {
 			//st.Format("%d. %s", av_cnt - v, vname[vid[v]]);
-			note_st += vname2[vid[v]];
+			note_st += vname_vocra_unique[v];
 		}
 		st.Format(" [bar %d, beat %d] note \\concat { %s } ", // ly_nnum
 			s / npm + 1, (s % npm) / 2 + 1,
@@ -1246,7 +1244,7 @@ void CP2Ly::SaveLyComments() {
 			CString sl_st;
 			sl_st.Format("bar %d, beat %d", lyv[v].f[s][f].sl_src / npm + 1, (lyv[v].f[s][f].sl_src % npm) / 2 + 1);
 			if (lyv[v].f[s][f].vl != v && av_cnt > 2) {
-				com += " - with " + vname2[vid[lyv[v].f[s][f].vl]];
+				com += " - with " + vname_vocra_unique[lyv[v].f[s][f].vl];
 				if (lyv[v].f[s][f].sl_src != lyv[v].f[s][f].s_src) {
 					com += ", " + sl_st;
 				}

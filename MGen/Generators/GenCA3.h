@@ -24,6 +24,7 @@ private:
 	void ScanVocalRanges();
 	inline void EvalVocalRanges();
 	void GetPossibleVocalRanges();
+	void GetUniqueVocra();
 	int AnalyseCP();
 	int FailSpeciesCombination();
 

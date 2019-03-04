@@ -185,6 +185,7 @@ protected:
 	vector<int> vsp; // [v] Species for each voice
 	vector<CString> vname; // [v] 
 	vector<CString> vname2; // [v] Names are unique
+	vector<CString> vname_vocra_unique; // [v] Unique vocal range voice names
 	vector<int> nmin; // [v]
 	vector<int> nmax; // [v]
 	vector<int> nmind; // [v] diatonic
