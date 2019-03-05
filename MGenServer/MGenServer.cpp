@@ -13,7 +13,7 @@
 #define new DEBUG_NEW
 #endif
 
-#define MAX_TRACK 1000
+#define MAX_TRACK 200
 
 // The one and only application object
 CWinApp theApp;
@@ -64,7 +64,7 @@ int max_screenshot = 10;
 map <int, map<int, int>> st_used; // [stage][track]
 map <int, float> st_reverb; // [stage]
 map <int, CString> tr_name; // [track]
-map <int, vector<int>> dyn; // [track][time]
+vector<vector<vector<int>>> dyn; // [stage][track][time]
 
 // Children
 vector <CString> nChild; // Child process name
@@ -543,12 +543,15 @@ void AnalyseWaveform(int sta, CString fname2) {
 		est.Format("File not found: " + share + j_folder + fname3 + ".png");
 	}
 
-	par.Format("-show_format -of flat -i \"%s\" > \"%s\".inf 2>&1",
+	CreateDirectory(share + j_folder + "inf", NULL);
+	par.Format("-show_format -of flat -i \"%s\" > \"%s.inf\" 2>&1",
 		share + j_folder + fname2,
-		share + j_folder + fname3);
-	ret = RunTimeout(fChild["ffmpeg.exe"] + "ffprobe.exe", par, 30000, 0);
-	if (!CGLib::fileExists(share + j_folder + fname3 + ".inf")) {
-		est.Format("File not found: " + share + j_folder + fname3 + ".inf");
+		share + j_folder + "inf\\" + fname3);
+	ret = RunTimeout("cmd.exe", "/c " + fChild["ffmpeg.exe"] + "ffprobe.exe " + par, 30000, 0);
+	if (!CGLib::fileExists(share + j_folder + "inf\\" + fname3 + ".inf")) {
+		est.Format("File not found: " + share + j_folder + "inf\\" + fname3 + ".inf");
+		WriteLog(est);
+		WriteLog("/c " + fChild["ffmpeg.exe"] + "ffprobe.exe " + par);
 	}
 
 	// Get volume
@@ -562,7 +565,9 @@ void AnalyseWaveform(int sta, CString fname2) {
 		fs.open(share + j_folder + "waveform\\" + fname3 + ".csv");
 		int ihei = img.GetHeight();
 		int iwid = img.GetWidth();
-		dyn[tr + sta * MAX_TRACK].resize(iwid);
+		dyn.resize(max(dyn.size(), sta + 1));
+		dyn[sta].resize(max(dyn[sta].size(), tr + 1));
+		dyn[sta][tr].resize(iwid);
 		COLORREF clr;
 		COLORREF white = RGB(255, 255, 255);
 		for (int x = 0; x < iwid; ++x) {
@@ -585,7 +590,7 @@ void AnalyseWaveform(int sta, CString fname2) {
 				c = ((high - ihei / 2) * 255) / (ihei / 2);
 			}
 			fs << (int)c << "\n";
-			dyn[tr + sta * MAX_TRACK][x] = c;
+			dyn[sta][tr][x] = c;
 			//fs.write(reinterpret_cast<const char*>(&c), 1);
 		}
 		fs.close();
@@ -721,55 +726,63 @@ void ProcessDyn() {
 	int tr, tr2, sta, sta2;
 	int xmax = 0;
 	ofstream fs;
-	CreateDirectory(share + j_folder + "waveform", NULL);
 	fs.open(share + j_folder + "waveform\\volume-analysis.csv");
 	fs << "Stage;Track;VolCorrect;Track name;Comment\n";
-	for (map<int, vector<int>>::iterator it = dyn.begin(); it != dyn.end(); ++it) {
-		tr = it->first % MAX_TRACK;
-		sta = it->first / MAX_TRACK;
-		xmax = it->second.size();
-		CString vol_comment;
-		//st.Format("Process dynamics for track %d:%d", sta, tr);
-		//WriteLog(st);
-		double correct = 0;
-		int sum_common = 0;
-		for (map<int, vector<int>>::iterator it2 = dyn.begin(); it2 != dyn.end(); ++it2) {
-			tr2 = it2->first % MAX_TRACK;
-			sta2 = it2->first / MAX_TRACK;
-			// Do not compare track to itself
-			if (tr2 == tr && sta == sta2) continue;
-			// Do not compare tracks with different size;
-			if (xmax != it->second.size()) continue;
-			int common = 0;
-			double esum = 0;
-			double esum2 = 0;
-			for (int x = 0; x < xmax; ++x) {
-				// Do not compare zero values
-				if (!it->second[x]) continue;
-				if (!it2->second[x]) continue;
-				++common;
-				// Calculate sums of powered values 
-				esum += pow(it->second[x], rms_exp);
-				esum2 += pow(it2->second[x], rms_exp);
-			}
-			if (common && esum > 0) {
-				// Get rms values of both tracks
-				double rms = pow(esum / common, 1 / rms_exp);
-				double rms2 = pow(esum2 / common, 1 / rms_exp);
-				if (rms > 0) {
-					correct += pow(common, 1 / 4) * (rms2 - rms) / rms;
-					sum_common += pow(common, 1 / 4);
-					st.Format("%d:%d %.3lf-%.3lf [%d], ", sta2, tr2, rms, rms2, common);
-					vol_comment += st;
-					//WriteLog(st);
+	for (sta = 0; sta < dyn.size(); ++sta) {
+		// Skip empty stages
+		if (!dyn[sta].size()) continue;
+		for (tr = 0; tr < dyn[sta].size(); ++tr) {
+			// Skip empty tracks
+			if (!dyn[sta][tr].size()) continue;
+			xmax = dyn[sta][tr].size();
+			CString vol_comment;
+			//st.Format("Process dynamics for track %d:%d", sta, tr);
+			//WriteLog(st);
+			double correct = 0;
+			int sum_common = 0;
+			for (sta2 = 0; sta2 < dyn.size(); ++sta2) {
+				// Skip empty stages
+				if (!dyn[sta2].size()) continue;
+				for (tr2 = 0; tr2 < dyn[sta2].size(); ++tr2) {
+					// Skip empty tracks
+					if (!dyn[sta2][tr2].size()) continue;
+					// Do not compare track to itself
+					if (tr2 == tr && sta == sta2) continue;
+					int xmax2 = dyn[sta2][tr2].size();
+					// Do not compare tracks with different size;
+					if (xmax != xmax2) continue;
+					int common = 0;
+					double esum = 0;
+					double esum2 = 0;
+					for (int x = 0; x < xmax; ++x) {
+						// Do not compare zero values
+						if (!dyn[sta][tr][x]) continue;
+						if (!dyn[sta2][tr2][x]) continue;
+						++common;
+						// Calculate sums of powered values 
+						esum += pow(dyn[sta][tr][x], rms_exp);
+						esum2 += pow(dyn[sta2][tr2][x], rms_exp);
+					}
+					if (common && esum > 0) {
+						// Get rms values of both tracks
+						double rms = pow(esum / common, 1 / rms_exp);
+						double rms2 = pow(esum2 / common, 1 / rms_exp);
+						if (rms > 0) {
+							correct += pow(common, 1 / 4) * (rms2 - rms) / rms;
+							sum_common += pow(common, 1 / 4);
+							st.Format("%d:%d %.3lf-%.3lf [%d], ", sta2, tr2, rms, rms2, common);
+							vol_comment += st;
+							//WriteLog(st);
+						}
+					}
 				}
 			}
+			if (sum_common) correct = correct / sum_common / 3 * 100;
+			//st.Format("Suggested volume correction for track %d:%d: %.0lf%%", sta, tr, correct);
+			//WriteLog(st);
+			st.Format("%d;%d;%.0lf;%s;%s", sta, tr, correct, tr_name[tr], vol_comment);
+			fs << st << "\n";
 		}
-		if (sum_common) correct = correct / sum_common / 3 * 100;
-		//st.Format("Suggested volume correction for track %d:%d: %.0lf%%", sta, tr, correct);
-		//WriteLog(st);
-		st.Format("%d;%d;%.0lf;%s;%s", sta, tr, correct, tr_name[tr], vol_comment);
-		fs << st << "\n";
 	}
 	fs.close();
 }
@@ -812,8 +825,9 @@ int RunJobMGen() {
 	CGLib::CleanFolder(share + j_folder + "*.pdf");
 	CGLib::CleanFolder(share + j_folder + "*.ly");
 	CGLib::CleanFolder(share + j_folder + "*.txt");
-	CGLib::CleanFolder(share + j_folder + "*.inf");
+	CGLib::CleanFolder(share + j_folder + "inf\\*.inf");
 	CGLib::CleanFolder(share + j_folder + "*.csv");
+	CGLib::CleanFolder(share + j_folder + "waveform\\*.csv");
 	CGLib::CleanFolder(share + j_folder + "*.png");
 	CGLib::CleanFolder(share + j_folder + "*.midi");
 	// Copy config and midi file
