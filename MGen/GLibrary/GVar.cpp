@@ -1014,3 +1014,26 @@ void CGVar::RegisterGraph(CString name, float scale) {
 	++graph_size;
 }
 
+void CGVar::ExportNotes() {
+	ofstream fs;
+	CreateDirectory(as_dir + "\\notes", NULL);
+	fs.open(as_dir + "\\notes\\notes.csv");
+	fs << "Stage;Track;NoteStart;NoteStop\n";
+	for (int v = 0; v < v_cnt; ++v) {
+		int ii = instr[v];
+		int tr = icf[ii].track;
+		int sta = v_stage[v];
+		for (int i=0; i<t_sent; ++i) {
+			long ei = max(0, i + len[i][v] - 1);
+			long long stimestamp = sstime[i][v] * 100 / m_pspeed + dstime[i][v];
+			long long etimestamp = setime[ei][v] * 100 / m_pspeed + detime[ei][v];
+			if (pause[i][v]) continue;
+			fs << sta << ';' << tr << ';' << stimestamp << ';' << etimestamp << "\n";
+			// Stop if last note
+			if (noff[i][v] == 0) break;
+			// Skip to next note
+			i += noff[i][v] - 1;
+		}
+	}
+	fs.close();
+}

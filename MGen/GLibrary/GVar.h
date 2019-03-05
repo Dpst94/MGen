@@ -25,6 +25,7 @@ public:
 	void LoadResults(CString dir, CString fname);
 	void LoadResultLogs(CString dir, CString fname);
 	void LoadResultMusic(CString dir, CString fname);
+	void ExportNotes();
 
 	// Warnings
 	int warning_loadvectors = 0;
@@ -152,7 +153,6 @@ protected:
 	void UpdateNoteMinMax(int step1, int step2, int final_run = 1);
 	void UpdateTempoMinMax(int step1, int step2);
 	void AddNote(int pos, int v, char note2, int len2, int dyn2);
-	void FillPause(int start, int length, int v);
 	void RegisterGraph(CString name, float scale);
 	inline void SetProgress(int i, int value);
 	void AddMelody(int step1, int step2, int v, CString info, CString info2="", CString info3="");
