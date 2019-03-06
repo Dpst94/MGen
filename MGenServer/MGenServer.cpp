@@ -65,6 +65,9 @@ map <int, map<int, int>> st_used; // [stage][track]
 map <int, float> st_reverb; // [stage]
 map <int, CString> tr_name; // [track]
 vector<vector<vector<int>>> dyn; // [stage][track][time]
+vector <vector<float>> track_dur; // [stage][track]
+vector<vector<long>> av_dyn; // [stage][track] Average dynamics
+vector<vector<long>> dyn_cnt; // [stage][track] Number of notes in track
 
 // Children
 vector <CString> nChild; // Child process name
@@ -498,6 +501,21 @@ void MakeRenderLua(int sta) {
 	fs.close();
 }
 
+void LoadTrackLength(int sta, int tr, CString fname) {
+	vector<CString> sv;
+	CString st;
+	CGLib::read_file_sv(fname, sv);
+	track_dur.resize(max(track_dur.size(), sta + 1));
+	track_dur[sta].resize(max(track_dur[sta].size(), tr + 1));
+	for (int i = 0; i < sv.size(); ++i) {
+		st = sv[i];
+		if (st.Left(16) != "format.duration=") continue;
+		st = st.Mid(16);
+		st.Replace("\"", "");
+		track_dur[sta][tr] = atof(st);
+	}
+}
+
 void AnalyseWaveform(int sta, CString fname2) {
 	CString st;
 	st.Format("Stage %d/%d: Waveform and information analysis", j_stages - sta, j_stages);
@@ -551,7 +569,9 @@ void AnalyseWaveform(int sta, CString fname2) {
 	if (!CGLib::fileExists(share + j_folder + "inf\\" + fname3 + ".inf")) {
 		est.Format("File not found: " + share + j_folder + "inf\\" + fname3 + ".inf");
 		WriteLog(est);
-		WriteLog("/c " + fChild["ffmpeg.exe"] + "ffprobe.exe " + par);
+	}
+	else {
+		LoadTrackLength(sta, tr, share + j_folder + "inf\\" + fname3 + ".inf");
 	}
 
 	// Get volume
@@ -721,6 +741,73 @@ int RunRenderStage(int sta) {
 	return 0;
 }
 
+void ProcessDyn2() {
+	CString st;
+	vector<CString> ast;
+	ifstream ifs;
+	ifs.open(share + j_folder + "notes\\notes.csv");
+	char pch[2550];
+	int pos = 0;
+	int i = 0;
+	// Skip first header line
+	ifs.getline(pch, 2550);
+	while (ifs.good()) {
+		i++;
+		// Get line
+		ifs.getline(pch, 2550);
+		st = pch;
+		CGLib::Tokenize(st, ast, ";");
+		// Do not process wrong lines
+		if (ast.size() != 4) continue;
+		int sta = atoi(ast[0]);
+		int tr = atoi(ast[1]);
+		// Start time and end time
+		float sti = atoi(ast[2]);
+		float eti = atoi(ast[3]);
+		// Skip non-existent stage or track
+		if (track_dur.size() >= sta || dyn.size() >= sta) continue;
+		if (track_dur[sta].size() >= tr || dyn[sta].size() >= tr) continue;
+		if (!track_dur[sta][tr] || !dyn[sta][tr].size()) continue;
+		// Calculate image steps
+		int is1 = sti * 8000.0 / track_dur[sta][tr];
+		int is2 = eti * 8000.0 / track_dur[sta][tr];
+		// Find highest dynamics
+		int max_dyn = 0;
+		for (int i = is1; i <= is2; ++i) {
+			if (dyn[sta][tr][i] > max_dyn) {
+				max_dyn = dyn[sta][tr][i];
+			}
+		}
+		// Skip zero dynamics
+		if (!max_dyn) continue;
+		av_dyn.resize(max(av_dyn.size(), sta + 1));
+		av_dyn[sta].resize(max(av_dyn[sta].size(), tr + 1));
+		dyn_cnt.resize(max(dyn_cnt.size(), sta + 1));
+		dyn_cnt[sta].resize(max(dyn_cnt[sta].size(), tr + 1));
+		// Append dynamics
+		av_dyn[sta][tr] += max_dyn;
+		++dyn_cnt[sta][tr];
+	}
+	ofstream fs;
+	fs.open(share + j_folder + "waveform\\volume-analysis.csv");
+	fs << "Stage;Track;VolCorrect;Track name;Comment\n";
+	for (int sta = 0; sta < dyn.size(); ++sta) {
+		// Skip empty stages
+		if (!dyn[sta].size()) continue;
+		if (av_dyn.size() <= sta) continue;
+		if (!av_dyn[sta].size()) continue;
+		for (int tr = 0; tr < dyn[sta].size(); ++tr) {
+			// Skip empty tracks
+			if (!dyn[sta][tr].size()) continue;
+			if (av_dyn[sta].size() <= tr) continue;
+			CString vol_comment;
+			vol_comment.Format("%ld notes, %.0f ms track duration", dyn_cnt[sta][tr], track_dur[sta][tr]);
+			st.Format("%d;%d;%.0lf;%s;%s", sta, tr, av_dyn[sta][tr] / dyn_cnt[sta][tr], tr_name[tr], vol_comment);
+			fs << st << "\n";
+		}
+	}
+}
+
 void ProcessDyn() {
 	CString st;
 	int tr, tr2, sta, sta2;
@@ -792,6 +879,7 @@ int RunRender() {
 	
 	LoadVoices();
 	dyn.clear();
+	track_dur.clear();
 	DeleteFile(reaperbuf + "stage.temp");
 	for (int sta = j_stages - 1; sta >= 0; --sta) {
 		if (RunRenderStage(sta)) return 1;
