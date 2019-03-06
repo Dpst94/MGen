@@ -561,6 +561,7 @@ void AnalyseWaveform(int sta, CString fname2) {
 		est.Format("File not found: " + share + j_folder + fname3 + ".png");
 	}
 
+	/*
 	CreateDirectory(share + j_folder + "inf", NULL);
 	par.Format("-show_format -of flat -i \"%s\" > \"%s.inf\" 2>&1",
 		share + j_folder + fname2,
@@ -573,6 +574,7 @@ void AnalyseWaveform(int sta, CString fname2) {
 	else {
 		LoadTrackLength(sta, tr, share + j_folder + "inf\\" + fname3 + ".inf");
 	}
+	*/
 
 	// Get volume
 	CImage img;
@@ -878,14 +880,14 @@ int RunRender() {
 	if (!j_render) return 0;
 	
 	LoadVoices();
-	dyn.clear();
-	track_dur.clear();
+	//dyn.clear();
+	//track_dur.clear();
 	DeleteFile(reaperbuf + "stage.temp");
 	for (int sta = j_stages - 1; sta >= 0; --sta) {
 		if (RunRenderStage(sta)) return 1;
 	}
 	// Process dynamics
-	ProcessDyn();
+	//ProcessDyn();
 
 	// Clean temporary files
 	CGLib::CleanFolder(ReaperTempFolder + "*.wav");
@@ -913,7 +915,7 @@ int RunJobMGen() {
 	CGLib::CleanFolder(share + j_folder + "*.pdf");
 	CGLib::CleanFolder(share + j_folder + "*.ly");
 	CGLib::CleanFolder(share + j_folder + "*.txt");
-	CGLib::CleanFolder(share + j_folder + "inf\\*.inf");
+	//CGLib::CleanFolder(share + j_folder + "inf\\*.inf");
 	CGLib::CleanFolder(share + j_folder + "*.csv");
 	CGLib::CleanFolder(share + j_folder + "waveform\\*.csv");
 	CGLib::CleanFolder(share + j_folder + "*.png");
