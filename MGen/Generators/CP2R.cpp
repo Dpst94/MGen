@@ -4232,10 +4232,12 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 	int de1 = hvar;
 	int de2 = (de1 + 2) % 7;
 	int de3 = (de1 + 4) % 7;
+	int de4 = (de1 + 6) % 7;
 	// Count harmonic occurences
 	int dc1 = 0;
 	int dc2 = 0;
 	int dc3 = 0;
+	int dc4 = 0;
 	for (v = 0; v < av_cnt; ++v) {
 		ls = bli[v][hstart];
 		// Skip pauses
@@ -4245,6 +4247,7 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 			if (de1 == pc[v][hstart]) dc1 = 1;
 			else if (de2 == pc[v][hstart]) dc2 = 1;
 			else if (de3 == pc[v][hstart]) dc3 = 1;
+			else if (de4 == pc[v][hstart] && nih[v][hstart] > 1) dc4 = 1;
 		}
 		// Detect PDD and sus resolutions
 		else {
@@ -4252,16 +4255,18 @@ void CP2R::EvalHarmIncomplete(int hvar) {
 				if (de1 == pc[v][resol[v][hstart]]) dc1 = 1;
 				else if (de2 == pc[v][resol[v][hstart]]) dc2 = 1;
 				else if (de3 == pc[v][resol[v][hstart]]) dc3 = 1;
+				else if (de4 == pc[v][resol[v][hstart]] && nih[v][resol[v][hstart]] > 1) dc4 = 1;
 			}
 		}
 	}
 	// Any chord in penultimate measure
-	if (mli.size() > 1 && bmli[hstart] == mli.size() - 1) {
+	if (mli.size() > 1 && bmli[hstart] == mli.size() - 2) {
 		if (vc == 2) {
 			if (!dc2 || (!dc1 && !dc3)) FlagA(0, 172, hstart, hstart, 0, 0);
 		}
 		else {
-			if (!dc1 || !dc2 || !dc3) FlagA(0, 172, hstart, hstart, 0, 0);
+			if (dc1 + dc2 + dc3 + dc4 < 3) 
+				FlagA(0, 172, hstart, hstart, 0, 0);
 		}
 	}
 	// Non penultimate incomplete
@@ -4293,6 +4298,7 @@ void CP2R::FlagHarmIncomplete() {
 		int dc1 = 0;
 		int dc2 = 0;
 		int dc3 = 0;
+		int dc4 = 0;
 		for (v = 0; v < av_cnt; ++v) {
 			ls = bli[v][hstart];
 			// Skip pauses
@@ -4302,6 +4308,7 @@ void CP2R::FlagHarmIncomplete() {
 				if (cct[hs][0] == pcc[v][hstart]) dc1 = 1;
 				else if (cct[hs][1] == pcc[v][hstart]) dc2 = 1;
 				else if (cct[hs][2] == pcc[v][hstart]) dc3 = 1;
+				else if (cctp[hs][3] > 1 && cct[hs][3] == pcc[v][hstart]) dc4 = 1;
 			}
 			// Detect PDD and sus resolutions
 			else {
@@ -4309,10 +4316,11 @@ void CP2R::FlagHarmIncomplete() {
 					if (cct[hs][0] == pcc[v][resol[v][hstart]]) dc1 = 1;
 					else if (cct[hs][1] == pcc[v][resol[v][hstart]]) dc2 = 1;
 					else if (cct[hs][2] == pcc[v][resol[v][hstart]]) dc3 = 1;
+					else if (cctp[hs][3] > 1 && cct[hs][3] == pcc[v][resol[v][hstart]]) dc4 = 1;
 				}
 			}
 		}
-		if (dc1 && dc2 && dc3) {
+		if (dc1 + dc2 + dc3 + dc4 > 2) {
 			prev_complete = 1;
 			continue;
 		}
