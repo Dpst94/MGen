@@ -6713,11 +6713,11 @@ void CP2R::FlagFCR() {
 			}
 			// If both notes exist in external voices, flag red
 			if (fcr == 2) {
-				AutoFlag(v2, 378, s2, v);
+				Flag(v2, 378, s2, v);
 			}
 			// If one of notes exist in internal voice and the other - in any voice, flag yellow
 			else if (fcr == 1) {
-				AutoFlag(v2, 165, s2, v);
+				Flag(v2, 165, s2, v);
 			}
 		}
 	}
