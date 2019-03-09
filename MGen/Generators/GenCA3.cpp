@@ -161,8 +161,7 @@ int CGenCA3::XML_to_CP() {
 	vname_vocra_unique.resize(av_cnt);
 	it.resize(av_cnt);
 	ilyr.resize(av_cnt);
-	for (vi = 0; vi < xfi.voice.size(); ++vi) {
-		v = av_cnt - vi - 1;
+	for (v = 0; v < xfi.voice.size(); ++v) {
 		// Position in resulting vector
 		int pos = 0;
 		// Position of measure inside xml file
@@ -170,20 +169,20 @@ int CGenCA3::XML_to_CP() {
 		// Position of note inside xml measure
 		float xpos2 = 0;
 		// Convert from UTF8 to UTF16
-		CStringW vname_w = CA2W(xfi.voice[vi].name, CP_UTF8);
+		CStringW vname_w = CA2W(xfi.voice[v].name, CP_UTF8);
 		// Build full name
 		vname_w.Replace(L"MusicXML", L"");
 		vname_w.Trim();
-		if (vname_w.IsEmpty()) vname_w.Format(L"Part%d", vi + 1);
+		if (vname_w.IsEmpty()) vname_w.Format(L"Part%d", v + 1);
 		// Build short name
 		CStringW vname_w2 = vname_w;
 		if (vname_w2.GetLength() > ly_max_partname_len) vname_w2 = vname_w2.Left(ly_max_partname_len);
 		// Conert back to UTF8
 		vname[v] = CW2A(vname_w, CP_UTF8);
 		vname2[v] = CW2A(vname_w2, CP_UTF8);
-		unique_part_id.insert(xfi.voice[vi].id);
+		unique_part_id.insert(xfi.voice[v].id);
 		track_id[v] = unique_part_id.size();
-		track_name[v].Format("%s (%s), staff %d, voice %d, chord %d", vname[v], xfi.voice[vi].id, xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord);
+		track_name[v].Format("%s (%s), staff %d, voice %d, chord %d", vname[v], xfi.voice[v].id, xfi.voice[v].staff, xfi.voice[v].v, xfi.voice[v].chord);
 		for (int m = 1; m < xfi.mea.size(); ++m) {
 			xpos2 = 0;
 			int posm = pos;
@@ -196,10 +195,10 @@ int CGenCA3::XML_to_CP() {
 				xfi.mea[m].barline == "heavy-light" || 
 				xfi.mea[m].barline == "heavy-heavy") 
 				ibl[pos + 8.0 * xfi.mea[m].len - 1] = 1;
-			for (int ni = 0; ni < xfi.note[vi][m].size(); ++ni) {
-				xpos2 += xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
+			for (int ni = 0; ni < xfi.note[v][m].size(); ++ni) {
+				xpos2 += xfi.note[v][m][ni].dur * 2.0 / xfi.note[v][m][ni].dur_div;
 				int ln = floor(xpos + xpos2) - pos; 
-				// xfi.note[vi][m][ni].dur * 2.0 / xfi.note[vi][m][ni].dur_div;
+				// xfi.note[v][m][ni].dur * 2.0 / xfi.note[v][m][ni].dur_div;
 				//if (pos + ln < floor(xpos + xpos2)) 
 				c_len = max(c_len, pos + ln);
 				it[v].resize(c_len);
@@ -209,28 +208,28 @@ int CGenCA3::XML_to_CP() {
 				cc[v].resize(c_len);
 				ial[v].resize(c_len);
 				retr[v].resize(c_len);
-				if (xfi.note[vi][m][ni].tempo && !cp_tempo)
-					cp_tempo = xfi.note[vi][m][ni].tempo;
-				if (pos && !xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].tie_stop &&
-					xfi.note[vi][m][ni].pitch == cc[v][pos - 1]) retr[v][pos] = 1;
+				if (xfi.note[v][m][ni].tempo && !cp_tempo)
+					cp_tempo = xfi.note[v][m][ni].tempo;
+				if (pos && !xfi.note[v][m][ni].rest && !xfi.note[v][m][ni].tie_stop &&
+					xfi.note[v][m][ni].pitch == cc[v][pos - 1]) retr[v][pos] = 1;
 				// Check lowest note
-				if (!xfi.note[vi][m][ni].rest && !xfi.note[vi][m][ni].pitch) {
+				if (!xfi.note[v][m][ni].rest && !xfi.note[v][m][ni].pitch) {
 					CString est;
 					est.Format("Detected too low note. This note will be replaced with a rest. Measure %d, vi %d, part id %s, part name %s, staff %d, voice %d, chord %d, beat %d/%d, note %d of %d.",
-						m, vi, xfi.voice[vi].id, xfi.voice[vi].name, xfi.voice[vi].staff, xfi.voice[vi].v, xfi.voice[vi].chord,
-						xfi.mea[m].beats, xfi.mea[m].beat_type, ni + 1, xfi.note[vi][m].size());
+						m, v, xfi.voice[v].id, xfi.voice[v].name, xfi.voice[v].staff, xfi.voice[v].v, xfi.voice[v].chord,
+						xfi.mea[m].beats, xfi.mea[m].beat_type, ni + 1, xfi.note[v][m].size());
 					WriteLogLy(1, est, 0);
 				}
 				for (s = 0; s < ln; ++s) {
-					cc[v][pos + s] = xfi.note[vi][m][ni].pitch;
-					ial[v][pos + s] = xfi.note[vi][m][ni].alter;
+					cc[v][pos + s] = xfi.note[v][m][ni].pitch;
+					ial[v][pos + s] = xfi.note[v][m][ni].alter;
 				}
 				// Get fifths
-				ifi[pos] = xfi.note[vi][m][ni].fifths;
+				ifi[pos] = xfi.note[v][m][ni].fifths;
 				ibt[pos] = xfi.mea[m].beat_type;
 				// Concatenate text
-				it[v][pos] = xfi.note[vi][m][ni].words;
-				ilyr[v][pos] = xfi.note[vi][m][ni].lyric;
+				it[v][pos] = xfi.note[v][m][ni].words;
+				ilyr[v][pos] = xfi.note[v][m][ni].lyric;
 				pos += ln;
 			}
 			xpos += xfi.mea[m].len * 8.0;
@@ -289,11 +288,12 @@ int CGenCA3::XML_to_CP() {
 					cp_mea[cp_id][s3 - s1] = im[s3];
 				}
 				// Copy notes
-				for (v = 0; v < av_cnt; ++v) {
+				for (vi = 0; vi < av_cnt; ++vi) {
+					v = av_cnt - vi - 1;
 					cp[cp_id][v].resize(s2 - s1 + 1);
 					cp_alter[cp_id][v].resize(s2 - s1 + 1);
 					cp_retr[cp_id][v].resize(s2 - s1 + 1);
-					cp_vid[cp_id][v] = v;
+					cp_vid[cp_id][v] = vi;
 					for (int s3 = s1; s3 <= s2; ++s3) {
 						if (ibt[s3]) cp_btype[cp_id] = ibt[s3];
 						if (ifi[s3] != 100) {
@@ -308,13 +308,13 @@ int CGenCA3::XML_to_CP() {
 								}
 							}
 						}
-						cp[cp_id][v][s3 - s1] = cc[v][s3];
-						cp_alter[cp_id][v][s3 - s1] = ial[v][s3];
-						cp_retr[cp_id][v][s3 - s1] = retr[v][s3];
-						if (!cp_text[cp_id].IsEmpty() && !it[v][s3].IsEmpty()) cp_text[cp_id] += " ";
-						cp_text[cp_id] += it[v][s3];
-						if (!cp_lyrics[cp_id].IsEmpty() && !ilyr[v][s3].IsEmpty()) cp_lyrics[cp_id] += " ";
-						cp_lyrics[cp_id] += ilyr[v][s3];
+						cp[cp_id][v][s3 - s1] = cc[vi][s3];
+						cp_alter[cp_id][v][s3 - s1] = ial[vi][s3];
+						cp_retr[cp_id][v][s3 - s1] = retr[vi][s3];
+						if (!cp_text[cp_id].IsEmpty() && !it[vi][s3].IsEmpty()) cp_text[cp_id] += " ";
+						cp_text[cp_id] += it[vi][s3];
+						if (!cp_lyrics[cp_id].IsEmpty() && !ilyr[vi][s3].IsEmpty()) cp_lyrics[cp_id] += " ";
+						cp_lyrics[cp_id] += ilyr[vi][s3];
 					}
 				}
 				if (cp_fi[cp_id] == 100) cp_fi[cp_id] = 0;
