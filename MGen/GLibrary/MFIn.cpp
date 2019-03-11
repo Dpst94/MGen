@@ -184,6 +184,7 @@ void MFIn::LoadMidi(CString path)
 				int patch = mev->data()[1];
 				if (patch == 59) mute_active[chan] = 1;
 				else if (patch == 45) pizz_active[chan] = 1;
+				else if (patch == 44) trem_active[chan] = 1;
 				else {
 					mute_active[chan] = 0;
 					marc_active[chan] = 0;
