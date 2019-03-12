@@ -8,11 +8,13 @@ struct CaseInsensitiveCompare {
 	}
 };
 
+// Instrument types
 #define itPerc 0
 #define itEIS 1
 #define itSMB 2
 #define itSIVOR 3
 #define itSMW 4
+#define itCS 5
 
 // Instrument config
 struct IConf {

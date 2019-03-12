@@ -1128,6 +1128,19 @@ void CGAdapt::Adapt(int step1, int step2) {
 					AdaptTremStep(v, x, i, ii, ei, pi, pei);
 					AdaptAheadStep(v, x, i, ii, ei, pi, pei);
 				}
+				// Cinematic Strings
+				if (icf[ii].type == itCS) {
+					AdaptAllAheadStep(v, x, i, ii, ei, pi, pei);
+					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
+					AdaptVibBell(v, x, i, ii, ei, pi, pei);
+					AdaptSlurStep(v, x, i, ii, ei, pi, pei);
+					AdaptNonlegatoStep(v, x, i, ii, ei, pi, pei);
+					AdaptStaccatoStep(v, x, i, ii, ei, pi, pei);
+					AdaptPizzStep(v, x, i, ii, ei, pi, pei);
+					AdaptTremStep(v, x, i, ii, ei, pi, pei);
+					AdaptAheadStep(v, x, i, ii, ei, pi, pei);
+				}
 				// Samplemodeling Brass
 				if (icf[ii].type == itSMB) {
 					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);

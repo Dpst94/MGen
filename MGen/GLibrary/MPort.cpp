@@ -425,6 +425,25 @@ void MPort::SendMIDI(int step1, int step2)
 							AddTransitionCC(i, stimestamp, icf[ii].CC_retrigger, 100, 0);
 						}
 					}
+					if (icf[ii].type == itCS) {
+						// Send staccato
+						if (artic[i][v] == aSTAC) {
+							AddKs(stimestamp - 3, icf[ii].NameToKsw["Staccato"]);
+						}
+						else if (artic[i][v] == aPIZZ) {
+							AddKs(stimestamp - 3, icf[ii].NameToKsw["Pizzicato"]);
+						}
+						else if (artic[i][v] == aTREM) {
+							AddKs(stimestamp - 3, icf[ii].NameToKsw["Tremolo"]);
+						}
+						else {
+							AddKs(stimestamp - 3, icf[ii].NameToKsw["Arco"]);
+						}
+						// Send rebow retrigger
+						if (artic[i][v] == aREBOW) {
+							AddTransitionCC(i, stimestamp, icf[ii].CC_retrigger, 100, 0);
+						}
+					}
 					// Send transition ks
 					if (icf[ii].type == itSMB || icf[ii].type == itSMW) {
 						// Frullato
