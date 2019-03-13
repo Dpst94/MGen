@@ -865,6 +865,8 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "single_stage", &icf[i].single_stage, 0, 1);
 	CheckVar(&st2, &st3, "type", &icf[i].type);
 	CheckVar(&st2, &st3, "channel", &icf[i].channel, 1, 16);
+	CheckVar(&st2, &st3, "channels", &icf[i].channels, 1, 16);
+	CheckVar(&st2, &st3, "channels_dyn", &icf[i].channels_dyn, 1, 16);
 	CheckVar(&st2, &st3, "legato_long_minlen", &icf[i].legato_long_minlen);
 	CheckVar(&st2, &st3, "vel_legato_long", &icf[i].vel_legato_long);
 	CheckVar(&st2, &st3, "unison_mute", &icf[i].unis_mute, 0, 1);
@@ -933,10 +935,12 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "divisi_auto", &icf[i].divisi_auto, 0, 1);
 	CheckVar(&st2, &st3, "stac_auto", &icf[i].stac_auto, 0, 1);
 	CheckVar(&st2, &st3, "stac_ahead", &icf[i].stac_ahead);
+	CheckVar(&st2, &st3, "stac_chan", &icf[i].stac_chan, 1, 16);
 	CheckVar(&st2, &st3, "stac_maxlen", &icf[i].stac_maxlen);
 	CheckRange(&st2, &st3, "stac_dyn_range", &icf[i].stac_dyn_range1, &icf[i].stac_dyn_range2, 1, 100);
 	CheckVar(&st2, &st3, "pizz_import", &icf[i].pizz_import, 0, 1);
 	CheckVar(&st2, &st3, "pizz_ahead", &icf[i].pizz_ahead);
+	CheckVar(&st2, &st3, "pizz_chan", &icf[i].pizz_chan, 1, 16);
 	CheckVar(&st2, &st3, "mute_lock", &icf[i].mute_lock, 0, 1);
 	CheckVar(&st2, &st3, "mute_import", &icf[i].mute_import, 0, 1);
 	CheckVar(&st2, &st3, "trem_import", &icf[i].trem_import, 0, 1);

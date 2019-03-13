@@ -9,12 +9,14 @@ struct CaseInsensitiveCompare {
 };
 
 // Instrument types
-#define itPerc 0
-#define itEIS 1
-#define itSMB 2
-#define itSIVOR 3
-#define itSMW 4
-#define itCS 5
+#define itPerc 0 // Percussion
+#define itEIS 1 // Embertone Intimate Strings
+#define itSMB 2 // Sample modeling Brass
+#define itSIVOR 3 // Soundiron Voices of Rapture
+#define itSMW 4 // Sample modeling Woodwinds
+#define itCS 5 // Cinematic Strings
+#define itCSS 6 // CineSamples CineStrings
+#define itLASS 7 // LA Scoring Strings
 
 // Instrument config
 struct IConf {
@@ -32,7 +34,9 @@ struct IConf {
 	int port = 0; // If this instrument can receive messages through MIDI port in real time
 	int track = 0; // Resulting track for this instrument
 	int channel = 0; // Resulting MIDI channel for this instrument (both for MIDI file export and playback to MIDI port)
-	int type = 0; 
+	int channels = 1; // Number of channels to initialize
+	int channels_dyn = 1; // Number of channels to send dynamics
+	int type = 0;
 	int ks1 = 0; // First keyswitch pitch
 	//int used = 0; // For how many voices this instrument is already used
 	int nmin = 0;
@@ -65,7 +69,7 @@ struct IConf {
 	int trem_min_repeats = 3;
 	int trem_replace = -1;
 	int trem_transpose = 0;
-	int trem_chan = -1;
+	int trem_chan = 0; // Send trem to separate relative channel
 	int trem_len = 0;
 	int trem_end = 0;
 	int trem_activate = -1; // Technique that will be triggered with trem command from MIDI file
@@ -152,9 +156,11 @@ struct IConf {
 	int stac_maxlen = 0; // Maximum note length (ms) to be converted to staccato in case of non-legato on both sides
 	int stac_dyn_range1 = 1;
 	int stac_dyn_range2 = 100;
+	int stac_chan = 0; // Send stac to separate relative channel
 	int pizz_dyn_range1 = 1;
 	int pizz_dyn_range2 = 100;
 	int pizz_ahead = -1;  // Time in ms to stretch pizz notes back to cope with slow attack
+	int pizz_chan = 0; // Send pizz to separate relative channel
 	int pizz_import = 1; // Set to 0 to ignore pizzicato in source MIDI file and play as normal notes
 	int mute_import = 1; // Set to 0 to ignore mutes in source MIDI file and play as normal notes
 	int trem_import = 1; // Set to 0 to ignore tremolo keyswitches and program changes in source MIDI file and play as normal notes

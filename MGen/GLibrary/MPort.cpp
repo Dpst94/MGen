@@ -304,40 +304,33 @@ void MPort::SendMIDI(int step1, int step2)
 		int ncount = 0;
 		int ii = instr[v];
 		midi_channel = icf[ii].channel - 1;
-		midi_channel_saved = midi_channel;
+		midi_channel_base = midi_channel;
 		midi_track = icf[ii].track;
 		midi_stage = v_stage[v];
 		midi_voice = v;
 		midi_current_step = 0;
 		// Send initialization commands
 		if (midi_first_run) {
-			for (auto const& it : icf[ii].InitCommands) {
-				AddMidiEvent(midi_sent_t - midi_start_time - midi_prepause,
-					Pm_MessageStatus(it) + midi_channel,
-					Pm_MessageData1(it), Pm_MessageData2(it));
-				if (Pm_MessageStatus(it) == MIDI_NOTEON) {
-					AddKsOff(midi_sent_t - midi_start_time - midi_prepause + 3,
-						Pm_MessageData1(it), 0);
-				}
-			}
-			// Send pan
-			AddCC(midi_sent_t - midi_start_time - midi_prepause, 10,
-				(icf[ii].pan * 127) / 100);
-			// Send vol
-			AddCC(midi_sent_t - midi_start_time - midi_prepause, 7,
-				(db2cc(icf[ii].db_compressed, icf[ii].vol_default, icf[ii].db_max, icf[ii].db_coef) * master_vol) / 100);
-			if (icf[ii].trem_chan > -1) {
+			for (int ch = 0; ch < icf[ii].channels; ++ch) {
 				// These CC can seem to be already sent, so clear them
 				last_cc.clear();
 				last_cc.resize(128, -1);
-				midi_channel = icf[ii].trem_chan - 1;
+				midi_channel = midi_channel_base + ch;
+				for (auto const& it : icf[ii].InitCommands) {
+					AddMidiEvent(midi_sent_t - midi_start_time - midi_prepause,
+						Pm_MessageStatus(it) + midi_channel,
+						Pm_MessageData1(it), Pm_MessageData2(it));
+					if (Pm_MessageStatus(it) == MIDI_NOTEON) {
+						AddKsOff(midi_sent_t - midi_start_time - midi_prepause + 3,
+							Pm_MessageData1(it), 0);
+					}
+				}
 				// Send pan
 				AddCC(midi_sent_t - midi_start_time - midi_prepause, 10,
 					(icf[ii].pan * 127) / 100);
 				// Send vol
 				AddCC(midi_sent_t - midi_start_time - midi_prepause, 7,
 					(db2cc(icf[ii].db_compressed, icf[ii].vol_default, icf[ii].db_max, icf[ii].db_coef) * master_vol) / 100);
-				midi_channel = midi_channel_saved;
 				// These CC can seem to be already sent, so clear them
 				last_cc.clear();
 				last_cc.resize(128, -1);
@@ -382,7 +375,10 @@ void MPort::SendMIDI(int step1, int step2)
 					}
 				}
 				// Note ON if it is not blocked and was not yet sent
-				if (artic[i][v] == aTREM && icf[ii].trem_chan > -1) midi_channel = icf[ii].trem_chan - 1;
+				if (artic[i][v] == aTREM && icf[ii].trem_chan) midi_channel = midi_channel_base + icf[ii].trem_chan - 1;
+				else if (artic[i][v] == aPIZZ && icf[ii].pizz_chan) midi_channel = midi_channel_base + icf[ii].pizz_chan - 1;
+				else if (artic[i][v] == aSTAC && icf[ii].stac_chan) midi_channel = midi_channel_base + icf[ii].stac_chan - 1;
+				else midi_channel = midi_channel_base;
 				stimestamp = sstime[i][v] * 100 / m_pspeed + dstime[i][v];
 				CheckDstime(i, v);
 				if ((stimestamp + midi_start_time + midi_prepause >= midi_sent_t) && (i >= midi_sent)) {
@@ -544,19 +540,22 @@ void MPort::SendMIDI(int step1, int step2)
 						}
 					}
 				}
-				midi_channel = midi_channel_saved;
+				midi_channel = midi_channel_base;
 			}
 			// Go to next note
 			if (noff[i][v] == 0) break;
 			i += noff[i][v];
 		}
 		// Send CC
-		if (icf[ii].trem_chan > -1) midi_channel = icf[ii].trem_chan - 1;
-		InterpolateCC(icf[ii].CC_dyn, icf[ii].rnd_dyn, icf[ii].rnd_dyn_slow, step1, step22, dyn, ii, v);
+		for (int ch = 0; ch < icf[ii].channels_dyn; ++ch) {
+			midi_channel = midi_channel_base + ch;
+			InterpolateCC(icf[ii].CC_dyn, icf[ii].rnd_dyn, icf[ii].rnd_dyn_slow, step1, step22, dyn, ii, v);
+		}
+		midi_channel = midi_channel_base;
 		InterpolateCC(icf[ii].CC_vib, icf[ii].rnd_vib, icf[ii].rnd_vib_slow, step1, step22, vib, ii, v);
 		InterpolateCC(icf[ii].CC_vibf, icf[ii].rnd_vibf, icf[ii].rnd_vibf_slow, step1, step22, vibf, ii, v);
 		SendPedalCC(step1, step22, ii, v);
-		midi_channel = midi_channel_saved;
+		midi_channel = midi_channel_base;
 	}
 	// Sort by timestamp before sending
 	qsort(midi_buf.data(), midi_buf.size(), sizeof(PmEvent), PmEvent_comparator);
