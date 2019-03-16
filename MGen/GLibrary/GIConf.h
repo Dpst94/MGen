@@ -70,6 +70,7 @@ struct IConf {
 	int trem_replace = -1;
 	int trem_transpose = 0;
 	int trem_chan = 0; // Send trem to separate relative channel
+	float trem_db = 0; // Relative db volume for trem articulation
 	int trem_len = 0;
 	int trem_end = 0;
 	int trem_activate = -1; // Technique that will be triggered with trem command from MIDI file
@@ -157,10 +158,12 @@ struct IConf {
 	int stac_dyn_range1 = 1;
 	int stac_dyn_range2 = 100;
 	int stac_chan = 0; // Send stac to separate relative channel
+	float stac_db = 0; // Relative db volume for stac articulation
 	int pizz_dyn_range1 = 1;
 	int pizz_dyn_range2 = 100;
 	int pizz_ahead = -1;  // Time in ms to stretch pizz notes back to cope with slow attack
 	int pizz_chan = 0; // Send pizz to separate relative channel
+	float pizz_db = 0; // Relative db volume for pizz articulation
 	int pizz_import = 1; // Set to 0 to ignore pizzicato in source MIDI file and play as normal notes
 	int mute_import = 1; // Set to 0 to ignore mutes in source MIDI file and play as normal notes
 	int trem_import = 1; // Set to 0 to ignore tremolo keyswitches and program changes in source MIDI file and play as normal notes

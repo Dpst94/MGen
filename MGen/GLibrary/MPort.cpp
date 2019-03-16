@@ -328,9 +328,13 @@ void MPort::SendMIDI(int step1, int step2)
 				// Send pan
 				AddCC(midi_sent_t - midi_start_time - midi_prepause, 10,
 					(icf[ii].pan * 127) / 100);
+				float my_db = icf[ii].db_compressed;
+				if (ch + 1 == icf[ii].trem_chan) my_db += icf[ii].trem_db;
+				else if (ch + 1 == icf[ii].stac_chan) my_db += icf[ii].stac_db;
+				else if (ch + 1 == icf[ii].pizz_chan) my_db += icf[ii].pizz_db;
 				// Send vol
 				AddCC(midi_sent_t - midi_start_time - midi_prepause, 7,
-					(db2cc(icf[ii].db_compressed, icf[ii].vol_default, icf[ii].db_max, icf[ii].db_coef) * master_vol) / 100);
+					(db2cc(my_db, icf[ii].vol_default, icf[ii].db_max, icf[ii].db_coef) * master_vol) / 100);
 				// These CC can seem to be already sent, so clear them
 				last_cc.clear();
 				last_cc.resize(128, -1);

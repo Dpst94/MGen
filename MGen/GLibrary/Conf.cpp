@@ -838,6 +838,9 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	LoadVar(&st2, &st3, "library", &icf[i].lib);
 	CheckVar(&st2, &st3, "pan", &icf[i].pan, 0, 100);
 	CheckVar(&st2, &st3, "volume", &icf[i].vol, 0, 200);
+	CheckVar(&st2, &st3, "trem_db", &icf[i].trem_db, -100, 100);
+	CheckVar(&st2, &st3, "stac_db", &icf[i].stac_db, -100, 100);
+	CheckVar(&st2, &st3, "pizz_db", &icf[i].pizz_db, -100, 100);
 	CheckVar(&st2, &st3, "volume_default", &icf[i].vol_default, 0, 127);
 	CheckVar(&st2, &st3, "db_max", &icf[i].db_max);
 	CheckVar(&st2, &st3, "db_coef", &icf[i].db_coef);
