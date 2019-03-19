@@ -836,7 +836,7 @@ int CP2R::FailManyLeaps(int mleaps, int mleaped, int mleaps2, int mleaped2, int 
 	g_leaped[v][fli_size[v] - 1] = 0;
 	int win_leaps = 0;
 	int win_leapnotes = 0;
-	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
+	for (ls = 0; ls < fli_size[v] - 2; ++ls) {
 		s = fli2[v][ls];
 		s1 = fli2[v][ls + 1];
 		// Add new leap
