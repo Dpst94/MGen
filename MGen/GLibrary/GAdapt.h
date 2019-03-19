@@ -18,6 +18,14 @@ public:
 	CGAdapt();
 	~CGAdapt();
 
+	void ScaleDyn(int step1, int step2, int v, int ii);
+
+	void Vel2Dyn(int step1, int step2, int v);
+
+	void RandStart(int v, int x, int i, int ii, int ei, int pi, int pei);
+
+	void RandEnd(int v, int x, int i, int ii, int ei, int pi, int pei);
+
 	void Adapt(int step1, int step2);
 
 	float adapt_pspeed = 100; // Playback speed used during adaptation
@@ -26,6 +34,8 @@ protected:
 	void CalculateVoiceStages();
 	void ExportVoiceStages();
 	void SetPauseDyn(int v, int step1, int step2);
+	void RandomizeTempo(int step1, int step2);
+	void UpdateStepTime(int step1, int step2);
 	void CheckInstrumentRange(int v, int ii);
 	void CheckShortStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void CheckNoteBreath(int v, int x, int i, int ii, int ei, int pi, int pei);
@@ -44,6 +54,7 @@ protected:
 	void AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptAllAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptFlexAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei);
+	void ApplyAheadEnd(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void FixOverlap(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int pei, int pni, int pnei);
 	void AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount);

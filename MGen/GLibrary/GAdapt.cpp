@@ -423,7 +423,7 @@ void CGAdapt::AdaptFlexAheadStep(int v, int x, int i, int ii, int ei, int pi, in
 				artic[i][v] = aSPLITPO_PENT;
 				if (comment_adapt) adapt_comment[i][v] += "Split portamento pentatonic. ";
 				min_adur = icf[ii].splitpo_mindur;
-				if (icf[ii].legato_ahead[1]) adur0 = icf[ii].legato_ahead[2];
+				if (icf[ii].legato_ahead[2]) adur0 = icf[ii].legato_ahead[2];
 				//CString st;
 				//st.Format("Added pentatonic split portamento at step %d", i);
 				//WriteLog(0, st);
@@ -434,7 +434,7 @@ void CGAdapt::AdaptFlexAheadStep(int v, int x, int i, int ii, int ei, int pi, in
 			artic[i][v] = aGLISS2;
 			if (comment_adapt) adapt_comment[i][v] += "Gliss2. ";
 			min_adur = icf[ii].gliss_mindur;
-			if (icf[ii].legato_ahead[1]) adur0 = icf[ii].legato_ahead[3];
+			if (icf[ii].legato_ahead[3]) adur0 = icf[ii].legato_ahead[3];
 			//CString st;
 			//st.Format("Added gliss2 at step %d", i);
 			//WriteLog(0, st);
@@ -457,6 +457,16 @@ void CGAdapt::AdaptFlexAheadStep(int v, int x, int i, int ii, int ei, int pi, in
 			adapt_comment[i - 1][v] += "Ahead flex end. ";
 		}
 	}
+}
+
+void CGAdapt::ApplyAheadEnd(int v, int x, int i, int ii, int ei, int pi, int pei) {
+	// Skip short articulations, because their length is not important
+	if (artic[i][v] == aSTAC || artic[i][v] == aPIZZ) return;
+	// Skip legato connections
+	if (ei < t_generated - 1 && !pause[ei + 1][v]) return;
+	if (icf[ii].ahead_end == -1) detime[ei][v] -= icf[ii].all_ahead;
+	else detime[ei][v] -= icf[ii].ahead_end;
+	adapt_comment[ei][v] += "Ahead end. ";
 }
 
 void CGAdapt::FixOverlap(int v, int x, int i, int ii, int ei, int pi, int pei) {
@@ -1005,17 +1015,7 @@ void CGAdapt::SetPauseDyn(int v, int step1, int step2) {
 	}
 }
 
-void CGAdapt::Adapt(int step1, int step2) {
-	if (step2 < 0) return;
-	if (step1 > t_adapted) {
-		CString est;
-		est.Format("Attempt to adapt from %d to %d steps, while last adapted step was %d. This means that some part of music is going to be not validated and not adapted.",
-			step1, step2, t_adapted);
-		WriteLog(5, est);
-	}
-	// Set new adapted limit
-	t_adapted = step2 + 1;
-	ValidateVectors(step1, step2);
+void CGAdapt::RandomizeTempo(int step1, int step2) {
 	// Randomize tempo
 	float tr;
 	CSmoothRandom sr;
@@ -1041,8 +1041,9 @@ void CGAdapt::Adapt(int step1, int step2) {
 			tempo[i] += tr;
 		}
 	}
-	// Tempo could change
-	UpdateTempoMinMax(step1, step2);
+}
+
+void CGAdapt::UpdateStepTime(int step1, int step2) {
 	// Make sstime delta before recalculating stime
 	for (int i = step1; i <= step2; i++) {
 		for (int v = 0; v < v_cnt; v++) {
@@ -1060,10 +1061,61 @@ void CGAdapt::Adapt(int step1, int step2) {
 			setime[i][v] += etime[i];
 		}
 	}
+}
+
+// Scale dynamics 
+void CGAdapt::ScaleDyn(int step1, int step2, int v, int ii) {
+	for (int i = step1; i <= step2; i++) {
+		dyn[i][v] = max(0, min(127,
+			dyn[i][v] * (icf[ii].dyn_range2 - icf[ii].dyn_range1) / 100.0 +
+			icf[ii].dyn_range1 * 127.0 / 100.0));
+	}
+}
+
+// Set vel to dyn
+void CGAdapt::Vel2Dyn(int step1, int step2, int v) {
+	for (int i = step1; i <= step2; i++) {
+		vel[i][v] = max(1, dyn[i][v]);
+	}
+}
+
+// Randomize note starts for piano and non-legato solo instruments
+void CGAdapt::RandStart(int v, int x, int i, int ii, int ei, int pi, int pei) {
+	if (icf[ii].rand_start > 0 && (icf[ii].type == itPerc || artic[i][v] == aNONLEGATO || artic[i][v] == aSTAC ||
+		artic[i][v] == aPIZZ || artic[i][v] == aTREM)) {
+		float max_shift = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed * icf[ii].rand_start / 100;
+		if ((icf[ii].rand_start_max > 0) && (max_shift > icf[ii].rand_start_max)) max_shift = icf[ii].rand_start_max;
+		dstime[i][v] += (rand01() - 0.5) * max_shift;
+	}
+}
+
+// Randomize note ends
+void CGAdapt::RandEnd(int v, int x, int i, int ii, int ei, int pi, int pei) {
+	if (icf[ii].rand_end > 0) {
+		float max_shift = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed * icf[ii].rand_end / 100;
+		if ((icf[ii].rand_end_max > 0) && (max_shift > icf[ii].rand_end_max)) max_shift = icf[ii].rand_end_max;
+		detime[ei][v] += (rand01() - 0.5) * max_shift;
+	}
+}
+
+void CGAdapt::Adapt(int step1, int step2) {
 	long long time_start = CGLib::time();
 	int ei; // ending step
 	int pi; // previous note step
 	int pei; // previous note ending step
+	if (step2 < 0) return;
+	if (step1 > t_adapted) {
+		CString est;
+		est.Format("Attempt to adapt from %d to %d steps, while last adapted step was %d. This means that some part of music is going to be not validated and not adapted.",
+			step1, step2, t_adapted);
+		WriteLog(5, est);
+	}
+	// Set new adapted limit
+	t_adapted = step2 + 1;
+	ValidateVectors(step1, step2);
+	RandomizeTempo(step1, step2);
+	UpdateTempoMinMax(step1, step2);
+	UpdateStepTime(step1, step2);
 	// Save current play speed
 	adapt_pspeed = m_pspeed;
 	CalculateVoiceStages();
@@ -1084,16 +1136,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 			// Clear adaptation comment
 			adapt_comment[i][v].Empty();
 		}
-		// Scale dynamics 
-		for (int i = step1; i <= step2; i++) {
-			dyn[i][v] = max(0, min(127,
-				dyn[i][v] * (icf[ii].dyn_range2 - icf[ii].dyn_range1) / 100.0 +
-				icf[ii].dyn_range1 * 127.0 / 100.0));
-		}
-		// Set vel to dyn
-		for (int i = step1; i <= step2; i++) {
-			vel[i][v] = max(1, dyn[i][v]);
-		}
+		ScaleDyn(step1, step2, v, ii);
+		Vel2Dyn(step1, step2, v);
 		CheckInstrumentRange(v, ii);
 		if (!adapt_enable) continue;
 		slur_count = 0;
@@ -1208,20 +1252,10 @@ void CGAdapt::Adapt(int step1, int step2) {
 			pi = max(0, i - poff[i][v]);
 			pei = i - 1;
 			if (!pause[i][v]) {
-				// Randomize note starts for piano and non-legato solo instruments
-				if (icf[ii].rand_start > 0 && (icf[ii].type == itPerc || artic[i][v] == aNONLEGATO || artic[i][v] == aSTAC ||
-					artic[i][v] == aPIZZ || artic[i][v] == aTREM)) {
-					float max_shift = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed * icf[ii].rand_start / 100;
-					if ((icf[ii].rand_start_max > 0) && (max_shift > icf[ii].rand_start_max)) max_shift = icf[ii].rand_start_max;
-					dstime[i][v] += (rand01() - 0.5) * max_shift;
-				}
-				// Randomize note ends
-				if (icf[ii].rand_end > 0) {
-					float max_shift = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed * icf[ii].rand_end / 100;
-					if ((icf[ii].rand_end_max > 0) && (max_shift > icf[ii].rand_end_max)) max_shift = icf[ii].rand_end_max;
-					detime[ei][v] += (rand01() - 0.5) * max_shift;
-				}
+				RandStart(v, x, i, ii, ei, pi, pei);
+				RandEnd(v, x, i, ii, ei, pi, pei);
 				FixOverlap(v, x, i, ii, ei, pi, pei);
+				ApplyAheadEnd(v, x, i, ii, ei, pi, pei);
 			}
 			CheckNoteBreath(v, x, i, ii, ei, pi, pei);
 			if (noff[i][v] == 0) break;
