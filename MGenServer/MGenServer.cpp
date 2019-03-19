@@ -64,10 +64,11 @@ int max_screenshot = 10;
 map <int, map<int, int>> st_used; // [stage][track]
 map <int, float> st_reverb; // [stage]
 map <int, CString> tr_name; // [track]
-vector<vector<vector<int>>> dyn; // [stage][track][time]
+vector<int> dyn; // [time]
 vector <vector<float>> track_dur; // [stage][track]
 vector<vector<long>> av_dyn; // [stage][track] Average dynamics
 vector<vector<long>> dyn_cnt; // [stage][track] Number of notes in track
+float master_db;
 
 // Children
 vector <CString> nChild; // Child process name
@@ -83,6 +84,10 @@ long long server_start_time = CGLib::time();
 
 // Objects
 CDb db;
+
+float gain2dBFS(float gain) {
+	return 20 * log10(gain);
+}
 
 void InitErrorMessages() {
 	errorMessages.resize(1000);
@@ -579,6 +584,44 @@ void AnalyseWaveform(int sta, CString fname2) {
 	// Get volume
 	CImage img;
 	HRESULT res = img.Load(share + j_folder + fname3 + ".png");
+	if (res == S_OK && tr == -1) {
+		//st.Format("Get volume %d:%d " + fname3, sta, tr);
+		//WriteLog(st);
+		ofstream fs;
+		CreateDirectory(share + j_folder + "waveform", NULL);
+		fs.open(share + j_folder + "waveform\\" + fname3 + ".csv");
+		int ihei = img.GetHeight();
+		int iwid = img.GetWidth();
+		dyn.resize(iwid);
+		COLORREF clr;
+		COLORREF white = RGB(255, 255, 255);
+		for (int x = 0; x < iwid; ++x) {
+			int started = 0;
+			int low = -1;
+			int high = -1;
+			for (int y = ihei / 2; y < ihei; ++y) {
+				clr = img.GetPixel(x, y);
+				if (clr == CLR_INVALID) continue;
+				if (clr == 0) {
+					high = y;
+					break;
+				}
+			}
+			//CString st;
+			//st.Format("Dyn: %d %d %d", x, low, high);
+			//WriteLog(st);
+			unsigned char c = 0;
+			if (high > ihei / 2) {
+				c = ((high - ihei / 2) * 255) / (ihei / 2);
+			}
+			fs << (int)c << "\n";
+			dyn[x] = c;
+			//fs.write(reinterpret_cast<const char*>(&c), 1);
+		}
+		fs.close();
+		//WriteLog("Volume recorded");
+	}
+	/*
 	if (res == S_OK && tr >= 0) { 
 		//st.Format("Get volume %d:%d " + fname3, sta, tr);
 		//WriteLog(st);
@@ -618,6 +661,29 @@ void AnalyseWaveform(int sta, CString fname2) {
 		fs.close();
 		//WriteLog("Volume recorded");
 	}
+	*/
+}
+
+int GetMasterVolume(float &mdb) {
+	mdb = 0;
+	if (!dyn.size()) return 0;
+	long av_dyn = 0;
+	int max_dyn = 0;
+	float rms_dyn = 0;
+	for (int i = 0; i < dyn.size(); ++i) {
+		if (dyn[i] > max_dyn) max_dyn = dyn[i];
+		av_dyn += dyn[i];
+		rms_dyn += pow(dyn[i], 2);
+	}
+	av_dyn = av_dyn / dyn.size();
+	rms_dyn = pow(rms_dyn, 0.5);
+	mdb = -gain2dBFS(max_dyn / 400.0);
+	return 0;
+}
+
+int RunMaster() {
+	GetMasterVolume(master_db);
+	return 0;
 }
 
 int RunRenderStage(int sta) {
@@ -743,6 +809,7 @@ int RunRenderStage(int sta) {
 	return 0;
 }
 
+/*
 void ProcessDyn2() {
 	CString st;
 	vector<CString> ast;
@@ -875,6 +942,7 @@ void ProcessDyn() {
 	}
 	fs.close();
 }
+*/
 
 int RunRender() {
 	if (!j_render) return 0;
@@ -887,6 +955,7 @@ int RunRender() {
 		if (RunRenderStage(sta)) return 1;
 	}
 	// Process dynamics
+	RunMaster();
 	//ProcessDyn();
 
 	// Clean temporary files
@@ -960,6 +1029,7 @@ int RunJobMGen() {
 	CGLib::copy_file(as_dir + "\\log-debug.log", share + j_folder + "log-debug.log");
 	CGLib::copy_file(as_dir + "\\log-algorithm.log", share + j_folder + "log-algorithm.log");
 	CGLib::copy_file(as_dir + "\\" + as_fname + ".ly", share + j_folder + j_basefile + ".ly");
+	CGLib::copy_folder(as_dir + "\\noteinfo", share + j_folder + "noteinfo", "*.*", true);
 	// Get j_stages
 	j_stages = 0;
 	for (int sta = 0; sta < MAX_STAGE; ++sta) {

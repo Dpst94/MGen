@@ -237,6 +237,7 @@ void CGVar::SaveResults(CString dir, CString fname)
 	long long time_start = CGLib::time();
 	CreateDirectory(dir, NULL);
 	ofstream fs;
+	/*
 	fs.open(dir + "\\" + fname + ".mgr", std::ofstream::binary);
 	if (t_generated > 0) {
 		for (size_t i = 0; i < t_generated; i++) {
@@ -264,6 +265,7 @@ void CGVar::SaveResults(CString dir, CString fname)
 		}
 	}
 	fs.close();
+	*/
 	// Save strings
 	CString st;
 	fs.open(dir + "\\" + fname + ".txt");
@@ -1016,24 +1018,31 @@ void CGVar::RegisterGraph(CString name, float scale) {
 
 void CGVar::ExportNotes() {
 	ofstream fs;
-	CreateDirectory(as_dir + "\\notes", NULL);
-	fs.open(as_dir + "\\notes\\notes.csv");
-	fs << "Stage;Track;NoteStart;NoteStop\n";
+	CreateDirectory(as_dir + "\\noteinfo", NULL);
 	for (int v = 0; v < v_cnt; ++v) {
 		int ii = instr[v];
 		int tr = icf[ii].track;
 		int sta = v_stage[v];
+		CString fname;
+		fname.Format(as_dir + "\\noteinfo\\tr%d_sta%d.csv", tr + 1, sta);
+		fs.open(fname);
+		fs << "Note;NoteStartMs;NoteEndMs;Dstime;Detime;Articulation;Filter;StartComment;EndComment\n"; 
 		for (int i=0; i<t_sent; ++i) {
 			long ei = max(0, i + len[i][v] - 1);
 			long long stimestamp = sstime[i][v] * 100 / m_pspeed + dstime[i][v];
 			long long etimestamp = setime[ei][v] * 100 / m_pspeed + detime[ei][v];
 			if (pause[i][v]) continue;
-			fs << sta << ';' << tr << ';' << stimestamp << ';' << etimestamp << "\n";
+			CString st;
+			st.Format("%u;%llu;%llu;%.0f;%.0f;%u;%u;%s;%s\n",
+				note[i][v], stimestamp, etimestamp, dstime[i][v], detime[ei][v], 
+				artic[i][v], filter[i][v], adapt_comment[i][v], adapt_comment[ei][v]
+			);
+			fs << st; 
 			// Stop if last note
 			if (noff[i][v] == 0) break;
 			// Skip to next note
 			i += noff[i][v] - 1;
 		}
+		fs.close();
 	}
-	fs.close();
 }

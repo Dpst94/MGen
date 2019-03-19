@@ -129,11 +129,12 @@ struct IConf {
 	int max_slur_count = 0;
 	int max_slur_interval = 0;
 	int all_ahead = 0;
+	int ahead_end = -1; // Time in ms to stretch note end back to cope with slow fadeout. -1 falls back to all_ahead
 	int nonlegato_mingap = 1;
 	int nonlegato_maxgap = 1;
 	int auto_legato = -1;
 	int pedal_import = 1; 
-	vector<int> legato_ahead;
+	vector<int> legato_ahead; // Time in ms to stretch legato notes back to cope with legato delay[norm, chrom, penta, gliss]
 	vector<int> ahead_chrom;
 	vector<short> KswGroup;
 	short ksw_group_count = 1;
@@ -153,7 +154,7 @@ struct IConf {
 	float nonlegato_freq = 0;
 	int nonlegato_minlen = 0;
 	int stac_auto = 1;
-	int stac_ahead = -1;
+	int stac_ahead = -1; // Time in ms to stretch stac notes back to cope with slow attack. -1 falls back to all_ahead
 	int stac_maxlen = 0; // Maximum note length (ms) to be converted to staccato in case of non-legato on both sides
 	int stac_dyn_range1 = 1;
 	int stac_dyn_range2 = 100;

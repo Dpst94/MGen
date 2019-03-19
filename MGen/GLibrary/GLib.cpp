@@ -433,6 +433,27 @@ void CGLib::copy_file(CString sName, CString dName) {
 	dst.close();
 }
 
+// Example of mask: *.*
+void CGLib::copy_folder(CString sName, CString dName, CString mask, bool recursive) {
+	CreateDirectory(dName, NULL);
+	CFileFind finder;
+	int track;
+	BOOL bWorking = finder.FindFile(dName + "\\" + mask);
+	CString fname, fname2;
+	while (bWorking) {
+		bWorking = finder.FindNextFile();
+		if (finder.IsDots()) continue;
+		fname = finder.GetFileName();
+		if (finder.IsDirectory()) {
+			if (recursive) 
+				copy_folder(sName + "\\" + fname, dName + "\\" + fname, mask, recursive);
+		}
+		else {
+			copy_file(sName + "\\" + fname, dName + "\\" + fname);
+		}
+	}
+}
+
 void CGLib::write_file_sv(ofstream &fs, vector<CString> &sv) {
 	for (int i = 0; i < sv.size(); ++i) {
 		fs << sv[i] << "\n";

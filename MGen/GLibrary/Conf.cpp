@@ -926,6 +926,7 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckRange(&st2, &st3, "trem_dyn_range", &icf[i].trem_dyn_range1, &icf[i].trem_dyn_range2, 0, 100);
 	CheckVar(&st2, &st3, "trem_min_repeats", &icf[i].trem_min_repeats);
 	CheckVar(&st2, &st3, "all_ahead", &icf[i].all_ahead);
+	CheckVar(&st2, &st3, "ahead_end", &icf[i].ahead_end);
 	LoadVectorPar(&st2, &st3, "legato_ahead", icf[i].legato_ahead);
 	LoadVectorPar(&st2, &st3, "ahead_chrom", icf[i].ahead_chrom);
 	CheckVar(&st2, &st3, "leg_pdur", &icf[i].leg_pdur);
