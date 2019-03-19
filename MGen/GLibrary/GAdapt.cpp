@@ -69,6 +69,7 @@ void CGAdapt::CheckInstrumentRange(int v, int ii) {
 	}
 }
 
+// Check if note is too short
 void CGAdapt::CheckShortStep(int v, int x, int i, int ii, int ei, int pi, int pei)
 {
 	// Check if note is too short
@@ -375,8 +376,9 @@ void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pe
 	}
 }
 
+// Move all notes to the left
 void CGAdapt::AdaptAllAheadStep(int v, int x, int i, int ii, int ei, int pi, int pei) {
-	// Advance start for legato (not longer than previous note length)
+	// Advance start for note
 	if (i > 0 && pi < i && icf[ii].all_ahead > 0) {
 		dstime[i][v] = -icf[ii].all_ahead;
 		if (comment_adapt) {
@@ -1120,7 +1122,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 	adapt_pspeed = m_pspeed;
 	CalculateVoiceStages();
 	ExportVoiceStages();
-	AdaptGetPhrases(step1, step2);
+	//AdaptGetPhrases(step1, step2);
 	for (int v = 0; v < v_cnt; v++) {
 		int ii = instr[v]; // Instrument id
 		int ncount = 0;
@@ -1178,7 +1180,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
-					AdaptSlurStep(v, x, i, ii, ei, pi, pei);
+					AdaptRetriggerNonlegatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptNonlegatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptStaccatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptPizzStep(v, x, i, ii, ei, pi, pei);
@@ -1191,7 +1193,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
-					AdaptSlurStep(v, x, i, ii, ei, pi, pei);
+					AdaptRetriggerNonlegatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptNonlegatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptStaccatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptPizzStep(v, x, i, ii, ei, pi, pei);
@@ -1204,7 +1206,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
-					AdaptSlurStep(v, x, i, ii, ei, pi, pei);
+					AdaptRetriggerNonlegatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptNonlegatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptStaccatoStep(v, x, i, ii, ei, pi, pei);
 					AdaptPizzStep(v, x, i, ii, ei, pi, pei);
