@@ -32,6 +32,7 @@ public:
 
 protected:
 	void CalculateVoiceStages();
+	void ApplyStageIcf();
 	void ExportVoiceStages();
 	void SetPauseDyn(int v, int step1, int step2);
 	void RandomizeTempo(int step1, int step2);

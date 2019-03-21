@@ -913,7 +913,7 @@ void CGAdapt::CalculateVoiceStages() {
 			}
 		}
 		else {
-			// For solo instrument alwas create new stage
+			// For solo instrument always create new stage
 			v_stage[v] = tcs_instr[trackchan].size();
 		}
 		// Set instrument for each exported track
@@ -967,6 +967,16 @@ void CGAdapt::CalculateVoiceStages() {
 		stage_reverb[v_stage[v]] = icf[ii].reverb_mix;
 	}
 	stages_calculated = 1;
+}
+
+// Rewrite instrument config with stage instrument config if exists
+void CGAdapt::ApplyStageIcf() {
+	for (int v = 0; v < v_cnt; v++) {
+		int ii = instr[v];
+		// Skip stages that were not specified
+		if (icf[ii].child.find(v_stage[v]) == icf[ii].child.end()) continue;
+		instr[v] = icf[ii].child[v_stage[v]];
+	}
 }
 
 void CGAdapt::ExportVoiceStages() {
@@ -1121,6 +1131,7 @@ void CGAdapt::Adapt(int step1, int step2) {
 	// Save current play speed
 	adapt_pspeed = m_pspeed;
 	CalculateVoiceStages();
+	ApplyStageIcf();
 	ExportVoiceStages();
 	//AdaptGetPhrases(step1, step2);
 	for (int v = 0; v < v_cnt; v++) {

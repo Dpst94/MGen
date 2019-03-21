@@ -20,6 +20,7 @@ struct CaseInsensitiveCompare {
 
 // Instrument config
 struct IConf {
+	int layer = 0; // 0 is basic config, 1 is track config, 2 is stage config
 	CString group; // group name
 	CString name; // config name
 	CString fname; // config file name

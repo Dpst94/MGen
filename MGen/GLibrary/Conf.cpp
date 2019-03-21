@@ -248,6 +248,12 @@ short CConf::CreateVirtualInstrument(int instr_id, int child_id) {
 	icf[instr_id2].child.clear();
 	// Save parent
 	icf[instr_id2].parent = instr_id;
+	if (icf[instr_id].parent == -1) {
+		icf[instr_id2].layer = 1;
+	}
+	else {
+		icf[instr_id2].layer = 2;
+	}
 	// Save child
 	icf[instr_id].child[child_id] = instr_id2;
 	return instr_id2;
