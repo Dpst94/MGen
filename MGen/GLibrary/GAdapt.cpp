@@ -357,19 +357,25 @@ void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pe
 				adapt_comment[i][v] += "Ahead legato start. ";
 				adapt_comment[i - 1][v] += "Ahead legato end. ";
 			}
-			// Add glissando if note is long
-			float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
-			if (icf[ii].gliss_freq > 0 && ndur > icf[ii].gliss_minlen && icf[ii].gliss_minlen > 0 &&
-				randbw(0, 100) < icf[ii].gliss_freq) {
-					vel[i][v] = icf[ii].gliss_leg_vel;
-					if (comment_adapt) adapt_comment[i][v] += "Gliss. ";
+			if (icf[ii].type == itLASS) {
+				// For LASS library, velocity for legato transitions should be low
+				vel[i][v] = dyn[i][v] / 2;
 			}
 			else {
-				if (ndur > icf[ii].legato_long_minlen) {
-					vel[i][v] = randbw(icf[ii].gliss_leg_vel + 1, icf[ii].vel_legato_long);
+				// Add glissando if note is long
+				float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
+				if (icf[ii].gliss_freq > 0 && ndur > icf[ii].gliss_minlen && icf[ii].gliss_minlen > 0 &&
+					randbw(0, 100) < icf[ii].gliss_freq) {
+					vel[i][v] = icf[ii].gliss_leg_vel;
+					if (comment_adapt) adapt_comment[i][v] += "Gliss. ";
 				}
 				else {
-					vel[i][v] = randbw(icf[ii].vel_legato_long + 1, 127);
+					if (ndur > icf[ii].legato_long_minlen) {
+						vel[i][v] = randbw(icf[ii].gliss_leg_vel + 1, icf[ii].vel_legato_long);
+					}
+					else {
+						vel[i][v] = randbw(icf[ii].vel_legato_long + 1, 127);
+					}
 				}
 			}
 		}
