@@ -1279,3 +1279,14 @@ int CGLib::db2cc(float db, int vol_default, float db_max, float db_coef) {
 	float cc = pow((db + db_default - db_max) / 1250.0 / db_coef + 1, 1 / 0.007) * 127.0;
 	return round(cc);
 }
+
+// Count number of specified characters in CString
+int CGLib::CountCharacters(CString& st, char ch) {
+	if (st.IsEmpty()) return 0;
+	int nFind = -1;
+	int nCount = 0;
+	while (-1 != (nFind = st.Find(ch, nFind + 1))) {
+		nCount++;
+	}
+	return nCount;
+}

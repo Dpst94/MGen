@@ -47,6 +47,10 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 	char pch[2550];
 	int pos = 0;
 	int i = 0;
+	vector<vector<vector<CString>>> cst; // [type][order][]
+	cst.resize(2);
+	cst[0].resize(10);
+	cst[1].resize(10);
 	while (fs.good()) {
 		i++;
 		// Get line
@@ -75,6 +79,31 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 			st2.Trim();
 			st3.Trim();
 			st2.MakeLower();
+			// Get order
+			int order = 0;
+			if (st2.Find(":") > 0) {
+				int scnt = CountCharacters(st2, '/');
+				if (scnt == 3) order = 4;
+				else if (scnt == 2) order = 3;
+				else if (scnt == 1) order = 2;
+				else order = 1;
+			}
+			cst[0][order].push_back(st2);
+			cst[1][order].push_back(st3);
+		}
+		else {
+			if (!st.IsEmpty()) {
+				WriteLog(5, "No equal sign in line, which is not a comment: '" + st + "' in file " + fname);
+			}
+		}
+	}
+	fs.close();
+	// Load config strings
+	for (int order = 0; order < 10; ++order) {
+		int cnt = cst[0][order].size();
+		for (int i = 0; i < cnt; ++i) {
+			st2 = cst[0][order][i];
+			st3 = cst[1][order][i];
 			// Load general variables
 			int idata = atoi(st3);
 			float fdata = atof(st3);
@@ -224,13 +253,8 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 			}
 			if (error) break;
 		}
-		else {
-			if (!st.IsEmpty()) {
-				WriteLog(5, "No equal sign in line, which is not a comment: '" + st + "' in file " + fname);
-			}
-		}
+		if (error) break;
 	}
-	fs.close();
 	CString est;
 	long long time_stop = CGLib::time();
 	est.Format("LoadConfigFile loaded %d lines from %s in %lld ms", i, fname, time_stop - time_start);
