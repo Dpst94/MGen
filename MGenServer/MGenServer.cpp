@@ -448,12 +448,23 @@ int Connect() {
 	return nRetCode;
 }
 
+void RotateConfig() {
+	CString fname, fname2;
+	for (int i = 10; i > 0; --i) {
+		fname.Format(share + j_folder + "config-log\\config_%d.pl", i - 1);
+		fname2.Format(share + j_folder + "config-log\\config_%d.pl", i);
+		if (!CGLib::fileExists(fname)) continue;
+		CGLib::copy_file(fname, fname2);
+	}
+}
+
 int FinishJob(int res, CString st) {
 	// Prevent changing database if there is db error (need to restart)
 	if (nRetCode) return res;
 	int state = 3;
 	// Queue autorestarting job after finish
 	if (j_autorestart && !res) state = 1;
+	RotateConfig();
 	CString q;
 	q.Format("UPDATE jobs SET j_updated=NOW(), j_duration=TIMESTAMPDIFF(SECOND, j_started, NOW()), j_finished=NOW(), j_state='%d', j_result='%d', j_progress='%s', j_cleaned=0, j_size='%llu' WHERE j_id='%lld'",
 		state, res, db.Escape(st), CGLib::FolderSize(share + j_folder), CDb::j_id);
@@ -991,7 +1002,12 @@ int RunJobMGen() {
 	CGLib::CleanFolder(share + j_folder + "*.midi");
 	// Copy config and midi file
 	CreateDirectory("server\\cache", NULL);
+	CreateDirectory(share + j_folder + "config-log", NULL);
 	CGLib::copy_file(fname_pl, fname_pl2);
+	CGLib::copy_file(fname_pl, share + j_folder + "config-log\\config_0.pl");
+	CGLib::AppendLineToFile(share + j_folder + "config-log\\config_0.pl", 
+		"# " + CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S") +
+		" config snapshot at task start\n");
 	CGLib::copy_file(fname, fname2);
 	// Delete log
 	DeleteFile("log\\autosave.txt");
