@@ -1811,27 +1811,30 @@ int CP2R::FailLeapSmooth(int l_max_smooth, int l_max_smooth_direct, int csel, in
 	for (ls = 0; ls < fli_size[v] - 1; ++ls) {
 		s = fli2[v][ls];
 		s1 = fli2[v][ls + 1];
-		// Add new leap
-		if (leap[v][s] != 0) {
-			++leap_sum2;
-			if (abs(c[v][s1] - c[v][s]) == 2) ++thirds_sum;
+		// Consecutive leaps should not fire at last step
+		if (ls < fli_size[v] - 2) {
+			// Add new leap
+			if (leap[v][s] != 0) {
+				++leap_sum2;
+				if (abs(c[v][s1] - c[v][s]) == 2) ++thirds_sum;
+			}
+			else {
+				leap_sum2 = 0;
+				thirds_sum = 0;
+			}
+			// Get maximum leap_sum
+			leap_sum_corrected = leap_sum2 - min(thirds_sum, thirds_ignored[sp][av_cnt][0]);
+			if (leap_sum_corrected > max_leap_sum2) {
+				max_leap_sum2 = leap_sum_corrected;
+				max_leap_sum3 = leap_sum2;
+				leap_sum_s2 = s;
+			}
+			// Calculate penalty
+			if (leap_sum_corrected == csel) {
+				if (accept[sp][av_cnt][0][leaps_flag3] > 0) ++fpenalty;
+			}
+			if (leap_sum_corrected > csel2 && accept[sp][av_cnt][0][leaps_flag4] > 0) ++fpenalty;
 		}
-		else {
-			leap_sum2 = 0;
-			thirds_sum = 0;
-		}
-		// Get maximum leap_sum
-		leap_sum_corrected = leap_sum2 - min(thirds_sum, thirds_ignored[sp][av_cnt][0]);
-		if (leap_sum_corrected > max_leap_sum2) {
-			max_leap_sum2 = leap_sum_corrected;
-			max_leap_sum3 = leap_sum2;
-			leap_sum_s2 = s;
-		}
-		// Calculate penalty
-		if (leap_sum_corrected == csel) {
-			if (accept[sp][av_cnt][0][leaps_flag3] > 0) ++fpenalty;
-		}
-		if (leap_sum_corrected > csel2 && accept[sp][av_cnt][0][leaps_flag4] > 0) ++fpenalty;
 		// Prohibit long smooth motion
 		if (smooth[v][s] != 0) {
 			++smooth_sum;
