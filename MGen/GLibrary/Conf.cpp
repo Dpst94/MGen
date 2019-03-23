@@ -121,6 +121,7 @@ void CConf::LoadConfigFile(CString fname, int load_includes) {
 			CheckVar(&st2, &st3, "midifile_export_comments", &midifile_export_comments, 0, 1);
 			CheckVar(&st2, &st3, "adapt_enable", &adapt_enable, 0, 1);
 			CheckVar(&st2, &st3, "autolegato", &auto_legato, 0, 1);
+			CheckVar(&st2, &st3, "stagepaninvert", &stage_pan_invert, 0, 1);
 			CheckVar(&st2, &st3, "reverb_mix", &reverb_mix, 0, 100);
 			CheckVar(&st2, &st3, "toload_time", &toload_time);
 			CheckVar(&st2, &st3, "autononlegato", &auto_nonlegato, 0, 1);
@@ -867,6 +868,7 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	parameter_found = 0;
 	LoadVar(&st2, &st3, "library", &icf[i].lib);
 	CheckVar(&st2, &st3, "pan", &icf[i].pan, 0, 100);
+	CheckVar(&st2, &st3, "pan_default", &icf[i].pan_default, 0, 100);
 	CheckVar(&st2, &st3, "volume", &icf[i].vol, 0, 200);
 	CheckVar(&st2, &st3, "trem_db", &icf[i].trem_db, -100, 100);
 	CheckVar(&st2, &st3, "stac_db", &icf[i].stac_db, -100, 100);

@@ -1046,6 +1046,7 @@ int RunJobMGen() {
 	CGLib::copy_file(as_dir + "\\log-algorithm.log", share + j_folder + "log-algorithm.log");
 	CGLib::copy_file(as_dir + "\\" + as_fname + ".ly", share + j_folder + j_basefile + ".ly");
 	CGLib::copy_folder(as_dir + "\\noteinfo", share + j_folder + "noteinfo", "*.*", true);
+	CGLib::copy_file(as_dir + "\\" + as_fname + ".midi", share + j_folder + j_basefile + ".midi");
 	// Get j_stages
 	j_stages = 0;
 	for (int sta = 0; sta < MAX_STAGE; ++sta) {

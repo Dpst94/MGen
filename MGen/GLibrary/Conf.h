@@ -57,6 +57,7 @@ public:
 	int sleep_ms = 0;
 	int adapt_enable = 1;
 	int auto_legato = -1;
+	int stage_pan_invert = 1; // Automatically invert panning of instruments in odd stages
 	int reverb_mix = 30;
 	int toload_time = 0;
 	int auto_nonlegato = 0; // Setting this to 0 disables nonlegato_freq

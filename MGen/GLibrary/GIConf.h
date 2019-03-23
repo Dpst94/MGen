@@ -47,6 +47,7 @@ struct IConf {
 	int import_min = 12; // Do not import notes below this one
 	int import_max = 127; // Do not import notes above this one
 	int pan = 50; // 50 is center
+	int pan_default = 50; // 50 is center. default panning for instrument
 	int vol = 100; // 0-100% of real cc value
 	float db = 0; // db level
 	float db_compressed = 0; // db level after compression due to volumes above 100
