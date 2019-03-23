@@ -425,6 +425,7 @@ protected:
 	vector<vector<int>> mshb; // [v][s] Best msh
 	vector<vector<int>> nih; // [v][s] Is current note in harmony?
 	vector<vector<int>> nihb; // [v][s] Best nih
+	vector<vector<int>> resolb; // [v][s] Best resol
 	vector<vector<int>> islt; // [v][s] Is current note a leading tone?
 	vector<vector<int>> pat; // [v][ls] Pattern (cambiata, dnt...) for fli
 	vector<vector<int>> pat_state; // [v][ls] Pattern (cambiata, dnt...) for fli state: 0 - not applied, 1 - fixed, 2,3 - variants

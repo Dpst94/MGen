@@ -67,6 +67,7 @@ void CGenCA3::InitAnalysis() {
 	nih.resize(av_cnt);
 	islt.resize(av_cnt);
 	nihb.resize(av_cnt);
+	resolb.resize(av_cnt);
 	pat.resize(av_cnt);
 	dtp.resize(av_cnt);
 	dtp_s.resize(av_cnt);
@@ -120,6 +121,7 @@ void CGenCA3::InitAnalysis() {
 		nih[v].resize(c_len);
 		islt[v].resize(c_len);
 		nihb[v].resize(c_len);
+		resolb[v].resize(c_len);
 		pat[v].resize(c_len);
 		dtp[v].resize(c_len);
 		dtp_s[v].resize(c_len);

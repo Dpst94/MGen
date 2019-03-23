@@ -5439,6 +5439,7 @@ void CP2R::GetMsh() {
 							for (v = 0; v < av_cnt; ++v) {
 								mshb[v][s] = msh[v][s];
 								nihb[v][s] = nih[v][s];
+								resolb[v][s] = resol[v][s];
 							}
 						}
 					}
@@ -5478,6 +5479,7 @@ void CP2R::GetMsh() {
 				for (v = 0; v < av_cnt; ++v) {
 					msh[v][s] = mshb[v][s];
 					nih[v][s] = nihb[v][s];
+					resol[v][s] = resolb[v][s];
 				}
 			}
 			// Save flags
@@ -5807,6 +5809,7 @@ void CP2R::GetMsh2(int sec_hp) {
 									for (v = 0; v < av_cnt; ++v) {
 										mshb[v][s] = msh[v][s];
 										nihb[v][s] = nih[v][s];
+										resolb[v][s] = resol[v][s];
 									}
 								}
 							}
