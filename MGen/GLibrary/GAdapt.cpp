@@ -989,7 +989,7 @@ void CGAdapt::ExportVoiceStages() {
 	ofstream fs;
 	CreateDirectory(as_dir, NULL);
 	fs.open(as_dir + "\\" + as_fname + ".csv");
-	fs << "SRC;SRC track;Voice;IGroup;Instr;Stage;Track;Chan;Port;Poly;Reverb;\n";
+	fs << "SRC;SRC track;Voice;IGroup;Instr;Stage;Track;Chan;Port;Poly;Reverb;Pan;PanInvert;PanApply;\n";
 	for (int v = 0; v < v_cnt; v++) {
 		int ii = instr[v];
 		fs << track_id[v] << ";";
@@ -1004,6 +1004,15 @@ void CGAdapt::ExportVoiceStages() {
 		fs << icf[ii].poly << ";";
 		if (icf[ii].reverb_mix == -1) fs << reverb_mix << ";";
 		else fs << icf[ii].reverb_mix << ";";
+		fs << icf[ii].pan << ";";
+		if (icf[ii].pan == -1) {
+			if (v_stage[v] % 2) fs << "1;";
+			else fs << "0;";
+		}
+		else {
+			fs << icf[ii].pan_invert << ";";
+		}
+		fs << icf[ii].pan_apply << ";";
 		fs << "\n";
 	}
 	fs.close();

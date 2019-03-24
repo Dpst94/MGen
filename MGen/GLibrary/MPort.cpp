@@ -327,7 +327,7 @@ void MPort::SendMIDI(int step1, int step2)
 				}
 				// Send pan
 				AddCC(midi_sent_t - midi_start_time - midi_prepause, 10,
-					(icf[ii].pan * 127) / 100);
+					(icf[ii].pan_apply * 127) / 100);
 				float my_db = icf[ii].db_compressed;
 				if (ch + 1 == icf[ii].trem_chan) my_db += icf[ii].trem_db;
 				else if (ch + 1 == icf[ii].stac_chan) my_db += icf[ii].stac_db;

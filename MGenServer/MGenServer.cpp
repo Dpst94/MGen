@@ -61,9 +61,10 @@ int can_render = 1;
 int screenshot_id = 0;
 int max_screenshot = 10;
 
-map <int, map<int, int>> st_used; // [stage][track]
-map <int, float> st_reverb; // [stage]
-map <int, CString> tr_name; // [track]
+unordered_map <int, map<int, int>> pan_invert; // [stage][track]
+unordered_map <int, unordered_map<int, int>> st_used; // [stage][track]
+unordered_map <int, float> st_reverb; // [stage]
+unordered_map <int, CString> tr_name; // [track]
 vector<int> dyn; // [time]
 vector <vector<float>> track_dur; // [stage][track]
 vector<vector<long>> av_dyn; // [stage][track] Average dynamics
@@ -490,28 +491,53 @@ void LoadVoices() {
 	tr_name.clear();
 	st_used.clear();
 	st_reverb.clear();
+	pan_invert.clear();
 	if (!CGLib::fileExists(share + j_folder + j_basefile + ".csv")) return;
 	CGLib::read_file_sv(share + j_folder + j_basefile + ".csv", sv);
 	for (int i = 1; i < sv.size(); ++i) {
 		sa.clear();
 		CGLib::Tokenize(sv[i], sa, ";");
 		if (sa.size() < 7) continue;
+		int tr = atoi(sa[6]);
+		int sta = atoi(sa[5]);
 		//WriteLog(sa[5] + "/" + sa[6]);
-		st_used[atoi(sa[5])][atoi(sa[6])] = 1;
-		st_reverb[atoi(sa[5])] = atoi(sa[10]);
-		tr_name[atoi(sa[6])] = sa[3] + "/" + sa[4];
+		st_used[sta][tr] = 1;
+		st_reverb[sta] = atoi(sa[10]);
+		tr_name[tr] = sa[3] + "/" + sa[4];
+		pan_invert[sta][tr] = atoi(sa[12]);
 	}
 }
 
 void MakeRenderLua(int sta) {
 	vector<CString> sv;
 	ofstream fs;
-	CString st;
+	CString reverb_mix_st, pan_invert_st;
 	fs.open("server\\scripts\\render-midi.lua");
 	CGLib::read_file_sv("server\\scripts\\templates\\render-midi.lua", sv);
-	st.Format("%.2f", st_reverb[sta] / 100.0);
+	reverb_mix_st.Format("%.2f", st_reverb[sta] / 100.0);
+	// Make pan invert string
+	for (auto it = pan_invert[sta].begin(); it != pan_invert[sta].end(); it++) {
+		CString st;
+		if (it->second) {
+			st.Format("reaper.SetMediaTrackInfo_Value(reaper.GetTrack(0, %d), \"D_DUALPANL\", 1)\n",
+				it->first + 2);
+			pan_invert_st += st;
+			st.Format("reaper.SetMediaTrackInfo_Value(reaper.GetTrack(0, %d), \"D_DUALPANR\", -1)\n",
+				it->first + 2);
+			pan_invert_st += st;
+		}
+		else {
+			st.Format("reaper.SetMediaTrackInfo_Value(reaper.GetTrack(0, %d), \"D_DUALPANL\", -1)\n",
+				it->first + 2);
+			pan_invert_st += st;
+			st.Format("reaper.SetMediaTrackInfo_Value(reaper.GetTrack(0, %d), \"D_DUALPANR\", 1)\n",
+				it->first + 2);
+			pan_invert_st += st;
+		}
+	}
 	for (int i = 0; i < sv.size(); ++i) {
-		sv[i].Replace("$REVERB_MIX$", st);
+		sv[i].Replace("$REVERB_MIX$", reverb_mix_st);
+		sv[i].Replace("$PAN_INVERT$", pan_invert_st);
 		fs << sv[i] << "\n";
 	}
 	fs.close();

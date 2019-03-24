@@ -322,6 +322,31 @@ void CConf::ProcessConfig() {
 		}
 	}
 	WriteLog(0, "Instruments db: " + est);
+	// Process pan
+	for (int ii = 0; ii < icf.size(); ++ii) {
+		if (icf[ii].pan == -1) continue;
+		// Apply panning
+		if (icf[ii].pan < 50) {
+			if (icf[ii].pan_default < 50) {
+				icf[ii].pan_invert = 0;
+				icf[ii].pan_apply = 50 + icf[ii].pan - icf[ii].pan_default;
+			}
+			else {
+				icf[ii].pan_invert = 1;
+				icf[ii].pan_apply = 50 + icf[ii].pan - (100 - icf[ii].pan_default);
+			}
+		}
+		else {
+			if (icf[ii].pan_default < 50) {
+				icf[ii].pan_invert = 1;
+				icf[ii].pan_apply = 50 + icf[ii].pan - (100 - icf[ii].pan_default);
+			}
+			else {
+				icf[ii].pan_invert = 0;
+				icf[ii].pan_apply = 50 + icf[ii].pan - icf[ii].pan_default;
+			}
+		}
+	}
 }
 
 void CConf::LoadConfigFiles(CString fname, int load_includes) {
