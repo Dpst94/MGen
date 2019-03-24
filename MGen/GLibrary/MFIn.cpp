@@ -251,7 +251,8 @@ void MFIn::LoadMidi(CString path)
 					if (nlen > MAX_LEN) {
 						if (warning_loadmidi_long < MAX_WARN_MIDI_LONG) {
 							CString st;
-							st.Format("Note too long and will be cut short at %d track %d tick with %d tpc (mul %.03f) approximated to %d step in file %s. Decrease midifile_in_mul can resolve this situation.", track, mev->tick, tpc, midifile_in_mul, pos, path);
+							st.Format("Note too long and will be cut short at %d track, %.03f ms, %d tick with %d tpc (mul %.03f) approximated to %d step in file %s. Decrease midifile_in_mul can resolve this situation.", 
+								track, stime[pos], mev->tick, tpc, midifile_in_mul, pos, path);
 							WriteLog(1, st);
 							warning_loadmidi_long++;
 						}
@@ -286,8 +287,10 @@ void MFIn::LoadMidi(CString path)
 								if (len[pos][x] < 2) {
 									if (warning_loadmidi_short < MAX_WARN_MIDI_SHORT) {
 										CString st;
-										st.Format("Note %s too short and gets same step with next note %s at %d track, %d tick with %d tpc (mul %.03f) approximated to %d step in file %s. Increasing midifile_in_mul will improve approximation.", GetNoteName(note[pos][x]), GetNoteName(pitch), track, mev->tick, tpc, midifile_in_mul, pos, path);
-										WriteLog(1, st);
+										st.Format("Note %s too short and gets same step with next note %s at %d track, %.03f ms, %d tick with %d tpc (mul %.03f) approximated to %d step in file %s. Increasing midifile_in_mul will improve approximation.", 
+											GetNoteName(note[pos][x]), GetNoteName(pitch), track, stime[pos],
+											mev->tick, tpc, midifile_in_mul, pos, path);
+										WriteLog(0, st);
 										warning_loadmidi_short++;
 									}
 								}

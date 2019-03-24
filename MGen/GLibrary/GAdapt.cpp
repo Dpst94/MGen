@@ -59,7 +59,7 @@ void CGAdapt::CheckInstrumentRange(int v, int ii) {
 			}
 		}
 		else {
-			st.Format("Generated notes range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s). Transposed automatically %s %d semitones. Consider changing instrument or generation range.",
+			st.Format("Generated notes range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s). Transposed automatically %s %d semitones. Consider changing instrument.",
 				GetNoteName(ngv_min[v]), GetNoteName(ngv_max[v]), 
 				icf[ii].group, icf[ii].name, v,
 				GetNoteName(icf[ii].nmin), GetNoteName(icf[ii].nmax), play_transpose[v]<0?"down":"up",
@@ -96,7 +96,7 @@ void CGAdapt::CheckNoteBreath(int v, int x, int i, int ii, int ei, int pi, int p
 			st.Format("Recommended maximum note length for %s/%s instrument is %d ms. In voice %d note length at step %d is %d ms. Try to change playback speed, instrument or algorithm config. Some instruments may cut this note shorter.",
 				icf[ii].group, icf[ii].name, icf[ii].tmax, v, i, ndur);
 			warning_note_long[v] ++;
-			WriteLog(1, st);
+			WriteLog(0, st);
 			if (comment_adapt) adapt_comment[i][v] += "Too long note. ";
 		}
 	}
