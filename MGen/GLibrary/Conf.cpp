@@ -1037,8 +1037,8 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "gliss_leg_vel", &icf[i].gliss_leg_vel);
 	CheckVar(&st2, &st3, "gliss_minlen", &icf[i].gliss_minlen);
 	CheckVar(&st2, &st3, "gliss_freq", &icf[i].gliss_freq);
-	CheckRange(&st2, &st3, "bell_mindur", &icf[i].bell_mindur, &icf[i].bell_mindur2);
 	CheckVar(&st2, &st3, "max_ahead_note", &icf[i].max_ahead_note);
+	CheckRange(&st2, &st3, "bell_mindur", &icf[i].bell_mindur, &icf[i].bell_mindur2);
 	CheckRange(&st2, &st3, "bell_mul", &icf[i].bell_start_mul, &icf[i].bell_end_mul);
 	CheckRange(&st2, &st3, "bell_len", &icf[i].bell_start_len, &icf[i].bell_end_len);
 	CheckRange(&st2, &st3, "bell_vel", &icf[i].bell_start_vel, &icf[i].bell_end_vel);

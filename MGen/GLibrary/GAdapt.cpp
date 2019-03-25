@@ -568,7 +568,7 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 			if (comment_adapt) adapt_comment[i][v] += "Long bell start. ";
 			// Decrease starting velocity
 			if (icf[ii].bell_end_vel) vel[i][v] = max(1,
-				randbw(dyn[i][v] * icf[ii].bell_end_vel / 100.0, dyn[i][v] * icf[ii].bell_start_vel / 100.0)); //-V550
+				randbw(dyn[i][v] * icf[ii].bell_start_vel / 100.0, dyn[i][v] * icf[ii].bell_end_vel / 100.0)); //-V550
 		}
 	}
 	int ni = i + noff[i][v];
