@@ -550,9 +550,9 @@ void CGAdapt::AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int p
 void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount) {
 	float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
 	// Create bell if long length, not high velocity, after pause or first note
-	if (ndur > icf[ii].bell_mindur && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ &&
+	if (ndur > icf[ii].cresc_mindur && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ &&
 		(!i || pause[pi][v]) && vel[i][v] < 120) {
-		int pos = i + (float)(len[i][v]) * icf[ii].bell_start_len / 100.0;
+		int pos = i + (float)(len[i][v]) * icf[ii].cresc_len / 100.0;
 		int ok = 1;
 		// Check if dynamics does not decrease
 		if (pos - i > 1) for (int z = i + 1; z < pos; z++) {
@@ -563,20 +563,20 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 		}
 		if (ok) {
 			for (int z = i; z < pos; z++) {
-				dyn[z][v] = dyn[pos - 1][v] * (icf[ii].bell_start_mul + (float)(z - i) / (pos - i) * (1.0 - icf[ii].bell_start_mul));
+				dyn[z][v] = dyn[pos - 1][v] * (icf[ii].cresc_mul + (float)(z - i) / (pos - i) * (1.0 - icf[ii].cresc_mul));
 			}
 			if (comment_adapt) adapt_comment[i][v] += "Long bell start. ";
 			// Decrease starting velocity
-			if (icf[ii].bell_end_vel) vel[i][v] = max(1,
-				randbw(dyn[i][v] * icf[ii].bell_start_vel / 100.0, dyn[i][v] * icf[ii].bell_end_vel / 100.0)); //-V550
+			if (icf[ii].cresc_end_vel) vel[i][v] = max(1,
+				randbw(dyn[i][v] * icf[ii].cresc_start_vel / 100.0, dyn[i][v] * icf[ii].cresc_end_vel / 100.0)); //-V550
 		}
 	}
 	int ni = i + noff[i][v];
 	// Create bell if long length, not pause and not last note (because can be just end of adapt window)
-	if ((ndur > (float)icf[ii].bell_mindur2 / 2) && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ
+	if ((ndur > (float)icf[ii].dim_mindur / 2) && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ
 		&& (x == ncount - 1 || pause[ni][v])) {
 		int end = i + len[i][v];
-		int pos = round(end - (float)(len[i][v])  * icf[ii].bell_end_len / 100.0);
+		int pos = round(end - (float)(len[i][v])  * icf[ii].dim_len / 100.0);
 		int ok = 1;
 		// Check if dynamics does not increase
 		if (end - pos > 1) for (int z = pos; z < end; z++) {
@@ -587,7 +587,7 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 		}
 		if (ok) {
 			for (int z = pos; z < end; z++) {
-				dyn[z][v] = dyn[pos][v] * (icf[ii].bell_end_mul + (float)(end - z - 1) / (end - pos) * (1.0 - icf[ii].bell_end_mul));
+				dyn[z][v] = dyn[pos][v] * (icf[ii].dim_mul + (float)(end - z - 1) / (end - pos) * (1.0 - icf[ii].dim_mul));
 			}
 			if (comment_adapt) adapt_comment[i + len[i][v] - 1][v] += "Long bell end. ";
 		}

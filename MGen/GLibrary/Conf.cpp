@@ -1038,10 +1038,13 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "gliss_minlen", &icf[i].gliss_minlen);
 	CheckVar(&st2, &st3, "gliss_freq", &icf[i].gliss_freq);
 	CheckVar(&st2, &st3, "max_ahead_note", &icf[i].max_ahead_note);
-	CheckRange(&st2, &st3, "bell_mindur", &icf[i].bell_mindur, &icf[i].bell_mindur2);
-	CheckRange(&st2, &st3, "bell_mul", &icf[i].bell_start_mul, &icf[i].bell_end_mul);
-	CheckRange(&st2, &st3, "bell_len", &icf[i].bell_start_len, &icf[i].bell_end_len);
-	CheckRange(&st2, &st3, "bell_vel", &icf[i].bell_start_vel, &icf[i].bell_end_vel);
+	CheckVar(&st2, &st3, "cresc_mindur", &icf[i].cresc_mindur);
+	CheckVar(&st2, &st3, "cresc_mul", &icf[i].cresc_mul);
+	CheckVar(&st2, &st3, "cresc_len", &icf[i].cresc_len);
+	CheckVar(&st2, &st3, "dim_mindur", &icf[i].dim_mindur);
+	CheckVar(&st2, &st3, "dim_mul", &icf[i].dim_mul);
+	CheckVar(&st2, &st3, "dim_len", &icf[i].dim_len);
+	CheckRange(&st2, &st3, "cresc_vel", &icf[i].cresc_start_vel, &icf[i].cresc_end_vel);
 	CheckVar(&st2, &st3, "rbell_freq", &icf[i].rbell_freq);
 	CheckRange(&st2, &st3, "rbell_pos", &icf[i].rbell_pos1, &icf[i].rbell_pos2);
 	CheckRange(&st2, &st3, "rbell_dur", &icf[i].rbell_mindur, &icf[i].rbell_dur);
