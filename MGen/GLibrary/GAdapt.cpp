@@ -563,7 +563,7 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 		}
 		if (ok) {
 			for (int z = i; z < pos; z++) {
-				dyn[z][v] = dyn[pos - 1][v] * (icf[ii].cresc_mul + (float)(z - i) / (pos - i) * (1.0 - icf[ii].cresc_mul));
+				dyn[z][v] = dyn[pos - 1][v] * (icf[ii].cresc_mul/100.0 + (float)(z - i) / (pos - i) * (1.0 - icf[ii].cresc_mul/100.0));
 			}
 			if (comment_adapt) adapt_comment[i][v] += "Long bell start. ";
 			// Decrease starting velocity
@@ -587,7 +587,7 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 		}
 		if (ok) {
 			for (int z = pos; z < end; z++) {
-				dyn[z][v] = dyn[pos][v] * (icf[ii].dim_mul + (float)(end - z - 1) / (end - pos) * (1.0 - icf[ii].dim_mul));
+				dyn[z][v] = dyn[pos][v] * (icf[ii].dim_mul/100.0 + (float)(end - z - 1) / (end - pos) * (1.0 - icf[ii].dim_mul/100.0));
 			}
 			if (comment_adapt) adapt_comment[i + len[i][v] - 1][v] += "Long bell end. ";
 		}
@@ -650,9 +650,9 @@ void CGAdapt::AdaptReverseBell(int v, int x, int i, int ii, int ei, int pi, int 
 		// Center position
 		int pos = pos1 + (pos2 - pos1) * randbw(icf[ii].rbell_pos1, icf[ii].rbell_pos2) / 100.0;
 		// Calculate multiplier
-		float mul0 = icf[ii].rbell_mul - (ndur2 - icf[ii].rbell_mindur) *
-			(icf[ii].rbell_mul - icf[ii].rbell_mul2) / (icf[ii].rbell_dur - icf[ii].rbell_mindur + 0.0001);
-		mul0 = max(min(mul0, icf[ii].rbell_mul), icf[ii].rbell_mul2);
+		float mul0 = icf[ii].rbell_mul2 / 100.0 - (ndur2 - icf[ii].rbell_mindur) *
+			(icf[ii].rbell_mul2 / 100.0 - icf[ii].rbell_mul / 100.0) / (icf[ii].rbell_dur - icf[ii].rbell_mindur + 0.0001);
+		mul0 = max(min(mul0, icf[ii].rbell_mul2 / 100.0), icf[ii].rbell_mul / 100.0);
 		// Calculate random maximum
 		float mul = 1.0 - rand01() * (1.0 - mul0);
 		// Left part
@@ -1110,7 +1110,7 @@ void CGAdapt::Vel2Dyn(int step1, int step2, int v) {
 void CGAdapt::RandStart(int v, int x, int i, int ii, int ei, int pi, int pei) {
 	if (icf[ii].rand_start > 0 && (icf[ii].type == itPerc || artic[i][v] == aNONLEGATO || artic[i][v] == aSTAC ||
 		artic[i][v] == aPIZZ || artic[i][v] == aTREM)) {
-		float max_shift = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed * icf[ii].rand_start / 100;
+		float max_shift = 0; // (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed * icf[ii].rand_start / 100;
 		if ((icf[ii].rand_start_max > 0) && (max_shift > icf[ii].rand_start_max)) max_shift = icf[ii].rand_start_max;
 		dstime[i][v] += (rand01() - 0.5) * max_shift;
 	}

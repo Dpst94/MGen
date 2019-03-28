@@ -619,7 +619,7 @@ void CGenCA3::Generate() {
 	if (conf_species.GetLength() > 1 && conf_species.GetLength() != v_cnt) {
 		CString est;
 		est.Format("Species in config is for %d voices ('%s'), but there are %d voices in file", conf_species.GetLength(), conf_species, v_cnt);
-		WriteLog(1, est);
+		WriteLog(0, est);
 	}
 	for (cp_id = 0; cp_id < cp.size(); ++cp_id) if (!cp_error[cp_id]) {
 		st.Format("Analyzing: %d of %zu", cp_id + 1, cp.size());
