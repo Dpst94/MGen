@@ -1200,7 +1200,7 @@ void TakeJob() {
 		// Prevent changing database if there is db error (need to restart)
 		if (nRetCode) return;
 		// Take job
-		q.Format("UPDATE jobs SET j_started=NOW(), j_updated=NOW(), s_id='%d', j_state=2, j_progress='Job assigned' WHERE j_id='%lld'",
+		q.Format("UPDATE jobs SET j_started=NOW(), j_updated=NOW(), s_id='%d', j_state=2, j_progress='Job assigned', j_changes=0, j_changes_st='' WHERE j_id='%lld'",
 			CDb::server_id, CDb::j_id);
 		if (db.Query(q)) {
 			nRetCode = 8;
