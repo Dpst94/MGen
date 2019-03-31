@@ -19,6 +19,8 @@ public:
 	void ExportAdaptedMidi(CString dir, CString fname);
 	void SaveMidi(CString dir, CString fname);
 
+	void ExportNotes();
+
 	int midi_saved = 0;
 	int amidi_saved = 0;
 };

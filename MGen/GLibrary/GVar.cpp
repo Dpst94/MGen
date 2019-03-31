@@ -1016,33 +1016,3 @@ void CGVar::RegisterGraph(CString name, float scale) {
 	++graph_size;
 }
 
-void CGVar::ExportNotes() {
-	ofstream fs;
-	CreateDirectory(as_dir + "\\noteinfo", NULL);
-	for (int v = 0; v < v_cnt; ++v) {
-		int ii = instr[v];
-		int tr = icf[ii].track;
-		int sta = v_stage[v];
-		CString fname;
-		fname.Format(as_dir + "\\noteinfo\\tr%d_sta%d.csv", tr + 1, sta);
-		fs.open(fname);
-		fs << "Note;NoteStartMs;NoteEndMs;Dstime;Detime;Articulation;Filter;StartComment;EndComment\n"; 
-		for (int i=0; i<t_sent; ++i) {
-			long ei = max(0, i + len[i][v] - 1);
-			long long stimestamp = sstime[i][v] * 100 / m_pspeed + dstime[i][v];
-			long long etimestamp = setime[ei][v] * 100 / m_pspeed + detime[ei][v];
-			if (pause[i][v]) continue;
-			CString st;
-			st.Format("%u;%llu;%llu;%.0f;%.0f;%u;%u;%s;%s\n",
-				note[i][v], stimestamp, etimestamp, dstime[i][v], detime[ei][v], 
-				artic[i][v], filter[i][v], adapt_comment[i][v], adapt_comment[ei][v]
-			);
-			fs << st; 
-			// Stop if last note
-			if (noff[i][v] == 0) break;
-			// Skip to next note
-			i += noff[i][v] - 1;
-		}
-		fs.close();
-	}
-}

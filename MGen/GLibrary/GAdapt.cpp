@@ -28,7 +28,7 @@ void CGAdapt::CheckInstrumentRange(int v, int ii) {
 	if (icf[ii].fix_transpose != 1000) {
 		play_transpose[v] = icf[ii].fix_transpose;
 		if ((ngv_min[v] + play_transpose[v] < icf[ii].nmin) || (ngv_max[v] + play_transpose[v] > icf[ii].nmax)) {
-			st.Format("Notes transposed by %d semitones in config. Resulting notes range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s).",
+			st.Format("Notes transposed by %d semitones in config. Resulting notes pitch range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s).",
 				play_transpose[v], GetNoteName(ngv_min[v] + play_transpose[v]), GetNoteName(ngv_max[v] + play_transpose[v]),
 				icf[ii].group, icf[ii].name, v,
 				GetNoteName(icf[ii].nmin), GetNoteName(icf[ii].nmax));
@@ -50,7 +50,7 @@ void CGAdapt::CheckInstrumentRange(int v, int ii) {
 		CString st;
 		if ((ngv_min[v] + play_transpose[v] < icf[ii].nmin) || (ngv_max[v] + play_transpose[v] > icf[ii].nmax)) {
 			if (!warning_note_range[v]) {
-				st.Format("Generated notes range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s). Cannot transpose automatically: range too wide.",
+				st.Format("Notes pitch range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s). Cannot transpose automatically: range too wide.",
 					GetNoteName(ngv_min[v]), GetNoteName(ngv_max[v]), 
 					icf[ii].group, icf[ii].name, v,
 					GetNoteName(icf[ii].nmin), GetNoteName(icf[ii].nmax));
@@ -59,7 +59,7 @@ void CGAdapt::CheckInstrumentRange(int v, int ii) {
 			}
 		}
 		else {
-			st.Format("Generated notes range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s). Transposed automatically %s %d semitones. Consider changing instrument.",
+			st.Format("Notes pitch range (%s - %s) is outside instrument %s/%s (voice %d) range (%s - %s). Transposed automatically %s %d semitones. Consider changing instrument.",
 				GetNoteName(ngv_min[v]), GetNoteName(ngv_max[v]), 
 				icf[ii].group, icf[ii].name, v,
 				GetNoteName(icf[ii].nmin), GetNoteName(icf[ii].nmax), play_transpose[v]<0?"down":"up",
@@ -286,7 +286,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 		if (comment_adapt) adapt_comment[i][v] += "Staccato. ";
 	}
 	// Make short non-legato notes (on both sides) staccato
-	if (icf[ii].stac_auto && x && artic[pi][v] != aLEGATO && artic[pi][v] != aSLUR && artic[pi][v] != aPIZZ &&
+	if (icf[ii].stac_auto && x && artic[pi][v] != aLEGATO && artic[pi][v] != aSLUR && artic[pi][v] != aPIZZ && artic[pi][v] != aTREM &&
 		artic[i][v] != aLEGATO && artic[i][v] != aSLUR && icf[ii].stac_maxlen > -1 && 
 		(setime[pei][v] - sstime[pi][v]) * 100 / m_pspeed + detime[pei][v] - dstime[pi][v] <= icf[ii].stac_maxlen) {
 		if (icf[ii].stac_ahead > -1) dstime[pi][v] = -icf[ii].stac_ahead;
@@ -300,7 +300,7 @@ void CGAdapt::AdaptStaccatoStep(int v, int x, int i, int ii, int ei, int pi, int
 		if (comment_adapt) adapt_comment[pi][v] += "Staccato. ";
 	}
 	// Same process for current note
-	if (icf[ii].stac_auto && artic[i][v] != aLEGATO && artic[i][v] != aSLUR && artic[i][v] != aPIZZ &&
+	if (icf[ii].stac_auto && artic[i][v] != aLEGATO && artic[i][v] != aSLUR && artic[i][v] != aPIZZ && artic[i][v] != aTREM &&
 		(ei == t_generated - 1 || pause[ei + 1][v]) && icf[ii].stac_maxlen > -1 &&
 		(setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v] <= icf[ii].stac_maxlen) {
 		if (icf[ii].stac_ahead > -1) dstime[i][v] = -icf[ii].stac_ahead;
@@ -359,7 +359,7 @@ void CGAdapt::AdaptAheadStep(int v, int x, int i, int ii, int ei, int pi, int pe
 			}
 			if (icf[ii].type == itLASS) {
 				// For LASS library, velocity for legato transitions should be low
-				vel[i][v] = dyn[i][v] / 2;
+				vel[i][v] = max(1, dyn[i][v] / 2);
 			}
 			else {
 				// Add glissando if note is long
@@ -553,15 +553,14 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 	if (ndur > icf[ii].cresc_mindur && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ &&
 		(!i || pause[pi][v]) && vel[i][v] < 120) {
 		int pos = i + (float)(len[i][v]) * icf[ii].cresc_len / 100.0;
-		int ok = 1;
 		// Check if dynamics does not decrease
 		if (pos - i > 1) for (int z = i + 1; z < pos; z++) {
 			if (dyn[z][v] < dyn[i][v]) {
-				ok = 0;
+				pos = z;
 				break;
 			}
 		}
-		if (ok) {
+		if (pos - i > 1) {
 			for (int z = i; z < pos; z++) {
 				dyn[z][v] = dyn[pos - 1][v] * (icf[ii].cresc_mul/100.0 + (float)(z - i) / (pos - i) * (1.0 - icf[ii].cresc_mul/100.0));
 			}
@@ -577,15 +576,14 @@ void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei
 		&& (x == ncount - 1 || pause[ni][v])) {
 		int end = i + len[i][v];
 		int pos = round(end - (float)(len[i][v])  * icf[ii].dim_len / 100.0);
-		int ok = 1;
 		// Check if dynamics does not increase
-		if (end - pos > 1) for (int z = pos; z < end; z++) {
+		if (end - pos > 1) for (int z = end - 1; z >= pos; z--) {
 			if (dyn[z - 1][v] < dyn[end - 1][v]) {
-				ok = 0;
+				pos = z;
 				break;
 			}
 		}
-		if (ok) {
+		if (end - pos > 1) {
 			for (int z = pos; z < end; z++) {
 				dyn[z][v] = dyn[pos][v] * (icf[ii].dim_mul/100.0 + (float)(end - z - 1) / (end - pos) * (1.0 - icf[ii].dim_mul/100.0));
 			}

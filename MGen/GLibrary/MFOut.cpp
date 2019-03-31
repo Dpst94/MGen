@@ -210,3 +210,39 @@ void MFOut::SaveMidi(CString dir, CString fname) {
 	midi_saved = 1;
 }
 
+void MFOut::ExportNotes() {
+	ofstream fs;
+	CreateDirectory(as_dir + "\\noteinfo", NULL);
+	float tps = 200;                // ticks per second
+	float spq = 0.5;              // Seconds per quarter note
+	int tpq = tps / spq;          // ticks per quarter note
+	int stick, etick;
+	for (int v = 0; v < v_cnt; ++v) {
+		int ii = instr[v];
+		int tr = icf[ii].track;
+		int sta = v_stage[v];
+		CString fname;
+		fname.Format(as_dir + "\\noteinfo\\tr%d_sta%d.csv", tr + 1, sta);
+		fs.open(fname);
+		fs << "Note;NoteStartTick;NoteEndTick;NoteStartMs;NoteEndMs;Dstime;Detime;Articulation;Filter;StartComment;EndComment\n";
+		for (int i = 0; i < t_sent; ++i) {
+			long ei = max(0, i + len[i][v] - 1);
+			long long stimestamp = sstime[i][v] * 100 / m_pspeed + dstime[i][v] + midi_prepause;
+			long long etimestamp = setime[ei][v] * 100 / m_pspeed + detime[ei][v] + midi_prepause;
+			stick = stimestamp / 1000.0 / spq * tpq;
+			etick = etimestamp / 1000.0 / spq * tpq;
+			if (pause[i][v]) continue;
+			CString st;
+			st.Format("%u;%ld;%ld;%llu;%llu;%.0f;%.0f;%s;%u;%s;%s\n",
+				note[i][v], stick, etick, stimestamp, etimestamp, dstime[i][v], detime[ei][v],
+				ArticName[artic[i][v]], filter[i][v], adapt_comment[i][v], adapt_comment[ei][v]
+			);
+			fs << st;
+			// Stop if last note
+			if (noff[i][v] == 0) break;
+			// Skip to next note
+			i += noff[i][v] - 1;
+		}
+		fs.close();
+	}
+}

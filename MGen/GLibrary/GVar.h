@@ -25,7 +25,6 @@ public:
 	void LoadResults(CString dir, CString fname);
 	void LoadResultLogs(CString dir, CString fname);
 	void LoadResultMusic(CString dir, CString fname);
-	void ExportNotes();
 
 	// Warnings
 	int warning_loadvectors = 0;

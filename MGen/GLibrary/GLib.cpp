@@ -438,8 +438,9 @@ void CGLib::copy_folder(CString sName, CString dName, CString mask, bool recursi
 	CreateDirectory(dName, NULL);
 	CFileFind finder;
 	int track;
-	BOOL bWorking = finder.FindFile(dName + "\\" + mask);
+	BOOL bWorking = finder.FindFile(sName + "\\" + mask);
 	CString fname, fname2;
+	//cout << "Copy folder: " << sName + "\\" + mask << " to " << dName << "\n";
 	while (bWorking) {
 		bWorking = finder.FindNextFile();
 		if (finder.IsDots()) continue;
@@ -450,6 +451,7 @@ void CGLib::copy_folder(CString sName, CString dName, CString mask, bool recursi
 		}
 		else {
 			copy_file(sName + "\\" + fname, dName + "\\" + fname);
+			//cout << "Copy: " << sName + "\\" + fname << " to " << dName + "\\" + fname << "\n";
 		}
 	}
 }
