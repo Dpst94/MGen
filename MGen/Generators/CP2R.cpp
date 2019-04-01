@@ -5063,7 +5063,7 @@ void CP2R::EvalHarm4thTritone() {
 		// Prepare data
 		civl = abs(cc[v][s] - cc[v2][s]);
 		// Flag 4th or tritone with bass 
-		if (civl % 12 == 5) AutoFlagA(v, 171, s, s, v2, 100);
+		if (civl % 12 == 5 && msh[v2][s5] > 0) AutoFlagA(v, 171, s, s, v2, 100);
 		if (civl % 12 == 6) {
 			// Flag if not suspension resolution to lt in bass
 			if (pcc[v2][s] != 11 || fli2[v2][ls2] != mli[bmli[s]] + npm - 1 ||
