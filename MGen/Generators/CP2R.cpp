@@ -1658,10 +1658,23 @@ int CP2R::FailLeapFill(int late_leap, int leap_prev, int child_leap) {
 				if (prefilled) {
 					if (fli_size[v] - fleap_start <= pre_last_leaps[sp][av_cnt][0] + 1)
 						FlagVL(v, 204 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
-					else FlagVL(v, 112 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+					else {
+						if (leap_size == 7 && fill_to == 3 && fill_from <= 2 && skips <= allowed_skips && deviates < 2) {
+							FlagVL(v, 304, ssus[v][fleap_start], fli[v][fleap_end]);
+						}
+						else {
+							FlagVL(v, 112 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+						}
+					}
 				}
-				else
-					FlagVL(v, 124 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+				else {
+					if (leap_size == 7 && fill_to == 3 && fill_from <= 2 && skips <= allowed_skips && deviates < 2) {
+						FlagVL(v, 304, ssus[v][fleap_start], fli[v][fleap_end]);
+					}
+					else {
+						FlagVL(v, 124 + leap_id, ssus[v][fleap_start], fli[v][fleap_end]);
+					}
+				}
 			}
 		}
 		// Show compensation flags only if successfully compensated
