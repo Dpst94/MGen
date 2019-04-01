@@ -6694,6 +6694,12 @@ void CP2R::FlagPcoApart() {
 							if (civl % 12 == 0) AutoFlagL(v, 488, s3, s, v2);
 							else AutoFlagL(v, 249, s3, s, v2);
 						}
+						// Double oblique in different voices (asymmetric)
+						else if ((s != fli[v2][ls2] && s3 != fli[v][ls3]) ||
+							(s != fli[v][ls] && s3 != fli[v2][ls4])) {
+							if (civl % 12 == 0) AutoFlagL(v, 225, s3, s, v2);
+							else AutoFlagL(v, 224, s3, s, v2);
+						}
 						// Other upbeat
 						else {
 							if (civl % 12 == 0) AutoFlagL(v, 492, s3, s, v2);
