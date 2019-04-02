@@ -23,6 +23,7 @@ using namespace std;
 CString ReaperTempFolder = "server\\Reaper\\";
 
 // Global
+int maintenance_mode = 0;
 volatile int close_flag = 0;
 int nRetCode = 0;
 CString est;
@@ -215,13 +216,14 @@ void SendStatus() {
 			WriteLog(est);
 		}
 	}
-	q.Format("REPLACE INTO s_status VALUES('%d','%lld',NOW(),'%s','%ld','%lld','%lld','%lld','%lld','%lld','%lld','%d')",
+	q.Format("REPLACE INTO s_status VALUES('%d','%lld',NOW(),'%s','%ld','%lld','%lld','%lld','%lld','%lld','%lld','%d','%d')",
 		CDb::server_id, CDb::session_id, client_host, GetTickCount() / 1000, (timestamp - server_start_time) / 1000,
 		rChild["Reaper.exe"] ? (timestamp - tChild["Reaper.exe"]) / 1000 : -1,
 		rChild["AutoHotkey.exe"] ? (timestamp - tChild["AutoHotkey.exe"]) / 1000 : -1,
 		rChild["MGen.exe"] ? (timestamp - tChild["MGen.exe"]) / 1000 : -1,
 		rChild["lilypond-windows.exe"] ? (timestamp - tChild["lilypond-windows.exe"]) / 1000 : -1,
-		CDb::j_id, (screenshot_id + max_screenshot - 1) % max_screenshot);
+		CDb::j_id, (screenshot_id + max_screenshot - 1) % max_screenshot,
+		maintenance_mode);
 	CGLib::OverwriteFile("server\\status.txt", q);
 	if (db.Query(q)) {
 		nRetCode = 8;
@@ -344,8 +346,7 @@ void CheckChildrenPath() {
 	}
 }
 
-void LoadConfig()
-{
+void LoadConfig() {
 	TCHAR buffer[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, buffer);
 	CString current_dir = string(buffer).c_str();
@@ -412,6 +413,7 @@ void LoadConfig()
 			CGLib::CheckVar(&st2, &st3, "daw_wait", &daw_wait, 0, 6000);
 			CGLib::CheckVar(&st2, &st3, "run_minimized", &run_minimized, 0, 1);
 			CGLib::CheckVar(&st2, &st3, "screenshots_enabled", &screenshots_enabled, 0, 1);
+			CGLib::CheckVar(&st2, &st3, "maintenance_mode", &maintenance_mode, 0, 1);
 			CGLib::LoadVar(&st2, &st3, "share", &share);
 			CGLib::LoadVar(&st2, &st3, "db_server", &db_server);
 			CGLib::LoadVar(&st2, &st3, "db_port", &db_port);
@@ -1164,16 +1166,16 @@ void TakeJob() {
 		return;
 	}
 	int err;
-	if (can_render) {
-		err = db.Fetch("SELECT * FROM jobs "
-			"LEFT JOIN files USING (f_id) "
-			"WHERE j_state=1 ORDER BY j_priority, j_id LIMIT 1");
+	CString cond;
+	if (maintenance_mode == 1) cond += " AND u_admin=1 ";
+	if (!can_render) {
+		cond += " AND j_class<2 ";
 	}
-	else {
-		err = db.Fetch("SELECT * FROM jobs "
-			"LEFT JOIN files USING (f_id) "
-			"WHERE j_state=1 AND j_class<2 ORDER BY j_priority, j_id LIMIT 1");
-	}
+	err = db.Fetch("SELECT * FROM jobs "
+		"LEFT JOIN files USING (f_id) "
+		"LEFT JOIN users ON (jobs.started_u_id = users.u_id) "
+		"WHERE j_state=1 " + cond +
+		"ORDER BY j_priority, j_id LIMIT 1");
 	if (err) {
 		nRetCode = 8;
 		return;
