@@ -895,6 +895,7 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "pan", &icf[i].pan, 0, 100);
 	CheckVar(&st2, &st3, "pan_default", &icf[i].pan_default, 0, 100);
 	CheckVar(&st2, &st3, "volume", &icf[i].vol, 0, 200);
+	CheckVar(&st2, &st3, "alternate_transpose", &icf[i].alternate_transpose, -127, 127);
 	CheckVar(&st2, &st3, "trem_db", &icf[i].trem_db, -100, 100);
 	CheckVar(&st2, &st3, "stac_db", &icf[i].stac_db, -100, 100);
 	CheckVar(&st2, &st3, "pizz_db", &icf[i].pizz_db, -100, 100);
@@ -908,10 +909,10 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	LoadNote(&st2, &st3, "import_max", &icf[i].import_max);
 	LoadNote(&st2, &st3, "replacepitch", &icf[i].replace_pitch);
 	LoadNote(&st2, &st3, "trem_replace", &icf[i].trem_replace);
-	CheckVar(&st2, &st3, "trem_transpose", &icf[i].trem_transpose, -127, 127);
 	CheckVar(&st2, &st3, "trem_chan", &icf[i].trem_chan, 1, 16);
 	CheckVar(&st2, &st3, "trem_lock", &icf[i].trem_lock, 0, 1);
 	CheckVar(&st2, &st3, "trem_maxint", &icf[i].trem_maxint, 0, 127);
+	CheckVar(&st2, &st3, "trem_transpose", &icf[i].trem_transpose, -127, 127);
 	CheckVar(&st2, &st3, "bow_lock", &icf[i].bow_lock, 0, 2);
 	LoadCCName(&st2, &st3, "cc_name", i);
 	LoadKswGroup(&st2, &st3, "kswgroup", i);

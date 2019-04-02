@@ -78,5 +78,6 @@ protected:
 	vector<int> warning_note_wrong;
 
 	vector<int> play_transpose; // If generated notes are not in instrument range, playback is automatically transposed (semitones)
+	int current_transpose = 0; // Transposition for current note
 };
 

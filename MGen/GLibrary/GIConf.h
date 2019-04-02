@@ -44,6 +44,8 @@ struct IConf {
 	int nmax = 127;
 	int tmin = 0;
 	int tmax = 0;
+	int alternate_transpose = 0; // Add this value to pitch for every odd note
+	int alternate_current = 0; // Current note has to alternate or not
 	int import_min = 12; // Do not import notes below this one
 	int import_max = 127; // Do not import notes above this one
 	int pan = -1; // 50 is center; -1 is default
@@ -72,13 +74,13 @@ struct IConf {
 	int trem_dyn_range2 = 100;
 	int trem_min_repeats = 3;
 	int trem_replace = -1;
-	int trem_transpose = 0;
 	int trem_chan = 0; // Send trem to separate relative channel
 	float trem_db = 0; // Relative db volume for trem articulation
 	int trem_len = 0;
 	int trem_end = 0;
 	int trem_activate = -1; // Technique that will be triggered with trem command from MIDI file
 	int trem_deactivate = -1; // Technique that will be triggered with trem command from MIDI file
+	int trem_transpose = 0; // When playing tremolo add this value to pitch
 	int dyn_range1 = 0; // Minimum allowed dynamics value in percent
 	int dyn_range2 = 100; // Maximum allowed dynamics value in percent
 	int CC_vib = 0; // CC number for vibrato intensity

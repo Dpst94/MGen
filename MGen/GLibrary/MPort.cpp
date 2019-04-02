@@ -357,6 +357,7 @@ void MPort::SendMIDI(int step1, int step2)
 		// Send notes
 		i = step21;
 		for (int x = 0; x < ncount; x++) {
+			current_transpose = 0;
 			midi_current_step = i;
 			ei = max(0, i + len[i][v] - 1);
 			if (!pause[i][v]) {
@@ -372,11 +373,18 @@ void MPort::SendMIDI(int step1, int step2)
 						my_note = icf[ii].trem_replace;
 					}
 					if (icf[ii].trem_transpose) {
-						my_note += icf[ii].trem_transpose;
+						current_transpose = icf[ii].trem_transpose;
+						my_note += current_transpose;
 					}
 					if (icf[ii].map_tremolo.find(note[i][v]) != icf[ii].map_tremolo.end()) {
 						my_note = icf[ii].map_tremolo[note[i][v]];
 					}
+				}
+				// Alternate pitch
+				else if (icf[ii].alternate_transpose) {
+					current_transpose = icf[ii].alternate_transpose * icf[ii].alternate_current;
+					my_note += current_transpose;
+					icf[ii].alternate_current = !icf[ii].alternate_current;
 				}
 				// Note ON if it is not blocked and was not yet sent
 				if (artic[i][v] == aTREM && icf[ii].trem_chan) midi_channel = midi_channel_base + icf[ii].trem_chan - 1;
@@ -786,13 +794,13 @@ int MPort::GetPlayStep() {
 void MPort::AddNoteOn(long long timestamp, int data1, int data2)
 {
 	// Check if range valid
-	if ((data1 < icf[instr[midi_voice]].nmin) || (data1 > icf[instr[midi_voice]].nmax)) {
+	if ((data1 < icf[instr[midi_voice]].nmin + current_transpose) || (data1 > icf[instr[midi_voice]].nmax + current_transpose)) {
 		if (warning_note_wrong[midi_voice] < 4) {
 			CString st;
-			st.Format("Blocked note %d/%d step %d time %lld in voice %d instrument %s/%s out of range %d-%d",
+			st.Format("Blocked note %d/%d step %d time %lld in voice %d instrument %s/%s out of range %d-%d (current transpose %d)",
 				data1, data2, midi_current_step, timestamp, midi_voice, icf[instr[midi_voice]].group,
 				icf[instr[midi_voice]].name,
-				icf[instr[midi_voice]].nmin, icf[instr[midi_voice]].nmax);
+				icf[instr[midi_voice]].nmin, icf[instr[midi_voice]].nmax, current_transpose);
 			WriteLog(1, st);
 			warning_note_wrong[midi_voice] ++;
 		}
@@ -821,13 +829,13 @@ void MPort::AddKsOn(long long timestamp, int data1, int data2)
 void MPort::AddNoteOff(long long timestamp, int data1, int data2)
 {
 	// Check if range valid
-	if ((data1 < icf[instr[midi_voice]].nmin) || (data1 > icf[instr[midi_voice]].nmax)) {
+	if ((data1 < icf[instr[midi_voice]].nmin + current_transpose) || (data1 > icf[instr[midi_voice]].nmax + current_transpose)) {
 		if (warning_note_wrong[midi_voice] < 4) {
 			CString st;
-			st.Format("Blocked note %d/%d time %lld in voice %d instrument %s/%s out of range %d-%d",
+			st.Format("Blocked note %d/%d time %lld in voice %d instrument %s/%s out of range %d-%d (current transposition %d)",
 				data1, data2, timestamp, midi_voice, icf[instr[midi_voice]].group,
 				icf[instr[midi_voice]].name,
-				icf[instr[midi_voice]].nmin, icf[instr[midi_voice]].nmax);
+				icf[instr[midi_voice]].nmin, icf[instr[midi_voice]].nmax, current_transpose);
 			WriteLog(1, st);
 			warning_note_wrong[midi_voice] ++;
 		}
