@@ -186,6 +186,7 @@ struct IConf {
 	int bow_lock = 0; // 0 - do not lock bow, 1 - always sul tasto, 2 - always sul ponticello
 	int mute_lock = 0; // 0 - do not lock mute, 1 - always selected mute (mute_activate)
 	int reverb_mix = -1;
+	int reverb_fixed = 0; // 0 - reverb can be changed; 1 - reverb cannot be changed for this instrument
 	int lengroup2 = 0;
 	int lengroup3 = 0;
 	int lengroup4 = 0;

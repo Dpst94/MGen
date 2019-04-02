@@ -978,6 +978,7 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "retrigger_mingap", &icf[i].retrigger_mingap);
 	CheckVar(&st2, &st3, "auto_legato", &icf[i].auto_legato);
 	CheckVar(&st2, &st3, "reverb_mix", &icf[i].reverb_mix);
+	CheckVar(&st2, &st3, "reverb_fixed", &icf[i].reverb_fixed);
 	CheckVar(&st2, &st3, "fix_transpose", &icf[i].fix_transpose);
 	CheckVar(&st2, &st3, "pedal_import", &icf[i].pedal_import);
 	CheckVar(&st2, &st3, "trem_maxlen", &icf[i].trem_maxlen);
