@@ -1040,6 +1040,8 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "gliss_minlen", &icf[i].gliss_minlen);
 	CheckVar(&st2, &st3, "gliss_freq", &icf[i].gliss_freq);
 	CheckVar(&st2, &st3, "max_ahead_note", &icf[i].max_ahead_note);
+	CheckVar(&st2, &st3, "cresc_maxvel", &icf[i].cresc_maxvel);
+	CheckVar(&st2, &st3, "cresc_minpause", &icf[i].cresc_minpause);
 	CheckVar(&st2, &st3, "cresc_mindur", &icf[i].cresc_mindur);
 	CheckVar(&st2, &st3, "cresc_mul", &icf[i].cresc_mul);
 	CheckVar(&st2, &st3, "cresc_len", &icf[i].cresc_len);

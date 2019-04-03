@@ -211,7 +211,14 @@ struct IConf {
 	int legato_long_minlen = 300; // Minimum note duration that can have long legato transition from previous note
 	int vel_legato_long = 64; // Long legato transition goes from vel_gliss to this value
 	int cresc_mindur = 0; // Minimum note duration (ms) that can have a starting bell
+	int cresc_maxvel = 119; // Maximum velocity to still trigger automatic crescendo
+	int cresc_minpause = 100; // Minimum pause length required before automatic crescendo (ms)
+	float cresc_mul = 0; // Multiply dynamics by this parameter at bell start
+	float cresc_len = 0; // Percent of notelength to use for slope at bell start
+	float cresc_start_vel = 0; // Set belled note velocity to random between these percents of starting dynamics
+	float cresc_end_vel = 0; // Set belled note velocity to random between these percents of starting dynamics
 	int dim_mindur = 0; // Minimum note duration (ms) that can have a ending bell
+	int dim_minpause = 100; // Minimum pause length required after automatic diminuendo (ms)
 	int gliss_leg_vel = 0; // Velocity below this value triggers glissando transition
 	int gliss_minlen = 0; // Minimum note length that can have a gliss transition
 	int gliss_freq = 0; // Frequency of gliss articulation in percent
@@ -219,12 +226,8 @@ struct IConf {
 	int rand_end_max = 0; // Maximum shift in ms
 	int fix_transpose = 1000; // 1000 - do not fix transpose. Other value - transpose fixed
 	int max_ahead_note = 0; // Maximum chromatic interval having ahead property
-	float cresc_mul = 0; // Multiply dynamics by this parameter at bell start
 	float dim_mul = 0; // Multiply dynamics by this parameter at bell end
-	float cresc_len = 0; // Percent of notelength to use for slope at bell start
 	float dim_len = 0; // Percent of notelength to use for slope at bell end
-	float cresc_start_vel = 0; // Set belled note velocity to random between these percents of starting dynamics
-	float cresc_end_vel = 0; // Set belled note velocity to random between these percents of starting dynamics
 	float rbell_mindur = 0; // Minimum note duration(ms) that can have a reverse bell
 	float rbell_dur = 0; // Minimum note duration(ms) that will have deepest reverse bell
 	float rbell_mul = 0; // Multiply dynamics by this parameter at bell center with mindur

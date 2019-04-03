@@ -31,7 +31,6 @@ public:
 
 	void FillPause(int start, int length, int v);
 
-	int in_ppq = 1; // PPQ in input midi file
 	int midifile_loaded = 0; // If MIDI was loaded from file
 	int xmlfile_loaded = 0; // If XML was loaded from file
 	int midifile_type = 1; // Type of MIDI file loaded

@@ -17,17 +17,13 @@ class CGAdapt :
 public:
 	CGAdapt();
 	~CGAdapt();
+	int in_ppq = 1; // PPQ in input midi file
 
 	void ScaleDyn(int step1, int step2, int v, int ii);
-
 	void Vel2Dyn(int step1, int step2, int v);
-
 	void RandStart(int v, int x, int i, int ii, int ei, int pi, int pei);
-
 	void RandEnd(int v, int x, int i, int ii, int ei, int pi, int pei);
-
 	void Adapt(int step1, int step2);
-
 	float adapt_pspeed = 100; // Playback speed used during adaptation
 
 protected:
@@ -58,7 +54,8 @@ protected:
 	void ApplyAheadEnd(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void FixOverlap(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int pei, int pni, int pnei);
-	void AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount);
+	void AdaptLongCresc(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount);
+	void AdaptLongDim(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount);
 	void AdaptGetPhrases(int step1, int step2);
 	void AdaptReverseBell(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei);

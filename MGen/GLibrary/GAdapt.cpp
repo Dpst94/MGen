@@ -547,48 +547,88 @@ void CGAdapt::AdaptAttackStep(int v, int x, int i, int ii, int ei, int pi, int p
 	vel[i][v] = RandInRange(vel[i][v], vel1, vel2, rv);
 }
 
-void CGAdapt::AdaptLongBell(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount) {
+void CGAdapt::AdaptLongCresc(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount) {
 	float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
-	// Create bell if long length, not high velocity, after pause or first note
-	if (ndur > icf[ii].cresc_mindur && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ &&
-		(!i || pause[pi][v]) && vel[i][v] < 120) {
-		int pos = i + (float)(len[i][v]) * icf[ii].cresc_len / 100.0;
-		// Check if dynamics does not decrease
-		if (pos - i > 1) for (int z = i + 1; z < pos; z++) {
-			if (dyn[z][v] < dyn[i][v]) {
-				pos = z;
-				break;
-			}
-		}
-		if (pos - i > 1) {
-			for (int z = i; z < pos; z++) {
-				dyn[z][v] = dyn[pos - 1][v] * (icf[ii].cresc_mul/100.0 + (float)(z - i) / (pos - i) * (1.0 - icf[ii].cresc_mul/100.0));
-			}
-			if (comment_adapt) adapt_comment[i][v] += "Long bell start. ";
-			// Decrease starting velocity
-			if (icf[ii].cresc_end_vel) vel[i][v] = max(1,
-				randbw(dyn[i][v] * icf[ii].cresc_start_vel / 100.0, dyn[i][v] * icf[ii].cresc_end_vel / 100.0)); //-V550
+	if (artic[i][v] == aSTAC) return;
+	if (artic[i][v] == aPIZZ) return;
+	if (ndur <= icf[ii].cresc_mindur) return;
+	if (len[i][v] < 3) return;
+	if (vel[i][v] > icf[ii].cresc_maxvel) return;
+	// If first note, do not check pause
+	if (i) {
+		// Require pause
+		if (!pause[pi][v]) return;
+		// If pause is first element, do not check it
+		if (pi) {
+			// Get note before pause
+			int ppi = max(0, pi - poff[pi][v]);
+			int ppei = ppi + len[ppi][v] - 1;
+			// Get pause length
+			float pdur = (sstime[i][v] - setime[ppei][v]) * 100 / m_pspeed + dstime[i][v] - detime[ppei][v];
+			// Prohibit short pause
+			if (pdur < icf[ii].cresc_minpause) return;
+			// Prohibit nonlegato pause
+			if (smst[i][v] - smet[ppei][v] < in_ppq / 10.0) return;
 		}
 	}
+	// Now create crescendo
+	int pos = i + (float)(len[i][v]) * icf[ii].cresc_len / 100.0;
+	// Check if dynamics does not decrease
+	if (pos - i > 1) for (int z = i + 1; z < pos; z++) {
+		if (dyn[z][v] < dyn[i][v]) {
+			pos = z;
+			break;
+		}
+	}
+	if (pos - i > 1) {
+		for (int z = i; z < pos; z++) {
+			dyn[z][v] = dyn[pos - 1][v] * (icf[ii].cresc_mul / 100.0 + (float)(z - i) / (pos - i) * (1.0 - icf[ii].cresc_mul / 100.0));
+		}
+		if (comment_adapt) adapt_comment[i][v] += "Long bell start. ";
+		// Decrease starting velocity
+		if (icf[ii].cresc_end_vel) vel[i][v] = max(1,
+			randbw(dyn[i][v] * icf[ii].cresc_start_vel / 100.0, dyn[i][v] * icf[ii].cresc_end_vel / 100.0)); //-V550
+	}
+}
+
+void CGAdapt::AdaptLongDim(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount) {
+	float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
 	int ni = i + noff[i][v];
-	// Create bell if long length, not pause and not last note (because can be just end of adapt window)
-	if ((ndur > (float)icf[ii].dim_mindur / 2) && len[i][v] > 2 && artic[i][v] != aSTAC && artic[i][v] != aPIZZ
-		&& (x == ncount - 1 || pause[ni][v])) {
-		int end = i + len[i][v];
-		int pos = round(end - (float)(len[i][v])  * icf[ii].dim_len / 100.0);
-		// Check if dynamics does not increase
-		if (end - pos > 1) for (int z = end - 1; z >= pos; z--) {
-			if (dyn[z - 1][v] < dyn[end - 1][v]) {
-				pos = z;
-				break;
-			}
+	if (artic[i][v] == aSTAC) return;
+	if (artic[i][v] == aPIZZ) return;
+	if (ndur <= icf[ii].dim_mindur) return;
+	if (len[i][v] < 3) return;
+	// If last note, do not check pause
+	if (x < ncount - 1) {
+		// Require pause
+		if (!pause[ni][v]) return;
+		// If pause is last element, do not check it
+		if (x < ncount - 2) {
+			// Get note before pause
+			int nni = max(0, ni + noff[ni][v]);
+			// Get pause length
+			float pdur = (sstime[nni][v] - setime[ei][v]) * 100 / m_pspeed + dstime[nni][v] - detime[ei][v];
+			// Prohibit short pause
+			if (pdur < icf[ii].dim_minpause) return;
+			// Prohibit nonlegato pause
+			if (smst[nni][v] - smet[ei][v] < in_ppq / 10.0) return;
 		}
-		if (end - pos > 1) {
-			for (int z = pos; z < end; z++) {
-				dyn[z][v] = dyn[pos][v] * (icf[ii].dim_mul/100.0 + (float)(end - z - 1) / (end - pos) * (1.0 - icf[ii].dim_mul/100.0));
-			}
-			if (comment_adapt) adapt_comment[i + len[i][v] - 1][v] += "Long bell end. ";
+	}
+	// Now create diminuendo
+	int end = i + len[i][v];
+	int pos = round(end - (float)(len[i][v])  * icf[ii].dim_len / 100.0);
+	// Check if dynamics does not increase
+	if (end - pos > 1) for (int z = end - 1; z >= pos; z--) {
+		if (dyn[z - 1][v] < dyn[end - 1][v]) {
+			pos = z;
+			break;
 		}
+	}
+	if (end - pos > 1) {
+		for (int z = pos; z < end; z++) {
+			dyn[z][v] = dyn[pos][v] * (icf[ii].dim_mul/100.0 + (float)(end - z - 1) / (end - pos) * (1.0 - icf[ii].dim_mul/100.0));
+		}
+		if (comment_adapt) adapt_comment[i + len[i][v] - 1][v] += "Long bell end. ";
 	}
 }
 
@@ -1187,7 +1227,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 				// Embertone Intimate Strings
 				if (icf[ii].type == itEIS) {
 					AdaptAllAheadStep(v, x, i, ii, ei, pi, pei);
-					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongCresc(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongDim(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
 					AdaptSlurStep(v, x, i, ii, ei, pi, pei);
@@ -1201,7 +1242,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 				// LA Scoring Strings
 				if (icf[ii].type == itLASS) {
 					AdaptAllAheadStep(v, x, i, ii, ei, pi, pei);
-					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongCresc(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongDim(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
 					AdaptRetriggerNonlegatoStep(v, x, i, ii, ei, pi, pei);
@@ -1214,7 +1256,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 				// Cinematic Strings
 				if (icf[ii].type == itCS) {
 					AdaptAllAheadStep(v, x, i, ii, ei, pi, pei);
-					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongCresc(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongDim(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
 					AdaptRetriggerNonlegatoStep(v, x, i, ii, ei, pi, pei);
@@ -1227,7 +1270,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 				// CineStrings
 				if (icf[ii].type == itCSS) {
 					AdaptAllAheadStep(v, x, i, ii, ei, pi, pei);
-					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongCresc(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongDim(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
 					AdaptRetriggerNonlegatoStep(v, x, i, ii, ei, pi, pei);
@@ -1239,7 +1283,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 				}
 				// Samplemodeling Brass
 				if (icf[ii].type == itSMB) {
-					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongCresc(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongDim(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
 					AdaptRetriggerNonlegatoStep(v, x, i, ii, ei, pi, pei);
@@ -1249,7 +1294,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 				}
 				// Soundiron Voices of Rapture
 				if (icf[ii].type == itSIVOR) {
-					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongCresc(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongDim(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
 					AdaptAllAheadStep(v, x, i, ii, ei, pi, pei);
@@ -1258,7 +1304,8 @@ void CGAdapt::Adapt(int step1, int step2) {
 				}
 				// Samplemodeling Woodwinds
 				if (icf[ii].type == itSMW) {
-					AdaptLongBell(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongCresc(v, x, i, ii, ei, pi, pei, ncount);
+					AdaptLongDim(v, x, i, ii, ei, pi, pei, ncount);
 					AdaptReverseBell(v, x, i, ii, ei, pi, pei);
 					AdaptVibBell(v, x, i, ii, ei, pi, pei);
 					AdaptRetriggerNonlegatoStep(v, x, i, ii, ei, pi, pei);
