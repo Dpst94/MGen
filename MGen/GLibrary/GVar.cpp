@@ -1016,3 +1016,26 @@ void CGVar::RegisterGraph(CString name, float scale) {
 	++graph_size;
 }
 
+// Get note before pause (returns -1 if this is first note)
+int CGVar::GetPrevNote(int i, int v) {
+	if (!i) return -1;
+	// Move left
+	--i;
+	// Move left until we hit a note or zero step
+	while (i && pause[i][v]) --i;
+	if (pause[i][v]) return -1;
+	// Return starting step
+	return i - coff[i][v];
+}
+
+// Get note after pause (returns -1 if this is last note)
+int CGVar::GetNextNote(int i, int v) {
+	if (i == t_generated - 1) return -1;
+	// Move right
+	++i;
+	// Move right until we hit a note or zero step
+	while (i < t_generated - 1 && pause[i][v]) ++i;
+	if (pause[i][v]) return -1;
+	// Return starting step
+	return i;
+}

@@ -153,6 +153,8 @@ protected:
 	void UpdateTempoMinMax(int step1, int step2);
 	void AddNote(int pos, int v, char note2, int len2, int dyn2);
 	void RegisterGraph(CString name, float scale);
+	int GetPrevNote(int i, int v);
+	int GetNextNote(int i, int v);
 	inline void SetProgress(int i, int value);
 	void AddMelody(int step1, int step2, int v, CString info, CString info2="", CString info3="");
 	inline void ResizeVectors(int size, int vsize = -1);

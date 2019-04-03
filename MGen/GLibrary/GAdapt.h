@@ -61,7 +61,6 @@ protected:
 	void AdaptVibBell(int v, int x, int i, int ii, int ei, int pi, int pei);
 	void AdaptNoteEndStep(int v, int x, int i, int ii, int ei, int pi, int pei, int ncount);
 	void ApplyTrem(int & started, int step1, int step2, int v, int ii);
-	void AdaptImportedTrem(int step1, int step2, int v, int ii);
 	void AdaptTrem(int step1, int step2, int v, int ii);
 											 
   // Adapt local variables

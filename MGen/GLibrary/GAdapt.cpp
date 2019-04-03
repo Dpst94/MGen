@@ -551,25 +551,20 @@ void CGAdapt::AdaptLongCresc(int v, int x, int i, int ii, int ei, int pi, int pe
 	float ndur = (setime[ei][v] - sstime[i][v]) * 100 / m_pspeed + detime[ei][v] - dstime[i][v];
 	if (artic[i][v] == aSTAC) return;
 	if (artic[i][v] == aPIZZ) return;
-	if (ndur <= icf[ii].cresc_mindur) return;
+	if (ndur < icf[ii].cresc_mindur) return;
 	if (len[i][v] < 3) return;
 	if (vel[i][v] > icf[ii].cresc_maxvel) return;
-	// If first note, do not check pause
-	if (i) {
-		// Require pause
-		if (!pause[pi][v]) return;
-		// If pause is first element, do not check it
-		if (pi) {
-			// Get note before pause
-			int ppi = max(0, pi - poff[pi][v]);
-			int ppei = ppi + len[ppi][v] - 1;
-			// Get pause length
-			float pdur = (sstime[i][v] - setime[ppei][v]) * 100 / m_pspeed + dstime[i][v] - detime[ppei][v];
-			// Prohibit short pause
-			if (pdur < icf[ii].cresc_minpause) return;
-			// Prohibit nonlegato pause
-			if (smst[i][v] - smet[ppei][v] < in_ppq / 10.0) return;
-		}
+  // Get note before pause (returns -1 if this is first note)
+	int ppi = GetPrevNote(i, v);
+	// If first note, or first note after pause, do not check pause
+	if (ppi > -1) {
+		int ppei = ppi + len[ppi][v] - 1;
+		// Get pause length
+		float pdur = (sstime[i][v] - setime[ppei][v]) * 100 / m_pspeed + dstime[i][v] - detime[ppei][v];
+		// Prohibit short pause
+		if (pdur < icf[ii].cresc_minpause) return;
+		// Prohibit nonlegato pause
+		if (smst[i][v] - smet[ppei][v] < in_ppq / 10.0) return;
 	}
 	// Now create crescendo
 	int pos = i + (float)(len[i][v]) * icf[ii].cresc_len / 100.0;
@@ -596,16 +591,16 @@ void CGAdapt::AdaptLongDim(int v, int x, int i, int ii, int ei, int pi, int pei,
 	int ni = i + noff[i][v];
 	if (artic[i][v] == aSTAC) return;
 	if (artic[i][v] == aPIZZ) return;
-	if (ndur <= icf[ii].dim_mindur) return;
+	if (ndur < icf[ii].dim_mindur) return;
 	if (len[i][v] < 3) return;
 	// If last note, do not check pause
 	if (x < ncount - 1) {
 		// Require pause
 		if (!pause[ni][v]) return;
+		// Get note after pause
+		int nni = GetNextNote(ei, v);
 		// If pause is last element, do not check it
-		if (x < ncount - 2) {
-			// Get note before pause
-			int nni = max(0, ni + noff[ni][v]);
+		if (nni > -1 && nni < t_adapted) {
 			// Get pause length
 			float pdur = (sstime[nni][v] - setime[ei][v]) * 100 / m_pspeed + dstime[nni][v] - detime[ei][v];
 			// Prohibit short pause

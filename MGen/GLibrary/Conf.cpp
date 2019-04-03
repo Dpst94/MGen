@@ -1045,6 +1045,7 @@ void CConf::LoadInstrumentLine(CString st2, CString st3, int i) {
 	CheckVar(&st2, &st3, "cresc_mindur", &icf[i].cresc_mindur);
 	CheckVar(&st2, &st3, "cresc_mul", &icf[i].cresc_mul);
 	CheckVar(&st2, &st3, "cresc_len", &icf[i].cresc_len);
+	CheckVar(&st2, &st3, "dim_minpause", &icf[i].dim_minpause);
 	CheckVar(&st2, &st3, "dim_mindur", &icf[i].dim_mindur);
 	CheckVar(&st2, &st3, "dim_mul", &icf[i].dim_mul);
 	CheckVar(&st2, &st3, "dim_len", &icf[i].dim_len);
